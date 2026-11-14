@@ -1,18 +1,17 @@
 """Test suite for the Mlx module."""
 
 import mlx.core as mx
-
 import mlx.nn as nn
 
 
 class BNModel:
-  """Test helper class BNModel."""
+  """Sentinel `BNModel` fixture class used in MLX tests."""
 
   def __init__(self, num_features: int):
     """Initializes the BNModel instance.
 
     Args:
-        num_features: The num features (int) for   init  .
+        num_features: Input `num_features` parameter value (`int`).
     """
     super().__init__()
     self.bn = nn.BatchNorm(num_features)

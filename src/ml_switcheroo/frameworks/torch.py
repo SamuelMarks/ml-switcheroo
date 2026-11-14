@@ -11,23 +11,26 @@ It provides:
     to/from NumPy format for interoperability.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
 import logging
 from types import ModuleType
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.frameworks.base import (
+  FrameworkSnapshot,
   GhostRef,
   ImportConfig,
-  InitMode as InitMode,
   PluginTraits,
+  SnapshotBackedAdapter,
   StandardMap,
   StructuralTraits,
   load_snapshot_for_adapter,
   register_framework,
+)
+from ml_switcheroo.frameworks.base import (
+  InitMode as InitMode,
 )
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.frameworks.torch_io import TorchIOMixin
@@ -51,6 +54,11 @@ class TorchAdapter(TorchIOMixin):
 
   Handles Source and Target translation rules for PyTorch, including
   `torch.nn`, `torch.optim`, and `torch.func` (vmap/grad).
+
+  Attributes:
+      display_name: The display name (`str`).
+      inherits_from: The inherits from (`str | None`).
+      ui_priority: The ui priority (`int`).
   """
 
   display_name: str = "PyTorch"
@@ -60,16 +68,17 @@ class TorchAdapter(TorchIOMixin):
   def __init__(self) -> None:
     """Initialize the adapter.
 
-    Detects if PyTorch is installed. to switch between LIVE inspection
+    Detects if PyTorch is installed to switch between LIVE inspection
     and GHOST snapshot loading.
     """
-    self._mode = InitMode.LIVE
-    self._snapshot_data: dict[str, JsonValue] = {}
-    if torch is None:
-      self._mode = InitMode.GHOST
-      self._snapshot_data = load_snapshot_for_adapter("torch")
-      if not self._snapshot_data:
-        logging.debug("PyTorch not installed and no snapshot found. Scanning unavailable.")
+    self._snapshot = SnapshotBackedAdapter(
+      "torch",
+      is_live_available=torch is not None,
+      loader=load_snapshot_for_adapter,
+      missing_message="PyTorch not installed and no snapshot found. Scanning unavailable.",
+    )
+    self._mode: InitMode = self._snapshot.mode
+    self._snapshot_data: FrameworkSnapshot | None = self._snapshot.snapshot
 
   @property
   def import_alias(self) -> tuple[str, str]:
@@ -381,14 +390,8 @@ class TorchAdapter(TorchIOMixin):
 
     Returns:
         List of hydrated GhostRef objects.
-
     """
-    if not self._snapshot_data:
-      return []
-    raw_cats = self._snapshot_data.get("categories", {})
-    raw_list = raw_cats.get(category.value, []) if isinstance(raw_cats, dict) else []
-    assert isinstance(raw_list, list)
-    return [GhostRef.model_validate(item) for item in raw_list]
+    return SnapshotBackedAdapter.collect_ghost_from(self._snapshot_data, category)
 
   def _scan_losses(self) -> list[GhostRef]:
     """Scan live `torch.nn` loss classes when available.

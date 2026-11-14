@@ -9,7 +9,7 @@ from ml_switcheroo.frameworks.torch import TorchAdapter
 
 @pytest.fixture
 def adapter() -> TorchAdapter:
-  """Execute adapter helper logic.
+  """Create a configured `TorchAdapter` fixture for torch examples tests.
 
   Returns:
       Configured `adapter` fixture value (TorchAdapter).
@@ -18,7 +18,7 @@ def adapter() -> TorchAdapter:
 
 
 def test_tiered_examples_structure(adapter: TorchAdapter) -> None:
-  """Verifies the behavior of tiered examples structure.
+  """Verify `adapter.get_tiered_examples` emits `tier1_math` for tiered examples structure.
 
   Args:
       adapter: FrameworkAdapter instance under test.
@@ -32,7 +32,7 @@ def test_tiered_examples_structure(adapter: TorchAdapter) -> None:
 
 
 def test_tier1_math_validity(adapter: TorchAdapter) -> None:
-  """Verifies the behavior of tier1 math validity.
+  """Verify `parse` emits `torch.abs` for tier1 math validity.
 
   Args:
       adapter: FrameworkAdapter instance under test.
@@ -45,7 +45,7 @@ def test_tier1_math_validity(adapter: TorchAdapter) -> None:
 
 
 def test_tier2_neural_simple_validity(adapter: TorchAdapter) -> None:
-  """Verifies the behavior of tier2 neural simple validity.
+  """Verify `parse` emits `class Net(nn.Module):` for tier2 neural simple validity.
 
   Args:
       adapter: FrameworkAdapter instance under test.
@@ -58,7 +58,7 @@ def test_tier2_neural_simple_validity(adapter: TorchAdapter) -> None:
 
 
 def test_tier2_neural_cnn_validity(adapter: TorchAdapter) -> None:
-  """Verifies the behavior of tier2 neural cnn validity.
+  """Verify `parse` emits `class ConvNet(nn.Module):` for tier2 neural cnn validity.
 
   Args:
       adapter: FrameworkAdapter instance under test.
@@ -71,7 +71,7 @@ def test_tier2_neural_cnn_validity(adapter: TorchAdapter) -> None:
 
 
 def test_tier3_extras_dataloader_validity(adapter: TorchAdapter) -> None:
-  """Verify tier3 extras dataloader validity behavior.
+  """Verify `parse` emits `DataLoader` for tier3 extras dataloader validity.
 
   Args:
       adapter: FrameworkAdapter instance under test.

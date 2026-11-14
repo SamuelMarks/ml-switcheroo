@@ -29,7 +29,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def base_semantics() -> MagicMock:
-  """Execute base semantics helper logic.
+  """Create a configured `MagicMock` fixture for device allocator multi tests.
 
   Returns:
       Configured `base_semantics` fixture value (MagicMock).
@@ -50,7 +50,7 @@ def get_rewriter(mgr: MagicMock, target: str) -> PivotRewriter:
   """Gets rewriter.
 
   Args:
-      mgr: The mgr (MagicMock) for get rewriter.
+      mgr: Semantics manager test instance (`MagicMock`).
       target: Target framework or dialect identifier string.
 
   Returns:
@@ -62,18 +62,18 @@ def get_rewriter(mgr: MagicMock, target: str) -> PivotRewriter:
 
 @pytest.fixture(autouse=True)
 def setup_hooks() -> None:
-  """Helper to setup hooks."""
+  """Create a configured `None` fixture for device allocator multi tests."""
   hooks.register_hook("device_allocator")(transform_device_allocator)
-  hooks._PLUGINS_LOADED = True
+  hooks.set_plugins_loaded(True)
 
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
 def test_jax_output(mock_get: MagicMock, base_semantics: MagicMock) -> None:
-  """Verifies the behavior of JAX output.
+  """Verify `get_rewriter` emits `jax.devices('gpu')[0]` for JAX output.
 
   Args:
       mock_get: Mock object for get.
-      base_semantics: The base semantics (MagicMock) for test jax output.
+      base_semantics: Input `base_semantics` parameter value (`MagicMock`).
   """
   mock_get.side_effect = lambda n: JaxCoreAdapter() if n == "jax" else None
   rw: PivotRewriter = get_rewriter(base_semantics, "jax")
@@ -83,11 +83,11 @@ def test_jax_output(mock_get: MagicMock, base_semantics: MagicMock) -> None:
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
 def test_mlx_output_gpu(mock_get: MagicMock, base_semantics: MagicMock) -> None:
-  """Verifies the behavior of MLX output gpu.
+  """Verify `get_rewriter` emits `mx.Device(mx.gpu)` for MLX output gpu.
 
   Args:
       mock_get: Mock object for get.
-      base_semantics: The base semantics (MagicMock) for test mlx output gpu.
+      base_semantics: Input `base_semantics` parameter value (`MagicMock`).
   """
   mock_get.side_effect = lambda n: MLXAdapter() if n == "mlx" else None
   rw: PivotRewriter = get_rewriter(base_semantics, "mlx")
@@ -97,11 +97,11 @@ def test_mlx_output_gpu(mock_get: MagicMock, base_semantics: MagicMock) -> None:
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
 def test_mlx_output_cpu(mock_get: MagicMock, base_semantics: MagicMock) -> None:
-  """Verifies the behavior of MLX output cpu.
+  """Verify `get_rewriter` emits `mx.Device(mx.cpu)` for MLX output cpu.
 
   Args:
       mock_get: Mock object for get.
-      base_semantics: The base semantics (MagicMock) for test mlx output cpu.
+      base_semantics: Input `base_semantics` parameter value (`MagicMock`).
   """
   mock_get.side_effect = lambda n: MLXAdapter() if n == "mlx" else None
   rw: PivotRewriter = get_rewriter(base_semantics, "mlx")
@@ -111,11 +111,11 @@ def test_mlx_output_cpu(mock_get: MagicMock, base_semantics: MagicMock) -> None:
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
 def test_mlx_output_index(mock_get: MagicMock, base_semantics: MagicMock) -> None:
-  """Verifies the behavior of MLX output index.
+  """Verify `get_rewriter` emits `mx.Device(mx.gpu, 1)` for MLX output index.
 
   Args:
       mock_get: Mock object for get.
-      base_semantics: The base semantics (MagicMock) for test mlx output index.
+      base_semantics: Input `base_semantics` parameter value (`MagicMock`).
   """
   mock_get.side_effect = lambda n: MLXAdapter() if n == "mlx" else None
   rw: PivotRewriter = get_rewriter(base_semantics, "mlx")
@@ -125,11 +125,11 @@ def test_mlx_output_index(mock_get: MagicMock, base_semantics: MagicMock) -> Non
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
 def test_tf_output_gpu(mock_get: MagicMock, base_semantics: MagicMock) -> None:
-  """Verifies the behavior of tf output gpu.
+  """Verify `get_rewriter` emits `tf.device('GPU:0')` for TensorFlow output gpu.
 
   Args:
       mock_get: Mock object for get.
-      base_semantics: The base semantics (MagicMock) for test tf output gpu.
+      base_semantics: Input `base_semantics` parameter value (`MagicMock`).
   """
   mock_get.side_effect = lambda n: TensorFlowAdapter() if n == "tensorflow" else None
   rw: PivotRewriter = get_rewriter(base_semantics, "tensorflow")
@@ -139,11 +139,11 @@ def test_tf_output_gpu(mock_get: MagicMock, base_semantics: MagicMock) -> None:
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
 def test_tf_output_index(mock_get: MagicMock, base_semantics: MagicMock) -> None:
-  """Verifies the behavior of tf output index.
+  """Verify `get_rewriter` emits `tf.device('GPU:2')` for TensorFlow output index.
 
   Args:
       mock_get: Mock object for get.
-      base_semantics: The base semantics (MagicMock) for test tf output index.
+      base_semantics: Input `base_semantics` parameter value (`MagicMock`).
   """
   mock_get.side_effect = lambda n: TensorFlowAdapter() if n == "tensorflow" else None
   rw: PivotRewriter = get_rewriter(base_semantics, "tensorflow")

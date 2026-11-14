@@ -5,10 +5,10 @@ from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
 
 
 def gen_code_from_block(ops: list[OperationNode]) -> str:
-  """Helper to generation code from block.
+  """Execute `ModuleNode` to support gen code from block in MLIR generator void suppression tests.
 
   Args:
-      ops: The ops (list[OperationNode]) for gen code from block.
+      ops: Input `ops` parameter value (`list[OperationNode]`).
 
   Returns:
       Resulting `str` from gen code from block.
@@ -19,7 +19,7 @@ def gen_code_from_block(ops: list[OperationNode]) -> str:
 
 
 def test_suppress_unused_result() -> None:
-  """Verifies the behavior of suppress unused result."""
+  """Verify `OperationNode` emits `_func()` for suppress unused result."""
   op = OperationNode(name="sw.call", results=[ValueNode(name="%0")], operands=[ValueNode(name="%func")])
   code: str = gen_code_from_block([op])
   assert "_func()" in code
@@ -27,7 +27,7 @@ def test_suppress_unused_result() -> None:
 
 
 def test_assign_used_result() -> None:
-  """Verifies the behavior of assign used result."""
+  """Verify `OperationNode` emits `_0 = _foo()` for assign used result."""
   op1 = OperationNode(name="sw.call", results=[ValueNode(name="%0")], operands=[ValueNode(name="%foo")])
   op2 = OperationNode(
     name="sw.call", results=[ValueNode(name="%1")], operands=[ValueNode(name="%bar"), ValueNode(name="%0")]
@@ -41,7 +41,7 @@ def test_assign_used_result() -> None:
 
 
 def test_suppress_super_init() -> None:
-  """Verifies the behavior of suppress super initialization."""
+  """Verify `OperationNode` emits `super().__init__()` for suppress super init."""
   op_super = OperationNode(
     name="sw.op", results=[ValueNode(name="%0")], attributes=[AttributeNode(name="type", value='"super"')]
   )
@@ -58,7 +58,7 @@ def test_suppress_super_init() -> None:
 
 
 def test_super_init_pattern_detection() -> None:
-  """Verifies the behavior of super initialization pattern detection."""
+  """Verify `MlirToPythonGenerator` handles super init pattern detection as expected."""
   import libcst as cst
 
   gen = MlirToPythonGenerator()

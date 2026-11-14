@@ -120,43 +120,37 @@ def build_forward(
     if op_type == "Input":
       continue
     if op_type == "Output":
-      ret_stmt = cst.parse_statement(f"return {current_var}")
-      assert isinstance(ret_stmt, cst.SimpleStatementLine)
+      ret_stmt = cst.ensure_type(cst.parse_statement(f"return {current_var}"), cst.SimpleStatementLine)
       stmts.append(apply_node_trivia_to_stmt(ret_stmt, node, include_runtime_comment=True))
       continue
 
     is_stateful = bool(backend._is_stateful_layer(node)) if backend is not None else False
     if is_stateful:
       line = f"{current_var} = self.{node.id}({current_var})"
-      call_stmt = cst.parse_statement(line)
-      assert isinstance(call_stmt, cst.SimpleStatementLine)
+      call_stmt = cst.ensure_type(cst.parse_statement(line), cst.SimpleStatementLine)
       stmts.append(apply_node_trivia_to_stmt(call_stmt, node, include_runtime_comment=True))
     else:
       func_api: str = op_type
       if semantics is not None:
-        try:
-          definition = semantics.resolve_variant(func_api, framework)
-        except AttributeError:
-          definition = None
-        if not definition:
-          try:
-            rev = semantics.get_definition(func_api)
-          except AttributeError:
-            rev = None
-          if rev:
-            abstract_id, _ = rev
-            definition = semantics.resolve_variant(abstract_id, framework)
+        from ml_switcheroo.semantics.resolution import query_resolve_operation, query_variant
 
-        if definition and "api" in definition:
-          func_api = str(definition["api"])
+        typed_var = query_variant(semantics, func_api, framework)
+        if typed_var is not None and typed_var.api is not None:
+          func_api = typed_var.api
+        else:
+          rev = query_resolve_operation(semantics, func_api)
+          if rev is not None:
+            abstract_id, _ = rev
+            resolved_var = query_variant(semantics, abstract_id, framework)
+            if resolved_var is not None and resolved_var.api is not None:
+              func_api = resolved_var.api
 
       args_str = current_var
       extra_args = format_args_from_metadata(node.attributes)
       if extra_args:
         args_str += f", {extra_args}"
       line = f"{current_var} = {func_api}({args_str})"
-      func_stmt = cst.parse_statement(line)
-      assert isinstance(func_stmt, cst.SimpleStatementLine)
+      func_stmt = cst.ensure_type(cst.parse_statement(line), cst.SimpleStatementLine)
       stmts.append(apply_node_trivia_to_stmt(func_stmt, node, include_runtime_comment=True))
 
     resolved_traits = _resolve_traits(framework, traits)

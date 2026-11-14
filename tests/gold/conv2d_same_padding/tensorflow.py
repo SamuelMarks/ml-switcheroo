@@ -4,7 +4,7 @@ import tensorflow as tf
 
 
 class SameConvModel:
-  """Test helper class SameConvModel."""
+  """Test double `SameConvModel` implementing `call` for tensorflow tests."""
 
   def __init__(self, in_channels: int, out_channels: int, kernel_size: int = 3):
     """Initializes the SameConvModel instance.
@@ -18,7 +18,7 @@ class SameConvModel:
     self.conv = tf.keras.layers.Conv2D(out_channels, kernel_size, padding="same")
 
   def call(self, x: tf.Tensor) -> tf.Tensor:
-    """Helper to call.
+    """Execute `conv` to support call in tensorflow tests.
 
     Args:
         x: Primary input tensor or array operand.

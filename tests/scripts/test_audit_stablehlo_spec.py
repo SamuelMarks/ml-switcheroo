@@ -93,9 +93,11 @@ def test_fetch_raw_https() -> None:
   with patch("urllib.request.urlopen", return_value=mock_response):
     assert auditor.fetch_raw_https("https://fake.url") == "# StableHLO Spec Content"
 
-  with patch("urllib.request.urlopen", side_effect=Exception("network down")):
-    with pytest.raises(RuntimeError, match="Failed to download spec"):
-      auditor.fetch_raw_https("https://fake.url")
+  with (
+    patch("urllib.request.urlopen", side_effect=Exception("network down")),
+    pytest.raises(RuntimeError, match="Failed to download spec"),
+  ):
+    auditor.fetch_raw_https("https://fake.url")
 
 
 def test_download_spec(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -173,9 +175,11 @@ def test_download_spec(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 
   # 6. Both primary and fallback fail with no cache: raises RuntimeError
   cache_file.unlink()
-  with patch("urllib.request.urlopen", side_effect=Exception("Total network failure")):
-    with pytest.raises(RuntimeError, match="Failed to download spec"):
-      auditor.download_spec(primary_url)
+  with (
+    patch("urllib.request.urlopen", side_effect=Exception("Total network failure")),
+    pytest.raises(RuntimeError, match="Failed to download spec"),
+  ):
+    auditor.download_spec(primary_url)
 
   # 7. Unparseable/corrupt cache file: falls back to download
   cache_file.write_text("   " + chr(10), encoding="utf-8")
@@ -185,29 +189,37 @@ def test_download_spec(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 
   # 8. Cache write failure does not break the function
   cache_file.unlink()
-  with patch.object(Path, "write_text", side_effect=PermissionError("read-only")):
-    with patch("urllib.request.urlopen", return_value=mock_response):
-      content = auditor.download_spec("https://fake.url/spec.md")
-      assert content == "# StableHLO Spec"
+  with (
+    patch.object(Path, "write_text", side_effect=PermissionError("read-only")),
+    patch("urllib.request.urlopen", return_value=mock_response),
+  ):
+    content = auditor.download_spec("https://fake.url/spec.md")
+    assert content == "# StableHLO Spec"
 
   # 9. Initial cache read exception proceeds to download
   cache_file.touch()
-  with patch.object(Path, "read_text", side_effect=OSError("Disk read error")):
-    with patch("urllib.request.urlopen", return_value=mock_response):
-      res = auditor.download_spec("https://fake.url/spec.md")
-      assert res == "# StableHLO Spec"
+  with (
+    patch.object(Path, "read_text", side_effect=OSError("Disk read error")),
+    patch("urllib.request.urlopen", return_value=mock_response),
+  ):
+    res = auditor.download_spec("https://fake.url/spec.md")
+    assert res == "# StableHLO Spec"
 
   # 10. Fallback cache read exception proceeds to raise RuntimeError
-  with patch.object(Path, "read_text", side_effect=OSError("Disk read error")):
-    with patch("urllib.request.urlopen", side_effect=Exception("Network down")):
-      with pytest.raises(RuntimeError, match="Failed to download spec"):
-        auditor.download_spec("https://fake.url/spec.md", force_download=True)
+  with (
+    patch.object(Path, "read_text", side_effect=OSError("Disk read error")),
+    patch("urllib.request.urlopen", side_effect=Exception("Network down")),
+    pytest.raises(RuntimeError, match="Failed to download spec"),
+  ):
+    auditor.download_spec("https://fake.url/spec.md", force_download=True)
 
   # 11. Fallback cache exists but is empty/whitespace when network fails: raises RuntimeError
   cache_file.write_text("   " + chr(10), encoding="utf-8")
-  with patch("urllib.request.urlopen", side_effect=Exception("Network down")):
-    with pytest.raises(RuntimeError, match="Failed to download spec"):
-      auditor.download_spec("https://fake.url/spec.md", force_download=True)
+  with (
+    patch("urllib.request.urlopen", side_effect=Exception("Network down")),
+    pytest.raises(RuntimeError, match="Failed to download spec"),
+  ):
+    auditor.download_spec("https://fake.url/spec.md", force_download=True)
 
   # 12. Non-spec.md URL filename branch and empty filename branch
   with patch("urllib.request.urlopen", return_value=mock_response):

@@ -1,13 +1,9 @@
 """Test suite for the Calls Extra module."""
 
-from tests.conftest import _test_getattr
-
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
-
 import libcst as _cst
 import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
 
 from ml_switcheroo.core.rewriter.calls.guards import apply_strict_guards
 from ml_switcheroo.core.rewriter.calls.post import handle_post_processing
@@ -17,17 +13,18 @@ from ml_switcheroo.core.rewriter.calls.transformers import (
   rewrite_as_inline_lambda,
   rewrite_as_macro,
 )
+from ml_switcheroo.enums import RuntimeTensorOrValue
 
 cst = _cst
 
 
 class MockHookContext:
-  """Test helper class MockHookContext."""
+  """Test double `MockHookContext` implementing `inject_preamble` for calls tests."""
 
   def __init__(self) -> None:
     """Initializes the MockHookContext instance."""
-    self.metadata: dict[str, RuntimeTensorOrValue] = {}
-    self.preambles: list[RuntimeTensorOrValue] = []
+    self.metadata: dict[str, JsonValue] = {}
+    self.preambles: list[str] = []
 
   def inject_preamble(self, code: str) -> None:
     """Mock implementation of inject preamble.
@@ -39,7 +36,7 @@ class MockHookContext:
 
 
 class MockContext:
-  """Test helper class MockContext."""
+  """Sentinel `MockContext` fixture class used in calls tests."""
 
   def __init__(self) -> None:
     """Initializes the MockContext instance."""
@@ -48,7 +45,7 @@ class MockContext:
 
 
 class MockSemantics:
-  """Test helper class MockSemantics."""
+  """Sentinel `MockSemantics` fixture class used in calls tests."""
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
@@ -57,7 +54,7 @@ class MockSemantics:
 
 
 class MockTraits:
-  """Test helper class MockTraits."""
+  """Sentinel `MockTraits` fixture class used in calls tests."""
 
   def __init__(self) -> None:
     """Initializes the MockTraits instance."""
@@ -67,21 +64,21 @@ class MockTraits:
 
 
 class MockSignature:
-  """Test helper class MockSignature."""
+  """Sentinel `MockSignature` fixture class used in calls tests."""
 
   def __init__(self, is_init: bool = True, is_module_method: bool = True) -> None:
     """Initializes the MockSignature instance.
 
     Args:
-        is_init: The is init (bool) for init.
-        is_module_method: The is module method (bool) for init.
+        is_init: Input `is_init` parameter value (`bool`).
+        is_module_method: Input `is_module_method` parameter value (`bool`).
     """
     self.is_init = is_init
     self.is_module_method = is_module_method
 
 
 class MockRewriter:
-  """Test helper class MockRewriter."""
+  """Test double `MockRewriter` implementing `_get_target_traits`, `_create_dotted_name` for calls tests."""
 
   def __init__(self) -> None:
     """Initializes the MockRewriter instance."""
@@ -90,7 +87,7 @@ class MockRewriter:
     self.failures: list[str] = []
 
   def _get_target_traits(self) -> MockTraits:
-    """Mock implementation of  get target traits.
+    """Execute `MockTraits` to support get target traits in calls tests.
 
     Returns:
         Resulting `MockTraits` from get target traits.
@@ -98,7 +95,10 @@ class MockRewriter:
     return MockTraits()
 
   def _create_dotted_name(self, name: str) -> cst.BaseExpression:
-    """Mock implementation of  create dotted name.
+    """Execute `Name` to support create dotted name in calls tests.
+
+    Args:
+        name: Target symbol or register identifier.
 
     Returns:
         Resulting `cst.BaseExpression` from create dotted name.
@@ -108,10 +108,10 @@ class MockRewriter:
     return cst.Name("float32")
 
   def _report_failure(self, msg: str) -> None:
-    """Mock implementation of  report failure.
+    """Execute `_report_failure` on `MockRewriter` for calls tests.
 
     Args:
-        msg: The msg (str) for report failure.
+        msg: Input `msg` parameter value (`str`).
     """
     self.failures.append(msg)
 
@@ -125,33 +125,26 @@ def test_apply_strict_guards() -> None:
   ]
   details = {"std_args": [{"name": "x", "rank": 2}, {"name": "y"}]}
   target_impl = {"args": {"x": "target_x"}}
-  assert _test_getattr(
-    {
-      "v": _test_getattr({"v": apply_strict_guards}, "__getitem__")("v")(
-        _test_getattr({"v": rewriter}, "__getitem__")("v"),
-        _test_getattr({"v": norm_args}, "__getitem__")("v"),
-        _test_getattr({"v": {"std_args": _test_getattr({"v": []}, "__getitem__")("v")}}, "__getitem__")("v"),
-        _test_getattr({"v": {}}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": norm_args}, "__getitem__")("v")
+  assert (
+    apply_strict_guards(
+      rewriter,
+      norm_args,
+      {"std_args": []},
+      {},
+    )
+    == norm_args
+  )
   norm_args_2 = [
     cst.Arg(value=cst.Name("a"), keyword=cst.Name("target_x")),
     cst.Arg(value=cst.Name("b"), keyword=cst.Name("x")),
     cst.Arg(value=cst.Name("c")),
   ]
-  new_args = _test_getattr(
-    {
-      "v": _test_getattr({"v": apply_strict_guards}, "__getitem__")("v")(
-        _test_getattr({"v": rewriter}, "__getitem__")("v"),
-        _test_getattr({"v": norm_args_2}, "__getitem__")("v"),
-        _test_getattr({"v": details}, "__getitem__")("v"),
-        _test_getattr({"v": target_impl}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
+  new_args = apply_strict_guards(
+    rewriter,
+    norm_args_2,
+    details,
+    target_impl,
+  )
   assert len(new_args) == 3
   assert isinstance(new_args[0].value, cst.Call)
   assert cst.ensure_type(new_args[0].value.func, cst.Name).value == "_check_rank"
@@ -165,27 +158,23 @@ def test_handle_post_processing() -> None:
   """Handles post processing."""
   rewriter = MockRewriter()
   node = cst.Call(func=cst.Name("foo"), args=[])
-  mapping = {"output_select_index": 0}
+  mapping: dict[str, JsonValue] = {"output_select_index": 0}
   res = handle_post_processing(rewriter, node, mapping, "abs_1")
   assert isinstance(res, cst.Subscript)
-  mapping = _test_getattr(
-    {"v": {"output_select_index": _test_getattr({"v": "invalid"}, "__getitem__")("v")}}, "__getitem__"
-  )("v")
-  _test_getattr({"v": handle_post_processing}, "__getitem__")("v")(
-    _test_getattr({"v": rewriter}, "__getitem__")("v"),
-    _test_getattr(
-      {"v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Pass}, "__getitem__")("v")()}, "__getitem__"
-    )("v"),
-    _test_getattr({"v": mapping}, "__getitem__")("v"),
-    _test_getattr({"v": "abs_1"}, "__getitem__")("v"),
+  mapping = {"output_select_index": "invalid"}
+  handle_post_processing(
+    rewriter,
+    node,
+    mapping,
+    "abs_1",
   )
   assert len(rewriter.failures) > 0
-  mapping = _test_getattr({"v": {"output_cast": _test_getattr({"v": "float32"}, "__getitem__")("v")}}, "__getitem__")("v")
+  mapping = {"output_cast": "float32"}
   res3 = handle_post_processing(rewriter, node, mapping, "abs_1")
   assert isinstance(res3, cst.Call)
   assert isinstance(res3.func, cst.Attribute)
   assert res3.func.attr.value == "astype"
-  mapping = _test_getattr({"v": {"output_cast": _test_getattr({"v": "fail"}, "__getitem__")("v")}}, "__getitem__")("v")
+  mapping = {"output_cast": "fail"}
   res4 = handle_post_processing(rewriter, node, mapping, "abs_1")
   assert res4 == node
   rewriter.context.signature_stack.append(MockSignature())
@@ -202,37 +191,8 @@ def test_apply_index_select() -> None:
   node = cst.Call(func=cst.Name("foo"), args=[])
   res = apply_index_select(node, 1)
   assert isinstance(res, cst.Subscript)
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-            _test_getattr(
-              {
-                "v": _test_getattr(
-                  {
-                    "v": _test_getattr(
-                      {
-                        "v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v").slice}, "__getitem__")(
-                          "v"
-                        )[0]
-                      },
-                      "__getitem__",
-                    )("v").slice
-                  },
-                  "__getitem__",
-                )("v").value
-              },
-              "__getitem__",
-            )("v"),
-            _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Integer}, "__getitem__")("v"),
-          )
-        },
-        "__getitem__",
-      )("v").value
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "1"}, "__getitem__")("v")
+  idx_slice = cst.ensure_type(res.slice[0].slice, cst.Index)
+  assert cst.ensure_type(idx_slice.value, cst.Integer).value == "1"
 
 
 def test_rewrite_as_inline_lambda() -> None:

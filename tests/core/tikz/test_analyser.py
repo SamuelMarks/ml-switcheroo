@@ -1,18 +1,19 @@
-"""Tests for TikZ Analyser."""
+"""Unit tests for the TikZ Python-AST `GraphExtractor` (`ml_switcheroo.core.tikz.analyser`)."""
 
 import libcst as cst
 
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 from ml_switcheroo.core.tikz.analyser import GraphExtractor
 
 
 def extract_graph(code: str) -> GraphExtractor:
-  """Execute extract graph helper logic.
+  """Parse `code` with LibCST and run `GraphExtractor` over the module.
 
   Args:
-      code: Python or DSL source code string to parse or transpile.
+      code: Python source code defining a model class.
 
   Returns:
-      Resulting `GraphExtractor` from extract graph.
+      Populated `GraphExtractor` visitor instance.
   """
   module = cst.parse_module(code)
   extractor = GraphExtractor()
@@ -20,186 +21,121 @@ def extract_graph(code: str) -> GraphExtractor:
   return extractor
 
 
-def test_graph_extractor_class_and_methods() -> None:
-  """Verify graph extractor class and methods behavior."""
-  code: str = """
+def test_extract_nodes_from_init_and_setup() -> None:
+  """Verify `__init__` and `setup` register `self.<layer>` calls with positional and keyword attributes."""
+  code = """
 class MyModel:
+    CLASS_VAR = 1
+
     def __init__(self):
-        self.conv1 = nn.Conv2d(3, 16)
+        self.conv1 = nn.Conv2d(1, 32, 3)
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.size = 10
+        local_var = nn.Linear(128, 10)
+        self.layer.sub = nn.Conv1d(4, 8)
+        other.conv = nn.Conv2d(3, 16)
 
     def setup(self):
-        self.conv2 = nn.Conv2d(16, 32)
+        self.fc = nn.Linear(128, 10)
 
-    def forward(self, x):
-        x = self.conv1(x)
-        return self.conv2(x)
-
-    def __call__(self, img):
-        img = F.relu(img)
-        return img
-
-    def call(self, val):
-        pass
+    def helper(self):
+        return
 """
-  extractor: GraphExtractor = extract_graph(code)
+  extractor = extract_graph(code)
   assert extractor.model_name == "MyModel"
-  assert "conv1" in extractor.layer_registry
-  assert "conv2" in extractor.layer_registry
-  assert extractor.layer_registry["conv1"].op_type == "Conv2d"
-  assert extractor.layer_registry["conv2"].op_type == "Conv2d"
+  assert set(extractor.layer_registry.keys()) == {"conv1", "pool", "fc"}
 
-  # We should have edges for both forward and __call__ but because they overwrite provenance
-  # the final state might just be from the last executed method if it was a visitor pass
-  # However, visit_FunctionDef resets provenance on each forward/call/__call__
-  assert len(extractor.graph.nodes) > 0
+  conv = extractor.graph.nodes["conv1"]
+  assert conv.op_type == "Conv2d"
+  assert conv.attributes == {"arg_0": "1", "arg_1": "32", "arg_2": "3"}
 
+  pool = extractor.graph.nodes["pool"]
+  assert pool.attributes == {"kernel_size": "2", "stride": "2"}
 
-def test_graph_extractor_layer_def_edge_cases() -> None:
-  """Verify graph extractor layer def edge cases behavior."""
-  code: str = """
-class Net:
-    def __init__(self):
-        # Valid
-        self.conv1 = nn.Conv2d(kernel_size=3)
-        # Not a call
-        self.size = 10
-        # Not self attribute
-        local_var = nn.Linear()
-        # Complex target
-        self.layer.sub = nn.Conv1d()
-"""
-  extractor: GraphExtractor = extract_graph(code)
-  assert "conv1" in extractor.layer_registry
-  assert "size" not in extractor.layer_registry
-  assert "local_var" not in extractor.layer_registry
-  assert "sub" not in extractor.layer_registry
-
-  # Verify metadata extraction
-  node = extractor.layer_registry["conv1"]
-  assert node.attributes.get("kernel_size") == "3"
+  fc = extractor.graph.nodes["fc"]
+  assert fc.op_type == "Linear"
+  assert fc.attributes["arg_0"] == "128"
 
 
-def test_graph_extractor_data_flow() -> None:
-  """Verify graph extractor data flow behavior."""
-  code: str = """
+def test_sequential_and_functional_dataflow_edges() -> None:
+  """Verify `forward` traces sequential stateful calls, functional `F.*` calls, and constant arguments."""
+  code = """
 class Net:
     def __init__(self):
         self.layer1 = Linear(10, 10)
         self.layer2 = Linear(10, 10)
 
     def forward(self, x):
-        # Assignment from call
-        y = self.layer1(x)
-        # Assignment from functional call
+        y = self.layer1(x, 1.0)
         z = F.relu(y)
-        # Not a call
         w = z
-        # Return variable
         return z
 """
-  extractor: GraphExtractor = extract_graph(code)
-
-  # Check edges
-  edges: list[tuple[str, str]] = [(e.source, e.target) for e in extractor.graph.edges]
+  graph: LogicalGraph = extract_graph(code).graph
+  edges = [(e.source, e.target) for e in graph.edges]
   assert ("input", "layer1") in edges
   assert ("layer1", "func_relu") in edges
   assert ("func_relu", "output") in edges
-
-  # Check nodes
-  node_ids: set[str] = {n.id for n in extractor.graph.nodes.values()}
-  assert "layer1" in node_ids
-  assert "layer2" in node_ids
-  assert "input" in node_ids
-  assert "func_relu" in node_ids
-  assert "output" in node_ids
+  assert {"input", "layer1", "layer2", "func_relu", "output"} <= set(graph.nodes.keys())
 
 
-def test_graph_extractor_return_call() -> None:
-  """Verify graph extractor return call behavior."""
-  code: str = """
+def test_direct_return_call_and_multiple_entry_methods() -> None:
+  """Verify `return self.layer(x)`, `__call__`, `call`, and repeated `Return` visits reuse `output`."""
+  code = """
 class Net:
     def __init__(self):
         self.layer1 = Linear(10, 10)
 
     def forward(self, x):
-        return self.layer1(x)
-"""
-  extractor: GraphExtractor = extract_graph(code)
-  edges: list[tuple[str, str]] = [(e.source, e.target) for e in extractor.graph.edges]
-  assert ("input", "layer1") in edges
-  assert ("layer1", "output") in edges
+        a = b = self.layer1(x)
+        self.output[0] = self.layer1(a)
+        return self.layer1(b)
 
+    def __call__(self, img):
+        img = F.relu(img)
+        return img
 
-def test_graph_extractor_return_untracked_variable() -> None:
-  """Verify graph extractor return untracked variable behavior."""
-  code: str = """
-class Net:
-    def __init__(self):
-        pass
-
-    def forward(self, x):
+    def call(self, val):
         untracked = 5
         return untracked
 """
-  extractor: GraphExtractor = extract_graph(code)
-  edges: list[tuple[str, str]] = [(e.source, e.target) for e in extractor.graph.edges]
-  # No edges should be created for untracked variable
-  assert len(edges) == 0
+  extractor = extract_graph(code)
+  edges = [(e.source, e.target) for e in extractor.graph.edges]
+  assert ("input", "layer1") in edges
+  assert ("layer1", "output") in edges
+
+  # Visiting Return again when "output" is already registered exercises the existing-output branches
+  ret_call_stmt = cst.ensure_type(cst.parse_statement("return self.conv(x)"), cst.SimpleStatementLine)
+  ret_call = cst.ensure_type(ret_call_stmt.body[0], cst.Return)
+  extractor._in_forward = True
+  extractor.layer_registry["conv"] = LogicalNode("conv", "Conv2d", attributes={})
+  extractor.visit_Return(ret_call)
+  extractor.visit_Return(ret_call)
+
+  ret_var_stmt = cst.ensure_type(cst.parse_statement("return x"), cst.SimpleStatementLine)
+  ret_var = cst.ensure_type(ret_var_stmt.body[0], cst.Return)
+  extractor.provenance["x"] = "conv"
+  extractor.visit_Return(ret_var)
+  extractor.visit_Return(ret_var)
 
 
-def test_graph_extractor_resolve_layer_func_name_fallback() -> None:
-  """Verify graph extractor resolve layer func name fallback behavior."""
-  code: str = """
+def test_unresolvable_calls_and_helper_fallbacks() -> None:
+  """Verify dynamic/lambda call targets and helper fallbacks safely produce no spurious edges."""
+  code = """
 class Net:
     def forward(self, x):
-        y = getattr(self, "layer")(x)
-        return y
+        y = (lambda t: t)(x)
+        z = x[0]()
+        return (lambda: None)()
 """
-  extractor: GraphExtractor = extract_graph(code)
-  edges: list[tuple[str, str]] = [(e.source, e.target) for e in extractor.graph.edges]
-  # No edges because getattr is not recognized properly by get_full_name
-  # without returning None
-  assert len(edges) == 0
+  extractor = extract_graph(code)
+  assert extractor.graph.edges == []
 
-
-def test_graph_extractor_complex_assignment_targets() -> None:
-  """Verify graph extractor complex assignment targets behavior."""
-  code: str = """
-class Net:
-    def __init__(self):
-        self.layer = Linear()
-
-    def forward(self, x):
-        # Multiple assignment targets
-        a = b = self.layer(x)
-        # Complex assignment target
-        self.output[0] = self.layer(a)
-        return a
-"""
-  extractor: GraphExtractor = extract_graph(code)
-  # Check edges to verify a and b were tracked
-  edges: list[tuple[str, str]] = [(e.source, e.target) for e in extractor.graph.edges]
-  assert ("input", "layer") in edges
-
-
-def test_get_var_name_fallback() -> None:
-  """Verify get var name fallback behavior."""
-  extractor = GraphExtractor()
-  assert extractor._get_var_name(cst.Integer("1")) is None
-
-
-def test_node_to_string_fallback() -> None:
-  """Verify node to string fallback behavior."""
-  extractor = GraphExtractor()
-  node = cst.Name("var_name")
-  assert extractor._node_to_string(node) == "var_name"
-
-
-def test_analyze_call_expression_missing_layer() -> None:
-  """Verify analyze call expression missing layer behavior."""
-  extractor = GraphExtractor()
-  # Mock a call with a complex func that doesn't resolve to a string
-  call = cst.Call(func=cst.List([]))
-  # Shouldn't crash and shouldn't add edges
-  extractor._analyze_call_expression(call, ["y"])
-  assert len(extractor.graph.edges) == 0
+  empty_extractor = GraphExtractor()
+  assert empty_extractor._get_var_name(cst.Integer("1")) is None
+  assert empty_extractor._node_to_string(cst.Name("var_name")) == "var_name"
+  assert empty_extractor._resolve_layer_or_func_name(cst.parse_expression("(lambda x: x)")) is None
+  empty_extractor._analyze_call_expression(cst.Call(func=cst.List([])), ["y"])
+  empty_extractor._finalize_graph()
+  assert empty_extractor.graph.nodes == {}
+  assert empty_extractor.graph.edges == []

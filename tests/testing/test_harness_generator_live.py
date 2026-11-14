@@ -1,0 +1,36 @@
+"""Test suite for the Harness Generator Live module."""
+
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+from ml_switcheroo.testing.harness_generator import HarnessGenerator
+
+
+def test_generated_fuzzer_runs_standalone(tmp_path: Path) -> None:
+  """Verify `HarnessGenerator` emits `class InputFuzzer` for generated fuzzer runs standalone.
+
+  Args:
+      tmp_path: Pytest temporary directory path fixture.
+  """
+  src: Path = tmp_path / "src.py"
+  tgt: Path = tmp_path / "tgt.py"
+  src.write_text("def f(x): return x")
+  tgt.write_text("def f(x): return x")
+  harness: Path = tmp_path / "verify_live.py"
+  gen: HarnessGenerator = HarnessGenerator()
+  gen.generate(src, tgt, harness, source_framework="numpy", target_framework="numpy")
+  content: str = harness.read_text()
+  assert "class InputFuzzer" in content
+  assert "def get_adapter(framework: str)" in content
+  assert "GenericAdapter" in content
+  env: dict[str, str] = os.environ.copy()
+  env.pop("PYTHONPATH", None)
+  res: subprocess.CompletedProcess[str] = subprocess.run(
+    [sys.executable, str(harness)], capture_output=True, text=True, env=env
+  )
+  if res.returncode != 0:
+    print("STDERR:", res.stderr)
+  assert res.returncode == 0
+  assert "✅ f: Match" in res.stdout

@@ -1,13 +1,11 @@
 """Test suite for the Init module."""
 
-from tests.conftest import _test_getattr
-
-import typing
-
 import os
+import typing
 from unittest import mock
 
 from pydantic import JsonValue
+from sphinx.application import Sphinx
 
 from ml_switcheroo.sphinx_ext import setup
 
@@ -19,7 +17,7 @@ class EventCallbackProtocol(typing.Protocol):
 
 
 class MockApp:
-  """Test helper class MockApp."""
+  """Test double `MockApp` implementing `add_directive`, `add_css_file` for init tests."""
 
   def __init__(self) -> None:
     """Initializes the MockApp instance."""
@@ -27,6 +25,11 @@ class MockApp:
     self.css_files: list[str] = []
     self.js_files: list[tuple[str | None, dict[str, JsonValue]]] = []
     self.events: list[tuple[str, EventCallbackProtocol]] = []
+    self.sphinx_app: mock.MagicMock = mock.MagicMock(spec=Sphinx)
+    self.sphinx_app.add_directive.side_effect = self.add_directive
+    self.sphinx_app.add_css_file.side_effect = self.add_css_file
+    self.sphinx_app.add_js_file.side_effect = self.add_js_file
+    self.sphinx_app.connect.side_effect = self.connect
 
   def add_directive(self, name: str, directive: type) -> None:
     """Mock implementation of add directive.
@@ -66,11 +69,9 @@ class MockApp:
 
 @mock.patch.dict(os.environ, {"BUILD_ALL_DOCS": "1"})
 def test_setup_build_all() -> None:
-  """Verifies the behavior of setup build all."""
+  """Verify `get` emits `switcheroo_demo` for setup build all."""
   app = MockApp()
-  result = _test_getattr(
-    {"v": _test_getattr({"v": setup}, "__getitem__")("v")(_test_getattr({"v": app}, "__getitem__")("v"))}, "__getitem__"
-  )("v")
+  result = setup(app.sphinx_app)
   assert result["version"]
   assert result["parallel_read_safe"] is True
   assert result["parallel_write_safe"] is True
@@ -88,8 +89,8 @@ def test_setup_build_all() -> None:
 
 @mock.patch.dict(os.environ, clear=True)
 def test_setup_default_no_docs() -> None:
-  """Verifies the behavior of setup default no documentation."""
+  """Verify `MockApp` handles setup default no docs as expected."""
   app = MockApp()
-  _test_getattr({"v": setup}, "__getitem__")("v")(_test_getattr({"v": app}, "__getitem__")("v"))
+  setup(app.sphinx_app)
   connected_funcs: list[str] = [e[1].__name__ for e in app.events]
   assert "generate_op_docs" not in connected_funcs

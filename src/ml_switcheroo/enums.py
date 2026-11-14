@@ -7,9 +7,9 @@ tensor/value conversion, and live object introspection.
 
 from __future__ import annotations
 
-from enum import Enum
 import types
 import typing
+from enum import Enum
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier as SemanticTier
 from pydantic import BaseModel, JsonValue
@@ -105,7 +105,48 @@ class _ClassProtocol(typing.Protocol):
   __name__: str
 
 
-InspectionObject: typing.TypeAlias = types.ModuleType | _ClassProtocol | typing.Hashable
+@typing.runtime_checkable
+class _CustomInstanceProtocol(typing.Protocol):
+  """Protocol matching user-defined Python class instances (which carry `__module__`)."""
+
+  __module__: str
+
+
+@typing.runtime_checkable
+class CallableTargetProtocol(typing.Protocol):
+  """Protocol for arbitrary callable runtime targets."""
+
+  def __call__(self, *args: "RuntimeTensorOrValue", **kwargs: "RuntimeTensorOrValue") -> "RuntimeTensorOrValue":
+    """Invoke callable target.
+
+    Args:
+        *args: Positional runtime arguments.
+        **kwargs: Keyword runtime arguments.
+
+    Returns:
+        Resulting runtime tensor or value.
+    """
+
+
+_CallableProtocol = CallableTargetProtocol
+
+InspectionObject: typing.TypeAlias = (
+  types.ModuleType
+  | _ClassProtocol
+  | _CustomInstanceProtocol
+  | _CallableProtocol
+  | types.FunctionType
+  | types.BuiltinFunctionType
+  | types.MethodType
+  | property
+  | Enum
+  | BaseModel
+  | str
+  | int
+  | float
+  | bool
+  | None
+)
 
 
 @typing.runtime_checkable
@@ -147,16 +188,22 @@ RuntimeTensorOrValue: typing.TypeAlias = (
   | str
   | _SliceProtocol
   | range
-  | None
   | types.EllipsisType
   | BaseModel
+  | Enum
+  | BaseException
   | types.ModuleType
   | _ClassProtocol
-  | typing.Hashable
+  | _CustomInstanceProtocol
+  | _CallableProtocol
+  | types.FunctionType
+  | types.BuiltinFunctionType
+  | types.MethodType
   | typing.Callable[[JsonValue], JsonValue]
   | typing.Sequence["RuntimeTensorOrValue"]
   | typing.Mapping[str, "RuntimeTensorOrValue"]
   | typing.Collection["RuntimeTensorOrValue"]
+  | None
 )
 
 FuzzValue: typing.TypeAlias = RuntimeTensorOrValue

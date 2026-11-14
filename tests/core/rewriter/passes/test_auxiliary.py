@@ -1,58 +1,35 @@
 """Test suite for the Auxiliary module."""
 
-from tests.conftest import _test_getattr, _test_hasattr, _test_setattr
-
 import typing
-from ml_switcheroo.core.hooks import HookContext
-from pydantic import JsonValue
 from unittest.mock import MagicMock, patch
 
 import libcst as _cst
 import pytest
-from libcst.codemod import CodemodContext
+from pydantic import JsonValue
 
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.escape_hatch import EscapeHatch
+from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.core.rewriter.passes.auxiliary import AuxiliaryPass, AuxiliaryTransformer
 from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.semantics.schema import StructuralTraits
 
 cst = _cst
 
 
 class MockSemantics(SemanticsManager):
-  """Test helper class MockSemantics."""
+  """Test double `MockSemantics` used in auxiliary tests."""
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
-    self.data = {}
-    jit_def = {"variants": {"jax": {"api": "jax.jit"}, "torch": {"api": "torch.jit.script"}}}
-    inf_def = {"variants": {"jax": None, "torch": {"api": "torch.inference_mode"}}}
-    _test_setattr(
-      _test_getattr({"v": self}, "__getitem__")("v"),
-      "_reverse_index",
-      _test_getattr(
-        {
-          "v": {
-            "torch.jit.script": _test_getattr(
-              {"v": (_test_getattr({"v": "Jit"}, "__getitem__")("v"), _test_getattr({"v": jit_def}, "__getitem__")("v"))},
-              "__getitem__",
-            )("v"),
-            "torch.inference_mode": _test_getattr(
-              {
-                "v": (
-                  _test_getattr({"v": "InfMode"}, "__getitem__")("v"),
-                  _test_getattr({"v": inf_def}, "__getitem__")("v"),
-                )
-              },
-              "__getitem__",
-            )("v"),
-          }
-        },
-        "__getitem__",
-      )("v"),
-    )
-    self.framework_configs = {}
+    super().__init__(load_defaults=False)
+    jit_def: dict[str, JsonValue] = {"variants": {"jax": {"api": "jax.jit"}, "torch": {"api": "torch.jit.script"}}}
+    inf_def: dict[str, JsonValue] = {"variants": {"jax": None, "torch": {"api": "torch.inference_mode"}}}
+    self._reverse_index = {
+      "torch.jit.script": ("Jit", jit_def),
+      "torch.inference_mode": ("InfMode", inf_def),
+    }
 
   def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Mock implementation of get definition.
@@ -79,7 +56,7 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def run_pass() -> typing.Callable[[str], str]:
-  """Execute run pass helper logic.
+  """Create a configured `typing.Callable[[str], str]` fixture for auxiliary tests.
 
   Returns:
       Configured `run_pass` fixture value (typing.Callable[[str], str]).
@@ -89,7 +66,7 @@ def run_pass() -> typing.Callable[[str], str]:
   ctx = RewriterContext(semantics, config)
 
   def _transform(code: str) -> str:
-    """Helper to  transform.
+    """Execute `AuxiliaryPass` to support transform in auxiliary tests.
 
     Args:
         code: Python or DSL source code string to parse or transpile.
@@ -105,22 +82,15 @@ def run_pass() -> typing.Callable[[str], str]:
 
 
 @pytest.fixture(autouse=True)
-def clean_hooks() -> typing.Generator[None, None, None]:
-  """Helper to clean hooks.
-
-  Returns:
-      Configured `clean_hooks` fixture value (typing.Generator[None, None, None]).
-  """
-  pass
-  yield
-  pass
+def clean_hooks() -> None:
+  """Create a configured `None` fixture for auxiliary tests."""
 
 
 def test_decorator_renaming(run_pass: typing.Callable[[str], str]) -> None:
-  """Verifies the behavior of decorator renaming.
+  """Verify `run_pass` emits `@jax.jit` for decorator renaming.
 
   Args:
-      run_pass: The run pass (typing.Callable[[str], str]) for test decorator renaming.
+      run_pass: Input `run_pass` parameter value (`typing.Callable[[str], str]`).
   """
   code = "\n@torch.jit.script\ndef f(): pass\n"
   res = run_pass(code)
@@ -129,10 +99,10 @@ def test_decorator_renaming(run_pass: typing.Callable[[str], str]) -> None:
 
 
 def test_decorator_removal(run_pass: typing.Callable[[str], str]) -> None:
-  """Verifies the behavior of decorator removal.
+  """Verify `run_pass` emits `def f():` for decorator removal.
 
   Args:
-      run_pass: The run pass (typing.Callable[[str], str]) for test decorator removal.
+      run_pass: Input `run_pass` parameter value (`typing.Callable[[str], str]`).
   """
   code = "\n@torch.inference_mode\ndef f(): pass\n"
   res = run_pass(code)
@@ -141,10 +111,10 @@ def test_decorator_removal(run_pass: typing.Callable[[str], str]) -> None:
 
 
 def test_decorator_with_args(run_pass: typing.Callable[[str], str]) -> None:
-  """Verifies the behavior of decorator with arguments.
+  """Verify `run_pass` emits `@jax.jit(optimize=True)` for decorator with args.
 
   Args:
-      run_pass: The run pass (typing.Callable[[str], str]) for test decorator with args.
+      run_pass: Input `run_pass` parameter value (`typing.Callable[[str], str]`).
   """
   code = "\n@torch.jit.script(optimize=True)\ndef f(): pass\n"
   res = run_pass(code)
@@ -152,72 +122,26 @@ def test_decorator_with_args(run_pass: typing.Callable[[str], str]) -> None:
 
 
 def test_loop_static_unroll_hook(run_pass: typing.Callable[[str], str]) -> None:
-  """Verifies the behavior of loop static unroll hook.
+  """Verify `register_hook` emits `unrolled` for loop static unroll hook.
 
   Args:
-      run_pass: The run pass (typing.Callable[[str], str]) for test loop static unroll hook.
+      run_pass: Input `run_pass` parameter value (`typing.Callable[[str], str]`).
   """
   from ml_switcheroo.core.hooks import register_hook
 
   @register_hook("transform_for_loop_static")
-  def mock_hook(node: cst.CSTNode, ctx: HookContext) -> cst.CSTNode:
-    """Execute mock hook helper logic.
+  def mock_hook(node: cst.CSTNode, ctx: HookContext) -> cst.CSTNode | cst.FlattenSentinel[cst.BaseStatement]:
+    """Execute `register_hook` to support mock hook in auxiliary tests.
 
     Args:
         node: CST or AST node under inspection or transformation.
         ctx: HookContext or RewriterContext instance under test.
 
     Returns:
-        Resulting `cst.CSTNode` from mock hook.
+        Resulting `cst.CSTNode | cst.FlattenSentinel[cst.BaseStatement]` from mock hook.
     """
-    _ret_v: cst.CSTNode = _test_getattr(
-      {
-        "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").FlattenSentinel}, "__getitem__")("v")(
-          _test_getattr(
-            {
-              "v": [
-                _test_getattr(
-                  {
-                    "v": _test_getattr(
-                      {"v": _test_getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__"
-                    )("v")(
-                      _test_getattr(
-                        {
-                          "v": [
-                            _test_getattr(
-                              {
-                                "v": _test_getattr(
-                                  {"v": _test_getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__"
-                                )("v")(
-                                  _test_getattr(
-                                    {
-                                      "v": _test_getattr(
-                                        {"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__"
-                                      )("v")(_test_getattr({"v": "unrolled"}, "__getitem__")("v"))
-                                    },
-                                    "__getitem__",
-                                  )("v")
-                                )
-                              },
-                              "__getitem__",
-                            )("v")
-                          ]
-                        },
-                        "__getitem__",
-                      )("v")
-                    )
-                  },
-                  "__getitem__",
-                )("v")
-              ]
-            },
-            "__getitem__",
-          )("v")
-        )
-      },
-      "__getitem__",
-    )("v")
-    return _ret_v
+    stmts: list[cst.BaseStatement] = [cst.SimpleStatementLine([cst.Expr(cst.Name("unrolled"))])]
+    return cst.FlattenSentinel(stmts)
 
   with patch(
     "ml_switcheroo.core.rewriter.passes.auxiliary.get_hook",
@@ -231,33 +155,25 @@ def test_loop_static_unroll_hook(run_pass: typing.Callable[[str], str]) -> None:
 
 
 def test_loop_safety_hook(run_pass: typing.Callable[[str], str]) -> None:
-  """Verifies the behavior of loop safety hook.
+  """Verify `register_hook` emits `Unsafe Loop` for loop safety hook.
 
   Args:
-      run_pass: The run pass (typing.Callable[[str], str]) for test loop safety hook.
+      run_pass: Input `run_pass` parameter value (`typing.Callable[[str], str]`).
   """
   from ml_switcheroo.core.hooks import register_hook
 
   @register_hook("transform_for_loop")
-  def mock_safety(node: cst.CSTNode, ctx: HookContext) -> cst.CSTNode:
-    """Execute mock safety helper logic.
+  def mock_safety(node: cst.CSTNode, ctx: HookContext) -> cst.CSTNode | cst.FlattenSentinel[cst.BaseStatement]:
+    """Execute `register_hook` to support mock safety in auxiliary tests.
 
     Args:
         node: CST or AST node under inspection or transformation.
         ctx: HookContext or RewriterContext instance under test.
 
     Returns:
-        Resulting `cst.CSTNode` from mock safety.
+        Resulting `cst.CSTNode | cst.FlattenSentinel[cst.BaseStatement]` from mock safety.
     """
-    _ret_v: cst.CSTNode = _test_getattr(
-      {
-        "v": _test_getattr({"v": _test_getattr({"v": EscapeHatch}, "__getitem__")("v").mark_failure}, "__getitem__")("v")(
-          _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": "Unsafe Loop"}, "__getitem__")("v")
-        )
-      },
-      "__getitem__",
-    )("v")
-    return _ret_v
+    return EscapeHatch.mark_failure(node, "Unsafe Loop")
 
   with patch(
     "ml_switcheroo.core.rewriter.passes.auxiliary.get_hook",
@@ -270,16 +186,16 @@ def test_loop_safety_hook(run_pass: typing.Callable[[str], str]) -> None:
 
 
 def test_loop_error_bubbling(run_pass: typing.Callable[[str], str]) -> None:
-  """Verifies the behavior of loop correctly handling an error bubbling.
+  """Verify `register_hook` handles loop error bubbling as expected.
 
   Args:
-      run_pass: The run pass (typing.Callable[[str], str]) for test loop error bubbling.
+      run_pass: Input `run_pass` parameter value (`typing.Callable[[str], str]`).
   """
   from ml_switcheroo.core.hooks import register_hook
 
   @register_hook("transform_for_loop")
   def crash_hook(node: cst.CSTNode, ctx: HookContext) -> cst.CSTNode:
-    """Helper to crash hook.
+    """Execute `register_hook` to support crash hook in auxiliary tests.
 
     Args:
         node: CST or AST node under inspection or transformation.
@@ -301,10 +217,10 @@ def test_loop_error_bubbling(run_pass: typing.Callable[[str], str]) -> None:
 
 
 def setup_ctx(alias_map: dict[str, str] | None = None) -> RewriterContext:
-  """Execute setup ctx helper logic.
+  """Execute `RuntimeConfig` to support setup ctx in auxiliary tests.
 
   Args:
-      alias_map: The alias map (dict[str, str] | None) for setup ctx.
+      alias_map: Input `alias_map` parameter value (`dict[str, str] | None`).
 
   Returns:
       Resulting `RewriterContext` from setup ctx.
@@ -316,10 +232,14 @@ def setup_ctx(alias_map: dict[str, str] | None = None) -> RewriterContext:
   return ctx
 
 
-def test_auxiliary_traits_empty() -> None:
-  """Verify auxiliary traits empty behavior."""
+def test_auxiliary_traits_empty(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `setup_ctx` handles auxiliary traits empty as expected.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   ctx = setup_ctx()
-  _test_setattr(ctx.semantics, "get_framework_config", MagicMock(return_value={}))
+  monkeypatch.setattr(ctx.semantics, "get_framework_config", MagicMock(return_value={}), raising=False)
   p = AuxiliaryTransformer(ctx)
   traits = p._get_traits()
   assert traits is not None
@@ -327,7 +247,7 @@ def test_auxiliary_traits_empty() -> None:
 
 
 def test_auxiliary_get_qualified_name_alias_split() -> None:
-  """Verify auxiliary get qualified name alias split behavior."""
+  """Verify `setup_ctx` handles auxiliary get qualified name alias split as expected."""
   ctx = setup_ctx({"np": "numpy"})
   p = AuxiliaryTransformer(ctx)
   node = cst.Attribute(value=cst.Name("np"), attr=cst.Name("add"))
@@ -335,7 +255,7 @@ def test_auxiliary_get_qualified_name_alias_split() -> None:
 
 
 def test_auxiliary_get_qualified_name_no_string() -> None:
-  """Verify auxiliary get qualified name no string behavior."""
+  """Verify `setup_ctx` handles auxiliary get qualified name no string as expected."""
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
   node = cst.Integer("1")
@@ -343,7 +263,7 @@ def test_auxiliary_get_qualified_name_no_string() -> None:
 
 
 def test_auxiliary_create_dotted_name() -> None:
-  """Verify auxiliary create dotted name behavior."""
+  """Verify `setup_ctx` handles auxiliary create dotted name as expected."""
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
   node = p._create_dotted_name("a.b.c")
@@ -352,18 +272,18 @@ def test_auxiliary_create_dotted_name() -> None:
 
 
 def test_auxiliary_leave_simplestatementline_warnings() -> None:
-  """Verify auxiliary leave simplestatementline warnings behavior."""
+  """Verify `setup_ctx` handles auxiliary leave simplestatementline warnings as expected."""
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
   p.context.current_stmt_warnings = ["warn1"]
   node = cst.SimpleStatementLine(body=[cst.Pass()])
   res = p.leave_SimpleStatementLine(node, node)
   assert res is not node
-  assert _test_hasattr(res, "nodes")  # FlattenSentinel
+  assert isinstance(res, cst.FlattenSentinel)
 
 
 def test_auxiliary_leave_simplestatementline_errors() -> None:
-  """Verify auxiliary leave simplestatementline errors behavior."""
+  """Verify `setup_ctx` handles auxiliary leave simplestatementline errors as expected."""
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
   p.context.current_stmt_errors = ["err1"]
@@ -372,21 +292,34 @@ def test_auxiliary_leave_simplestatementline_errors() -> None:
   assert res is not node
 
 
-def test_auxiliary_leave_decorator_remove() -> None:
-  """Verify auxiliary leave decorator remove behavior."""
+def test_auxiliary_leave_decorator_remove(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `setup_ctx` handles auxiliary leave decorator remove as expected.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   ctx = setup_ctx()
-  _test_setattr(ctx.semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"torch": None}})))
+  monkeypatch.setattr(
+    ctx.semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"torch": None}})), raising=False
+  )
   p = AuxiliaryTransformer(ctx)
   dec = cst.Decorator(decorator=cst.Name("test"))
   res = p.leave_Decorator(dec, dec)
   assert type(res).__name__ == "RemovalSentinel"
 
 
-def test_auxiliary_leave_decorator_rename_noncall() -> None:
-  """Verify auxiliary leave decorator rename noncall behavior."""
+def test_auxiliary_leave_decorator_rename_noncall(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `setup_ctx` handles auxiliary leave decorator rename noncall as expected.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   ctx = setup_ctx()
-  _test_setattr(
-    ctx.semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"torch": {"api": "new_dec"}}}))
+  monkeypatch.setattr(
+    ctx.semantics,
+    "get_definition",
+    MagicMock(return_value=("id", {"variants": {"torch": {"api": "new_dec"}}})),
+    raising=False,
   )
   p = AuxiliaryTransformer(ctx)
   dec = cst.Decorator(decorator=cst.Name("test"))
@@ -396,8 +329,12 @@ def test_auxiliary_leave_decorator_rename_noncall() -> None:
   assert res.decorator.value == "new_dec"
 
 
-def test_auxiliary_leave_decorator_name_none_or_not_found() -> None:
-  """Test leave_Decorator returns updated_node if name is None or not found."""
+def test_auxiliary_leave_decorator_name_none_or_not_found(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Test leave_Decorator returns updated_node if name is None or not found.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
   # name is None (e.g. integer or unsupported expression as decorator)
@@ -405,17 +342,17 @@ def test_auxiliary_leave_decorator_name_none_or_not_found() -> None:
   assert p.leave_Decorator(dec_unnamed, dec_unnamed) is dec_unnamed
 
   # lookup is None
-  _test_setattr(ctx.semantics, "get_definition", MagicMock(return_value=None))
+  monkeypatch.setattr(ctx.semantics, "get_definition", MagicMock(return_value=None), raising=False)
   dec = cst.Decorator(decorator=cst.Name("unknown_dec"))
   assert p.leave_Decorator(dec, dec) is dec
 
 
 @patch("ml_switcheroo.core.rewriter.passes.auxiliary.get_hook")
 def test_auxiliary_for_loop_static_hook(mock_get_hook: MagicMock) -> None:
-  """Verify auxiliary for loop static hook behavior.
+  """Verify `setup_ctx` handles auxiliary for loop static hook as expected.
 
   Args:
-      mock_get_hook: The mock get hook (MagicMock) for test auxiliary for loop static hook.
+      mock_get_hook: Input `mock_get_hook` parameter value (`MagicMock`).
   """
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
@@ -430,7 +367,7 @@ def test_auxiliary_for_loop_static_hook(mock_get_hook: MagicMock) -> None:
 
     Args:
         node: CST or AST node under inspection or transformation.
-        hook_ctx: The hook ctx (HookContext) for hook mock.
+        hook_ctx: Input `hook_ctx` parameter value (`HookContext`).
 
     Returns:
         Resulting `cst.CSTNode` from hook mock.
@@ -442,14 +379,15 @@ def test_auxiliary_for_loop_static_hook(mock_get_hook: MagicMock) -> None:
   mock_get_hook.side_effect = lambda name: hook_mock if name == "transform_for_loop_static" else None
   res = p.leave_For(loop, loop)
   assert isinstance(res, cst.Pass)
+  assert cst.Module([]).code_for_node(res).strip() == "pass"
 
 
 @patch("ml_switcheroo.core.rewriter.passes.auxiliary.get_hook")
 def test_auxiliary_for_loop_static_hook_exception(mock_get_hook: MagicMock) -> None:
-  """Verify auxiliary for loop static hook exception behavior.
+  """Verify `setup_ctx` handles auxiliary for loop static hook exception as expected.
 
   Args:
-      mock_get_hook: The mock get hook (MagicMock) for test auxiliary for loop static hook exception.
+      mock_get_hook: Input `mock_get_hook` parameter value (`MagicMock`).
   """
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
@@ -464,7 +402,7 @@ def test_auxiliary_for_loop_static_hook_exception(mock_get_hook: MagicMock) -> N
 
     Args:
         node: CST or AST node under inspection or transformation.
-        hook_ctx: The hook ctx (HookContext) for hook mock.
+        hook_ctx: Input `hook_ctx` parameter value (`HookContext`).
 
     Returns:
         Resulting `cst.CSTNode` from hook mock.
@@ -478,10 +416,10 @@ def test_auxiliary_for_loop_static_hook_exception(mock_get_hook: MagicMock) -> N
 
 @patch("ml_switcheroo.core.rewriter.passes.auxiliary.get_hook")
 def test_auxiliary_for_loop_hook(mock_get_hook: MagicMock) -> None:
-  """Verify auxiliary for loop hook behavior.
+  """Verify `setup_ctx` handles auxiliary for loop hook as expected.
 
   Args:
-      mock_get_hook: The mock get hook (MagicMock) for test auxiliary for loop hook.
+      mock_get_hook: Input `mock_get_hook` parameter value (`MagicMock`).
   """
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
@@ -496,7 +434,7 @@ def test_auxiliary_for_loop_hook(mock_get_hook: MagicMock) -> None:
 
     Args:
         node: CST or AST node under inspection or transformation.
-        hook_ctx: The hook ctx (HookContext) for hook mock.
+        hook_ctx: Input `hook_ctx` parameter value (`HookContext`).
 
     Returns:
         Resulting `cst.CSTNode` from hook mock.
@@ -506,14 +444,15 @@ def test_auxiliary_for_loop_hook(mock_get_hook: MagicMock) -> None:
   mock_get_hook.side_effect = lambda name: hook_mock if name == "transform_for_loop" else None
   res = p.leave_For(loop, loop)
   assert isinstance(res, cst.Pass)
+  assert cst.Module([]).code_for_node(res).strip() == "pass"
 
 
 @patch("ml_switcheroo.core.rewriter.passes.auxiliary.get_hook")
 def test_auxiliary_for_loop_hook_exception(mock_get_hook: MagicMock) -> None:
-  """Verify auxiliary for loop hook exception behavior.
+  """Verify `setup_ctx` handles auxiliary for loop hook exception as expected.
 
   Args:
-      mock_get_hook: The mock get hook (MagicMock) for test auxiliary for loop hook exception.
+      mock_get_hook: Input `mock_get_hook` parameter value (`MagicMock`).
   """
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
@@ -528,7 +467,7 @@ def test_auxiliary_for_loop_hook_exception(mock_get_hook: MagicMock) -> None:
 
     Args:
         node: CST or AST node under inspection or transformation.
-        hook_ctx: The hook ctx (HookContext) for hook mock.
+        hook_ctx: Input `hook_ctx` parameter value (`HookContext`).
 
     Returns:
         Resulting `cst.CSTNode` from hook mock.
@@ -540,42 +479,55 @@ def test_auxiliary_for_loop_hook_exception(mock_get_hook: MagicMock) -> None:
   assert not isinstance(res, cst.For)
 
 
-def test_auxiliary_traits_with_traits() -> None:
-  """Verify auxiliary traits with traits behavior."""
+def test_auxiliary_traits_with_traits(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `setup_ctx` handles auxiliary traits with traits as expected.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   ctx = setup_ctx()
-  _test_setattr(ctx.semantics, "get_framework_config", MagicMock(return_value={"traits": {}}))
+  monkeypatch.setattr(ctx.semantics, "get_framework_config", MagicMock(return_value={"traits": {}}), raising=False)
   p = AuxiliaryTransformer(ctx)
   traits = p._get_traits()
-  assert traits is not None
+  assert isinstance(traits, StructuralTraits)
+  assert traits.init_method_name == "__init__"
 
 
 def test_auxiliary_get_qualified_name_alias_no_split() -> None:
-  """Verify auxiliary get qualified name alias no split behavior."""
+  """Verify `setup_ctx` handles auxiliary get qualified name alias no split as expected."""
   ctx = setup_ctx({"np": "numpy"})
   p = AuxiliaryTransformer(ctx)
   node = cst.Name("np")
   assert p._get_qualified_name(node) == "numpy"
 
 
-def test_auxiliary_leave_decorator_rename_noncall2() -> None:
-  """Verify auxiliary leave decorator rename noncall2 behavior."""
+def test_auxiliary_leave_decorator_rename_noncall2(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `setup_ctx` handles auxiliary leave decorator rename noncall2 as expected.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   ctx = setup_ctx()
-  _test_setattr(
-    ctx.semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"torch": {"api": "new_dec"}}}))
+  monkeypatch.setattr(
+    ctx.semantics,
+    "get_definition",
+    MagicMock(return_value=("id", {"variants": {"torch": {"api": "new_dec"}}})),
+    raising=False,
   )
   p = AuxiliaryTransformer(ctx)
   # The actual decorator decorator is just a Name, not a Call
   dec = cst.Decorator(decorator=cst.Name("test"))
   res = p.leave_Decorator(dec, dec)
   assert isinstance(res, cst.Decorator)
+  assert cst.Module([]).code_for_node(res).strip() == "@new_dec"
 
 
 @patch("ml_switcheroo.core.rewriter.passes.auxiliary.get_hook")
 def test_auxiliary_for_loop_static_hook_new_node(mock_get_hook: MagicMock) -> None:
-  """Verify auxiliary for loop static hook new node behavior.
+  """Verify `setup_ctx` handles auxiliary for loop static hook new node as expected.
 
   Args:
-      mock_get_hook: The mock get hook (MagicMock) for test auxiliary for loop static hook new node.
+      mock_get_hook: Input `mock_get_hook` parameter value (`MagicMock`).
   """
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
@@ -590,7 +542,7 @@ def test_auxiliary_for_loop_static_hook_new_node(mock_get_hook: MagicMock) -> No
 
     Args:
         node: CST or AST node under inspection or transformation.
-        hook_ctx: The hook ctx (HookContext) for hook mock.
+        hook_ctx: Input `hook_ctx` parameter value (`HookContext`).
 
     Returns:
         Resulting `cst.CSTNode` from hook mock.
@@ -600,26 +552,35 @@ def test_auxiliary_for_loop_static_hook_new_node(mock_get_hook: MagicMock) -> No
   mock_get_hook.side_effect = lambda name: hook_mock if name == "transform_for_loop_static" else None
   res = p.leave_For(loop, loop)
   assert isinstance(res, cst.Pass)
+  assert cst.Module([]).code_for_node(res).strip() == "pass"
 
 
-def test_auxiliary_leave_decorator_rename_call() -> None:
-  """Verify auxiliary leave decorator rename call behavior."""
+def test_auxiliary_leave_decorator_rename_call(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `setup_ctx` handles auxiliary leave decorator rename call as expected.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   ctx = setup_ctx()
-  _test_setattr(
-    ctx.semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"torch": {"api": "new_dec"}}}))
+  monkeypatch.setattr(
+    ctx.semantics,
+    "get_definition",
+    MagicMock(return_value=("id", {"variants": {"torch": {"api": "new_dec"}}})),
+    raising=False,
   )
   p = AuxiliaryTransformer(ctx)
   dec = cst.Decorator(decorator=cst.Call(func=cst.Name("test")))
   res = p.leave_Decorator(dec, dec)
   assert isinstance(res, cst.Decorator)
+  assert cst.Module([]).code_for_node(res).strip() == "@new_dec()"
 
 
 @patch("ml_switcheroo.core.rewriter.passes.auxiliary.get_hook")
 def test_auxiliary_for_loop_static_hook_same2(mock_get_hook: MagicMock) -> None:
-  """Verify auxiliary for loop static hook same2 behavior.
+  """Verify `setup_ctx` handles auxiliary for loop static hook same2 as expected.
 
   Args:
-      mock_get_hook: The mock get hook (MagicMock) for test auxiliary for loop static hook same2.
+      mock_get_hook: Input `mock_get_hook` parameter value (`MagicMock`).
   """
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
@@ -631,10 +592,10 @@ def test_auxiliary_for_loop_static_hook_same2(mock_get_hook: MagicMock) -> None:
 
 @patch("ml_switcheroo.core.rewriter.passes.auxiliary.get_hook")
 def test_auxiliary_for_loop_hook_same2(mock_get_hook: MagicMock) -> None:
-  """Verify auxiliary for loop hook same2 behavior.
+  """Verify `setup_ctx` handles auxiliary for loop hook same2 as expected.
 
   Args:
-      mock_get_hook: The mock get hook (MagicMock) for test auxiliary for loop hook same2.
+      mock_get_hook: Input `mock_get_hook` parameter value (`MagicMock`).
   """
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
@@ -645,39 +606,17 @@ def test_auxiliary_for_loop_hook_same2(mock_get_hook: MagicMock) -> None:
 
 
 def test_cst_to_string_none_base() -> None:
-  """Verify cst to string none base behavior."""
-  transformer = _test_getattr(
-    {
-      "v": _test_getattr({"v": AuxiliaryTransformer}, "__getitem__")("v")(
-        _test_getattr({"v": _test_getattr({"v": CodemodContext}, "__getitem__")("v")()}, "__getitem__")("v")
-      )
-    },
-    "__getitem__",
-  )("v")
-  attr_node = _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Attribute}, "__getitem__")("v")(
-        value=_test_getattr(
-          {"v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Pass}, "__getitem__")("v")()},
-          "__getitem__",
-        )("v"),
-        attr=_test_getattr(
-          {
-            "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
-              _test_getattr({"v": "bar"}, "__getitem__")("v")
-            )
-          },
-          "__getitem__",
-        )("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
+  """Verify `transformer._cst_to_string` handles none base as expected."""
+  transformer = AuxiliaryTransformer(setup_ctx())
+  attr_node = cst.Attribute(
+    value=cst.Call(func=cst.Name("foo")),
+    attr=cst.Name("bar"),
+  )
   assert transformer._cst_to_string(attr_node) is None
 
 
 def test_auxiliary_visit_simplestatementline() -> None:
-  """Verify auxiliary visit simplestatementline behavior."""
+  """Verify `setup_ctx` handles auxiliary visit simplestatementline as expected."""
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
   res = p.visit_SimpleStatementLine(cst.SimpleStatementLine(body=[cst.Pass()]))
@@ -686,11 +625,18 @@ def test_auxiliary_visit_simplestatementline() -> None:
   assert p.context.current_stmt_warnings == []
 
 
-def test_auxiliary_leave_decorator_rename_noncall3() -> None:
-  """Verify auxiliary leave decorator rename noncall3 behavior."""
+def test_auxiliary_leave_decorator_rename_noncall3(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `setup_ctx` handles auxiliary leave decorator rename noncall3 as expected.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   ctx = setup_ctx()
-  _test_setattr(
-    ctx.semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"torch": {"no_api": "missing"}}}))
+  monkeypatch.setattr(
+    ctx.semantics,
+    "get_definition",
+    MagicMock(return_value=("id", {"variants": {"torch": {"no_api": "missing"}}})),
+    raising=False,
   )
   p = AuxiliaryTransformer(ctx)
   dec = cst.Decorator(decorator=cst.Name("test"))
@@ -700,10 +646,10 @@ def test_auxiliary_leave_decorator_rename_noncall3() -> None:
 
 @patch("ml_switcheroo.core.rewriter.passes.auxiliary.get_hook")
 def test_auxiliary_for_loop_static_hook_same(mock_get_hook: MagicMock) -> None:
-  """Verify auxiliary for loop static hook same behavior.
+  """Verify `setup_ctx` handles auxiliary for loop static hook same as expected.
 
   Args:
-      mock_get_hook: The mock get hook (MagicMock) for test auxiliary for loop static hook same.
+      mock_get_hook: Input `mock_get_hook` parameter value (`MagicMock`).
   """
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
@@ -715,10 +661,10 @@ def test_auxiliary_for_loop_static_hook_same(mock_get_hook: MagicMock) -> None:
 
 @patch("ml_switcheroo.core.rewriter.passes.auxiliary.get_hook")
 def test_auxiliary_for_loop_hook_same(mock_get_hook: MagicMock) -> None:
-  """Verify auxiliary for loop hook same behavior.
+  """Verify `setup_ctx` handles auxiliary for loop hook same as expected.
 
   Args:
-      mock_get_hook: The mock get hook (MagicMock) for test auxiliary for loop hook same.
+      mock_get_hook: Input `mock_get_hook` parameter value (`MagicMock`).
   """
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
@@ -730,10 +676,10 @@ def test_auxiliary_for_loop_hook_same(mock_get_hook: MagicMock) -> None:
 
 @patch("ml_switcheroo.core.rewriter.passes.auxiliary.get_hook")
 def test_auxiliary_for_loop_hook_none(mock_get_hook: MagicMock) -> None:
-  """Verify auxiliary for loop hook none behavior.
+  """Verify `setup_ctx` handles auxiliary for loop hook none as expected.
 
   Args:
-      mock_get_hook: The mock get hook (MagicMock) for test auxiliary for loop hook none.
+      mock_get_hook: Input `mock_get_hook` parameter value (`MagicMock`).
   """
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
@@ -741,3 +687,47 @@ def test_auxiliary_for_loop_hook_none(mock_get_hook: MagicMock) -> None:
   mock_get_hook.return_value = None
   res = p.leave_For(loop, loop)
   assert res is loop
+
+
+def test_auxiliary_decorator_complex_callee_and_missing_target_variant() -> None:
+  """Verify `AuxiliaryTransformer.leave_Decorator` preserves unresolvable and unmapped-target decorators."""
+  ctx = setup_ctx()
+  ctx.semantics._reverse_index["my_dec"] = ("DecOp", {"variants": {"other_fw": {"api": "other.dec"}}})
+  p = AuxiliaryTransformer(ctx)
+
+  fn_complex = cst.ensure_type(cst.parse_module("@foo()()\ndef x(): pass").body[0], cst.FunctionDef)
+  dec_complex = fn_complex.decorators[0]
+  assert p.leave_Decorator(dec_complex, dec_complex) is dec_complex
+
+  fn_unmapped = cst.ensure_type(cst.parse_module("@my_dec\ndef x(): pass").body[0], cst.FunctionDef)
+  dec_unmapped = fn_unmapped.decorators[0]
+  assert p.leave_Decorator(dec_unmapped, dec_unmapped) is dec_unmapped
+
+  ctx.semantics._reverse_index["bad_variants_dec"] = ("BadDec", {"variants": "not_a_dict"})
+  fn_bad_var = cst.ensure_type(cst.parse_module("@bad_variants_dec\ndef x(): pass").body[0], cst.FunctionDef)
+  dec_bad_var = fn_bad_var.decorators[0]
+  assert p.leave_Decorator(dec_bad_var, dec_bad_var) is dec_bad_var
+
+  from ml_switcheroo.core.hooks import HookContext
+
+  def _failing_loop_hook(_n: cst.For, _c: HookContext) -> cst.CSTNode:
+    """Raise `ValueError` inside loop transformation hook.
+
+    Args:
+        _n: Loop node.
+        _c: Hook context.
+
+    Returns:
+        Never returns; raises `ValueError`.
+    """
+    raise ValueError("loop failure")
+
+  loop = cst.For(target=cst.Name("i"), iter=cst.Name("r"), body=cst.IndentedBlock(body=[]))
+  with (
+    patch(
+      "ml_switcheroo.core.rewriter.passes.auxiliary.get_hook",
+      side_effect=lambda name: _failing_loop_hook if name == "transform_for_loop" else None,
+    ),
+    patch("ml_switcheroo.core.rewriter.passes.auxiliary.EscapeHatch.mark_failure", return_value=cst.RemoveFromParent()),
+  ):
+    assert p.leave_For(loop, loop) is loop

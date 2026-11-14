@@ -1,143 +1,197 @@
-"""Test suite for the Import Resolver module."""
+"""Unit tests for ``ImportReq``, ``ResolutionPlan``, ``ImportResolver``, and scanners in ``resolution.py``."""
 
 from unittest.mock import Mock
 
 import libcst as cst
 import pytest
 
-from ml_switcheroo.core.import_fixer.resolution import ImportReq, ImportResolver, _deduplicate, _QualNameScanner
+from ml_switcheroo.core.import_fixer.resolution import (
+  ImportReq,
+  ImportResolver,
+  ResolutionPlan,
+  _deduplicate,
+  _QualNameScanner,
+)
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-def test_importreq_signature() -> None:
-  """Verifies the behavior of ImportReq.signature."""
-  req1 = ImportReq(module="torch")
-  assert req1.signature == "torch"
+class StubSemanticsManager(SemanticsManager):
+  """Lightweight ``SemanticsManager`` test double returning deterministic alias and import maps."""
 
-  req2 = ImportReq(module="torch", subcomponent="nn")
-  assert req2.signature == "torch.nn"
+  def __init__(
+    self,
+    aliases: dict[str, tuple[str, str]] | None = None,
+    import_maps: dict[str, dict[str, tuple[str, str | None, str | None]]] | None = None,
+  ) -> None:
+    """Initialize the stub manager without loading filesystem defaults.
 
-  req3 = ImportReq(module="jax", subcomponent="numpy", alias="jnp")
-  assert req3.signature == "jax.numpy : jnp"
+    Args:
+        aliases: Mapping of framework names to ``(module_path, alias_name)`` pairs.
+        import_maps: Per-target-framework mapping of source paths to ``(root, sub, alias)`` tuples.
+    """
+    super().__init__(load_defaults=False)
+    self._aliases: dict[str, tuple[str, str]] = aliases if aliases is not None else {}
+    self._import_maps: dict[str, dict[str, tuple[str, str | None, str | None]]] = (
+      import_maps if import_maps is not None else {}
+    )
 
-  # redundant alias
-  req4 = ImportReq(module="torch", subcomponent="nn", alias="nn")
-  assert req4.signature == "torch.nn"
+  def get_framework_aliases(self) -> dict[str, tuple[str, str]]:
+    """Return configured framework alias mappings.
 
-  req5 = ImportReq(module="jax", alias="jax")
-  assert req5.signature == "jax"
+    Returns:
+        Dictionary mapping framework identifiers to ``(module_path, alias_name)`` pairs.
+    """
+    return self._aliases
+
+  def get_import_map(self, target_framework: str) -> dict[str, tuple[str, str | None, str | None]]:
+    """Return configured submodule import mappings for ``target_framework``.
+
+    Args:
+        target_framework: Target framework identifier.
+
+    Returns:
+        Dictionary mapping source module paths to ``(root, subcomponent, alias)`` tuples.
+    """
+    return self._import_maps.get(target_framework, {})
+
+
+def test_import_req_signature() -> None:
+  """Verify ``ImportReq.signature`` normalizes redundant aliases and retains explicit aliases."""
+  assert ImportReq(module="torch").signature == "torch"
+  assert ImportReq(module="torch", subcomponent="nn").signature == "torch.nn"
+  assert ImportReq(module="torch", subcomponent="nn", alias="nn").signature == "torch.nn"
+  assert ImportReq(module="torch", subcomponent="nn", alias="my_nn").signature == "torch.nn : my_nn"
+  assert ImportReq(module="jax.numpy", alias="jnp").signature == "jax.numpy : jnp"
+  assert ImportReq(module="jax.numpy", alias="numpy").signature == "jax.numpy"
+  assert ImportReq(module="jax", alias="jax").signature == "jax"
+
+
+def test_resolution_plan_initialization() -> None:
+  """Verify ``ResolutionPlan`` supports both default empty collections and explicit values."""
+  empty_plan = ResolutionPlan()
+  assert empty_plan.required_imports == []
+  assert empty_plan.mappings == {}
+  assert empty_plan.path_to_alias == {}
+  assert empty_plan.target_framework is None
+
+  req = ImportReq(module="jax")
+  populated_plan = ResolutionPlan(
+    required_imports=[req],
+    mappings={"torch": req},
+    path_to_alias={"jax.numpy": "jnp"},
+    target_framework="jax",
+  )
+  assert populated_plan.required_imports == [req]
+  assert populated_plan.mappings == {"torch": req}
+  assert populated_plan.path_to_alias == {"jax.numpy": "jnp"}
+  assert populated_plan.target_framework == "jax"
 
 
 def test_deduplicate() -> None:
-  """Verifies the behavior of _deduplicate."""
-  reqs: list[ImportReq] = [
+  """Verify ``_deduplicate`` preserves insertion order while collapsing identical signatures."""
+  reqs = [
     ImportReq(module="torch"),
     ImportReq(module="torch", alias="torch"),
     ImportReq(module="jax", subcomponent="numpy", alias="jnp"),
     ImportReq(module="jax", subcomponent="numpy", alias="jnp"),
   ]
-  deduped: list[ImportReq] = _deduplicate(reqs)
+  deduped = _deduplicate(reqs)
   assert len(deduped) == 2
+  assert deduped[0].signature == "torch"
+  assert deduped[1].signature == "jax.numpy : jnp"
 
 
-def test_qualnamescanner(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Verifies the behavior of _QualNameScanner.
+def test_qual_name_scanner(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify ``_QualNameScanner`` matches exact names, attribute prefixes, early exits, and error paths.
 
   Args:
-      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
+      monkeypatch: Pytest monkeypatch fixture used to simulate ``get_full_name`` failures.
   """
-  code: str = "import torch; torch.nn.Linear(10, 10); x = 5"
-  tree: cst.Module = cst.parse_module(code)
+  tree = cst.parse_module(
+    """import jax.numpy
+x = jax.numpy.sum()
+y = 5"""
+  )
 
-  scanner = _QualNameScanner("torch.nn")
-  tree.visit(scanner)
-  assert scanner.found is True
+  scanner_prefix = _QualNameScanner("jax.numpy")
+  tree.visit(scanner_prefix)
+  assert scanner_prefix.found is True
 
-  scanner_not_found = _QualNameScanner("flax.nnx")
-  tree.visit(scanner_not_found)
-  assert scanner_not_found.found is False
+  scanner_miss = _QualNameScanner("flax.nnx")
+  tree.visit(scanner_miss)
+  assert scanner_miss.found is False
 
-  scanner_name = _QualNameScanner("x")
+  scanner_name = _QualNameScanner("y")
   tree.visit(scanner_name)
   assert scanner_name.found is True
 
-  scanner_name_not_found = _QualNameScanner("y")
-  tree.visit(scanner_name_not_found)
-  assert scanner_name_not_found.found is False
+  scanner_name_miss = _QualNameScanner("z")
+  tree.visit(scanner_name_miss)
+  assert scanner_name_miss.found is False
 
-  # test already found logic
-  scanner2 = _QualNameScanner("x")
-  scanner2.found = True
-  scanner2.visit_Name(cst.Name("x"))
-  scanner2.visit_Attribute(cst.Attribute(value=cst.Name("x"), attr=cst.Name("y")))
-  assert scanner2.found is True
+  scanner_already_found = _QualNameScanner("y")
+  scanner_already_found.found = True
+  scanner_already_found.visit_Name(cst.Name("y"))
+  scanner_already_found.visit_Attribute(cst.Attribute(value=cst.Name("y"), attr=cst.Name("attr")))
+  assert scanner_already_found.found is True
 
-  # test exception swallowing in visit_Attribute
-  # Monkeypatch get_full_name to raise an exception
   monkeypatch.setattr(
-    "ml_switcheroo.core.import_fixer.resolution.get_full_name", Mock(side_effect=ValueError("Test exception"))
+    "ml_switcheroo.core.import_fixer.resolution.get_full_name",
+    Mock(side_effect=ValueError("Simulated Error")),
   )
-  scanner3 = _QualNameScanner("x")
-  attr_fail = cst.Attribute(value=cst.Name("foo"), attr=cst.Name("bar"))
-  scanner3.visit_Attribute(attr_fail)
-  assert scanner3.found is False
+  scanner_err = _QualNameScanner("some.path")
+  scanner_err.visit_Attribute(cst.Attribute(value=cst.Name("a"), attr=cst.Name("b")))
+  assert scanner_err.found is False
 
 
-def test_importresolver() -> None:
-  """Verifies the behavior of ImportResolver."""
-  mock_semantics: Mock = Mock()
-  # Mock alias
-  mock_semantics.get_framework_aliases.return_value = {"jax": ("jax.numpy", "jnp")}
-  # Mock import map
-  mock_semantics.get_import_map.return_value = {
-    "torch.nn": ("flax", "nnx", "nnx"),
-    "torch.nn.functional": ("jax.nn", None, None),
-  }
+def test_import_resolver_aliases_and_submodules() -> None:
+  """Verify ``ImportResolver.resolve`` detects base framework, alias, and submodule usages."""
+  semantics = StubSemanticsManager(
+    aliases={"jax": ("jax.numpy", "jnp")},
+    import_maps={
+      "jax": {
+        "torch.nn": ("flax", "nnx", "nnx"),
+        "torch.nn.functional": ("jax", "nn", "F"),
+        "torch.lax": ("jax", "lax", None),
+        "torch.optim": ("optax", None, None),
+      }
+    },
+  )
+  resolver = ImportResolver(semantics=semantics)
 
-  resolver = ImportResolver(semantics=mock_semantics)
+  plan_base = resolver.resolve(
+    cst.parse_module(
+      """import jax
+jax.sum()"""
+    ),
+    "jax",
+  )
+  assert any(r.signature == "jax" for r in plan_base.required_imports)
 
-  # Test tree where things are used
-  code: str = "import jax; jnp.zeros(5); flax.nnx.Linear(); jax.nn.relu()"
-  tree: cst.Module = cst.parse_module(code)
+  plan_alias = resolver.resolve(cst.parse_module("jnp.array([1, 2])"), "jax")
+  assert any(r.signature == "jax.numpy : jnp" for r in plan_alias.required_imports)
+  assert plan_alias.path_to_alias["jax.numpy"] == "jnp"
 
-  plan = resolver.resolve(tree, "jax")
+  plan_mod_path = resolver.resolve(cst.parse_module("jax.numpy.array([1, 2])"), "jax")
+  assert any(r.signature == "jax.numpy : jnp" for r in plan_mod_path.required_imports)
 
-  # jax used, jnp used, flax.nnx used (nnx check name used), jax.nn used
-  assert len(plan.required_imports) == 4
+  plan_nnx = resolver.resolve(cst.parse_module("nnx.Linear()"), "jax")
+  assert any(r.signature == "flax.nnx" for r in plan_nnx.required_imports)
+  assert plan_nnx.mappings["torch.nn"].module == "flax"
+  assert plan_nnx.path_to_alias["flax.nnx"] == "nnx"
 
-  # target framework check
-  assert plan.required_imports[0].module == "jax"
-  # alias check
-  assert plan.required_imports[1].module == "jax.numpy"
-  assert plan.required_imports[1].alias == "jnp"
-  # map 1
-  assert plan.required_imports[2].module == "flax"
-  assert plan.required_imports[2].subcomponent == "nnx"
-  assert plan.required_imports[2].alias == "nnx"
-  # map 2
-  assert plan.required_imports[3].module == "jax.nn"
-  assert plan.required_imports[3].subcomponent is None
+  plan_full_subpath = resolver.resolve(cst.parse_module("jax.nn.relu(x)"), "jax")
+  assert any(r.signature == "jax.nn : F" for r in plan_full_subpath.required_imports)
+  assert plan_full_subpath.path_to_alias["jax.nn"] == "F"
 
-  # test not used path
-  code_empty: str = "x = 1"
-  tree_empty: cst.Module = cst.parse_module(code_empty)
-  plan_empty = resolver.resolve(tree_empty, "jax")
-  assert len(plan_empty.required_imports) == 0
+  plan_sub_no_alias = resolver.resolve(cst.parse_module("lax.sin(x)"), "jax")
+  assert any(r.signature == "jax.lax" for r in plan_sub_no_alias.required_imports)
 
+  plan_root_no_alias = resolver.resolve(cst.parse_module("optax.adam()"), "jax")
+  assert any(r.signature == "optax" for r in plan_root_no_alias.required_imports)
 
-def test_importresolver_full_path() -> None:
-  """Verifies the behavior of ImportResolver using full paths."""
-  mock_semantics: Mock = Mock()
-  mock_semantics.get_framework_aliases.return_value = {"jax": ("jax.numpy", "jnp")}
-  mock_semantics.get_import_map.return_value = {
-    "torch.nn": ("flax", "nnx", "nnx"),
-  }
-  resolver = ImportResolver(semantics=mock_semantics)
+  plan_unused = resolver.resolve(cst.parse_module("x = 1"), "jax")
+  assert plan_unused.required_imports == []
 
-  # Even if we use jax.numpy, it should detect it and inject alias
-  code: str = "jax.numpy.zeros(5)"
-  tree: cst.Module = cst.parse_module(code)
-  plan = resolver.resolve(tree, "jax")
-  assert len(plan.required_imports) == 2
-  assert plan.required_imports[0].module == "jax"
-  assert plan.required_imports[1].module == "jax.numpy"
-  assert plan.required_imports[1].alias == "jnp"
+  plan_no_alias_fw = resolver.resolve(cst.parse_module("x = 1"), "torch")
+  assert plan_no_alias_fw.required_imports == []

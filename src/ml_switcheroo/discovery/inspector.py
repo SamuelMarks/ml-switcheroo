@@ -11,7 +11,8 @@ import inspect
 import types
 import typing
 
-from ml_switcheroo.enums import InspectionObject as InspectionObject, RuntimeTensorOrValue
+from ml_switcheroo.enums import InspectionObject as InspectionObject
+from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
 def is_inspection_object(obj: RuntimeTensorOrValue) -> typing.TypeGuard[InspectionObject]:

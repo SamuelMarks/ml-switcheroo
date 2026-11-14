@@ -24,11 +24,11 @@ from ml_switcheroo.core.rewriter.passes.structure import StructuralPass
 from ml_switcheroo.core.rewriter.pipeline import RewriterPipeline
 
 __all__ = [
-  "RewriterContext",
-  "RewriterPipeline",
-  "RewriterPass",
-  "StructuralPass",
   "ApiPass",
   "AuxiliaryPass",
+  "RewriterContext",
+  "RewriterPass",
+  "RewriterPipeline",
   "RuntimeAnnotationPass",
+  "StructuralPass",
 ]

@@ -25,13 +25,17 @@ def _auto_register_adapters() -> None:
   Importing the module triggers the @register_framework decorator defined
   within the adapter implementation, populating the global registry.
   """
-  for _, module_name, _ in pkgutil.iter_modules(__path__):
-    if module_name in _EXCLUDED_MODULES:
-      continue
-    try:
-      importlib.import_module(f".{module_name}", package=__name__)
-    except Exception as e:
-      logging.warning(f"⚠️  Failed to load framework module '{module_name}': {e}")
+  saved_handlers = list(logging.root.handlers)
+  try:
+    for _, module_name, _ in pkgutil.iter_modules(__path__):
+      if module_name in _EXCLUDED_MODULES:
+        continue
+      try:
+        importlib.import_module(f".{module_name}", package=__name__)
+      except (ImportError, SyntaxError, OSError, ValueError, TypeError, AttributeError, RuntimeError) as e:
+        logging.warning(f"⚠️  Failed to load framework module '{module_name}': {e}")
+  finally:
+    logging.root.handlers[:] = saved_handlers
 
 
 _auto_register_adapters()

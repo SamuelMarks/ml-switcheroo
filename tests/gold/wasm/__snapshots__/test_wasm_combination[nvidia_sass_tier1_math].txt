@@ -1,0 +1,12 @@
+--- Forward ---
+; RDNA Code Generation Initialized (Arch: gfx1030)
+    v_abs_f32       v0;
+    v_add_f32       v1, v0;
+; BEGIN Reduction (mean)
+    v_mov_b32       v2, v3;
+; END Reduction (mean)
+
+--- Backward ---
+    fabs            R0;
+    fadd            R1, R0;
+// Unmapped Op: Reduction (mean)

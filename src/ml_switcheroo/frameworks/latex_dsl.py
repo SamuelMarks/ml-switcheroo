@@ -4,13 +4,11 @@ Provides metadata and hooks for the Machine Intelligence Definition Language (MI
 LaTeX DSL.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
-
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
 
 from ml_switcheroo.core.latex.parser import LatexParser
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.frameworks.base import (
   FrameworkAdapter,
   ImportConfig,
@@ -25,7 +23,13 @@ from ml_switcheroo.semantics.schema import PluginTraits, StructuralTraits
 
 @register_framework("latex_dsl")
 class LatexDSLAdapter(FrameworkAdapter):
-  """Adapter for generating LaTeX Mathematical Expressions."""
+  """Adapter for generating LaTeX Mathematical Expressions.
+
+  Attributes:
+      display_name: The display name (`str`).
+      inherits_from: The inherits from (`str | None`).
+      ui_priority: The ui priority (`int`).
+  """
 
   display_name: str = "LaTeX DSL (MIDL)"
   inherits_from: str | None = None
@@ -34,7 +38,6 @@ class LatexDSLAdapter(FrameworkAdapter):
 
   def __init__(self) -> None:
     """Initialize the LaTeX DSL adapter."""
-    pass
 
   def create_parser(self, code: str) -> LatexParser:
     """Create a parser instance for the LaTeX DSL.
@@ -294,7 +297,6 @@ class LatexDSLAdapter(FrameworkAdapter):
     Args:
         snapshot: A dictionary representation of the mappings snapshot.
     """
-    pass
 
   def get_doc_url(self, api_name: str) -> str | None:
     """Get reference documentation URL for a given API symbol.

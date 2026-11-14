@@ -5,10 +5,11 @@ into final ReStructuredText (RST) content. It embeds custom HTML/CSS/JS logic to
 create an interactive "Vertical Tabs" layout for displaying framework variants side-by-side.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
 import re
 import textwrap
 import typing
+
+from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
 class OpPageRenderer:
@@ -132,7 +133,7 @@ class OpPageRenderer:
       details.append(f'<div class="op-detail-row"><span class="label">Strategy:</span> <span>{impl_type}</span></div>')
 
       # Link
-      if link:
+      if isinstance(link, str) and link:
         details.append(
           f'<div class="op-detail-row"><a href="{link}" target="_blank" class="op-doc-link">Official Docs ↗</a></div>'
         )

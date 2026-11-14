@@ -29,7 +29,17 @@ MAX_REGISTERS = 255
 
 
 class NvidiaSassSynthesizer(IsaSynthesizer[NvidiaSassNode, NvidiaSassRegister]):
-  """NVIDIA SASS Synthesizer inherited from unified base."""
+  """NVIDIA SASS Synthesizer inherited from unified base.
+
+  Attributes:
+      TARGET_NAME: The target name (`str`).
+      COMMENT_CLS: The comment cls (`type[NvidiaSassComment]`).
+      INSTRUCTION_CLS: The instruction cls (`type[NvidiaSassInstruction]`).
+      LABEL_CLS: The label cls (`type[NvidiaSassLabel]`).
+      IMMEDIATE_CLS: The immediate cls (`type[NvidiaSassImmediate]`).
+      LABEL_COMMENT_PREFIX: The label comment prefix (`str`).
+      EMIT_BEGIN_END_COMMENTS_IN_PY: The emit begin end comments in py (`bool`).
+  """
 
   TARGET_NAME: str = "nvidia_sass"
   COMMENT_CLS: type[NvidiaSassComment] = NvidiaSassComment

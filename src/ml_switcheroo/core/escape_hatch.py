@@ -19,30 +19,22 @@ import libcst as cst
 T = typing.TypeVar("T", bound=cst.CSTNode)
 
 
-def _is_statement(node: cst.CSTNode) -> typing.TypeGuard[cst.BaseStatement]:
-  """Check if a CST node is a statement node suitable for FlattenSentinel.
-
-  Args:
-      node: The CST node to check.
-
-  Returns:
-      True, narrowing ``node`` to ``cst.BaseStatement``.
-  """
-  return node is not None
-
-
 class EscapeHatch:
   """Handle the "Pass-Through" Protocol.
 
   Wraps untranslatable nodes with standardized comment flags and valid Python syntax markers.
+
+  Attributes:
+      START_MARKER: Leading comment marker indicating start of untranslated block.
+      END_MARKER: Trailing comment marker indicating end of untranslated block.
   """
 
-  START_MARKER = "# <SWITCHEROO_FAILED_TO_TRANS>"
-  END_MARKER = "# </SWITCHEROO_FAILED_TO_TRANS>"
+  START_MARKER: str = "# <SWITCHEROO_FAILED_TO_TRANS>"
+  END_MARKER: str = "# </SWITCHEROO_FAILED_TO_TRANS>"
 
   @staticmethod
   def mark_failure(node: T, reason: str) -> T | cst.FlattenSentinel[cst.BaseStatement]:
-    """Attach warning comments to the node and appends an end marker.
+    """Attach warning comments to a statement node and append an end marker.
 
     Transformation:
         original_stmt()
@@ -59,43 +51,28 @@ class EscapeHatch:
         reason: Human-readable explanation of the failure.
 
     Returns:
-        A FlattenSentinel containing the preserved node (with header)
-        and a footer node (Ellipsis) containing the end marker.
-
+        A FlattenSentinel containing the preserved statement (with header)
+        and a footer node (Ellipsis) containing the end marker, or ``node``
+        unchanged if it is not a statement supporting ``leading_lines``.
     """
-    # 1. Create Header Lines (Start Marker + Reason)
+    if not isinstance(node, (cst.SimpleStatementLine, cst.BaseCompoundStatement)):
+      return node
+
     header_lines = [
       cst.EmptyLine(comment=cst.Comment(EscapeHatch.START_MARKER)),
       cst.EmptyLine(comment=cst.Comment(f"# Reason: {reason}")),
     ]
 
-    # 2. Attach Header to the Node
-    # We try to preserve existing leading lines if possible.
     try:
-      import inspect
-
-      raw_leading = (
-        node.leading_lines
-        if isinstance(node, (cst.SimpleStatementLine, cst.BaseCompoundStatement))
-        else inspect.getattr_static(node, "leading_lines")
-      )
-      current_leading = list(raw_leading) if isinstance(raw_leading, (list, tuple)) else []
-      marked_node = node.with_changes(leading_lines=[*header_lines, *current_leading])
+      current_leading = list(node.leading_lines)
+      marked_node: cst.BaseStatement = node.with_changes(leading_lines=[*header_lines, *current_leading])
     except (TypeError, AttributeError):
-      # Fallback: If node type doesn't support leading_lines, return raw node.
-      # This is rare if 'node' is a Statement.
       return node
 
-    # 3. Create Footer Node (End Marker)
-    # We use an Ellipsis (...) statement as a semantic no-op placeholder
-    # to carry the leading_lines containing the END_MARKER.
-    # This works because FlattenSentinel inserts it as the *next* statement.
     footer_node = cst.SimpleStatementLine(
       body=[cst.Expr(value=cst.Ellipsis())],
       leading_lines=[cst.EmptyLine(comment=cst.Comment(EscapeHatch.END_MARKER))],
     )
 
-    # 4. Return both as a flattened sequence
-    assert _is_statement(marked_node)
     stmts: list[cst.BaseStatement] = [marked_node, footer_node]
     return cst.FlattenSentinel(stmts)

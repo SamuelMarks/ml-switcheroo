@@ -1,7 +1,5 @@
 """Test suite for the Runner Shape module."""
 
-from tests.conftest import _test_getattr, _test_setattr
-
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -12,7 +10,7 @@ from ml_switcheroo.testing.runner import EquivalenceRunner
 
 @pytest.fixture
 def runner() -> EquivalenceRunner:
-  """Execute runner helper logic.
+  """Create a configured `EquivalenceRunner` fixture for runner shape tests.
 
   Returns:
       Configured `runner` fixture value (EquivalenceRunner).
@@ -22,144 +20,76 @@ def runner() -> EquivalenceRunner:
   return r
 
 
-def test_verify_passes_correct_shape(runner: EquivalenceRunner) -> None:
+def test_verify_passes_correct_shape(runner: EquivalenceRunner, monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies passes correct shape.
 
   Args:
-      runner: The runner (EquivalenceRunner) for test verify passes correct shape.
+      runner: Input `runner` parameter value (`EquivalenceRunner`).
+      monkeypatch: Pytest monkeypatch fixture.
   """
   inputs = {"x": np.array([1, 2])}
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr({"v": _test_getattr({"v": runner}, "__getitem__")("v").fuzzer}, "__getitem__")(
-          "v"
-        ).build_strategies
-      },
-      "__getitem__",
-    )("v"),
+  monkeypatch.setattr(
+    runner.fuzzer.build_strategies,
     "return_value",
-    _test_getattr({"v": {}}, "__getitem__")("v"),
+    {},
+    raising=False,
   )
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr({"v": _test_getattr({"v": runner}, "__getitem__")("v").fuzzer}, "__getitem__")(
-          "v"
-        ).generate_inputs_oneshot
-      },
-      "__getitem__",
-    )("v"),
-    "return_value",
-    _test_getattr({"v": inputs}, "__getitem__")("v"),
+  monkeypatch.setattr(
+    runner.fuzzer,
+    "generate_inputs_oneshot",
+    MagicMock(return_value=inputs),
+    raising=False,
   )
   import hypothesis.strategies as st
 
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr({"v": _test_getattr({"v": runner}, "__getitem__")("v").fuzzer}, "__getitem__")(
-          "v"
-        ).build_strategies
-      },
-      "__getitem__",
-    )("v"),
+  monkeypatch.setattr(
+    runner.fuzzer.build_strategies,
     "return_value",
-    _test_getattr(
-      {
-        "v": {
-          "x": _test_getattr(
-            {
-              "v": _test_getattr({"v": _test_getattr({"v": st}, "__getitem__")("v").just}, "__getitem__")("v")(
-                _test_getattr(
-                  {
-                    "v": _test_getattr({"v": _test_getattr({"v": np}, "__getitem__")("v").array}, "__getitem__")("v")(
-                      _test_getattr(
-                        {"v": [_test_getattr({"v": 1}, "__getitem__")("v"), _test_getattr({"v": 2}, "__getitem__")("v")]},
-                        "__getitem__",
-                      )("v")
-                    )
-                  },
-                  "__getitem__",
-                )("v")
-              )
-            },
-            "__getitem__",
-          )("v")
-        }
-      },
-      "__getitem__",
-    )("v"),
+    {"x": st.just(np.array([1, 2]))},
+    raising=False,
   )
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr({"v": _test_getattr({"v": runner}, "__getitem__")("v").fuzzer}, "__getitem__")(
-          "v"
-        ).adapt_to_framework
-      },
-      "__getitem__",
-    )("v"),
+  monkeypatch.setattr(
+    runner.fuzzer.adapt_to_framework,
     "side_effect",
-    _test_getattr({"v": lambda d, fw: d}, "__getitem__")("v"),
+    (lambda d, fw: d),
+    raising=False,
   )
   variants = {"mock": {"api": "mock.op"}}
-  with patch.object(runner, "_execute_api", return_value=inputs["x"]):
-    with patch("ml_switcheroo.testing.runner.get_adapter", return_value=None):
-      passed, msg = runner.verify(variants, params=["x"], shape_calc="lambda x: x.shape")
+  with (
+    patch.object(runner, "_execute_api", return_value=inputs["x"]),
+    patch("ml_switcheroo.testing.runner.get_adapter", return_value=None),
+  ):
+    passed, _msg = runner.verify(variants, params=["x"], shape_calc="lambda x: x.shape")
   assert passed is True
 
 
-def test_verify_fails_shape_mismatch(runner: EquivalenceRunner) -> None:
+def test_verify_fails_shape_mismatch(runner: EquivalenceRunner, monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies fails shape mismatch.
 
   Args:
-      runner: The runner (EquivalenceRunner) for test verify fails shape mismatch.
+      runner: Input `runner` parameter value (`EquivalenceRunner`).
+      monkeypatch: Pytest monkeypatch fixture.
   """
   import hypothesis.strategies as st
 
   inputs = {"x": np.zeros((2,))}
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr({"v": _test_getattr({"v": runner}, "__getitem__")("v").fuzzer}, "__getitem__")(
-          "v"
-        ).build_strategies
-      },
-      "__getitem__",
-    )("v"),
+  monkeypatch.setattr(
+    runner.fuzzer.build_strategies,
     "return_value",
-    _test_getattr(
-      {
-        "v": {
-          "x": _test_getattr(
-            {
-              "v": _test_getattr({"v": _test_getattr({"v": st}, "__getitem__")("v").just}, "__getitem__")("v")(
-                _test_getattr({"v": _test_getattr({"v": inputs}, "__getitem__")("v")["x"]}, "__getitem__")("v")
-              )
-            },
-            "__getitem__",
-          )("v")
-        }
-      },
-      "__getitem__",
-    )("v"),
+    {"x": st.just(inputs["x"])},
+    raising=False,
   )
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr({"v": _test_getattr({"v": runner}, "__getitem__")("v").fuzzer}, "__getitem__")(
-          "v"
-        ).adapt_to_framework
-      },
-      "__getitem__",
-    )("v"),
+  monkeypatch.setattr(
+    runner.fuzzer.adapt_to_framework,
     "side_effect",
-    _test_getattr({"v": lambda d, fw: d}, "__getitem__")("v"),
+    (lambda d, fw: d),
+    raising=False,
   )
   variants = {"mock": {"api": "mock.op"}}
-  with patch.object(runner, "_execute_api", return_value=inputs["x"]):
-    with patch("ml_switcheroo.testing.runner.get_adapter", return_value=None):
-      passed, msg = runner.verify(variants, params=["x"], shape_calc="lambda x: (3,)")
+  with (
+    patch.object(runner, "_execute_api", return_value=inputs["x"]),
+    patch("ml_switcheroo.testing.runner.get_adapter", return_value=None),
+  ):
+    passed, msg = runner.verify(variants, params=["x"], shape_calc="lambda x: (3,)")
   assert passed is False
   assert "Shape Mismatch" in msg

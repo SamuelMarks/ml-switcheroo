@@ -176,7 +176,7 @@ def test_initialization_tracker_leave_classdef_no_scope() -> None:
 
 
 def analyze(code: str) -> InitializationTracker:
-  """Helper to run the InitializationTracker on a snippet of code.
+  """Run the InitializationTracker on a snippet of code.
 
   Args:
       code (str): Source code to parse and analyze.

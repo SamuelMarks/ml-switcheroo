@@ -1,19 +1,18 @@
 """Test suite for the Paxml module."""
 
-from praxis import base_layer
 import jax.numpy as jnp
-
+from praxis import base_layer
 from praxis.layers import embedding_softmax
 
 
 class EmbeddingModel(base_layer.BaseLayer):
-  """Test helper class EmbeddingModel."""
+  """Stub `base_layer.BaseLayer` subclass implementing `setup` for PaxML tests."""
 
   num_embeddings = 0
   embedding_dim = 0
 
   def setup(self) -> None:
-    """Helper to setup."""
+    """Execute `create_child` to support setup in PaxML tests."""
     self.create_child(
       "emb", embedding_softmax.Embedding.HParams(vocab_size=self.num_embeddings, embedding_dims=self.embedding_dim)
     )

@@ -1,7 +1,5 @@
 """Test suite for the Fuzzer Callables module."""
 
-from tests.conftest import _test_getattr
-
 import hypothesis.strategies as st
 import numpy as np
 import pytest
@@ -12,7 +10,7 @@ from ml_switcheroo.testing.fuzzer.core import InputFuzzer
 
 @pytest.fixture
 def fuzzer() -> InputFuzzer:
-  """Execute fuzzer helper logic.
+  """Create a configured `InputFuzzer` fixture for fuzzer callables tests.
 
   Returns:
       Configured `fuzzer` fixture value (InputFuzzer).
@@ -26,13 +24,13 @@ def test_generate_simple_callable(fuzzer: InputFuzzer, data: st.DataObject) -> N
   """Generates simple callable.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test generate simple callable.
-      data: The data (st.DataObject) for test generate simple callable.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
+      data: Input `data` parameter value (`st.DataObject`).
   """
   hints: dict[str, str] = {"fn": "Callable"}
   strats = fuzzer.build_strategies(["fn"], hints=hints)
   inputs = data.draw(st.fixed_dictionaries(strats))
-  val = _test_getattr(inputs, "__getitem__")("fn")
+  val = inputs["fn"]
   assert callable(val)
   assert val(5) == 5
   assert val("foo") == "foo"
@@ -44,13 +42,13 @@ def test_generate_complex_callable_hint(fuzzer: InputFuzzer, data: st.DataObject
   """Generates complex callable hint.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test generate complex callable hint.
-      data: The data (st.DataObject) for test generate complex callable hint.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
+      data: Input `data` parameter value (`st.DataObject`).
   """
   hints: dict[str, str] = {"op": "Callable[[int], int]"}
   strats = fuzzer.build_strategies(["op"], hints=hints)
   inputs = data.draw(st.fixed_dictionaries(strats))
-  val = _test_getattr(inputs, "__getitem__")("op")
+  val = inputs["op"]
   assert callable(val)
   assert val(10) == 10
 
@@ -61,45 +59,50 @@ def test_generate_func_shorthand(fuzzer: InputFuzzer, data: st.DataObject) -> No
   """Generates function shorthand.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test generate func shorthand.
-      data: The data (st.DataObject) for test generate func shorthand.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
+      data: Input `data` parameter value (`st.DataObject`).
   """
   hints: dict[str, str] = {"f": "func", "g": "function"}
   strats = fuzzer.build_strategies(["f", "g"], hints=hints)
   inputs = data.draw(st.fixed_dictionaries(strats))
-  assert callable(_test_getattr(inputs, "__getitem__")("f"))
-  assert callable(_test_getattr(inputs, "__getitem__")("g"))
-  assert _test_getattr(inputs, "__getitem__")("f")(1, 2, 3) == 1
+  assert callable(inputs["f"])
+  assert callable(inputs["g"])
+  assert inputs["f"](1, 2, 3) == 1
 
 
 @given(data=st.data())
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
 def test_callable_in_list(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of callable in list.
+  """Verify `given` handles callable in list as expected.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test callable in list.
-      data: The data (st.DataObject) for test callable in list.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
+      data: Input `data` parameter value (`st.DataObject`).
   """
   hints: dict[str, str] = {"ops": "List[Callable]"}
   strats = fuzzer.build_strategies(["ops"], hints=hints)
   inputs = data.draw(st.fixed_dictionaries(strats))
   lst = inputs["ops"]
   assert isinstance(lst, list)
-  if lst:
-    assert callable(lst[0])
+  assert len(lst) >= 1
+  assert len(lst) <= 4
+  assert callable(lst[0])
+  fn0 = lst[0]
+  assert callable(fn0)
+  assert fn0(42) == 42
+  assert fn0("hello") == "hello"
 
 
 def test_fallback_depth_recursion(fuzzer: InputFuzzer) -> None:
-  """Verifies the behavior of fallback depth recursion.
+  """Verify `callable` handles fallback depth recursion as expected.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test fallback depth recursion.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
   """
   from ml_switcheroo.testing.fuzzer.parser import get_fallback_base_value
   from ml_switcheroo.testing.fuzzer.type_parser import parse_type_annotation
 
-  val = _test_getattr(get_fallback_base_value, "__call__")(parse_type_annotation("Callable"), (1, 1))
+  val = get_fallback_base_value(parse_type_annotation("Callable"), (1, 1))
   assert callable(val)
   assert val("test") == "test"
 
@@ -107,18 +110,18 @@ def test_fallback_depth_recursion(fuzzer: InputFuzzer) -> None:
 @given(data=st.data())
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
 def test_vmap_usage_simulation(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of vmap usage simulation.
+  """Verify `given` handles vmap usage simulation as expected.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test vmap usage simulation.
-      data: The data (st.DataObject) for test vmap usage simulation.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
+      data: Input `data` parameter value (`st.DataObject`).
   """
   hints: dict[str, str] = {"func": "Callable", "in_axes": "int"}
   strats = fuzzer.build_strategies(["func", "in_axes"], hints=hints)
   inputs = data.draw(st.fixed_dictionaries(strats))
   fn = inputs["func"]
+  assert callable(fn)
   arr = np.array([1, 2, 3])
-  out = _test_getattr(
-    {"v": _test_getattr({"v": fn}, "__getitem__")("v")(_test_getattr({"v": arr}, "__getitem__")("v"))}, "__getitem__"
-  )("v")
+  out = fn(arr)
+  assert isinstance(out, np.ndarray)
   assert np.array_equal(arr, out)

@@ -4,11 +4,11 @@ import tensorflow as tf
 
 
 def gelu_activation(x: tf.Tensor, approximate: bool = False) -> tf.Tensor:
-  """Helper to gelu activation.
+  """Execute `gelu` to support gelu activation in tensorflow tests.
 
   Args:
       x: Primary input tensor or array operand.
-      approximate: The approximate (bool) for gelu activation.
+      approximate: Input `approximate` parameter value (`bool`).
 
   Returns:
       Resulting `tf.Tensor` from gelu activation.

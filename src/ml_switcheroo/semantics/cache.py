@@ -1,7 +1,7 @@
 """Thread-safe bounded caching utilities for SemanticsManager."""
 
-import typing
 import threading
+import typing
 from collections import OrderedDict
 
 K = typing.TypeVar("K")

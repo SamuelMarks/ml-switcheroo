@@ -1,14 +1,10 @@
 """Test suite for the Casting module."""
 
-from tests.conftest import _test_getattr, _test_setattr
-
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
-from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
 import pytest
+from pydantic import JsonValue
 
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.config import RuntimeConfig
@@ -32,27 +28,25 @@ def rewrite_call(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Execute rewriter helper logic.
+  """Create a configured `PivotRewriter` fixture for casting tests.
 
   Returns:
       Configured `rewriter` fixture value (PivotRewriter).
   """
-  _test_getattr(
-    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
-  )("type_methods", _test_getattr({"v": transform_casting}, "__getitem__")("v"))
-  hooks._PLUGINS_LOADED = True
+  hooks.register_hook("type_methods")(transform_casting)
+  hooks.set_plugins_loaded(True)
   mgr = MagicMock()
-  cast_float_def = {
+  cast_float_def: dict[str, JsonValue] = {
     "variants": {"torch": {"api": "torch.Tensor.float"}, "jax": {"api": "astype", "requires_plugin": "type_methods"}},
     "metadata": {"target_type": "Float32"},
   }
-  cast_long_def = {
+  cast_long_def: dict[str, JsonValue] = {
     "variants": {"torch": {"api": "torch.Tensor.long"}, "jax": {"api": "astype", "requires_plugin": "type_methods"}},
     "metadata": {"target_type": "Int64"},
   }
-  float32_def = {"variants": {"jax": {"api": "jax.numpy.float32"}}}
-  int64_def = {"variants": {"jax": {"api": "jax.numpy.int64"}}}
-  all_defs = {
+  float32_def: dict[str, JsonValue] = {"variants": {"jax": {"api": "jax.numpy.float32"}}}
+  int64_def: dict[str, JsonValue] = {"variants": {"jax": {"api": "jax.numpy.int64"}}}
+  all_defs: dict[str, dict[str, JsonValue]] = {
     "CastFloat": cast_float_def,
     "CastLong": cast_long_def,
     "Float32": float32_def,
@@ -69,50 +63,24 @@ def rewriter() -> PivotRewriter:
         Resulting `tuple[str, dict[str, JsonValue]] | None` from get def.
     """
     if "float" in name:
-      _ret_v_1: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
-        {
-          "v": (
-            _test_getattr({"v": "CastFloat"}, "__getitem__")("v"),
-            _test_getattr({"v": cast_float_def}, "__getitem__")("v"),
-          )
-        },
-        "__getitem__",
-      )("v")
-      return _ret_v_1
+      return ("CastFloat", cast_float_def)
     if "long" in name:
-      _ret_v_2: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
-        {
-          "v": (
-            _test_getattr({"v": "CastLong"}, "__getitem__")("v"),
-            _test_getattr({"v": cast_long_def}, "__getitem__")("v"),
-          )
-        },
-        "__getitem__",
-      )("v")
-      return _ret_v_2
+      return ("CastLong", cast_long_def)
     return None
 
   def get_def_by_id(op_id: str) -> dict[str, JsonValue] | None:
     """Gets def by id.
 
     Args:
-        op_id: The op id (str) for get def by id.
+        op_id: Input `op_id` parameter value (`str`).
 
     Returns:
         Resulting `dict[str, JsonValue] | None` from get def by id.
     """
-    _ret_v_3: dict[str, JsonValue] | None = _test_getattr(
-      {
-        "v": _test_getattr({"v": _test_getattr({"v": all_defs}, "__getitem__")("v").get}, "__getitem__")("v")(
-          _test_getattr({"v": op_id}, "__getitem__")("v")
-        )
-      },
-      "__getitem__",
-    )("v")
-    return _ret_v_3
+    return all_defs.get(op_id)
 
   def resolve(aid: str, fw: str) -> dict[str, JsonValue] | None:
-    """Resolves .
+    """Execute `all_defs.get` to support resolve in casting tests.
 
     Args:
         aid: Abstract operation identifier string.
@@ -122,19 +90,11 @@ def rewriter() -> PivotRewriter:
         Resulting `dict[str, JsonValue] | None` from resolve.
     """
     defn = all_defs.get(aid)
-    if _test_getattr(
-      {
-        "v": defn
-        and _test_getattr({"v": fw}, "__getitem__")("v")
-        in _test_getattr({"v": _test_getattr({"v": defn}, "__getitem__")("v")["variants"]}, "__getitem__")("v")
-      },
-      "__getitem__",
-    )("v"):
-      res = _test_getattr(
-        {"v": _test_getattr({"v": _test_getattr({"v": defn}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[fw]},
-        "__getitem__",
-      )("v")
-      return res if isinstance(res, dict) else {}
+    if defn is not None:
+      variants = defn.get("variants")
+      if isinstance(variants, dict) and fw in variants:
+        res = variants[fw]
+        return res if isinstance(res, dict) else {}
     return None
 
   mgr.get_definition.side_effect = get_def
@@ -148,7 +108,7 @@ def rewriter() -> PivotRewriter:
 
 
 def test_float_cast(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of float cast.
+  """Verify `rewrite_call` emits `.astype` for float cast.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -161,7 +121,7 @@ def test_float_cast(rewriter: PivotRewriter) -> None:
 
 
 def test_long_cast(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of long cast.
+  """Verify `rewrite_call` emits `.astype` for long cast.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -173,33 +133,19 @@ def test_long_cast(rewriter: PivotRewriter) -> None:
   assert "jax.numpy.int64" in res
 
 
-def test_metadata_missing_fallback(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of metadata missing fallback.
+def test_metadata_missing_fallback(rewriter: PivotRewriter, monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `ensure_type` handles metadata missing fallback as expected.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
   cast_bad_def = {"variants": {"jax": {"api": "astype", "requires_plugin": "type_methods"}}}
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
-          "v"
-        ).get_definition_by_id
-      },
-      "__getitem__",
-    )("v"),
+  monkeypatch.setattr(
+    rewriter.semantics.get_definition_by_id,
     "side_effect",
-    _test_getattr(
-      {
-        "v": lambda oid: (
-          cast_bad_def
-          if _test_getattr({"v": oid}, "__getitem__")("v") == _test_getattr({"v": "CastBad"}, "__getitem__")("v")
-          else None
-        )
-      },
-      "__getitem__",
-    )("v"),
+    (lambda oid: cast_bad_def if oid == "CastBad" else None),
+    raising=False,
   )
   rewriter.ctx.current_op_id = "CastBad"
   call_node: cst.Call = cst.ensure_type(cst.parse_expression("x.bad()"), cst.Call)
@@ -207,49 +153,29 @@ def test_metadata_missing_fallback(rewriter: PivotRewriter) -> None:
   assert res_node == call_node
 
 
-def test_type_resolution_failure(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of type resolution successfully handling failure.
+def test_type_resolution_failure(rewriter: PivotRewriter, monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `ensure_type` handles type resolution failure as expected.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
   cast_huge = {
     "metadata": {"target_type": "Int128"},
     "variants": {"jax": {"requires_plugin": "type_methods"}},
   }
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
-          "v"
-        ).get_definition_by_id
-      },
-      "__getitem__",
-    )("v"),
+  monkeypatch.setattr(
+    rewriter.semantics.get_definition_by_id,
     "side_effect",
-    _test_getattr(
-      {
-        "v": lambda oid: (
-          cast_huge
-          if _test_getattr({"v": oid}, "__getitem__")("v") == _test_getattr({"v": "CastHuge"}, "__getitem__")("v")
-          else None
-        )
-      },
-      "__getitem__",
-    )("v"),
+    (lambda oid: cast_huge if oid == "CastHuge" else None),
+    raising=False,
   )
   rewriter.ctx.current_op_id = "CastHuge"
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
-          "v"
-        ).resolve_variant
-      },
-      "__getitem__",
-    )("v"),
+  monkeypatch.setattr(
+    rewriter.semantics.resolve_variant,
     "side_effect",
-    _test_getattr({"v": lambda aid, fw: None}, "__getitem__")("v"),
+    (lambda aid, fw: None),
+    raising=False,
   )
   call_node: cst.Call = cst.ensure_type(cst.parse_expression("x.huge()"), cst.Call)
   res_node: cst.CSTNode = transform_casting(call_node, rewriter.ctx)
@@ -257,7 +183,7 @@ def test_type_resolution_failure(rewriter: PivotRewriter) -> None:
 
 
 def test_missing_semantics() -> None:
-  """Verifies the behavior of missing semantics."""
+  """Verify `ensure_type` handles missing semantics as expected."""
   ctx = MagicMock()
   ctx.semantics = None
   node: cst.Call = cst.ensure_type(cst.parse_expression("x.float()"), cst.Call)
@@ -265,56 +191,38 @@ def test_missing_semantics() -> None:
   assert res is node
 
 
-def test_missing_conf(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of missing conf.
+def test_missing_conf(rewriter: PivotRewriter, monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `ensure_type` handles missing conf as expected.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr(
-          {
-            "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")(
-              "v"
-            ).semantics
-          },
-          "__getitem__",
-        )("v").get_framework_config
-      },
-      "__getitem__",
-    )("v"),
+  assert rewriter.ctx.semantics is not None
+  monkeypatch.setattr(
+    rewriter.ctx.semantics.get_framework_config,
     "return_value",
-    _test_getattr({"v": None}, "__getitem__")("v"),
+    None,
+    raising=False,
   )
   node: cst.Call = cst.ensure_type(cst.parse_expression("x.float()"), cst.Call)
   res: cst.CSTNode = transform_casting(node, rewriter.ctx)
   assert res is node
 
 
-def test_missing_traits(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of missing traits.
+def test_missing_traits(rewriter: PivotRewriter, monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `ensure_type` handles missing traits as expected.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr(
-          {
-            "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")(
-              "v"
-            ).semantics
-          },
-          "__getitem__",
-        )("v").get_framework_config
-      },
-      "__getitem__",
-    )("v"),
+  assert rewriter.ctx.semantics is not None
+  monkeypatch.setattr(
+    rewriter.ctx.semantics.get_framework_config,
     "return_value",
-    _test_getattr({"v": {}}, "__getitem__")("v"),
+    {},
+    raising=False,
   )
   node: cst.Call = cst.ensure_type(cst.parse_expression("x.float()"), cst.Call)
   res: cst.CSTNode = transform_casting(node, rewriter.ctx)
@@ -322,49 +230,30 @@ def test_missing_traits(rewriter: PivotRewriter) -> None:
 
 
 class MockTraits:
-  """Test helper class MockTraits."""
+  """Sentinel `MockTraits` fixture class used in casting tests."""
 
   def __init__(self, val: bool) -> None:
     """Initializes the MockTraits instance.
 
     Args:
-        val: The val (bool) for init.
+        val: Input `val` parameter value (`bool`).
     """
     self.has_numpy_compatible_arrays: bool = val
 
 
-def test_object_traits(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of object traits.
+def test_object_traits(rewriter: PivotRewriter, monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `ensure_type` emits `astype` for object traits.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr(
-          {
-            "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")(
-              "v"
-            ).semantics
-          },
-          "__getitem__",
-        )("v").get_framework_config
-      },
-      "__getitem__",
-    )("v"),
+  assert rewriter.ctx.semantics is not None
+  monkeypatch.setattr(
+    rewriter.ctx.semantics.get_framework_config,
     "return_value",
-    _test_getattr(
-      {
-        "v": {
-          "plugin_traits": _test_getattr(
-            {"v": _test_getattr({"v": MockTraits}, "__getitem__")("v")(_test_getattr({"v": True}, "__getitem__")("v"))},
-            "__getitem__",
-          )("v")
-        }
-      },
-      "__getitem__",
-    )("v"),
+    {"plugin_traits": MockTraits(True)},
+    raising=False,
   )
   rewriter.ctx.current_op_id = "CastFloat"
   node: cst.Call = cst.ensure_type(cst.parse_expression("x.float()"), cst.Call)
@@ -372,38 +261,19 @@ def test_object_traits(rewriter: PivotRewriter) -> None:
   assert "astype" in cst.Module(body=[cst.SimpleStatementLine([cst.Expr(cst.ensure_type(res, cst.Call))])]).code
 
 
-def test_object_traits_false(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of object traits false.
+def test_object_traits_false(rewriter: PivotRewriter, monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `ensure_type` handles object traits false as expected.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr(
-          {
-            "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")(
-              "v"
-            ).semantics
-          },
-          "__getitem__",
-        )("v").get_framework_config
-      },
-      "__getitem__",
-    )("v"),
+  assert rewriter.ctx.semantics is not None
+  monkeypatch.setattr(
+    rewriter.ctx.semantics.get_framework_config,
     "return_value",
-    _test_getattr(
-      {
-        "v": {
-          "plugin_traits": _test_getattr(
-            {"v": _test_getattr({"v": MockTraits}, "__getitem__")("v")(_test_getattr({"v": False}, "__getitem__")("v"))},
-            "__getitem__",
-          )("v")
-        }
-      },
-      "__getitem__",
-    )("v"),
+    {"plugin_traits": MockTraits(False)},
+    raising=False,
   )
   rewriter.ctx.current_op_id = "CastFloat"
   node: cst.Call = cst.ensure_type(cst.parse_expression("x.float()"), cst.Call)
@@ -411,43 +281,23 @@ def test_object_traits_false(rewriter: PivotRewriter) -> None:
   assert res is node
 
 
-def test_object_traits_missing_attr(rewriter: PivotRewriter) -> None:
+def test_object_traits_missing_attr(rewriter: PivotRewriter, monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies behavior when traits object lacks the attribute.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
 
   class EmptyTraits:
     """Empty traits."""
 
-    pass
-
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr(
-          {
-            "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")(
-              "v"
-            ).semantics
-          },
-          "__getitem__",
-        )("v").get_framework_config
-      },
-      "__getitem__",
-    )("v"),
+  assert rewriter.ctx.semantics is not None
+  monkeypatch.setattr(
+    rewriter.ctx.semantics.get_framework_config,
     "return_value",
-    _test_getattr(
-      {
-        "v": {
-          "plugin_traits": _test_getattr({"v": _test_getattr({"v": EmptyTraits}, "__getitem__")("v")()}, "__getitem__")(
-            "v"
-          )
-        }
-      },
-      "__getitem__",
-    )("v"),
+    {"plugin_traits": EmptyTraits()},
+    raising=False,
   )
   rewriter.ctx.current_op_id = "CastFloat"
   node: cst.Call = cst.ensure_type(cst.parse_expression("x.float()"), cst.Call)
@@ -456,7 +306,7 @@ def test_object_traits_missing_attr(rewriter: PivotRewriter) -> None:
 
 
 def test_non_attribute_call(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of non attribute call.
+  """Verify `ensure_type` handles non attribute call as expected.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -468,7 +318,7 @@ def test_non_attribute_call(rewriter: PivotRewriter) -> None:
 
 
 def test_missing_op_id(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of missing op id.
+  """Verify `ensure_type` handles missing operation id as expected.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -479,77 +329,58 @@ def test_missing_op_id(rewriter: PivotRewriter) -> None:
   assert res is node
 
 
-def test_missing_defn(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of missing defn.
+def test_missing_defn(rewriter: PivotRewriter, monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `ensure_type` handles missing defn as expected.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
   rewriter.ctx.current_op_id = "UnknownOp"
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr(
-          {
-            "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")(
-              "v"
-            ).semantics
-          },
-          "__getitem__",
-        )("v").get_definition_by_id
-      },
-      "__getitem__",
-    )("v"),
+  assert rewriter.ctx.semantics is not None
+  monkeypatch.setattr(
+    rewriter.ctx.semantics.get_definition_by_id,
     "return_value",
-    _test_getattr({"v": None}, "__getitem__")("v"),
+    None,
+    raising=False,
   )
   node: cst.Call = cst.ensure_type(cst.parse_expression("x.float()"), cst.Call)
   res: cst.CSTNode = transform_casting(node, rewriter.ctx)
   assert res is node
 
 
-def test_fallback_infer_type(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of fallback infer type.
+def test_fallback_infer_type(rewriter: PivotRewriter, monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `ensure_type` emits `astype` for fallback infer type.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
-  cast_half_def: dict[str, RuntimeTensorOrValue] = {"variants": {}}
+  cast_half_def: dict[str, JsonValue] = {"variants": {}}
 
   def get_def_by_id(op_id: str) -> dict[str, JsonValue] | None:
     """Gets def by id.
 
     Args:
-        op_id: The op id (str) for get def by id.
+        op_id: Input `op_id` parameter value (`str`).
 
     Returns:
         Resulting `dict[str, JsonValue] | None` from get def by id.
     """
     if op_id == "CastHalf":
-      _ret_v_4: dict[str, JsonValue] | None = _test_getattr({"v": cast_half_def}, "__getitem__")("v")
-      return _ret_v_4
+      return cast_half_def
     return None
 
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr(
-          {
-            "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")(
-              "v"
-            ).semantics
-          },
-          "__getitem__",
-        )("v").get_definition_by_id
-      },
-      "__getitem__",
-    )("v"),
+  assert rewriter.ctx.semantics is not None
+  monkeypatch.setattr(
+    rewriter.ctx.semantics.get_definition_by_id,
     "side_effect",
-    _test_getattr({"v": get_def_by_id}, "__getitem__")("v"),
+    get_def_by_id,
+    raising=False,
   )
 
   def resolve(aid: str, fw: str) -> dict[str, JsonValue] | None:
-    """Resolves .
+    """Execute `resolve` helper in casting tests.
 
     Args:
         aid: Abstract operation identifier string.
@@ -562,22 +393,11 @@ def test_fallback_infer_type(rewriter: PivotRewriter) -> None:
       return {"api": "jax.numpy.float16"}
     return None
 
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr(
-          {
-            "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")(
-              "v"
-            ).semantics
-          },
-          "__getitem__",
-        )("v").resolve_variant
-      },
-      "__getitem__",
-    )("v"),
+  monkeypatch.setattr(
+    rewriter.ctx.semantics.resolve_variant,
     "side_effect",
-    _test_getattr({"v": resolve}, "__getitem__")("v"),
+    resolve,
+    raising=False,
   )
   rewriter.ctx.current_op_id = "CastHalf"
   node: cst.Call = cst.ensure_type(cst.parse_expression("x.half()"), cst.Call)
@@ -587,44 +407,34 @@ def test_fallback_infer_type(rewriter: PivotRewriter) -> None:
   assert "jax.numpy.float16" in res_code
 
 
-def test_fallback_infer_type_unmapped(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of fallback infer type unmapped.
+def test_fallback_infer_type_unmapped(rewriter: PivotRewriter, monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `ensure_type` handles fallback infer type unmapped as expected.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
-  cast_unknown_def: dict[str, RuntimeTensorOrValue] = {"variants": {}}
+  cast_unknown_def: dict[str, JsonValue] = {"variants": {}}
 
   def get_def_by_id(op_id: str) -> dict[str, JsonValue] | None:
     """Gets def by id.
 
     Args:
-        op_id: The op id (str) for get def by id.
+        op_id: Input `op_id` parameter value (`str`).
 
     Returns:
         Resulting `dict[str, JsonValue] | None` from get def by id.
     """
     if op_id == "CastUnknown":
-      _ret_v_5: dict[str, JsonValue] | None = _test_getattr({"v": cast_unknown_def}, "__getitem__")("v")
-      return _ret_v_5
+      return cast_unknown_def
     return None
 
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr(
-          {
-            "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")(
-              "v"
-            ).semantics
-          },
-          "__getitem__",
-        )("v").get_definition_by_id
-      },
-      "__getitem__",
-    )("v"),
+  assert rewriter.ctx.semantics is not None
+  monkeypatch.setattr(
+    rewriter.ctx.semantics.get_definition_by_id,
     "side_effect",
-    _test_getattr({"v": get_def_by_id}, "__getitem__")("v"),
+    get_def_by_id,
+    raising=False,
   )
   rewriter.ctx.current_op_id = "CastUnknown"
   node: cst.Call = cst.ensure_type(cst.parse_expression("x.unknown()"), cst.Call)
@@ -633,7 +443,7 @@ def test_fallback_infer_type_unmapped(rewriter: PivotRewriter) -> None:
 
 
 def test_casting_missing_traits_in_conf() -> None:
-  """Verifies the behavior of casting missing traits in conf."""
+  """Verify `HookContext` handles casting missing traits in conf as expected."""
   semantics = MagicMock()
   ctx = HookContext(semantics=semantics, config=MagicMock(effective_target="jax"))
   semantics.get_framework_config.return_value = {"plugin_traits": None}
@@ -641,7 +451,7 @@ def test_casting_missing_traits_in_conf() -> None:
 
 
 def test_casting_op_id_not_cast() -> None:
-  """Verifies the behavior of casting op id not cast."""
+  """Verify `Call` handles casting operation id not cast as expected."""
   node = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("float")))
   semantics = MagicMock()
   ctx = HookContext(semantics=semantics, config=MagicMock(effective_target="jax"))

@@ -10,16 +10,18 @@ import pydantic
 
 from ml_switcheroo.core.compiler.isa.cst import (
   IsaComment,
+  IsaDirective,
   IsaImmediate,
   IsaInstruction,
   IsaLabel,
   IsaMemory,
+  IsaModule,
   IsaNode,
   IsaOperand,
   IsaRegister,
   TriviaInput,
 )
-from ml_switcheroo.core.cst.base import CSTNode, CstFieldValue
+from ml_switcheroo.core.cst.base import CstFieldValue, CSTNode
 
 
 class RdnaNode(IsaNode):
@@ -380,13 +382,13 @@ class RdnaInstruction(IsaInstruction, RdnaNode):
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
 
-  def __post_init__(self) -> None:
+  def _post_init(self) -> None:
     """Validate instruction post-initialization.
 
     Raises:
         ValueError: If the opcode contains spaces.
     """
-    super().__post_init__()
+    super()._post_init()
     if " " in self.opcode:
       raise ValueError("Invalid RDNA opcode")
 
@@ -442,16 +444,13 @@ class RdnaLabel(IsaLabel, RdnaNode):
     )
 
 
-class RdnaDirective(RdnaNode):
+class RdnaDirective(IsaDirective, RdnaNode):
   """Represent an assembler directive.
 
   Attributes:
       name (str): The directive name.
       params (List[str]): List of string parameters.
   """
-
-  name: str = ""
-  params: list[str] = pydantic.Field(default_factory=list)
 
   def __init__(
     self,
@@ -470,24 +469,10 @@ class RdnaDirective(RdnaNode):
     """
     super().__init__(
       name=name,
-      params=params if params is not None else [],
-      leading_trivia=leading_trivia if leading_trivia is not None else [],
-      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+      params=params,
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
     )
-
-  def to_text(self) -> str:
-    """Render the directive.
-
-    Returns:
-        str: The rendered text representation of the directive.
-    """
-    res = "".join(t.text for t in self.leading_trivia)
-    out = f".{self.name}"
-    if self.params:
-      out += " " + ", ".join(self.params)
-    res += out
-    res += "".join(t.text for t in self.trailing_trivia)
-    return res
 
 
 class RdnaComment(IsaComment, RdnaNode):
@@ -495,6 +480,7 @@ class RdnaComment(IsaComment, RdnaNode):
 
   Attributes:
       text (str): The comment content.
+      prefix (str): Comment token prefix (`";"`).
   """
 
   text: str = ""
@@ -523,18 +509,16 @@ class RdnaComment(IsaComment, RdnaNode):
     )
 
 
-class RdnaModule(RdnaNode):
+class RdnaModule(IsaModule[RdnaNode], RdnaNode):
   """Represent a complete RDNA code module.
 
   Attributes:
       statements (List[RdnaNode]): List of statements.
   """
 
-  statements: list[RdnaNode] = pydantic.Field(default_factory=list)
-
   def __init__(
     self,
-    statements: typing.Sequence[RdnaNode | IsaNode] | None = None,
+    statements: typing.Sequence[RdnaNode] | None = None,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
   ) -> None:
@@ -546,19 +530,7 @@ class RdnaModule(RdnaNode):
         trailing_trivia: Optional trailing trivia.
     """
     super().__init__(
-      statements=list(statements) if statements is not None else [],
-      leading_trivia=leading_trivia if leading_trivia is not None else [],
-      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+      statements=statements,
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
     )
-
-  def to_text(self) -> str:
-    """Render the module.
-
-    Returns:
-        str: The rendered text representation of the entire module.
-    """
-    res = "".join(t.text for t in self.leading_trivia)
-    for stmt in self.statements:
-      res += stmt.to_text()
-    res += "".join(t.text for t in self.trailing_trivia)
-    return res

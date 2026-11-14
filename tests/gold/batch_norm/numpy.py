@@ -5,14 +5,14 @@ import numpy.typing
 
 
 class BNModel:
-  """Test helper class BNModel."""
+  """Sentinel `BNModel` fixture class used in numpy tests."""
 
   def __init__(self, num_features: int, momentum: float = 0.1):
     """Initializes the BNModel instance.
 
     Args:
-        num_features: The num features (int) for   init  .
-        momentum: The momentum (float) for   init  .
+        num_features: Input `num_features` parameter value (`int`).
+        momentum: Input `momentum` parameter value (`float`).
     """
     self.gamma = np.ones(num_features)
     self.beta = np.zeros(num_features)
@@ -25,7 +25,7 @@ class BNModel:
 
     Args:
         x: Primary input tensor or array operand.
-        training: The training (bool) for   call  .
+        training: Input `training` parameter value (`bool`).
 
     Returns:
         Output tensor or value computed by the forward pass.

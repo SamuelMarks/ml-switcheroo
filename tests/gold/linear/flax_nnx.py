@@ -5,7 +5,7 @@ from flax import nnx
 
 
 class Model(nnx.Module):
-  """Test helper class Model."""
+  """Minimal `nnx.Module` test double used in flax NNX tests."""
 
   def __init__(self, in_features: int, out_features: int, rngs: nnx.Rngs):
     """Initializes the Model instance.

@@ -1,83 +1,70 @@
-"""Plugin for Keras Sequential Container Translation.
+"""Plugin for Sequential Container Argument Packing.
 
-This plugin bridges the difference between PyTorch's `nn.Sequential(*layers)` (variadic args)
-and Keras's `keras.Sequential([layers])` (list input).
-
-It performs two key transformations:
-
-1.  **API Renaming**: Swaps the function name to `keras.Sequential` (or configured API).
-2.  **Argument Packing**: Collects all positional arguments (individual layers) into a
-    single list argument to match the Keras constructor signature.
+Bridges variadic sequential layer constructors (e.g., ``Sequential(l1, l2)``)
+and sequence-taking sequential constructors (e.g., ``Sequential([l1, l2])``)
+strictly using ``HookContext.current_variant`` without hardcoded framework APIs.
 """
 
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
-from ml_switcheroo.plugins.utils import create_dotted_name
+from ml_switcheroo.plugins.utils import create_dotted_name, resolve_variant_api
+
+_SEQUENCE_KEYWORDS = frozenset({"layers", "modules", "fns"})
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """Support function to create a CST node representing a dotted name (e.g., 'keras.Sequential').
+  """Create a CST node representing a dotted API path.
 
   Args:
-      name_str: The dot-separated string representation.
+      name_str: Dot-separated API path string.
 
   Returns:
-      A LibCST node (Name or nested Attribute).
-
+      LibCST ``Name`` or nested ``Attribute`` node.
   """
   return create_dotted_name(name_str)
 
 
 @register_hook("keras_sequential_pack")
 def transform_keras_sequential(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """Plugin Transform Transforms Sequential container initialization.
+  """Transform Sequential container initialization via ``HookContext.current_variant``.
 
-  Transformation:
-      Input: `Sequential(layer1, layer2, ...)`
-      Output: `keras.Sequential([layer1, layer2, ...])`
-
-  This hook is triggered for operations mapped with `requires_plugin="keras_sequential_pack"`.
-  It uses `ctx.lookup_api("Sequential")` to determine the target class name, defaulting
-  to `keras.Sequential` if lookup fails.
+  Resolves the target Sequential API from ``ctx.current_variant`` or semantic lookup;
+  if no mapping exists, returns ``node`` unchanged instead of falling back to a
+  hardcoded framework path. Supports variadic positional layers, pre-packed list/tuple
+  containers, and keyword layer lists (``layers=[...]``, ``modules=[...]``, ``fns=[...]``).
 
   Args:
-      node: The original function call node.
-      ctx: The plugin execution context.
+      node: Original Sequential constructor call node.
+      ctx: Plugin execution context.
 
   Returns:
-      The transformed function call.
-
+      Transformed ``cst.Call`` node, or ``node`` unchanged if unmapped.
   """
-  # 1. Rename Function (API Swap)
-  # We resolve the name "Sequential" to the target API using the context if possible.
-  op_api = ctx.lookup_api("Sequential")
-
-  # Safety Check: If lookup returns non-string (e.g. Mock in bad test setup) or None
-  if not isinstance(op_api, str):
-    op_api = "keras.Sequential"
+  op_api = resolve_variant_api(ctx, "Sequential")
+  if not op_api:
+    return node
 
   new_func = _create_dotted_name(op_api)
-
-  # If args are already empty or it looks like a list is passed (e.g. Sequential([...])),
-  # just rename and return to avoid double-packing.
   if not node.args:
     return node.with_changes(func=new_func)
 
-  first_val = node.args[0].value
-  if isinstance(first_val, (cst.List, cst.Tuple)):
+  first_arg = node.args[0]
+  if first_arg.keyword is None and isinstance(first_arg.value, (cst.List, cst.Tuple)):
     return node.with_changes(func=new_func)
 
-  # 2. Pack Arguments
-  elements = []
   for arg in node.args:
-    # Ignore keyword args if any (Keras Sequential doesn't typically use kwargs for layers)
-    if arg.keyword:
-      continue
-    val = arg.value
-    elements.append(cst.Element(value=val))
+    if arg.keyword is not None and arg.keyword.value in _SEQUENCE_KEYWORDS:
+      clean_seq = arg.with_changes(
+        keyword=None,
+        equal=cst.MaybeSentinel.DEFAULT,
+        comma=cst.MaybeSentinel.DEFAULT,
+      )
+      return node.with_changes(func=new_func, args=[clean_seq])
+
+  elements = [cst.Element(value=arg.value) for arg in node.args if arg.keyword is None]
+  if not elements:
+    return node.with_changes(func=new_func, args=[])
 
   list_node = cst.List(elements=elements)
-  new_args = [cst.Arg(value=list_node)]
-
-  return node.with_changes(func=new_func, args=new_args)
+  return node.with_changes(func=new_func, args=[cst.Arg(value=list_node)])

@@ -1,236 +1,188 @@
-"""Test suite for main."""
+"""End-to-end CLI entrypoint tests invoking `main()` against real `tmp_path` files (`ml_switcheroo.cli.__main__`)."""
 
 import argparse
+import runpy
+import sys
+import types
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
+import yaml
 
+import ml_switcheroo.cli.handlers.define as define_mod
 from ml_switcheroo.cli.__main__ import main
+from ml_switcheroo.cli.commands import handle_gen_weight_script
+from ml_switcheroo.semantics.manager import SemanticsManager
+
+_NL = chr(10)
 
 
-@patch("ml_switcheroo.cli.__main__.commands.handle_convert")
-def test_main_convert(mock_handle_convert: MagicMock) -> None:
-  """Verify main convert behavior.
+def test_main_help_version_missing_and_unknown_args() -> None:
+  """Verify `--version`, `--help`, missing subcommands, and unknown subcommand fallbacks."""
+  with patch("sys.argv", ["ml-switcheroo"]), pytest.raises(SystemExit):
+    main()
 
-  Args:
-      mock_handle_convert: Mock object for handle convert.
-  """
-  mock_handle_convert.return_value = 0
-  argv: list[str] = ["convert", "input.py", "--target", "jax", "--out", "out.py", "--config", "a=1"]
-  res: int = main(argv)
-  assert res == 0
-  mock_handle_convert.assert_called_once()
-  # verify args
-  call_args = mock_handle_convert.call_args[0]
-  assert call_args[0] == Path("input.py")
-  assert call_args[1] == Path("out.py")
-  assert call_args[3] == "jax"
-  assert call_args[7] == {"a": 1}  # settings parsed via parse_cli_key_values converts '1' to int 1
+  with pytest.raises(SystemExit) as exc_ver:
+    main(["--version"])
+  assert exc_ver.value.code == 0
 
+  with pytest.raises(SystemExit) as exc_help:
+    main(["--help"])
+  assert exc_help.value.code == 0
 
-@patch("ml_switcheroo.cli.__main__.commands.handle_define")
-def test_main_define(mock_handle_define: MagicMock) -> None:
-  """Verify main define behavior.
+  with pytest.raises(SystemExit):
+    main(["unknown_command"])
 
-  Args:
-      mock_handle_define: Mock object for handle define.
-  """
-  mock_handle_define.return_value = 0
-  argv: list[str] = ["define", "op.yaml"]
-  res: int = main(argv)
-  assert res == 0
-  mock_handle_define.assert_called_once_with(Path("op.yaml"))
+  with patch("argparse.ArgumentParser.parse_args", return_value=argparse.Namespace(command="unknown")):
+    assert main(["unknown"]) == 0
 
 
-@patch("ml_switcheroo.cli.__main__.commands.handle_gen_weight_script")
-def test_main_gen_weight_script(mock_handle: MagicMock) -> None:
-  """Verify main gen weight script behavior.
+def test_main_real_file_commands(
+  tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+  """Invoke real CLI subcommands against `tmp_path` files and mini-configurations.
 
   Args:
-      mock_handle: Mock object for handle.
+      tmp_path: Pytest temporary directory fixture.
+      monkeypatch: Pytest monkeypatch fixture.
+      capsys: Pytest stdout/stderr capture fixture.
   """
-  mock_handle.return_value = 0
-  argv: list[str] = ["gen-weight-script", "model.py", "--out", "script.py", "--source", "torch", "--target", "jax"]
-  res: int = main(argv)
-  assert res == 0
-  mock_handle.assert_called_once_with(Path("model.py"), Path("script.py"), "torch", "jax")
+  monkeypatch.chdir(tmp_path)
 
+  # 1. `convert`: real Torch -> JAX transpilation to an output file on disk
+  src_py = tmp_path / "input.py"
+  src_py.write_text(f"import torch{_NL}y = torch.abs(x){_NL}", encoding="utf-8")
+  out_py = tmp_path / "out.py"
+  assert (
+    main(["convert", str(src_py), "--source", "torch", "--target", "jax", "--out", str(out_py), "--config", "a=1"]) == 0
+  )
+  assert "jnp.abs(x)" in out_py.read_text(encoding="utf-8")
 
-@patch("ml_switcheroo.cli.__main__.commands.handle_matrix")
-def test_main_matrix(mock_handle: MagicMock) -> None:
-  """Verify main matrix behavior.
+  # 2. `define`: real ODL YAML validation and copy into `tmp_path / "sem"`
+  sem_dir = tmp_path / "sem"
+  monkeypatch.setattr(define_mod, "resolve_semantics_dir", lambda: sem_dir)
+  op_yaml = tmp_path / "op.yaml"
+  op_yaml.write_text(yaml.dump({"operation": "CliTestOp", "description": "Op.", "variants": {}}), encoding="utf-8")
+  assert main(["define", str(op_yaml)]) == 0
+  assert (sem_dir / "odl" / "CliTestOp.yaml").exists()
 
-  Args:
-      mock_handle: Mock object for handle.
-  """
-  mock_handle.return_value = 0
-  res: int = main(["matrix"])
-  assert res == 0
-  mock_handle.assert_called_once()
+  # 3. `gen-weight-script`: real Torch -> JAX weight migration script generation & failure case
+  model_py = tmp_path / "model.py"
+  model_py.write_text(
+    _NL.join(
+      [
+        "import torch.nn as nn",
+        "class Net(nn.Module):",
+        "    def __init__(self):",
+        "        super().__init__()",
+        "        self.conv = nn.Conv2d(3, 8, 3)",
+      ]
+    ),
+    encoding="utf-8",
+  )
+  weight_out = tmp_path / "migrate_weights.py"
+  assert main(["gen-weight-script", str(model_py), "--out", str(weight_out), "--source", "torch", "--target", "jax"]) == 0
+  assert "MAPPING_RULES" in weight_out.read_text(encoding="utf-8")
+  assert handle_gen_weight_script(tmp_path / "missing_model.py", tmp_path / "unused.py") == 1
 
+  # 4. `schema`, `completion`, `harvest`
+  assert main(["schema"]) == 0
+  assert '"OperationDef"' in capsys.readouterr().out or '"operation"' in capsys.readouterr().out
+  assert main(["completion", "bash"]) == 0
+  _ = capsys.readouterr()
+  assert main(["harvest", str(tmp_path)]) == 0
+  assert "Harvest complete." in capsys.readouterr().out
 
-@patch("ml_switcheroo.cli.__main__.handle_schema")
-def test_main_schema(mock_handle: MagicMock) -> None:
-  """Verify main schema behavior.
+  # 5. `suggest` against an in-memory module in `sys.modules`
+  mini_mod = types.ModuleType("cli_mini_mod")
 
-  Args:
-      mock_handle: Mock object for handle.
-  """
-  mock_handle.return_value = 0
-  res: int = main(["schema"])
-  assert res == 0
-  mock_handle.assert_called_once()
+  def sample_op(x: int) -> int:
+    """Add one to `x`.
 
+    Args:
+        x: Input integer.
 
-@patch("ml_switcheroo.cli.__main__.handle_suggest")
-def test_main_suggest(mock_handle: MagicMock) -> None:
-  """Verify main suggest behavior.
+    Returns:
+        `x + 1`.
+    """
+    return x + 1
 
-  Args:
-      mock_handle: Mock object for handle.
-  """
-  mock_handle.return_value = 0
-  res: int = main(["suggest", "torch.add", "--out-dir", "out"])
-  assert res == 0
-  mock_handle.assert_called_once_with("torch.add", out_dir=Path("out"), batch_size=50)
+  monkeypatch.setattr(mini_mod, "sample_op", sample_op, raising=False)
+  monkeypatch.setitem(sys.modules, "cli_mini_mod", mini_mod)
+  suggest_dir = tmp_path / "suggest_out"
+  assert main(["suggest", "cli_mini_mod.*", "--out-dir", str(suggest_dir)]) == 0
+  assert len(list(suggest_dir.glob("*.md"))) == 1
 
+  # 6. `import-onnx` against a real Markdown file in `tmp_path`
+  onnx_md = tmp_path / "Operators.md"
+  onnx_md.write_text(
+    _NL.join(
+      [
+        '### <a name="Relu"></a>**Relu**',
+        "",
+        "#### Summary",
+        "",
+        "Applies relu activation.",
+        "",
+        "#### Inputs",
+        "",
+        "<dl><dt>X : T</dt><dd>input</dd></dl>",
+        "",
+      ]
+    ),
+    encoding="utf-8",
+  )
+  onnx_out = tmp_path / "onnx_odl"
+  assert (
+    main(["import-onnx", str(onnx_md), "--out-dir", str(onnx_out), "--domain", "ai.onnx", "--opset-version", "21"]) == 0
+  )
 
-@patch("ml_switcheroo.cli.__main__.handle_scaffold")
-def test_main_scaffold(mock_handle: MagicMock) -> None:
-  """Verify main scaffold behavior.
+  # 7. `gen-docs`, `gen-tests`, `matrix`, and `ci` with a compact in-memory `SemanticsManager`
+  mini_sem = SemanticsManager(load_defaults=False)
+  mini_sem.data = {
+    "Abs": {
+      "operation": "Abs",
+      "description": "Absolute value.",
+      "std_args": ["x"],
+      "variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jax.numpy.abs"}},
+    }
+  }
+  monkeypatch.setattr("ml_switcheroo.cli.handlers.dev.SemanticsManager", lambda: mini_sem)
+  monkeypatch.setattr("ml_switcheroo.cli.handlers.verify.SemanticsManager", lambda: mini_sem)
 
-  Args:
-      mock_handle: Mock object for handle.
-  """
-  res: int = main(["scaffold", "jax"])
-  assert res == 0
-  mock_handle.assert_called_once()
+  docs_md = tmp_path / "MIGRATION_GUIDE.md"
+  assert main(["gen-docs", "--source", "torch", "--target", "jax", "--out", str(docs_md)]) == 0
+  assert docs_md.exists()
 
+  tests_py = tmp_path / "generated_tests.py"
+  assert main(["gen-tests", "--out", str(tests_py)]) == 0
+  assert tests_py.exists()
 
-@patch("ml_switcheroo.cli.__main__.handle_harvest")
-def test_main_harvest(mock_handle: MagicMock) -> None:
-  """Verify main harvest behavior.
+  with patch("sys.argv", ["ml-switcheroo", "matrix"]):
+    assert main() == 0
 
-  Args:
-      mock_handle: Mock object for handle.
-  """
-  res: int = main(["harvest", "tests/"])
-  assert res == 0
-  mock_handle.assert_called_once()
+  ci_report = tmp_path / "ci_report.json"
+  (tmp_path / "tests").mkdir()
+  (tmp_path / "tests" / "test_abs.py").write_text("def test_Abs(): pass", encoding="utf-8")
+  assert main(["ci", "--json-report", str(ci_report)]) == 0
+  assert ci_report.exists()
 
+  # 8. `scaffold` against `tmp_path`
+  with patch("ml_switcheroo.cli.handlers.scaffold.ConsensusEngine") as mock_ce:
+    mock_ce.return_value.cluster.return_value = {"Abs": ["jax.numpy.abs"]}
+    assert main(["scaffold", "jax"]) == 0
+    assert (tmp_path / "jax_skeleton.json").exists()
 
-@patch("ml_switcheroo.cli.__main__.commands.handle_ci")
-def test_main_ci(mock_handle: MagicMock) -> None:
-  """Verify main ci behavior.
+  # 9. `verified-pipeline` reading real `tmp_path` files for both success and error outcomes
+  vp_file = tmp_path / "vp.py"
+  vp_file.write_text(f"import torch{_NL}", encoding="utf-8")
+  with patch("ml_switcheroo.ingestion.verified_pipeline.run_verified_pipeline", return_value={"status": "success"}):
+    assert main(["verified-pipeline", str(vp_file)]) == 0
+  with patch("ml_switcheroo.ingestion.verified_pipeline.run_verified_pipeline", return_value={"status": "failed"}):
+    assert main(["verified-pipeline", str(vp_file)]) == 1
 
-  Args:
-      mock_handle: Mock object for handle.
-  """
-  mock_handle.return_value = 0
-  res: int = main(["ci", "--repair"])
-  assert res == 0
-  mock_handle.assert_called_once_with(False, Path("README.md"), None, True)
-
-
-@patch("ml_switcheroo.cli.__main__.commands.handle_docs")
-def test_main_gen_docs(mock_handle: MagicMock) -> None:
-  """Verify main gen docs behavior.
-
-  Args:
-      mock_handle: Mock object for handle.
-  """
-  mock_handle.return_value = 0
-  res: int = main(["gen-docs"])
-  assert res == 0
-  mock_handle.assert_called_once_with("torch", "jax", Path("MIGRATION_GUIDE.md"))
-
-
-@patch("ml_switcheroo.cli.__main__.commands.handle_gen_tests")
-def test_main_gen_tests(mock_handle: MagicMock) -> None:
-  """Verify main gen tests behavior.
-
-  Args:
-      mock_handle: Mock object for handle.
-  """
-  mock_handle.return_value = 0
-  res: int = main(["gen-tests"])
-  assert res == 0
-  mock_handle.assert_called_once()
-
-
-@patch("ml_switcheroo.cli.__main__.handle_completion")
-def test_main_completion(mock_handle: MagicMock) -> None:
-  """Verifies completion command dispatch in main.
-
-  Args:
-      mock_handle: Mock object for handle.
-  """
-  mock_handle.return_value = 0
-  res: int = main(["completion", "bash"])
-  assert res == 0
-  mock_handle.assert_called_once_with("bash")
-
-
-@patch("builtins.open")
-@patch("ml_switcheroo.ingestion.verified_pipeline.run_verified_pipeline")
-def test_main_verified_pipeline(mock_run: MagicMock, mock_open: MagicMock) -> None:
-  """Verify main verified pipeline behavior.
-
-  Args:
-      mock_run: Mock object for run.
-      mock_open: Mock object for open.
-  """
-  mock_run.return_value = {"status": "success"}
-  mock_open.return_value.__enter__.return_value.read.return_value = "code"
-  res: int = main(["verified-pipeline", "file.py"])
-  assert res == 0
-  mock_run.assert_called_once_with("code")
-
-
-@patch("builtins.open")
-@patch("ml_switcheroo.ingestion.verified_pipeline.run_verified_pipeline")
-def test_main_verified_pipeline_fail(mock_run: MagicMock, mock_open: MagicMock) -> None:
-  """Verify main verified pipeline fail behavior.
-
-  Args:
-      mock_run: Mock object for run.
-      mock_open: Mock object for open.
-  """
-  mock_run.return_value = {"status": "error"}
-  mock_open.return_value.__enter__.return_value.read.return_value = "code"
-  res: int = main(["verified-pipeline", "file.py"])
-  assert res == 1
-
-
-@patch("ml_switcheroo.cli.__main__.handle_import_onnx")
-def test_main_import_onnx(mock_handle: MagicMock) -> None:
-  """Verifies import-onnx command dispatch in main.
-
-  Args:
-      mock_handle: Mock object for handle.
-  """
-  mock_handle.return_value = 0
-  res: int = main(["import-onnx", "Operators.md", "--out-dir", "out", "--domain", "ai.onnx", "--opset-version", "21"])
-  assert res == 0
-  mock_handle.assert_called_once_with(Path("Operators.md"), out_dir=Path("out"), domain="ai.onnx", opset_version=21)
-
-
-def test_main_unknown() -> None:
-  """Verify main unknown behavior."""
-  # Simulate an unknown command (argparse would usually catch this, but just in case)
-  with patch("argparse.ArgumentParser.parse_args") as mock_parse:
-    mock_parse.return_value = argparse.Namespace(command="unknown")
-    res: int = main(["unknown"])
-    assert res == 0
-
-
-def test_main_dunder_main() -> None:
-  """Test execution of __main__ module block."""
-  import runpy
-
-  with patch("sys.argv", ["ml-switcheroo", "schema"]):
-    with patch("ml_switcheroo.cli.__main__.handle_schema", return_value=0):
-      with pytest.raises(SystemExit) as exc:
-        runpy.run_module("ml_switcheroo.cli.__main__", run_name="__main__")
-      assert exc.value.code == 0
+  # 10. `__main__` module execution
+  with patch("sys.argv", ["ml-switcheroo", "schema"]), pytest.raises(SystemExit) as exc_main:
+    runpy.run_module("ml_switcheroo.cli.__main__", run_name="__main__")
+  assert exc_main.value.code == 0

@@ -1,0 +1,51 @@
+--- Forward ---
+; RDNA Code Generation Initialized (Arch: gfx1030)
+; Input x -> v0
+; symbolic -1 view
+; Unmapped Op: x.view (func_view)
+; Flatten dynamic spatial dimensions (2, 3, 4, 4) -> (2, 48)
+; Dynamic reshape with -1 and symbolic batch size
+; flatten spatial dims
+; BEGIN Flatten (flat)
+; END Flatten (flat)
+; LazyLinear resolves in_features=48 on-device
+; BEGIN Linear (fc)
+    v_mov_b32       v1, 0;
+    s_mov_b32       v2, 0;
+L_GEMM_fc:
+    global_load_dword v3, v5, off;
+    global_load_dword v4, v6, off;
+    s_waitcnt       vmcnt(0);
+    v_fmac_f32      v1, v3, v4;
+    v_add_u32       v5, v5, 4;
+    v_add_u32       v6, v6, 4;
+    s_add_i32       v2, v2, 1;
+    s_cmp_lt_i32    v2, 128;
+    s_cbranch_scc1  L_GEMM_fc;
+; END Linear (fc)
+; Return: v1
+
+--- Backward ---
+import torch
+import torch.nn as nn
+
+class DecompiledNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        # Flatten dynamic spatial dimensions (2, 3, 4, 4) -> (2, 48)
+        # Dynamic reshape with -1 and symbolic batch size
+        # flatten spatial dims
+        self.flat = nn.Flatten()
+        # LazyLinear resolves in_features=48 on-device
+        self.fc = nn.Linear(128, in_features=128)
+
+    def forward(self, x):
+        # symbolic -1 view
+        x = x.view(x)
+        # Flatten dynamic spatial dimensions (2, 3, 4, 4) -> (2, 48)
+        # Dynamic reshape with -1 and symbolic batch size
+        # flatten spatial dims
+        x = self.flat(x)
+        # LazyLinear resolves in_features=48 on-device
+        x = self.fc(x)
+        return x

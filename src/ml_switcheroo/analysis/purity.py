@@ -15,6 +15,7 @@ Operations flagged:
 Violations are marked via the `EscapeHatch` mechanism.
 """
 
+import contextlib
 import typing
 
 import libcst as cst
@@ -40,9 +41,9 @@ class PurityScanner(cst.CSTTransformer):
   """
 
   # Standard Python Language Impurities (Constant across frameworks)
-  _IO_FUNCTIONS: set[str] = {"print", "input", "open", "write"}
+  _IO_FUNCTIONS: typing.ClassVar[set[str]] = {"print", "input", "open", "write"}
 
-  _MUTATION_METHODS: set[str] = {
+  _MUTATION_METHODS: typing.ClassVar[set[str]] = {
     "append",
     "extend",
     "insert",
@@ -54,7 +55,7 @@ class PurityScanner(cst.CSTTransformer):
   }
 
   # Fallback only if semantics not provided
-  _DEFAULT_RNG_METHODS: set[str] = {"seed"}
+  _DEFAULT_RNG_METHODS: typing.ClassVar[set[str]] = {"seed"}
 
   def __init__(
     self,
@@ -82,10 +83,8 @@ class PurityScanner(cst.CSTTransformer):
     # Dynamic Loading
     if semantics is not None:
       # A. Global RNG Methods
-      try:
+      with contextlib.suppress(AttributeError):
         self._global_rng_methods.update(semantics.get_all_rng_methods())
-      except AttributeError:
-        pass
 
       # B. Source Framework Specific Impurities (e.g. add_, copy_)
       if source_framework:

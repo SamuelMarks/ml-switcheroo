@@ -100,5 +100,5 @@ def get_definitions_path(framework: str) -> Path:
   try:
     fp = importlib.resources.files("ml_ecosystem_snapshots.snapshots").joinpath(f"{framework}.json")
     return Path(str(fp))
-  except (ImportError, ModuleNotFoundError, OSError, TypeError, RuntimeError, Exception):
+  except (ImportError, ModuleNotFoundError, OSError, TypeError, ValueError, AttributeError, RuntimeError):
     return Path(f"{framework}.json")

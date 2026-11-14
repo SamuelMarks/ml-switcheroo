@@ -152,7 +152,7 @@ def copy_external_wheels() -> None:
             with urllib.request.urlopen(req) as resp, open(dest_path, "wb") as out:
               shutil.copyfileobj(resp, out)
             print(f"✅ Downloaded {whl_filename} to {static_dir}/")
-          except Exception as e:
+          except (OSError, ValueError, TypeError, RuntimeError) as e:
             print(f"⚠️  Warning: Failed to download {url_or_spec}: {e}")
 
   bundle_on_device_wheels(PROJECT_ROOT, static_dir)
@@ -170,7 +170,7 @@ def calculate_unique_variants() -> None:
     if os.environ.get("CI") == "true" and total_variants < 1860:
       print(f"❌ CI Assertion Failed: Unique operator count ({total_variants}) is below the required 1860 limit.")
       sys.exit(1)
-  except Exception as e:
+  except (ImportError, OSError, ValueError, TypeError, KeyError, RuntimeError) as e:
     print(f"⚠️ Failed to calculate variants: {e}")
 
 

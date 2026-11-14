@@ -1,31 +1,26 @@
 """Test suite for the Dispatch Logic module."""
 
-from tests.conftest import _test_getattr
-
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
-from pydantic import JsonValue
-
 import libcst as cst
 import pytest
+from pydantic import JsonValue
 
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.dsl import LogicOp, Rule
-from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from tests.conftest import TestRewriter
 
 
-class MockDispatchSemantics(SemanticsManager):
-  """Test helper class MockDispatchSemantics."""
+class MockDispatchSemantics:
+  """Test double `MockDispatchSemantics` used in dispatch logic tests."""
 
   def __init__(self) -> None:
-    """Initializes the MockDispatchSemantics instance."""
-    self.data = {}
-    self._reverse_index = {}
-    self._key_origins = {}
+    """Initialize `MockDispatchSemantics` with typed operation definitions."""
+    self.data: dict[str, dict[str, RuntimeTensorOrValue]] = {}
+    self._reverse_index: dict[str, tuple[str, dict[str, RuntimeTensorOrValue]]] = {}
+    self._key_origins: dict[str, str] = {}
     self.import_data: dict[str, RuntimeTensorOrValue] = {}
-    self.framework_configs = {}
-    resize_def = {
+    self.framework_configs: dict[str, dict[str, JsonValue]] = {}
+    resize_def: dict[str, RuntimeTensorOrValue] = {
       "std_args": ["image", "dummy", "mode"],
       "variants": {
         "torch": {"api": "torch.resize", "args": {}},
@@ -33,52 +28,73 @@ class MockDispatchSemantics(SemanticsManager):
           "api": "jax.image.resize",
           "args": {},
           "dispatch_rules": [
-            Rule(if_arg="mode", op=LogicOp.EQ, val="nearest", use_api="jax.image.resize_nearest"),
-            Rule(if_arg="mode", op=LogicOp.IN, val=["bilinear", "bicubic"], use_api="jax.image.resize_bi"),
+            Rule(if_arg="mode", op=LogicOp.EQ, is_val="nearest", use_api="jax.image.resize_nearest"),
+            Rule(if_arg="mode", op=LogicOp.IN, is_val=["bilinear", "bicubic"], use_api="jax.image.resize_bi"),
           ],
         },
       },
     }
-    _test_getattr(self.data, "__setitem__")("resize", resize_def)
-    _test_getattr(self._reverse_index, "__setitem__")(
-      "torch.resize",
-      ("resize", resize_def),
-    )
-    clamp_def = {
+    self.data["resize"] = resize_def
+    self._reverse_index["torch.resize"] = ("resize", resize_def)
+    clamp_def: dict[str, RuntimeTensorOrValue] = {
       "std_args": ["x", "limit"],
       "variants": {
         "torch": {"api": "torch.clamp"},
         "jax": {
           "api": "jnp.clip",
-          "dispatch_rules": [Rule(if_arg="limit", op=LogicOp.GT, val=100, use_api="jnp.heavy_clip")],
+          "dispatch_rules": [Rule(if_arg="limit", op=LogicOp.GT, is_val=100, use_api="jnp.heavy_clip")],
         },
       },
     }
-    _test_getattr(self.data, "__setitem__")("clamp", clamp_def)
-    _test_getattr(self._reverse_index, "__setitem__")(
-      "torch.clamp",
-      ("clamp", clamp_def),
-    )
-    process_def = {
+    self.data["clamp"] = clamp_def
+    self._reverse_index["torch.clamp"] = ("clamp", clamp_def)
+    process_def: dict[str, RuntimeTensorOrValue] = {
       "std_args": ["data"],
       "variants": {
         "torch": {"api": "torch.process"},
         "jax": {
           "api": "jax.single_process",
           "dispatch_rules": [
-            Rule(if_arg="data", op=LogicOp.IS_TYPE, val="list", use_api="jax.batch_process"),
-            Rule(if_arg="data", op=LogicOp.IS_TYPE, val="int", use_api="jax.int_process"),
+            Rule(if_arg="data", op=LogicOp.IS_TYPE, is_val="list", use_api="jax.batch_process"),
+            Rule(if_arg="data", op=LogicOp.IS_TYPE, is_val="int", use_api="jax.int_process"),
           ],
         },
       },
     }
-    _test_getattr(self.data, "__setitem__")("process", process_def)
-    _test_getattr(self._reverse_index, "__setitem__")(
-      "torch.process",
-      ("process", process_def),
-    )
+    self.data["process"] = process_def
+    self._reverse_index["torch.process"] = ("process", process_def)
 
-  def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
+  def is_verified(self, abstract_id: str) -> bool:
+    """Return `True` for all stubbed operations.
+
+    Args:
+        abstract_id: Canonical operation identifier.
+
+    Returns:
+        Always `True`.
+    """
+    return True
+
+  def resolve_variant(self, abstract_id: str, target_framework: str) -> dict[str, RuntimeTensorOrValue] | None:
+    """Return the stubbed variant mapping for `abstract_id` and `target_framework`.
+
+    Args:
+        abstract_id: Canonical operation identifier.
+        target_framework: Target framework key.
+
+    Returns:
+        Variant dictionary or `None`.
+    """
+    entry = self.data.get(abstract_id)
+    if not isinstance(entry, dict):
+      return None
+    variants = entry.get("variants")
+    if not isinstance(variants, dict):
+      return None
+    target_var = variants.get(target_framework)
+    return target_var if isinstance(target_var, dict) else None
+
+  def get_definition(self, name: str) -> tuple[str, dict[str, RuntimeTensorOrValue]] | None:
     """Mock implementation of get definition.
 
     Args:
@@ -98,6 +114,9 @@ class MockDispatchSemantics(SemanticsManager):
   def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
+    Args:
+        framework: Framework identifier string.
+
     Returns:
         Configuration dictionary for the specified framework.
     """
@@ -106,7 +125,7 @@ class MockDispatchSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter() -> TestRewriter:
-  """Execute rewriter helper logic.
+  """Create a configured `TestRewriter` fixture for dispatch logic tests.
 
   Returns:
       Configured `rewriter` fixture value (TestRewriter).
@@ -117,7 +136,7 @@ def rewriter() -> TestRewriter:
 
 
 def rewrite(rewriter: TestRewriter, code: str) -> str:
-  """Rewrites .
+  """Execute `rewriter.convert` to support rewrite in dispatch logic tests.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -131,7 +150,7 @@ def rewrite(rewriter: TestRewriter, code: str) -> str:
 
 
 def test_dispatch_equality_string(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of dispatch equality string.
+  """Verify `rewrite` emits `jax.image.resize_nearest` for dispatch equality string.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -143,7 +162,7 @@ def test_dispatch_equality_string(rewriter: TestRewriter) -> None:
 
 
 def test_dispatch_fallback_default(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of dispatch fallback default.
+  """Verify `rewrite` emits `jax.image.resize(` for dispatch fallback default.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -154,7 +173,7 @@ def test_dispatch_fallback_default(rewriter: TestRewriter) -> None:
 
 
 def test_dispatch_in_list(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of dispatch in list.
+  """Verify `rewrite` emits `jax.image.resize_bi` for dispatch in list.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -165,7 +184,7 @@ def test_dispatch_in_list(rewriter: TestRewriter) -> None:
 
 
 def test_dispatch_positional_extraction(rewriter: TestRewriter) -> None:
-  """Verify dispatch positional extraction behavior.
+  """Verify `rewrite` emits `jax.image.resize_nearest` for dispatch positional extraction.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -176,7 +195,7 @@ def test_dispatch_positional_extraction(rewriter: TestRewriter) -> None:
 
 
 def test_dispatch_numeric_gt(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of dispatch numeric gt.
+  """Verify `rewrite` emits `jnp.heavy_clip` for dispatch numeric gt.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -187,7 +206,7 @@ def test_dispatch_numeric_gt(rewriter: TestRewriter) -> None:
 
 
 def test_dispatch_numeric_method_call(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of dispatch numeric method call.
+  """Verify `rewrite` emits `jnp.clip` for dispatch numeric method call.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -201,7 +220,7 @@ def test_dispatch_numeric_method_call(rewriter: TestRewriter) -> None:
 
 
 def test_dispatch_is_type_list(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of dispatch is type list.
+  """Verify `rewrite` emits `jax.batch_process` for dispatch is type list.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -212,7 +231,7 @@ def test_dispatch_is_type_list(rewriter: TestRewriter) -> None:
 
 
 def test_dispatch_is_type_int(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of dispatch is type integer.
+  """Verify `rewrite` emits `jax.int_process` for dispatch is type int.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -223,7 +242,7 @@ def test_dispatch_is_type_int(rewriter: TestRewriter) -> None:
 
 
 def test_dispatch_is_type_fallback(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of dispatch is type fallback.
+  """Verify `rewrite` emits `jax.single_process` for dispatch is type fallback.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.

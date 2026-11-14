@@ -83,11 +83,10 @@ def is_docstring(node: cst.CSTNode, idx: int) -> bool:
   """
   if idx != 0:
     return False
-  if isinstance(node, cst.SimpleStatementLine):
-    if len(node.body) == 1 and isinstance(node.body[0], cst.Expr):
-      expr = node.body[0].value
-      if isinstance(expr, (cst.SimpleString, cst.ConcatenatedString)):
-        return True
+  if isinstance(node, cst.SimpleStatementLine) and len(node.body) == 1 and isinstance(node.body[0], cst.Expr):
+    expr = node.body[0].value
+    if isinstance(expr, (cst.SimpleString, cst.ConcatenatedString)):
+      return True
   return False
 
 
@@ -103,8 +102,11 @@ def is_future_import(node: cst.CSTNode) -> bool:
   """
   if isinstance(node, cst.SimpleStatementLine):
     for small_stmt in node.body:
-      if isinstance(small_stmt, cst.ImportFrom):
-        if small_stmt.module and isinstance(small_stmt.module, cst.Name):
-          if small_stmt.module.value == "__future__":
-            return True
+      if (
+        isinstance(small_stmt, cst.ImportFrom)
+        and small_stmt.module
+        and isinstance(small_stmt.module, cst.Name)
+        and small_stmt.module.value == "__future__"
+      ):
+        return True
   return False

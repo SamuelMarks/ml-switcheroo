@@ -32,14 +32,12 @@ def get_required_packages(imp_str: str) -> list[str]:
   except SyntaxError:
     return []
 
-  packages = []
+  packages: list[str] = []
   for node in tree.body:
     if isinstance(node, ast.Import):
-      for alias in node.names:
-        packages.append(alias.name.split(".")[0])
-    elif isinstance(node, ast.ImportFrom):
-      if node.module:
-        packages.append(node.module.split(".")[0])
+      packages.extend(alias.name.split(".")[0] for alias in node.names)
+    elif isinstance(node, ast.ImportFrom) and node.module:
+      packages.append(node.module.split(".")[0])
 
   return list(dict.fromkeys(packages))
 
@@ -49,6 +47,10 @@ _SHARED_RUNTIME_LOGIC = (
   "\n# --- Determinism ---\n"
   + inspect.getsource(_runtime_mod.ensure_determinism)
   + "\n# --- Verification Logic ---\n"
+  + inspect.getsource(_runtime_mod._verify_with_chex)
+  + "\n"
+  + inspect.getsource(_runtime_mod._verify_leaf_arrays)
+  + "\n"
   + inspect.getsource(_runtime_mod.verify_results).replace("def verify_results(\n  ref:", "def verify_results(ref:")
 )
 
@@ -113,7 +115,11 @@ def ensure_runtime_module(
 
   # Combine parts
   code = '"""Shared runtime flags for generated tests (Auto-Generated)."""\n# ruff: noqa\n# fmt: off\n\n'
-  code += "import sys\nimport pytest\nimport random\nimport numpy as np\nimport importlib.util\nimport typing\n\n"
+  code += (
+    "import sys\nimport pytest\nimport random\nimport numpy as np\n"
+    "import importlib.util\nimport typing\n"
+    "from ml_switcheroo.enums import RuntimeTensorOrValue\n\n"
+  )
   code += imports_str + "\n"
   code += _SHARED_RUNTIME_LOGIC
 

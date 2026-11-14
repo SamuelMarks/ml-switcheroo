@@ -1,0 +1,16 @@
+--- Forward ---
+% ------------------------------------------------------------------
+% [Requirement] midl.sty
+% This document uses the Machine Intelligence Definition Language.
+% Ensure 'midl.sty' is in your LaTeX path.
+% ------------------------------------------------------------------
+\documentclass[tikz, border=10pt, landscape]{standalone}
+\usepackage{midl}
+\begin{document}
+\begin{DefModel}{GeneratedNet}
+  \Input{input}{[_]}
+\end{DefModel}
+\end{document}
+--- Backward ---
+module {sym_name = "GeneratedNet"} {func.func {sym_name = "__init__", function_type = (tensor<*xf32>) -> ()} {^entry(%self0: tensor<*xf32>):%1 = sw.op {type = "super"}%2 = sw.getattr (%1) {name = "__init__"}%3 = sw.call (%2)}func.func {sym_name = "forward", function_type = (tensor<*xf32>, tensor<*xf32>) -> ()} {^entry(%self4: tensor<*xf32>, %input5: tensor<*xf32>):
+}}

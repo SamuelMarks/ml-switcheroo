@@ -38,7 +38,7 @@ class LayoutPermutationPass(cst.CSTTransformer):
       # Very simplistic heuristic: assume 4D tensor outputs that need (0, 2, 3, 1)
       permute_attr = cst.Attribute(value=updated_node, attr=cst.Name("permute"))
       return cst.Call(func=permute_attr, args=[cst.Arg(value=cst.Integer(str(i))) for i in (0, 2, 3, 1)])
-    elif self.source_layout == "NHWC" and self.target_layout == "NCHW":
+    if self.source_layout == "NHWC" and self.target_layout == "NCHW":
       # Reverse permutation (0, 3, 1, 2)
       permute_attr = cst.Attribute(value=updated_node, attr=cst.Name("permute"))
       return cst.Call(func=permute_attr, args=[cst.Arg(value=cst.Integer(str(i))) for i in (0, 3, 1, 2)])
@@ -83,9 +83,8 @@ class FrameworkMacroPass(cst.CSTTransformer):
           try:
             # Parse the expanded string into a Python expression
             # We wrap it in a function to extract the single expression easily
-            expr_ast = cst.parse_expression(expanded_str)
-            return expr_ast
-          except Exception:
+            return cst.parse_expression(expanded_str)
+          except (cst.ParserSyntaxError, ValueError, TypeError):
             # If parsing fails (e.g. malformed macro), return original
             return updated_node
     return updated_node

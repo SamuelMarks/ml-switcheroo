@@ -1,90 +1,58 @@
 """Test suite for the Api module."""
 
-from tests.conftest import _test_getattr, _test_setattr
-
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
 import typing
-from pydantic import JsonValue
 from unittest.mock import MagicMock, PropertyMock, patch
 
 import libcst as cst
 import pytest
+from pydantic import JsonValue
 
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.escape_hatch import EscapeHatch
 from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.core.rewriter.normalization_utils import normalize_arguments
 from ml_switcheroo.core.rewriter.passes.api import ApiTransformer
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.schema import StructuralTraits
 from tests.conftest import TestRewriter
 
 
 class MockSemantics(SemanticsManager):
-  """Test helper class MockSemantics."""
+  """Stub `SemanticsManager` subclass implementing `_inject`, `get_definition` for API tests."""
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
-    self.data = {}
-    self.framework_configs = {}
+    super().__init__(load_defaults=False)
+    self.data: dict[str, dict[str, JsonValue]] = {}
+    self.framework_configs: dict[str, dict[str, JsonValue]] = {}
     self.import_data: dict[str, RuntimeTensorOrValue] = {}
-    self._reverse_index = {}
-    self._validation_status = {}
+    self._reverse_index: dict[str, tuple[str, dict[str, JsonValue]]] = {}
+    self._validation_status: dict[str, bool] = {}
     self._inject("abs", ["x"], {"torch": {"api": "torch.abs"}, "jax": {"api": "jnp.abs"}})
     self._inject("add_", ["x", "y"], {"torch": {"api": "torch.Tensor.add_"}, "jax": {"requires_plugin": "mock_unroll"}})
     self._inject("unsupported", [], {"torch": {"api": "torch.bad"}})
     self.framework_configs["jax"] = {"alias": {"module": "jax.numpy", "name": "jnp"}}
 
   def _inject(self, name: str, args: list[str], variants: dict[str, JsonValue]) -> None:
-    """Mock implementation of  inject.
+    """Execute `variants.values` to support inject in API tests.
 
     Args:
         name: Identifier or operation name string.
-        args: The args (list[str]) for inject.
-        variants: The variants (dict[str, JsonValue]) for inject.
+        args: Positional argument specifications (`list[str]`).
+        variants: Per-framework operation variant mappings (`dict[str, JsonValue]`).
     """
-    _test_getattr(
-      _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__"
-    )(
-      name,
-      _test_getattr(
-        {
-          "v": {
-            "std_args": _test_getattr({"v": args}, "__getitem__")("v"),
-            "variants": _test_getattr({"v": variants}, "__getitem__")("v"),
-          }
-        },
-        "__getitem__",
-      )("v"),
-    )
-    for _, v in variants.items():
-      if _test_getattr(
-        {"v": _test_getattr({"v": "api"}, "__getitem__")("v") in _test_getattr({"v": v}, "__getitem__")("v")},
-        "__getitem__",
-      )("v"):
-        _test_getattr(
-          _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"),
-          "__setitem__",
-        )(
-          _test_getattr({"v": v}, "__getitem__")("v")["api"],
-          _test_getattr(
-            {
-              "v": (
-                _test_getattr({"v": name}, "__getitem__")("v"),
-                _test_getattr(
-                  {
-                    "v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v")[
-                      name
-                    ]
-                  },
-                  "__getitem__",
-                )("v"),
-              )
-            },
-            "__getitem__",
-          )("v"),
-        )
+    std_args: list[JsonValue] = list(args)
+    entry: dict[str, JsonValue] = {
+      "std_args": std_args,
+      "variants": variants,
+    }
+    self.data[name] = entry
+    for v in variants.values():
+      if isinstance(v, dict):
+        api_name = v.get("api")
+        if isinstance(api_name, str):
+          self._reverse_index[api_name] = (name, entry)
 
   def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Mock implementation of get definition.
@@ -107,48 +75,20 @@ class MockSemantics(SemanticsManager):
     Returns:
         Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
-    _ret_v: dict[str, JsonValue] | None = _test_getattr(
-      {
-        "v": _test_getattr(
-          {
-            "v": _test_getattr(
-              {
-                "v": _test_getattr(
-                  {
-                    "v": _test_getattr(
-                      {
-                        "v": _test_getattr(
-                          {
-                            "v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")(
-                              "v"
-                            ).get
-                          },
-                          "__getitem__",
-                        )("v")(
-                          _test_getattr({"v": aid}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v")
-                        )
-                      },
-                      "__getitem__",
-                    )("v").get
-                  },
-                  "__getitem__",
-                )("v")(_test_getattr({"v": "variants"}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v"))
-              },
-              "__getitem__",
-            )("v").get
-          },
-          "__getitem__",
-        )("v")(_test_getattr({"v": fw}, "__getitem__")("v"))
-      },
-      "__getitem__",
-    )("v")
-    return _ret_v
+    op_entry = self.data.get(aid)
+    if op_entry is None:
+      return None
+    variants = op_entry.get("variants")
+    if not isinstance(variants, dict):
+      return None
+    fw_variant = variants.get(fw)
+    return fw_variant if isinstance(fw_variant, dict) else None
 
   def is_verified(self, _id: str) -> bool:
     """Mock implementation of is verified.
 
     Args:
-        _id: The  id (str) for is verified.
+        _id: Input `_id` parameter value (`str`).
 
     Returns:
         Resulting `bool` from is verified.
@@ -169,7 +109,7 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def run_pass() -> typing.Callable[[str], str]:
-  """Execute run pass helper logic.
+  """Create a configured `typing.Callable[[str], str]` fixture for API tests.
 
   Returns:
       Configured `run_pass` fixture value (typing.Callable[[str], str]).
@@ -180,7 +120,7 @@ def run_pass() -> typing.Callable[[str], str]:
   rewriter = TestRewriter(semantics, config)
 
   def _transform(code: str) -> str:
-    """Helper to  transform.
+    """Execute `rewriter.convert` to support transform in API tests.
 
     Args:
         code: Python or DSL source code string to parse or transpile.
@@ -195,10 +135,10 @@ def run_pass() -> typing.Callable[[str], str]:
 
 
 def test_api_call_rewrite(run_pass: typing.Callable[[str], str]) -> None:
-  """Verifies the behavior of API call rewrite.
+  """Verify `run_pass` emits `jnp.abs(x)` for API call rewrite.
 
   Args:
-      run_pass: The run pass (typing.Callable[[str], str]) for test api call rewrite.
+      run_pass: Input `run_pass` parameter value (`typing.Callable[[str], str]`).
   """
   code = "y = torch.abs(x)"
   res: str = run_pass(code)
@@ -206,10 +146,10 @@ def test_api_call_rewrite(run_pass: typing.Callable[[str], str]) -> None:
 
 
 def test_missing_mapping_strict_failure(run_pass: typing.Callable[[str], str]) -> None:
-  """Verifies the behavior of missing mapping strict successfully handling failure.
+  """Verify `run_pass` emits `No mapping available` for missing mapping strict failure.
 
   Args:
-      run_pass: The run pass (typing.Callable[[str], str]) for test missing mapping strict failure.
+      run_pass: Input `run_pass` parameter value (`typing.Callable[[str], str]`).
   """
   code = "torch.bad()"
   res: str = run_pass(code)
@@ -218,10 +158,10 @@ def test_missing_mapping_strict_failure(run_pass: typing.Callable[[str], str]) -
 
 
 def test_assignment_unwrapping_passthrough(run_pass: typing.Callable[[str], str]) -> None:
-  """Verifies the behavior of assignment unwrapping passthrough.
+  """Verify `run_pass` handles assignment unwrapping passthrough as expected.
 
   Args:
-      run_pass: The run pass (typing.Callable[[str], str]) for test assignment unwrapping passthrough.
+      run_pass: Input `run_pass` parameter value (`typing.Callable[[str], str]`).
   """
   code = "res = layer(x)"
   res: str = run_pass(code)
@@ -231,27 +171,25 @@ def test_assignment_unwrapping_passthrough(run_pass: typing.Callable[[str], str]
   assert "layer.apply" in res2
 
 
-def test_arg_normalization_logic(run_pass: typing.Callable[[str], str]) -> None:
-  """Verifies the behavior of argument normalization logic.
+def test_arg_normalization_logic(run_pass: typing.Callable[[str], str], monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `RuntimeConfig` emits `jnp.sum(x, axis=1)` for arg normalization logic.
 
   Args:
-      run_pass: The run pass (typing.Callable[[str], str]) for test arg normalization logic.
+      run_pass: Input `run_pass` parameter value (`typing.Callable[[str], str]`).
+      monkeypatch: Pytest monkeypatch fixture.
   """
   mgr = MagicMock(spec=SemanticsManager)
-  op_def = {
+  jax_variant: dict[str, JsonValue] = {"api": "jnp.sum"}
+  op_def: dict[str, JsonValue] = {
     "std_args": ["x", "axis"],
-    "variants": {"torch": {"api": "torch.sum", "args": {"axis": "dim"}}, "jax": {"api": "jnp.sum"}},
+    "variants": {"torch": {"api": "torch.sum", "args": {"axis": "dim"}}, "jax": jax_variant},
   }
   mgr.get_definition.return_value = ("Sum", op_def)
-  _test_setattr(
-    _test_getattr({"v": _test_getattr({"v": mgr}, "__getitem__")("v").resolve_variant}, "__getitem__")("v"),
+  monkeypatch.setattr(
+    mgr.resolve_variant,
     "return_value",
-    _test_getattr(
-      {
-        "v": _test_getattr({"v": _test_getattr({"v": op_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]
-      },
-      "__getitem__",
-    )("v"),
+    jax_variant,
+    raising=False,
   )
   mgr.is_verified.return_value = True
   mgr.get_framework_config.return_value = {}
@@ -264,22 +202,16 @@ def test_arg_normalization_logic(run_pass: typing.Callable[[str], str]) -> None:
 
 
 class DummySemantics(SemanticsManager):
-  """Test helper class DummySemantics."""
-
-  framework_configs = {}
+  """Test double `DummySemantics` used in API tests."""
 
   def __init__(self) -> None:
     """Initializes the DummySemantics instance."""
-    self.configs: dict[str, RuntimeTensorOrValue] = {}
-    self.definitions: dict[str, RuntimeTensorOrValue] = {}
-    self.variants: dict[str, RuntimeTensorOrValue] = {}
+    super().__init__(load_defaults=False)
+    self.configs: dict[str, dict[str, JsonValue]] = {}
+    self.definitions: dict[str, tuple[str, dict[str, JsonValue]]] = {}
+    self.variants: dict[tuple[str, str], dict[str, JsonValue]] = {}
     self.verified = True
-    self._key_origins: dict[str, str] = {}
-    _test_setattr(
-      _test_getattr({"v": self}, "__getitem__")("v"),
-      "framework_configs",
-      _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").configs}, "__getitem__")("v"),
-    )
+    self.framework_configs = self.configs
 
   def get_framework_config(self, fw: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
@@ -290,15 +222,7 @@ class DummySemantics(SemanticsManager):
     Returns:
         Resulting `dict[str, JsonValue]` from get framework config.
     """
-    _ret_v: dict[str, JsonValue] = _test_getattr(
-      {
-        "v": _test_getattr(
-          {"v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").configs}, "__getitem__")("v").get},
-          "__getitem__",
-        )("v")(_test_getattr({"v": fw}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v"))
-      },
-      "__getitem__",
-    )("v")
+    _ret_v: dict[str, JsonValue] = self.configs.get(fw, {})
     return _ret_v
 
   def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
@@ -310,48 +234,27 @@ class DummySemantics(SemanticsManager):
     Returns:
         Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
-    _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
-      {
-        "v": _test_getattr(
-          {"v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").definitions}, "__getitem__")("v").get},
-          "__getitem__",
-        )("v")(_test_getattr({"v": name}, "__getitem__")("v"))
-      },
-      "__getitem__",
-    )("v")
+    _ret_v: tuple[str, dict[str, JsonValue]] | None = self.definitions.get(name)
     return _ret_v
 
   def resolve_variant(self, abstract_id: str, fw: str) -> dict[str, JsonValue] | None:
     """Mock implementation of resolve variant.
 
     Args:
-        abstract_id: The abstract id (str) for resolve variant.
+        abstract_id: Canonical abstract operation identifier (`str`).
         fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
         Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
-    _ret_v: dict[str, JsonValue] | None = _test_getattr(
-      {
-        "v": _test_getattr(
-          {"v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").variants}, "__getitem__")("v").get},
-          "__getitem__",
-        )("v")(
-          _test_getattr(
-            {"v": (_test_getattr({"v": abstract_id}, "__getitem__")("v"), _test_getattr({"v": fw}, "__getitem__")("v"))},
-            "__getitem__",
-          )("v")
-        )
-      },
-      "__getitem__",
-    )("v")
+    _ret_v: dict[str, JsonValue] | None = self.variants.get((abstract_id, fw))
     return _ret_v
 
   def is_verified(self, _id: str) -> bool:
     """Mock implementation of is verified.
 
     Args:
-        _id: The  id (str) for is verified.
+        _id: Input `_id` parameter value (`str`).
 
     Returns:
         Resulting `bool` from is verified.
@@ -376,15 +279,16 @@ def get_transformer() -> tuple[ApiTransformer, DummySemantics, RewriterContext]:
 
 
 def test_api_traits_fallback() -> None:
-  """Verifies the behavior of API traits fallback."""
-  (t, s, c) = get_transformer()
+  """Verify `get_transformer` handles API traits fallback as expected."""
+  (t, s, _c) = get_transformer()
   s.configs["jax"] = {}
   traits = t._get_target_traits()
   assert isinstance(traits, StructuralTraits)
+  assert traits.init_method_name == "__init__"
 
 
 def test_cst_to_string_fallback() -> None:
-  """Verifies the behavior of cst to string fallback."""
+  """Verify `get_transformer` handles CST to string fallback as expected."""
   (t, _, _) = get_transformer()
   node = cst.BinaryOperation(left=cst.Name("a"), operator=cst.Add(), right=cst.Name("b"))
   assert t._cst_to_string(node) == "Add"
@@ -393,21 +297,25 @@ def test_cst_to_string_fallback() -> None:
   assert t._get_qualified_name(node2) is None
 
 
-def test_module_bases_object() -> None:
-  """Verifies the behavior of module bases object."""
+def test_module_bases_object(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `get_transformer` handles module bases object as expected.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   (t, s, _) = get_transformer()
 
   class DummyTraits:
-    """Test helper class DummyTraits."""
+    """Sentinel `DummyTraits` fixture class used in API tests."""
 
     module_base = "MyModule"
 
-  s.configs["torch"] = {"traits": DummyTraits()}
+  monkeypatch.setattr(s, "framework_configs", {"torch": {"traits": DummyTraits()}}, raising=False)
   assert t._is_framework_base("MyModule") is True
 
 
 def test_module_preamble_exception() -> None:
-  """Verifies the behavior of module preamble correctly handling an exception."""
+  """Verify `get_transformer` returns `0` for module preamble exception."""
   (t, _, c) = get_transformer()
   c.module_preamble.append("invalid python syntax +++")
   mod = cst.Module(body=[])
@@ -415,13 +323,21 @@ def test_module_preamble_exception() -> None:
   assert len(res.body) == 0
 
 
-def test_classdef_raw_fallback() -> None:
-  """Verifies the behavior of classdef raw fallback."""
-  (t, s, c) = get_transformer()
-  t._known_module_bases = {"MyModule"}
+def test_classdef_raw_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `get_transformer` handles classdef raw fallback as expected.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
+  (t, _s, c) = get_transformer()
+  assert t._cached_source_traits is None
+  assert t._cached_target_traits is None
+  assert t.target_traits is t._get_target_traits()
+  assert isinstance(t._create_name_node("a.b"), cst.Attribute)
+  t.state.known_module_bases = {"MyModule"}
 
   def mock_get_qualified_name(node: cst.CSTNode) -> str | None:
-    """Execute mock get qualified name helper logic.
+    """Execute `mock_get_qualified_name` helper in API tests.
 
     Args:
         node: CST or AST node under inspection or transformation.
@@ -432,7 +348,7 @@ def test_classdef_raw_fallback() -> None:
     return None
 
   def mock_cst_to_string(node: cst.CSTNode) -> str | None:
-    """Execute mock cst to string helper logic.
+    """Execute `mock_cst_to_string` helper in API tests.
 
     Args:
         node: CST or AST node under inspection or transformation.
@@ -444,8 +360,8 @@ def test_classdef_raw_fallback() -> None:
       return "MyModule"
     return "Other"
 
-  _test_setattr(t, "_get_qualified_name", mock_get_qualified_name)
-  _test_setattr(t, "_cst_to_string", mock_cst_to_string)
+  monkeypatch.setattr(t, "_get_qualified_name", mock_get_qualified_name, raising=False)
+  monkeypatch.setattr(t, "_cst_to_string", mock_cst_to_string, raising=False)
   base_node = cst.Arg(value=cst.Name("MyModule"))
   class_def = cst.ClassDef(name=cst.Name("MyClass"), body=cst.IndentedBlock(body=[]), bases=[base_node])
   t.visit_ClassDef(class_def)
@@ -472,8 +388,8 @@ def test_inject_argument_to_signature_comma() -> None:
 
 
 def test_visit_import_aliases() -> None:
-  """Verifies the behavior of visit import aliases."""
-  (t, _, c) = get_transformer()
+  """Verify `get_transformer` handles visit import aliases as expected."""
+  (t, _, _c) = get_transformer()
   imp_node = cst.Import(names=[cst.ImportAlias(name=cst.Name("a"))])
   with patch.object(t, "_cst_to_string", return_value=None):
     t.visit_Import(imp_node)
@@ -486,7 +402,7 @@ def test_visit_import_aliases() -> None:
 
 
 def test_import_star() -> None:
-  """Verifies the behavior of import star."""
+  """Verify `get_transformer` handles import star as expected."""
   (t, _, _) = get_transformer()
   imp_from = cst.ImportFrom(module=cst.Name("a"), names=cst.ImportStar())
   _res = t.visit_ImportFrom(imp_from)
@@ -495,7 +411,7 @@ def test_import_star() -> None:
 
 
 def test_import_from_non_alias() -> None:
-  """Verifies the behavior of import from empty names."""
+  """Verify `get_transformer` handles import from non alias as expected."""
   (t, _, _) = get_transformer()
   mock_imp = MagicMock(spec=cst.ImportFrom)
   mock_imp.relative = False
@@ -507,7 +423,7 @@ def test_import_from_non_alias() -> None:
 
 
 def test_leave_assign_no_source_traits() -> None:
-  """Verifies the behavior of leave assign no source traits."""
+  """Verify `get_transformer` handles leave assign no source traits as expected."""
   (t, _, _) = get_transformer()
   with patch(
     "ml_switcheroo.core.rewriter.passes.api.ApiTransformer.source_traits", new_callable=PropertyMock
@@ -520,7 +436,7 @@ def test_leave_assign_no_source_traits() -> None:
 
 
 def test_leave_attribute_no_name() -> None:
-  """Verifies the behavior of leave attribute no name."""
+  """Verify `get_transformer` handles leave attribute no name as expected."""
   (t, _, _) = get_transformer()
   attr = cst.Attribute(value=cst.Name("a"), attr=cst.Name("b"))
   with patch.object(t, "_get_qualified_name", return_value=""):
@@ -529,7 +445,7 @@ def test_leave_attribute_no_name() -> None:
 
 
 def test_leave_attribute_requires_plugin() -> None:
-  """Verifies the behavior of leave attribute requires plugin."""
+  """Verify `get_transformer` handles leave attribute requires plugin as expected."""
   (t, s, _) = get_transformer()
   s.definitions["a.b"] = ("abstract_id", {"variants": {"jax": {"requires_plugin": "yes"}}})
   attr = cst.Attribute(value=cst.Name("a"), attr=cst.Name("b"))
@@ -539,20 +455,20 @@ def test_leave_attribute_requires_plugin() -> None:
 
 
 def test_leave_attribute_macro_exception() -> None:
-  """Verifies the behavior of leave attribute macro correctly handling an exception."""
-  (t, s, _) = get_transformer()
+  """Verify `get_transformer` handles leave attribute macro exception as expected."""
+  (t, _s, _) = get_transformer()
   attr = cst.Attribute(value=cst.Name("a"), attr=cst.Name("b"))
   with (
     patch.object(t, "_get_qualified_name", return_value="a.b"),
     patch.object(t, "_get_mapping", return_value={"macro_template": "invalid"}),
-    patch("ml_switcheroo.core.rewriter.calls.transformers.rewrite_as_macro", side_effect=Exception),
+    patch("ml_switcheroo.core.rewriter.calls.transformers.rewrite_as_macro", side_effect=ValueError("invalid macro")),
   ):
     res = t.leave_Attribute(attr, attr)
     assert res is attr
 
 
 def test_leave_call_handled_pre_check() -> None:
-  """Verifies the behavior of leave call handled pre check."""
+  """Verify `get_transformer` handles leave call handled pre check as expected."""
   (t, _, _) = get_transformer()
   call = cst.Call(func=cst.Name("a"))
   with patch(
@@ -564,8 +480,8 @@ def test_leave_call_handled_pre_check() -> None:
 
 
 def test_leave_call_implicit_method() -> None:
-  """Verifies the behavior of leave call implicit method."""
-  (t, s, _) = get_transformer()
+  """Verify `get_transformer` handles leave call implicit method as expected."""
+  (t, _s, _) = get_transformer()
   call = cst.Call(func=cst.Name("a"))
   with (
     patch("ml_switcheroo.core.rewriter.passes.api_call_mixin.handle_pre_checks", return_value=(False, call)),
@@ -577,7 +493,7 @@ def test_leave_call_implicit_method() -> None:
 
 
 def test_leave_call_is_super() -> None:
-  """Verifies the behavior of leave call is super."""
+  """Verify `get_transformer` handles leave call is super as expected."""
   (t, _, _) = get_transformer()
   call = cst.Call(func=cst.Name("super"))
   with (
@@ -590,8 +506,8 @@ def test_leave_call_is_super() -> None:
 
 
 def test_leave_call_version_warning() -> None:
-  """Verifies the behavior of leave call version warning."""
-  (t, s, c) = get_transformer()
+  """Verify `get_transformer` handles leave call version warning as expected."""
+  (t, s, _c) = get_transformer()
   call = cst.Call(func=cst.Name("func"))
   with (
     patch("ml_switcheroo.core.rewriter.passes.api_call_mixin.handle_pre_checks", return_value=(False, call)),
@@ -606,8 +522,8 @@ def test_leave_call_version_warning() -> None:
 
 
 def test_leave_call_no_lookup() -> None:
-  """Verifies the behavior of leave call no lookup."""
-  (t, s, _) = get_transformer()
+  """Verify `get_transformer` handles leave call no lookup as expected."""
+  (t, _s, _) = get_transformer()
   call = cst.Call(func=cst.Name("func"))
   with (
     patch("ml_switcheroo.core.rewriter.passes.api_call_mixin.handle_pre_checks", return_value=(False, call)),
@@ -632,25 +548,32 @@ def test_is_module_alias() -> None:
 
 
 def test_normalize_arguments_types() -> None:
-  """Verifies the behavior of normalize arguments types."""
+  """Verify `get_transformer` handles normalize arguments types as expected."""
   (t, _, _) = get_transformer()
   op_details = {"std_args": [{"name": "a", "default": 1}, ("b", 2)]}
   call = cst.Call(func=cst.Name("func"))
   with patch.object(t, "_is_module_alias", return_value=False):
     res = normalize_arguments(call, call, op_details, {}, "torch", t._is_module_alias)
   assert isinstance(res, list)
+  assert len(res) == 1
+  assert isinstance(res[0].value, cst.Integer)
+  assert res[0].value.value == "1"
 
 
 def test_api_ctx_property() -> None:
-  """Verifies the behavior of API ctx property."""
+  """Verify `get_transformer` handles API ctx property as expected."""
   (t, _, ctx) = get_transformer()
   assert t.ctx is ctx.hook_context
 
 
-def test_normalize_arguments_method_call_arg_provided() -> None:
-  """Verifies the behavior of normalize arguments method call argument provided."""
+def test_normalize_arguments_method_call_arg_provided(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `get_transformer` handles normalize arguments method call arg provided as expected.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   (t, _, _) = get_transformer()
-  _test_setattr(t, "_is_module_alias", lambda x: False)
+  monkeypatch.setattr(t, "_is_module_alias", lambda x: False, raising=False)
   original_node = cst.Call(
     func=cst.Attribute(value=cst.Name("tensor"), attr=cst.Name("method")),
     args=[cst.Arg(keyword=cst.Name("x"), value=cst.Name("a"))],
@@ -661,10 +584,14 @@ def test_normalize_arguments_method_call_arg_provided() -> None:
   assert cst.ensure_type(args[0].keyword, cst.Name).value == "input"
 
 
-def test_normalize_arguments_method_call_no_std_args() -> None:
-  """Verifies the behavior of normalize arguments method call no std arguments."""
+def test_normalize_arguments_method_call_no_std_args(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `get_transformer` handles normalize arguments method call no std args as expected.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   (t, _, _) = get_transformer()
-  _test_setattr(t, "_is_module_alias", lambda x: False)
+  monkeypatch.setattr(t, "_is_module_alias", lambda x: False, raising=False)
   original_node = cst.Call(func=cst.Attribute(value=cst.Name("tensor"), attr=cst.Name("method")), args=[])
   op_details: dict[str, RuntimeTensorOrValue] = {}
   args: list[cst.Arg] = normalize_arguments(original_node, original_node, op_details, {}, "torch", t._is_module_alias)
@@ -672,10 +599,14 @@ def test_normalize_arguments_method_call_no_std_args() -> None:
   assert isinstance(args[0].value, cst.Name)
 
 
-def test_normalize_arguments_pack_variadics_no_list_single() -> None:
-  """Verifies the behavior of normalize arguments pack variadics no list single."""
+def test_normalize_arguments_pack_variadics_no_list_single(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `get_transformer` handles normalize arguments pack variadics no list single as expected.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   (t, _, _) = get_transformer()
-  _test_setattr(t, "_is_module_alias", lambda x: False)
+  monkeypatch.setattr(t, "_is_module_alias", lambda x: False, raising=False)
   original_node = cst.Call(func=cst.Name("func"), args=[cst.Arg(value=cst.Name("a"))])
   op_details = {"std_args": [{"name": "dim", "is_variadic": True}]}
   api_mapping = {"pack_to_tuple": "dims", "pack_as": "Tuple"}
@@ -685,10 +616,14 @@ def test_normalize_arguments_pack_variadics_no_list_single() -> None:
   assert len(args) == 1
 
 
-def test_normalize_arguments_reconstruct_defaults_error() -> None:
-  """Verifies the behavior of normalize arguments reconstruct defaults correctly handling an error."""
+def test_normalize_arguments_reconstruct_defaults_error(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `get_transformer` handles normalize arguments reconstruct defaults error as expected.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   (t, _, _) = get_transformer()
-  _test_setattr(t, "_is_module_alias", lambda x: False)
+  monkeypatch.setattr(t, "_is_module_alias", lambda x: False, raising=False)
   original_node = cst.Call(func=cst.Name("func"), args=[])
   op_details = {
     "std_args": [
@@ -699,10 +634,14 @@ def test_normalize_arguments_reconstruct_defaults_error() -> None:
   assert len(args) == 0
 
 
-def test_normalize_arguments_reconstruct_no_alias() -> None:
-  """Verifies the behavior of normalize arguments reconstruct no alias."""
+def test_normalize_arguments_reconstruct_no_alias(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `get_transformer` handles normalize arguments reconstruct no alias as expected.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   (t, _, _) = get_transformer()
-  _test_setattr(t, "_is_module_alias", lambda x: False)
+  monkeypatch.setattr(t, "_is_module_alias", lambda x: False, raising=False)
   original_node = cst.Call(func=cst.Name("func"), args=[cst.Arg(value=cst.Name("a"))])
   op_details = {"std_args": ["input"]}
   api_mapping = {"args": {"input": None}}
@@ -712,10 +651,14 @@ def test_normalize_arguments_reconstruct_no_alias() -> None:
   assert len(args) == 0
 
 
-def test_normalize_arguments_reconstruct_val_map() -> None:
-  """Verifies the behavior of normalize arguments reconstruct value map."""
+def test_normalize_arguments_reconstruct_val_map(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `get_transformer` handles normalize arguments reconstruct val map as expected.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   (t, _, _) = get_transformer()
-  _test_setattr(t, "_is_module_alias", lambda x: False)
+  monkeypatch.setattr(t, "_is_module_alias", lambda x: False, raising=False)
   original_node = cst.Call(func=cst.Name("func"), args=[cst.Arg(keyword=cst.Name("x"), value=cst.Name("a"))])
   op_details = {"std_args": ["input"], "variants": {"torch": {"args": {"input": "x"}}}}
 
@@ -741,23 +684,33 @@ def test_normalize_arguments_reconstruct_val_map() -> None:
   assert isinstance(res4[0].value, cst.Integer)
 
 
-def test_normalize_arguments_reconstruct_different_val() -> None:
-  """Verifies the behavior of normalize arguments reconstruct different value."""
+def test_normalize_arguments_reconstruct_different_val(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `get_transformer` handles normalize arguments reconstruct different val as expected.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   (t, _, _) = get_transformer()
-  _test_setattr(t, "_is_module_alias", lambda x: False)
+  monkeypatch.setattr(t, "_is_module_alias", lambda x: False, raising=False)
   original_node = cst.Call(func=cst.Name("func"), args=[cst.Arg(value=cst.Name("a"))])
   op_details = {"std_args": ["input"]}
   api_mapping = {"arg_values": {"input": 42}}
   args: list[cst.Arg] = normalize_arguments(
     original_node, original_node, op_details, api_mapping, "torch", t._is_module_alias
   )
+  assert len(args) == 1
   assert isinstance(args[0].value, cst.Integer)
+  assert args[0].value.value == "42"
 
 
-def test_normalize_arguments_inject_args() -> None:
-  """Verifies the behavior of normalize arguments inject arguments."""
+def test_normalize_arguments_inject_args(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `get_transformer` returns `3` for normalize arguments inject args.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   (t, _, _) = get_transformer()
-  _test_setattr(t, "_is_module_alias", lambda x: False)
+  monkeypatch.setattr(t, "_is_module_alias", lambda x: False, raising=False)
   original_node = cst.Call(func=cst.Name("func"), args=[])
   op_details: dict[str, RuntimeTensorOrValue] = {"std_args": []}
   api_mapping = {
@@ -792,34 +745,44 @@ def test_inject_stmts_to_body() -> None:
   )
   res2 = t._inject_stmts_to_body(node2, [cst.SimpleStatementLine(body=[cst.Expr(cst.Integer("1"))])])
   assert len(res2.body.body) == 3
-  assert isinstance(
-    _test_getattr(
-      {
-        "v": _test_getattr(
-          {
-            "v": _test_getattr(
-              {
-                "v": _test_getattr(
-                  {
-                    "v": _test_getattr(
-                      {
-                        "v": _test_getattr({"v": _test_getattr({"v": res2}, "__getitem__")("v").body}, "__getitem__")(
-                          "v"
-                        ).body
-                      },
-                      "__getitem__",
-                    )("v")[0]
-                  },
-                  "__getitem__",
-                )("v").body
-              },
-              "__getitem__",
-            )("v")[0]
-          },
-          "__getitem__",
-        )("v").value
-      },
-      "__getitem__",
-    )("v"),
-    cst.SimpleString,
+  first_stmt = cst.ensure_type(res2.body.body[0], cst.SimpleStatementLine)
+  first_expr = cst.ensure_type(first_stmt.body[0], cst.Expr)
+  assert isinstance(first_expr.value, cst.SimpleString)
+
+
+def test_api_transformer_import_alias_tracking_and_version_runtime_error(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `visit_Import` / `visit_ImportFrom` alias tracking and `check_version_constraints` error resilience.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
+  import importlib.metadata
+
+  ctx = RewriterContext(SemanticsManager(), RuntimeConfig(source_framework="torch", target_framework="jax"))
+  p = ApiTransformer(ctx)
+
+  imp_node = cst.Import(names=[cst.ImportAlias(name=cst.Name("torch"))])
+  assert p.visit_Import(imp_node) is False
+  assert p.context.alias_map.get("torch") == "torch"
+
+  imp_from = cst.ImportFrom(
+    module=cst.Name("torch"),
+    names=[cst.ImportAlias(name=cst.Attribute(value=cst.Name("nn"), attr=cst.Name("functional")))],
   )
+  assert p.visit_ImportFrom(imp_from) is False
+  assert p.context.alias_map.get("functional") == "torch.functional"
+
+  def _raise_runtime_error(_pkg: str) -> str:
+    """Raise `RuntimeError` during package metadata lookup.
+
+    Args:
+        _pkg: Package name string.
+
+    Returns:
+        Never returns; raises `RuntimeError`.
+    """
+    raise RuntimeError("metadata lookup failure")
+
+  monkeypatch.setattr(importlib.metadata, "version", _raise_runtime_error)
+  monkeypatch.setattr(p.context.semantics, "get_framework_config", lambda _fw: None)
+  assert p.check_version_constraints("1.0", "2.0") is None

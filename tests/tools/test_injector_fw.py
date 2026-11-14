@@ -13,7 +13,7 @@ from ml_switcheroo.tools.injector_fw import FrameworkInjector
 
 @pytest.fixture
 def target_json(tmp_path: Path) -> Path:
-  """Execute target json helper logic.
+  """Create a configured `Path` fixture for injector fw tests.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
@@ -31,7 +31,7 @@ def target_json(tmp_path: Path) -> Path:
 
 @pytest.fixture
 def sample_variant() -> FrameworkVariant:
-  """Execute sample variant helper logic.
+  """Create a configured `FrameworkVariant` fixture for injector fw tests.
 
   Returns:
       Configured `sample_variant` fixture value (FrameworkVariant).
@@ -40,7 +40,7 @@ def sample_variant() -> FrameworkVariant:
 
 
 def test_injector_updates_existing_json(target_json: Path, sample_variant: FrameworkVariant) -> None:
-  """Verifies the behavior of injector updates existing JSON.
+  """Verify `loads` emits `OldOp` for injector updates existing JSON.
 
   Args:
       target_json: Path to temporary target framework JSON file.
@@ -60,7 +60,7 @@ def test_injector_updates_existing_json(target_json: Path, sample_variant: Frame
 
 
 def test_injector_creates_new_file(tmp_path: Path, sample_variant: FrameworkVariant) -> None:
-  """Verifies the behavior of injector creates new file.
+  """Verify `missing_path.exists` emits `NewOp` for injector creates new file.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
@@ -79,17 +79,18 @@ def test_injector_creates_new_file(tmp_path: Path, sample_variant: FrameworkVari
 def test_injector_dry_run(
   target_json: Path, sample_variant: FrameworkVariant, capsys: pytest.CaptureFixture[str]
 ) -> None:
-  """Verifies the behavior of injector dry run.
+  """Verify `capsys.readouterr` emits `LogSoftmax` for injector dry run.
 
   Args:
       target_json: Path to temporary target framework JSON file.
       sample_variant: Sample FrameworkVariant fixture for testing.
       capsys: Pytest stdout and stderr capture fixture.
   """
-  target_json.stat().st_mtime
+  mtime_before: float = target_json.stat().st_mtime
   with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=target_json):
     injector: FrameworkInjector = FrameworkInjector("torch", "LogSoftmax", sample_variant)
     injector.inject(dry_run=True)
+  assert target_json.stat().st_mtime == mtime_before
   captured = capsys.readouterr()
   assert "[Dry Run] Writing to torch.json" in captured.out
   assert "LogSoftmax" in captured.out
@@ -163,11 +164,13 @@ def test_injector_write_error(target_json: Path, sample_variant: FrameworkVarian
       raise OSError("Permission denied")
     return original_open(file, "r", encoding=encoding)
 
-  with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=target_json):
-    with patch("builtins.open", side_effect=mock_open):
-      injector: FrameworkInjector = FrameworkInjector("torch", "LogSoftmax", sample_variant)
-      success: bool = injector.inject(dry_run=False)
-      assert success is False
+  with (
+    patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=target_json),
+    patch("builtins.open", side_effect=mock_open),
+  ):
+    injector: FrameworkInjector = FrameworkInjector("torch", "LogSoftmax", sample_variant)
+    success: bool = injector.inject(dry_run=False)
+    assert success is False
 
 
 def test_injector_load_corrupt_json(target_json: Path, sample_variant: FrameworkVariant) -> None:
@@ -189,8 +192,9 @@ def test_injector_load_corrupt_json(target_json: Path, sample_variant: Framework
 
 
 def test_injector_fw_missing() -> None:
-  """Verifies the behavior of injector framework missing."""
+  """Verify `FrameworkVariant` handles injector fw missing as expected."""
   from unittest import mock
+
   from ml_switcheroo.core.dsl import FrameworkVariant
   from ml_switcheroo.tools.injector_fw.core import FrameworkInjector
 
@@ -198,24 +202,29 @@ def test_injector_fw_missing() -> None:
   injector: FrameworkInjector = FrameworkInjector("jax", "bar", variant)
   with mock.patch.object(injector, "_load_current", return_value={"bar": variant.model_dump(exclude_none=True)}):
     assert injector.inject(dry_run=False) is True
-  with mock.patch.object(injector, "_load_current", return_value={"other": {}}):
-    with mock.patch("builtins.open", side_effect=OSError("fail")):
-      assert injector.inject(dry_run=False) is False
+  with (
+    mock.patch.object(injector, "_load_current", return_value={"other": {}}),
+    mock.patch("builtins.open", side_effect=OSError("fail")),
+  ):
+    assert injector.inject(dry_run=False) is False
   with mock.patch("builtins.open", mock.mock_open(read_data="invalid json")):
     assert injector._load_current() == {}
 
 
 def test_injector_fw_updating() -> None:
-  """Verifies the behavior of injector framework updating."""
+  """Verify `FrameworkVariant` handles injector fw updating as expected."""
   from unittest import mock
+
   from ml_switcheroo.core.dsl import FrameworkVariant
   from ml_switcheroo.tools.injector_fw.core import FrameworkInjector
 
   variant: FrameworkVariant = FrameworkVariant(api="foo")
   injector: FrameworkInjector = FrameworkInjector("jax", "bar", variant)
-  with mock.patch.object(injector, "_load_current", return_value={"bar": {"api": "old_foo"}}):
-    with mock.patch("builtins.open", mock.mock_open()):
-      assert injector.inject(dry_run=False) is True
+  with (
+    mock.patch.object(injector, "_load_current", return_value={"bar": {"api": "old_foo"}}),
+    mock.patch("builtins.open", mock.mock_open()),
+  ):
+    assert injector.inject(dry_run=False) is True
 
 
 def test_injector_dry_run_nonexistent_parent_dir(tmp_path: Path, sample_variant: FrameworkVariant) -> None:

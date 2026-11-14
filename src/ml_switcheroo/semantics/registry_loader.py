@@ -17,9 +17,19 @@ if typing.TYPE_CHECKING:
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
-from ml_switcheroo.core import hooks as hooks
+from ml_switcheroo.core import hooks_registry as _hooks_registry
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.frameworks.base import FrameworkAdapter, ImportConfig, available_frameworks, get_adapter
-from ml_switcheroo.semantics.merging import merge_overlay_data, merge_tier_data
+from ml_switcheroo.semantics.merging import (
+  JsonValueLike,
+  TypedSemanticsStore,
+  merge_overlay_data,
+  merge_tier_data,
+  merge_tier_with_models,
+)
+from ml_switcheroo.semantics.schema import FrameworkAlias, FrameworkTraits, PluginTraits, StructuralTraits
+
+hooks = _hooks_registry
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +55,21 @@ class RegistryLoader:
     self._hydrate_plugins()
     self.index_variants()
 
+  def _typed_store(self) -> TypedSemanticsStore | None:
+    """Return a ``TypedSemanticsStore`` bound to ``self.mgr`` when typed dictionaries exist.
+
+    Returns:
+        ``TypedSemanticsStore`` instance if ``self.mgr`` exposes typed stores, else ``None``.
+    """
+    try:
+      ops = self.mgr.operations
+      fw_traits = self.mgr.framework_traits
+    except AttributeError:
+      return None
+    if type(ops) is not dict or type(fw_traits) is not dict:
+      return None
+    return TypedSemanticsStore(operations=ops, framework_traits=fw_traits)
+
   def index_variants(self) -> None:
     """Index operation variants into hash maps for O(1) lookups.
 
@@ -60,6 +85,18 @@ class RegistryLoader:
             for fw_name, variant in variants.items():
               if isinstance(variant, dict):
                 self.mgr._variant_cache[(abstract_id, fw_name)] = variant
+    except AttributeError:
+      pass
+
+    try:
+      typed_cache = self.mgr._typed_variant_cache
+      ops = self.mgr.operations
+      if type(typed_cache) is dict and type(ops) is dict:
+        typed_cache.clear()
+        for abstract_id, op_model in ops.items():
+          for fw_name, variant_model in op_model.variants.items():
+            if variant_model is not None:
+              typed_cache[(abstract_id, fw_name)] = variant_model
     except AttributeError:
       pass
 
@@ -101,6 +138,61 @@ class RegistryLoader:
       # 6. Apply Dynamic Wiring logic
       self._apply_wiring(fw_name, adapter)
 
+  @staticmethod
+  def _load_trait_models(
+    fw_name: str,
+    adapter: FrameworkAdapter,
+    config: dict[str, JsonValue],
+    typed_fw: FrameworkTraits | None = None,
+  ) -> None:
+    """Attach structural and plugin Pydantic trait models from ``adapter`` onto ``typed_fw`` and ``config``.
+
+    Args:
+        fw_name: Framework identifier for warning diagnostics.
+        adapter: Active framework adapter instance.
+        config: Mutable framework configuration dictionary.
+        typed_fw: Optional ``FrameworkTraits`` model updated directly without dict roundtrip.
+    """
+    try:
+      traits = adapter.structural_traits
+      if traits is not None:
+        config["traits"] = traits.model_dump(exclude_unset=True)
+        if typed_fw is not None and isinstance(traits, StructuralTraits):
+          typed_fw.traits = traits
+    except AttributeError:
+      pass
+    except (TypeError, ValueError) as e:
+      logger.warning("⚠️ Failed to load structural traits for %s: %s", fw_name, e)
+
+    try:
+      ptraits = adapter.plugin_traits
+      if ptraits is not None:
+        config["plugin_traits"] = ptraits.model_dump(exclude_unset=True)
+        if typed_fw is not None and isinstance(ptraits, PluginTraits):
+          typed_fw.plugin_traits = ptraits
+    except AttributeError:
+      pass
+    except (TypeError, ValueError) as e:
+      logger.warning("⚠️ Failed to load plugin traits for %s: %s", fw_name, e)
+
+  def _ensure_typed_framework_traits(self, fw_name: str) -> FrameworkTraits | None:
+    """Return or create the ``FrameworkTraits`` entry for ``fw_name`` on ``self.mgr`` if supported.
+
+    Args:
+        fw_name: Framework identifier key.
+
+    Returns:
+        ``FrameworkTraits`` model stored in ``self.mgr.framework_traits``, or ``None``.
+    """
+    store = self._typed_store()
+    if store is None:
+      return None
+    existing = store.framework_traits.get(fw_name)
+    if existing is None:
+      existing = FrameworkTraits()
+      store.framework_traits[fw_name] = existing
+    return existing
+
   def _load_adapter_traits(self, fw_name: str, adapter: FrameworkAdapter) -> None:
     """Extract import aliases, supported tiers, and structural traits.
 
@@ -112,6 +204,7 @@ class RegistryLoader:
         None
     """
     config = self.mgr.framework_configs[fw_name]
+    typed_fw = self._ensure_typed_framework_traits(fw_name)
 
     try:
       imp_alias = adapter.import_alias
@@ -119,10 +212,9 @@ class RegistryLoader:
       imp_alias = None
     if imp_alias:
       mod_path, alias_name = imp_alias
-      config["alias"] = {
-        "module": mod_path,
-        "name": alias_name,
-      }
+      config["alias"] = {"module": mod_path, "name": alias_name}
+      if typed_fw is not None:
+        typed_fw.alias = FrameworkAlias(module=mod_path, name=alias_name)
 
     try:
       inh = adapter.inherits_from
@@ -130,24 +222,10 @@ class RegistryLoader:
       inh = None
     if inh:
       config["extends"] = inh
+      if typed_fw is not None:
+        typed_fw.extends = inh
 
-    try:
-      traits = adapter.structural_traits
-      if traits is not None:
-        config["traits"] = traits.model_dump(exclude_unset=True)
-    except AttributeError:
-      pass
-    except (TypeError, ValueError) as e:
-      logger.warning("⚠️ Failed to load structural traits for %s: %s", fw_name, e)
-
-    try:
-      ptraits = adapter.plugin_traits
-      if ptraits is not None:
-        config["plugin_traits"] = ptraits.model_dump(exclude_unset=True)
-    except AttributeError:
-      pass
-    except (TypeError, ValueError) as e:
-      logger.warning("⚠️ Failed to load plugin traits for %s: %s", fw_name, e)
+    self._load_trait_models(fw_name, adapter, config, typed_fw=typed_fw)
 
     try:
       tiers = adapter.supported_tiers
@@ -155,6 +233,8 @@ class RegistryLoader:
       tiers = []
     if tiers:
       config["tiers"] = [t.value for t in tiers]
+      if typed_fw is not None:
+        typed_fw.tiers = list(tiers)
 
     try:
       seed_methods = adapter.rng_seed_methods
@@ -184,22 +264,33 @@ class RegistryLoader:
     except AttributeError:
       specs = {}
     if specs:
-      # Default to Extras unless inferred otherwise
       tier = SemanticTier.EXTRAS
-      spec_content: dict[str, JsonValue] = {}
-
-      for op_key, op_model in specs.items():
-        spec_content[op_key] = op_model.model_dump(by_alias=True, exclude_unset=True)
+      for op_key in specs:
         if op_key[0].isupper():
           tier = SemanticTier.NEURAL
 
-      merge_tier_data(
-        data=self.mgr.data,
-        key_origins=self.mgr._key_origins,
-        framework_configs=self.mgr.framework_configs,
-        new_content=spec_content,
-        tier=tier,
-      )
+      store = self._typed_store()
+      if store is not None:
+        typed_spec_content: dict[str, JsonValueLike] = dict(specs)
+        merge_tier_with_models(
+          typed_store=store,
+          data=self.mgr.data,
+          key_origins=self.mgr._key_origins,
+          framework_configs=self.mgr.framework_configs,
+          new_content=typed_spec_content,
+          tier=tier,
+        )
+      else:
+        spec_content: dict[str, JsonValue] = {
+          op_key: op_model.model_dump(by_alias=True, exclude_unset=True) for op_key, op_model in specs.items()
+        }
+        merge_tier_data(
+          data=self.mgr.data,
+          key_origins=self.mgr._key_origins,
+          framework_configs=self.mgr.framework_configs,
+          new_content=spec_content,
+          tier=tier,
+        )
 
   def _load_adapter_definitions(self, fw_name: str, adapter: FrameworkAdapter) -> None:
     """Load concrete implementations defined by the adapter.
@@ -216,25 +307,37 @@ class RegistryLoader:
     except AttributeError:
       defs = {}
     if defs:
-      mappings: dict[str, JsonValue] = {k: v.model_dump(exclude_unset=True) for k, v in defs.items()}
-
-      # Pre-label Tiers based on Naming Convention if unknown
-      for op_key in mappings.keys():
+      for op_key in defs:
         if op_key not in self.mgr._key_origins:
           if op_key and op_key[0].isupper():
             self.mgr._key_origins[op_key] = SemanticTier.NEURAL.value
           else:
             self.mgr._key_origins[op_key] = SemanticTier.ARRAY_API.value
 
-      virtual_snap: dict[str, JsonValue] = {"__framework__": fw_name, "mappings": mappings}
-      merge_overlay_data(
-        data=self.mgr.data,
-        key_origins=self.mgr._key_origins,
-        framework_configs=self.mgr.framework_configs,
-        test_templates=self.mgr.test_templates,
-        content=virtual_snap,
-        filename=f"{fw_name}_code_defs",
-      )
+      store = self._typed_store()
+      if store is not None:
+        typed_mappings: dict[str, RuntimeTensorOrValue] = dict(defs)
+        virtual_typed_snap: dict[str, RuntimeTensorOrValue] = {"__framework__": fw_name, "mappings": typed_mappings}
+        merge_overlay_data(
+          data=self.mgr.data,
+          key_origins=self.mgr._key_origins,
+          framework_configs=self.mgr.framework_configs,
+          test_templates=self.mgr.test_templates,
+          content=virtual_typed_snap,
+          filename=f"{fw_name}_code_defs",
+          typed_store=store,
+        )
+      else:
+        mappings: dict[str, JsonValue] = {k: v.model_dump(exclude_unset=True) for k, v in defs.items()}
+        virtual_snap: dict[str, JsonValue] = {"__framework__": fw_name, "mappings": mappings}
+        merge_overlay_data(
+          data=self.mgr.data,
+          key_origins=self.mgr._key_origins,
+          framework_configs=self.mgr.framework_configs,
+          test_templates=self.mgr.test_templates,
+          content=virtual_snap,
+          filename=f"{fw_name}_code_defs",
+        )
 
   def _load_import_namespaces(self, fw_name: str, adapter: FrameworkAdapter) -> None:
     """Register framework namespaces for import abstraction.
@@ -303,9 +406,7 @@ class RegistryLoader:
     dummy_snap: dict[str, dict[str, JsonValue]] = {}
     try:
       wiring_fn(dummy_snap)
-      overlay_snap: dict[str, JsonValue] = {"__framework__": fw_name}
-      for k, v in dummy_snap.items():
-        overlay_snap[k] = v
+      overlay_snap: dict[str, JsonValue] = {"__framework__": fw_name, **dummy_snap}
       merge_overlay_data(
         data=self.mgr.data,
         key_origins=self.mgr._key_origins,
@@ -313,6 +414,7 @@ class RegistryLoader:
         test_templates=self.mgr.test_templates,
         content=overlay_snap,
         filename=f"{fw_name}_dynamic_wiring",
+        typed_store=self._typed_store(),
       )
     except (OSError, KeyError, ValueError, TypeError, AttributeError, RuntimeError) as e:
       logger.warning("⚠️ Failed to apply wiring for %s: %s", fw_name, e)
@@ -324,13 +426,24 @@ class RegistryLoader:
         None
     """
     plugin_metadata = hooks.get_all_hook_metadata()
-    for _, spec in plugin_metadata.items():
+    store = self._typed_store()
+    for spec in plugin_metadata.values():
       ops_dict: dict[str, JsonValue] = spec.ops or {}
       for op_name, op_details in ops_dict.items():
-        merge_tier_data(
-          data=self.mgr.data,
-          key_origins=self.mgr._key_origins,
-          framework_configs=self.mgr.framework_configs,
-          new_content={op_name: op_details},
-          tier=SemanticTier.EXTRAS,
-        )
+        if store is not None:
+          merge_tier_with_models(
+            typed_store=store,
+            data=self.mgr.data,
+            key_origins=self.mgr._key_origins,
+            framework_configs=self.mgr.framework_configs,
+            new_content={op_name: op_details},
+            tier=SemanticTier.EXTRAS,
+          )
+        else:
+          merge_tier_data(
+            data=self.mgr.data,
+            key_origins=self.mgr._key_origins,
+            framework_configs=self.mgr.framework_configs,
+            new_content={op_name: op_details},
+            tier=SemanticTier.EXTRAS,
+          )

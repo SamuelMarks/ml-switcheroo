@@ -4,13 +4,13 @@ import mlx.core as mx
 
 
 class FlattenModel:
-  """Test helper class FlattenModel."""
+  """Sentinel `FlattenModel` fixture class used in MLX tests."""
 
   def __init__(self, start_dim: mx.array = 1):
     """Initializes the FlattenModel instance.
 
     Args:
-        start_dim: The start dim (mx.array) for   init  .
+        start_dim: Input `start_dim` parameter value (`mx.array`).
     """
     super().__init__()
     self.start_dim = start_dim

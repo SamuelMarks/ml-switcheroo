@@ -5,7 +5,7 @@ import numpy.typing
 
 
 class Model:
-  """Test helper class Model."""
+  """Sentinel `Model` fixture class used in numpy tests."""
 
   def __init__(self, in_features: int, out_features: int):
     """Initializes the Model instance.

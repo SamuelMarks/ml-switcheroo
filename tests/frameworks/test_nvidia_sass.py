@@ -1,12 +1,9 @@
 """Test suite for the Sass module."""
 
-from tests.conftest import _test_getattr
-
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
 import typing
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
 
 from ml_switcheroo.frameworks.base import InitMode
 from ml_switcheroo.frameworks.nvidia_sass import NvidiaSassAdapter
@@ -14,7 +11,7 @@ from ml_switcheroo.semantics.schema import PluginTraits
 
 
 def test_nvidia_sass_adapter_init() -> None:
-  """Verifies the behavior of NVIDIA_SASS adapter initialization."""
+  """Verify `NvidiaSassAdapter` returns `150` for nvidia SASS adapter init."""
   adapter = NvidiaSassAdapter()
   assert adapter.display_name == "NVIDIA SASS"
   assert adapter.ui_priority == 150
@@ -23,7 +20,7 @@ def test_nvidia_sass_adapter_init() -> None:
 
 
 def test_nvidia_sass_properties() -> None:
-  """Verifies the behavior of NVIDIA_SASS properties."""
+  """Verify `NvidiaSassAdapter` emits `// NVIDIA_SASS Header` for nvidia SASS properties."""
   adapter = NvidiaSassAdapter()
   assert adapter.import_alias == ("nvidia_sass", "asm")
   assert adapter.import_namespaces == {}
@@ -41,10 +38,8 @@ def test_nvidia_sass_properties() -> None:
   assert isinstance(defs, dict)
   specs = adapter.specifications
   assert specs == {}
-  snapshot: dict[str, RuntimeTensorOrValue] = {}
-  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    _test_getattr({"v": snapshot}, "__getitem__")("v")
-  )
+  snapshot: dict[str, dict[str, JsonValue]] = {}
+  adapter.apply_wiring(snapshot)
   assert snapshot == {}
   examples: dict[str, str] = adapter.get_tiered_examples()
   assert "tier1_math" in examples
@@ -52,7 +47,7 @@ def test_nvidia_sass_properties() -> None:
 
 
 def test_nvidia_sass_missing_coverage() -> None:
-  """Verify nvidia sass missing coverage behavior."""
+  """Verify `NvidiaSassAdapter` returns `1` for nvidia SASS missing coverage."""
   adapter = NvidiaSassAdapter()
 
   # Traits
@@ -103,7 +98,7 @@ def test_nvidia_sass_missing_coverage() -> None:
 
 
 def test_nvidia_sass_missing_methods() -> None:
-  """Verify nvidia sass missing methods behavior."""
+  """Verify `NvidiaSassAdapter` emits `tier1_math` for nvidia SASS missing methods."""
   adapter = NvidiaSassAdapter()
 
   assert adapter.get_device_syntax("cpu") == "// Target Device: cpu"
@@ -128,14 +123,13 @@ def test_nvidia_sass_missing_methods() -> None:
   ex: dict[str, str] = adapter.get_tiered_examples()
   assert "tier1_math" in ex
   assert "tier1_math" in ex
-  pass
 
   adapter.apply_wiring({})
   assert adapter.get_doc_url("api") is None
 
 
 def test_nvidia_sass_parse_nvidia_sass_to_graph() -> None:
-  """Verify nvidia sass parse nvidia sass to graph behavior."""
+  """Verify `NvidiaSassAdapter` handles nvidia SASS parse nvidia SASS to graph as expected."""
   adapter = NvidiaSassAdapter()
 
   # Test empty graph

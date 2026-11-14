@@ -1,0 +1,56 @@
+"""Test suite for the Loader module."""
+
+import pytest
+from pydantic import JsonValue
+
+from ml_switcheroo.semantics.manager import SemanticsManager
+
+
+@pytest.fixture
+def manager() -> SemanticsManager:
+  """Create a configured `SemanticsManager` fixture for loader tests.
+
+  Returns:
+      Configured `manager` fixture value (SemanticsManager).
+  """
+  return SemanticsManager()
+
+
+def test_load_semantics(manager: SemanticsManager) -> None:
+  """Loads semantics.
+
+  Args:
+      manager: Input `manager` parameter value (`SemanticsManager`).
+  """
+  data = manager.get_known_apis()
+  assert len(data) > 0
+  assert "abs" in data
+
+
+def test_resolve_torch_sum(manager: SemanticsManager) -> None:
+  """Resolves PyTorch sum.
+
+  Args:
+      manager: Input `manager` parameter value (`SemanticsManager`).
+  """
+  mock_data: dict[str, dict[str, JsonValue]] = {"mock_op": {"variants": {"torch": {"api": "torch.mock_op"}}}}
+  manager.data = mock_data
+  manager._build_index()
+  result: tuple[str, dict[str, JsonValue]] | None = manager.get_definition("torch.mock_op")
+  assert isinstance(result, tuple)
+  assert result[0] == "mock_op"
+  variants = result[1]["variants"]
+  assert isinstance(variants, dict)
+  torch_var = variants["torch"]
+  assert isinstance(torch_var, dict)
+  assert torch_var["api"] == "torch.mock_op"
+
+
+def test_unknown_api_returns_none(manager: SemanticsManager) -> None:
+  """Verify `manager.get_definition` handles unknown API returns none as expected.
+
+  Args:
+      manager: Input `manager` parameter value (`SemanticsManager`).
+  """
+  result: tuple[str, dict[str, JsonValue]] | None = manager.get_definition("torch.non_existent_function")
+  assert result is None

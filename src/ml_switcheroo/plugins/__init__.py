@@ -1,9 +1,7 @@
-"""Plugin Package.
+"""Built-in transformation plugins package for ml-switcheroo.
 
-Automatically discovers and registers all plugin modules within this package
-by delegating to ``ml_switcheroo.core.hooks_registry.load_plugins``.
+Plugin modules inside this package are discovered and loaded lazily on demand via
+``HookRegistry.ensure_loaded()`` without mutating global state at package import time.
 """
 
-from ml_switcheroo.core.hooks_registry import load_plugins
-
-load_plugins()
+__all__: list[str] = []

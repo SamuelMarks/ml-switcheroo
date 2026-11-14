@@ -1,14 +1,12 @@
 """Test suite for the Fuzzer Symbolic module."""
 
-from tests.conftest import _test_getattr
-
-from pydantic import JsonValue
 import random
 
 import hypothesis.strategies as st
 import numpy as np
 import pytest
 from hypothesis import HealthCheck, given, settings
+from pydantic import JsonValue
 
 from ml_switcheroo.frameworks import register_framework
 from ml_switcheroo.testing.fuzzer import InputFuzzer
@@ -16,7 +14,7 @@ from ml_switcheroo.testing.fuzzer import InputFuzzer
 
 @pytest.fixture
 def fuzzer() -> InputFuzzer:
-  """Execute fuzzer helper logic.
+  """Create a configured `InputFuzzer` fixture for fuzzer symbolic tests.
 
   Returns:
       Configured `fuzzer` fixture value (InputFuzzer).
@@ -30,59 +28,76 @@ def fuzzer() -> InputFuzzer:
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_heuristic_booleans(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of heuristic booleans.
+  """Verify `given` handles heuristic booleans as expected.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test heuristic booleans.
-      data: The data (st.DataObject) for test heuristic booleans.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
+      data: Input `data` parameter value (`st.DataObject`).
   """
   strats = fuzzer.build_strategies(["mask", "condition"])
   inputs = data.draw(st.fixed_dictionaries(strats))
-  assert _test_getattr(inputs["mask"], "dtype") == np.bool_
-  assert _test_getattr(inputs["condition"], "dtype") == np.bool_
+  mask = inputs["mask"]
+  cond = inputs["condition"]
+  assert isinstance(mask, np.ndarray)
+  assert isinstance(cond, np.ndarray)
+  assert mask.dtype == np.bool_
+  assert cond.dtype == np.bool_
 
 
 @given(data=st.data())
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_heuristic_integers(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of heuristic integers.
+  """Verify `given` handles heuristic integers as expected.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test heuristic integers.
-      data: The data (st.DataObject) for test heuristic integers.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
+      data: Input `data` parameter value (`st.DataObject`).
   """
   strats = fuzzer.build_strategies(["indices", "k_idx"])
   inputs = data.draw(st.fixed_dictionaries(strats))
-  assert np.issubdtype(_test_getattr(inputs["indices"], "dtype"), np.integer)
-  assert np.issubdtype(_test_getattr(inputs["k_idx"], "dtype"), np.integer)
+  indices = inputs["indices"]
+  k_idx = inputs["k_idx"]
+  assert isinstance(indices, np.ndarray)
+  assert isinstance(k_idx, np.ndarray)
+  assert np.issubdtype(indices.dtype, np.integer)
+  assert np.issubdtype(k_idx.dtype, np.integer)
 
 
 @given(data=st.data())
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_heuristic_scalars(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of heuristic scalars.
+  """Verify `given` handles heuristic scalars as expected.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test heuristic scalars.
-      data: The data (st.DataObject) for test heuristic scalars.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
+      data: Input `data` parameter value (`st.DataObject`).
   """
   strats = fuzzer.build_strategies(["alpha", "eps"])
   inputs = data.draw(st.fixed_dictionaries(strats))
+  assert set(inputs.keys()) == {"alpha", "eps"}
   assert isinstance(inputs["alpha"], float)
   assert isinstance(inputs["eps"], float)
+  alpha = inputs["alpha"]
+  eps = inputs["eps"]
+  assert isinstance(alpha, float)
+  assert isinstance(eps, float)
+  assert alpha >= -1000.0
+  assert alpha <= 1000.0
+  assert eps >= -1000.0
+  assert eps <= 1000.0
 
 
 @given(data=st.data())
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_axis_heuristic_validity(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of axis heuristic validity.
+  """Verify `given` handles axis heuristic validity as expected.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test axis heuristic validity.
-      data: The data (st.DataObject) for test axis heuristic validity.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
+      data: Input `data` parameter value (`st.DataObject`).
   """
   strats = fuzzer.build_strategies(["x", "axis"])
   inputs = data.draw(st.fixed_dictionaries(strats))
@@ -90,67 +105,82 @@ def test_axis_heuristic_validity(fuzzer: InputFuzzer, data: st.DataObject) -> No
   axis = inputs["axis"]
   assert isinstance(x, np.ndarray)
   assert isinstance(axis, int)
+  assert x.dtype == np.float32
+  assert x.ndim >= 1
+  assert x.ndim <= 4
+  assert axis >= 0
+  assert axis <= 3
 
 
 @given(data=st.data())
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_hint_primitive_override(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of hint primitive override.
+  """Verify `given` handles hint primitive override as expected.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test hint primitive override.
-      data: The data (st.DataObject) for test hint primitive override.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
+      data: Input `data` parameter value (`st.DataObject`).
   """
   hints: dict[str, str] = {"mask": "int"}
   strats = fuzzer.build_strategies(["mask"], hints=hints)
   inputs = data.draw(st.fixed_dictionaries(strats))
+  assert set(inputs.keys()) == {"mask"}
   assert isinstance(inputs["mask"], int)
+  assert not isinstance(inputs["mask"], bool)
+  bounded = data.draw(fuzzer.build_strategies(["mask"], hints=hints, constraints={"mask": {"min": 4, "max": 4}})["mask"])
+  assert bounded == 4
 
 
 @given(data=st.data())
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_hint_array(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of hint array.
+  """Verify `given` handles hint array as expected.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test hint array.
-      data: The data (st.DataObject) for test hint array.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
+      data: Input `data` parameter value (`st.DataObject`).
   """
   hints: dict[str, str] = {"x": "Array"}
   strats = fuzzer.build_strategies(["x"], hints=hints)
   inputs = data.draw(st.fixed_dictionaries(strats))
   val = inputs["x"]
   assert isinstance(val, np.ndarray)
-  assert _test_getattr(val, "dtype") == np.float32
+  assert val.dtype == np.float32
 
 
 @given(data=st.data())
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_hint_union(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of hint union.
+  """Verify `given` handles hint union as expected.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test hint union.
-      data: The data (st.DataObject) for test hint union.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
+      data: Input `data` parameter value (`st.DataObject`).
   """
   hints: dict[str, str] = {"x": "int | float"}
   strats = fuzzer.build_strategies(["x"], hints=hints)
+  assert set(strats.keys()) == {"x"}
   val = data.draw(st.fixed_dictionaries(strats))["x"]
   assert isinstance(val, (int, float))
+  assert not isinstance(val, bool)
+  bounded_val = data.draw(fuzzer.build_strategies(["x"], hints=hints, constraints={"x": {"min": 2, "max": 5}})["x"])
+  assert isinstance(bounded_val, (int, float))
+  assert float(bounded_val) >= 2.0
+  assert float(bounded_val) <= 5.0
 
 
 @given(data=st.data())
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_hint_tuple_variadic(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of hint tuple variadic.
+  """Verify `given` handles hint tuple variadic as expected.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test hint tuple variadic.
-      data: The data (st.DataObject) for test hint tuple variadic.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
+      data: Input `data` parameter value (`st.DataObject`).
   """
   hints: dict[str, str] = {"vals": "Tuple[int, ...]"}
   strats = fuzzer.build_strategies(["vals"], hints=hints)
@@ -165,34 +195,39 @@ def test_hint_tuple_variadic(fuzzer: InputFuzzer, data: st.DataObject) -> None:
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_hint_nested_complex(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of hint nested complex.
+  """Verify `given` handles hint nested complex as expected.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test hint nested complex.
-      data: The data (st.DataObject) for test hint nested complex.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
+      data: Input `data` parameter value (`st.DataObject`).
   """
   hints: dict[str, str] = {"config": "Dict[str, List[int]]"}
   strats = fuzzer.build_strategies(["config"], hints=hints)
   inputs = data.draw(st.fixed_dictionaries(strats))
   val = inputs["config"]
   assert isinstance(val, dict)
-  if val:
-    k, v = next(iter(val.items()))
-    assert isinstance(k, str)
-    assert isinstance(v, list)
-    if v:
-      assert isinstance(v[0], int)
+  assert len(val) >= 1
+  assert len(val) <= 3
+  k, v = next(iter(val.items()))
+  assert isinstance(k, str)
+  assert len(k) >= 1
+  assert len(k) <= 10
+  assert isinstance(v, list)
+  assert len(v) >= 1
+  assert len(v) <= 4
+  assert isinstance(v[0], int)
+  assert not isinstance(v[0], bool)
 
 
 @given(data=st.data())
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_recursion_limit_stops(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of recursion limit stops.
+  """Verify `given` handles recursion limit stops as expected.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test recursion limit stops.
-      data: The data (st.DataObject) for test recursion limit stops.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
+      data: Input `data` parameter value (`st.DataObject`).
   """
   hint: str = "List[List[List[List[int]]]]"
   hints: dict[str, str] = {"deep": hint}
@@ -200,70 +235,68 @@ def test_recursion_limit_stops(fuzzer: InputFuzzer, data: st.DataObject) -> None
   inputs = data.draw(st.fixed_dictionaries(strats))
   _val = inputs["deep"]
   assert isinstance(_val, list)
+  assert len(_val) >= 1
+  assert len(_val) <= 4
+  lvl1 = _val[0]
+  assert isinstance(lvl1, list)
+  lvl2 = lvl1[0]
+  assert isinstance(lvl2, list)
+  lvl3 = lvl2[0]
+  assert isinstance(lvl3, list)
+  assert len(lvl3) >= 1
+  assert isinstance(lvl3[0], int)
 
 
 @given(data=st.data())
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_unhashable_dict_key_fallback(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of unhashable dictionary key fallback.
+  """Verify `given` handles unhashable dict key fallback as expected.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test unhashable dict key fallback.
-      data: The data (st.DataObject) for test unhashable dict key fallback.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
+      data: Input `data` parameter value (`st.DataObject`).
   """
   hints: dict[str, str] = {"bad_key": "Dict[Array, int]"}
   strats = fuzzer.build_strategies(["bad_key"], hints=hints)
   inputs = data.draw(st.fixed_dictionaries(strats))
   val = inputs["bad_key"]
-  if val:
-    key = _test_getattr(
-      {
-        "v": _test_getattr({"v": next}, "__getitem__")("v")(
-          _test_getattr(
-            {
-              "v": _test_getattr({"v": iter}, "__getitem__")("v")(
-                _test_getattr(
-                  {"v": _test_getattr({"v": _test_getattr({"v": val}, "__getitem__")("v").keys}, "__getitem__")("v")()},
-                  "__getitem__",
-                )("v")
-              )
-            },
-            "__getitem__",
-          )("v")
-        )
-      },
-      "__getitem__",
-    )("v")
-    assert isinstance(key, str)
+  assert isinstance(val, dict)
+  assert len(val) >= 1
+  assert len(val) <= 3
+  key, mapped_val = next(iter(val.items()))
+  assert isinstance(key, str)
+  assert "[" in key
+  assert isinstance(mapped_val, int)
 
 
 @given(data=st.data())
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_dtype_object_generation(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of dtype object generation.
+  """Verify `given` handles dtype object generation as expected.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test dtype object generation.
-      data: The data (st.DataObject) for test dtype object generation.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
+      data: Input `data` parameter value (`st.DataObject`).
   """
   hints: dict[str, str] = {"d": "dtype"}
   strats = fuzzer.build_strategies(["d"], hints=hints)
   inputs = data.draw(st.fixed_dictionaries(strats))
   val = inputs["d"]
-  assert isinstance(val, type) or isinstance(val, np.dtype)
+  assert isinstance(val, (type, np.dtype))
+  assert val in (np.float32, np.int32, np.float64, np.bool_)
 
 
 @given(data=st.data())
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_symbolic_sharing(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of symbolic sharing.
+  """Verify `given` returns `1` for symbolic sharing.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test symbolic sharing.
-      data: The data (st.DataObject) for test symbolic sharing.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
+      data: Input `data` parameter value (`st.DataObject`).
   """
   hints: dict[str, str] = {"x": "Array['N']", "y": "Array['N']"}
   strats = fuzzer.build_strategies(["x", "y"], hints=hints)
@@ -272,87 +305,85 @@ def test_symbolic_sharing(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   y = inputs["y"]
   assert isinstance(x, np.ndarray)
   assert isinstance(y, np.ndarray)
-  assert _test_getattr(x, "shape") == _test_getattr(y, "shape")
-  assert len(_test_getattr(x, "shape")) == 1
-  assert _test_getattr(x, "shape")[0] >= 1
+  assert x.shape == y.shape
+  assert len(x.shape) == 1
+  assert x.shape[0] >= 1
 
 
 @given(data=st.data())
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_matmul_constraints(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of matmul constraints.
+  """Verify `given` returns `2` for matmul constraints.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test matmul constraints.
-      data: The data (st.DataObject) for test matmul constraints.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
+      data: Input `data` parameter value (`st.DataObject`).
   """
   hints: dict[str, str] = {"x": "Array['A', 'B']", "y": "Array['B', 'C']"}
   strats = fuzzer.build_strategies(["x", "y"], hints=hints)
   inputs = data.draw(st.fixed_dictionaries(strats))
   x = inputs["x"]
   y = inputs["y"]
-  assert len(_test_getattr(x, "shape")) == 2
-  assert len(_test_getattr(y, "shape")) == 2
-  assert _test_getattr(x, "shape")[1] == _test_getattr(y, "shape")[0]
+  assert isinstance(x, np.ndarray)
+  assert isinstance(y, np.ndarray)
+  assert len(x.shape) == 2
+  assert len(y.shape) == 2
+  assert x.shape[1] == y.shape[0]
 
 
 @given(data=st.data())
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_fixed_dimension_mixed(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of fixed dimension mixed.
+  """Verify `given` returns `3` for fixed dimension mixed.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test fixed dimension mixed.
-      data: The data (st.DataObject) for test fixed dimension mixed.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
+      data: Input `data` parameter value (`st.DataObject`).
   """
   hints: dict[str, str] = {"x": "Array[3, 'D']"}
   strats = fuzzer.build_strategies(["x"], hints=hints)
   inputs = data.draw(st.fixed_dictionaries(strats))
   x = inputs["x"]
-  assert _test_getattr(x, "shape")[0] == 3
-  assert len(_test_getattr(x, "shape")) == 2
+  assert isinstance(x, np.ndarray)
+  assert x.shape[0] == 3
+  assert len(x.shape) == 2
 
 
 @given(data=st.data())
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_symbolic_list_consistency(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of symbolic list consistency.
+  """Verify `given` handles symbolic list consistency as expected.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test symbolic list consistency.
-      data: The data (st.DataObject) for test symbolic list consistency.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
+      data: Input `data` parameter value (`st.DataObject`).
   """
   hints: dict[str, str] = {"x": "List[Array['Z']]"}
   strats = fuzzer.build_strategies(["x"], hints=hints)
   inputs = data.draw(st.fixed_dictionaries(strats))
   lst = inputs["x"]
-  if not lst:
+  if not isinstance(lst, list) or not lst:
     return
-  shape0 = _test_getattr(
-    {
-      "v": _test_getattr(
-        _test_getattr({"v": _test_getattr({"v": lst}, "__getitem__")("v")[0]}, "__getitem__")("v"),
-        _test_getattr({"v": "shape"}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
-  for arr in _test_getattr({"v": _test_getattr({"v": lst}, "__getitem__")("v")[1:]}, "__getitem__")("v"):
-    assert _test_getattr(arr, "shape") == shape0
+  first_arr = lst[0]
+  assert isinstance(first_arr, np.ndarray)
+  shape0 = first_arr.shape
+  for arr in lst[1:]:
+    assert isinstance(arr, np.ndarray)
+    assert arr.shape == shape0
 
 
 @given(data=st.data())
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_independent_calls_are_independent(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of independent calls are independent.
+  """Verify `given` handles independent calls are independent as expected.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test independent calls are independent.
-      data: The data (st.DataObject) for test independent calls are independent.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
+      data: Input `data` parameter value (`st.DataObject`).
   """
   hints: dict[str, str] = {"x": "Array['N']"}
   strats1 = fuzzer.build_strategies(["x"], hints=hints)
@@ -361,14 +392,18 @@ def test_independent_calls_are_independent(fuzzer: InputFuzzer, data: st.DataObj
   res2 = data.draw(st.fixed_dictionaries(strats2))
   assert isinstance(res1["x"], np.ndarray)
   assert isinstance(res2["x"], np.ndarray)
+  assert list(res1.keys()) == ["x"]
+  assert list(res2.keys()) == ["x"]
+  assert len(res1["x"].shape) == 1
+  assert len(res2["x"].shape) == 1
 
 
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_adapt_to_framework_passthrough(fuzzer: InputFuzzer) -> None:
-  """Verifies the behavior of adapt to framework passthrough.
+  """Verify `fuzzer.adapt_to_framework` handles passthrough as expected.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test adapt to framework passthrough.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
   """
   raw = {"x": np.array([1])}
   res = fuzzer.adapt_to_framework(raw, "unknown_fw")
@@ -377,21 +412,21 @@ def test_adapt_to_framework_passthrough(fuzzer: InputFuzzer) -> None:
 
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_adapt_to_framework_delegation(fuzzer: InputFuzzer) -> None:
-  """Verifies the behavior of adapt to framework delegation.
+  """Verify `register_framework` handles adapt to framework delegation as expected.
 
   Args:
-      fuzzer: The fuzzer (InputFuzzer) for test adapt to framework delegation.
+      fuzzer: Input `fuzzer` parameter value (`InputFuzzer`).
   """
 
   @register_framework("mock_fw")
   class MockAdapter:
-    """Test helper class MockAdapter."""
+    """Test double `MockAdapter` implementing `convert` for fuzzer symbolic tests."""
 
     def convert(self, x: JsonValue) -> str:
       """Mock implementation of convert.
 
       Args:
-          x: The x (JsonValue) for convert.
+          x: Input tensor or scalar operand (`JsonValue`).
 
       Returns:
           Resulting `str` from convert.

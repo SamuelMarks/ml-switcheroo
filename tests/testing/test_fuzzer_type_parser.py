@@ -1,6 +1,6 @@
 """Tests for TypeAnnotationParser."""
 
-from tests.conftest import _test_getattr
+from unittest.mock import MagicMock
 
 import libcst as _cst
 
@@ -24,27 +24,27 @@ cst = _cst
 
 
 def test_empty_and_any() -> None:
-  """Verify empty and any behavior."""
+  """Verify `parse_type_annotation` handles empty and any as expected."""
   assert parse_type_annotation("") == AnyType()
   assert parse_type_annotation("   ") == AnyType()
   assert parse_type_annotation("Any") == AnyType()
 
 
 def test_none() -> None:
-  """Verify none behavior."""
+  """Verify `parse_type_annotation` handles none as expected."""
   assert parse_type_annotation("None") == NoneType()
   assert parse_type_annotation("NoneType") == NoneType()
 
 
 def test_primitives() -> None:
-  """Verify primitives behavior."""
+  """Verify `parse_type_annotation` handles primitives as expected."""
   primitives = ["int", "integer", "float", "double", "number", "bool", "boolean", "str", "string"]
   for p in primitives:
     assert parse_type_annotation(p) == PrimitiveType(name=p)
 
 
 def test_tensors() -> None:
-  """Verify tensors behavior."""
+  """Verify `parse_type_annotation` handles tensors as expected."""
   assert parse_type_annotation("Array") == TensorType(dims=None)
   assert parse_type_annotation("Tensor") == TensorType(dims=None)
   assert parse_type_annotation("Array[1:2]") == TensorType(dims=None)
@@ -60,14 +60,14 @@ def test_tensors() -> None:
 
 
 def test_callables() -> None:
-  """Verify callables behavior."""
+  """Verify `parse_type_annotation` handles callables as expected."""
   assert parse_type_annotation("Callable") == CallableType()
   assert parse_type_annotation("func") == CallableType()
   assert parse_type_annotation("function") == CallableType()
 
 
 def test_lists() -> None:
-  """Verify lists behavior."""
+  """Verify `parse_type_annotation` handles lists as expected."""
   assert parse_type_annotation("List") == ListType(inner=AnyType())
   assert parse_type_annotation("Sequence") == ListType(inner=AnyType())
   assert parse_type_annotation("List[int]") == ListType(inner=PrimitiveType(name="int"))
@@ -75,7 +75,7 @@ def test_lists() -> None:
 
 
 def test_dicts() -> None:
-  """Verify dicts behavior."""
+  """Verify `parse_type_annotation` handles dicts as expected."""
   assert parse_type_annotation("Dict") == DictType(key_type=AnyType(), value_type=AnyType())
   assert parse_type_annotation("Mapping") == DictType(key_type=AnyType(), value_type=AnyType())
   assert parse_type_annotation("Dict[str, int]") == DictType(
@@ -85,7 +85,7 @@ def test_dicts() -> None:
 
 
 def test_tuples() -> None:
-  """Verify tuples behavior."""
+  """Verify `parse_type_annotation` handles tuples as expected."""
   assert parse_type_annotation("Tuple") == TupleType(elements=[AnyType()], variadic=True)
   assert parse_type_annotation("Tuple[int]") == TupleType(elements=[PrimitiveType(name="int")], variadic=False)
   assert parse_type_annotation("Tuple[int, float]") == TupleType(
@@ -95,14 +95,14 @@ def test_tuples() -> None:
 
 
 def test_optional() -> None:
-  """Verify optional behavior."""
+  """Verify `parse_type_annotation` handles optional as expected."""
   assert parse_type_annotation("Optional") == OptionalType(inner=AnyType())
   assert parse_type_annotation("Optional[int]") == OptionalType(inner=PrimitiveType(name="int"))
   assert parse_type_annotation("Optional[List[str]]") == OptionalType(inner=ListType(inner=PrimitiveType(name="str")))
 
 
 def test_union() -> None:
-  """Verify union behavior."""
+  """Verify `parse_type_annotation` handles union as expected."""
   # Union syntax (PEP 604)
   assert parse_type_annotation("int | float") == UnionType(types=[PrimitiveType(name="int"), PrimitiveType(name="float")])
   assert parse_type_annotation("int | float | str") == UnionType(
@@ -118,36 +118,38 @@ def test_union() -> None:
 
 
 def test_syntax_error_fallback() -> None:
-  """Verify syntax error fallback behavior."""
+  """Verify `parse_type_annotation` handles syntax error fallback as expected."""
   # Invalid Python syntax, will fallback to PrimitiveType with raw string
   assert parse_type_annotation("a b c") == PrimitiveType(name="a b c")
 
 
 def test_unknown_types() -> None:
-  """Verify unknown types behavior."""
+  """Verify `parse_type_annotation` handles unknown types as expected."""
   assert parse_type_annotation("CustomClass") == PrimitiveType(name="CustomClass")
   assert parse_type_annotation("module.Class") == PrimitiveType(name="module.Class")
 
 
 def test_generic_visit() -> None:
-  """Verify generic visit behavior."""
+  """Verify `TypeAnnotationParser` handles generic visit as expected."""
   import libcst as cst
 
   parser = TypeAnnotationParser()
   # Pass an arbitrary CST node that shouldn't normally be hit
   res = parser.visit(cst.Pass())
-  assert isinstance(res, PrimitiveType) and _test_getattr(res, "name") == "Unknown"
+  assert isinstance(res, PrimitiveType)
+  assert res.name == "Unknown"
 
 
 def test_binop_unknown() -> None:
-  """Verify binop unknown behavior."""
+  """Verify `parse_type_annotation` handles binop unknown as expected."""
   # E.g., int + float
   res = parse_type_annotation("int + float")
-  assert isinstance(res, PrimitiveType) and _test_getattr(res, "name") == "Unknown"
+  assert isinstance(res, PrimitiveType)
+  assert res.name == "Unknown"
 
 
 def test_full_name() -> None:
-  """Verify full name behavior."""
+  """Verify `TypeAnnotationParser` handles full name as expected."""
   import libcst as cst
 
   parser = TypeAnnotationParser()
@@ -155,7 +157,7 @@ def test_full_name() -> None:
 
 
 def test_complex_nesting() -> None:
-  """Verify complex nesting behavior."""
+  """Verify `OptionalType` handles complex nesting as expected."""
   type_str = "Optional[Dict[str, List[Tuple[int, float]]]]"
   expected = OptionalType(
     inner=DictType(
@@ -169,118 +171,72 @@ def test_complex_nesting() -> None:
 
 
 def test_slice_subscript() -> None:
-  """Verify slice subscript behavior."""
+  """Verify `parse_type_annotation` handles slice subscript as expected."""
   # In 'Array[1:2]', 1:2 is a cst.Slice, not cst.Index
   res = parse_type_annotation("Array[1:2]")
   assert isinstance(res, TensorType)
-  assert _test_getattr(res, "dims") is None
+  assert res.dims is None
 
 
 def test_parsed_type_base() -> None:
-  """Verify parsed type base behavior."""
+  """Verify `ParsedType` handles parsed type base as expected."""
   pt = ParsedType()
   assert isinstance(pt, ParsedType)
+  assert pt.cst_node is None
+  name_node = cst.Name("int")
+  pt_with_node = ParsedType(cst_node=name_node)
+  assert pt_with_node.cst_node is name_node
+  assert pt == pt_with_node
 
 
 def test_cst_formatting_preservation() -> None:
-  """Verify cst formatting preservation behavior."""
+  """Verify `parse_type_annotation` handles CST formatting preservation as expected."""
   import libcst as cst
 
   type_str = "Optional[  Dict[ str ,  int ]  ]"
   parsed = parse_type_annotation(type_str)
 
-  assert _test_getattr(parsed, "cst_node") is not None
+  assert isinstance(parsed.cst_node, cst.BaseExpression)
   # Extract code directly using Module
-  module = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=_test_getattr(parsed, "cst_node"))])])
+  module = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=parsed.cst_node)])])
   # Module adds newline for SimpleStatementLine
-  assert _test_getattr(module, "code").strip() == type_str
+  assert module.code.strip() == type_str
 
 
 def test_cst_fallback_formatting() -> None:
-  """Verify cst fallback formatting behavior."""
+  """Verify `parse_type_annotation` handles CST fallback formatting as expected."""
   type_str = "int + float"
   parsed = parse_type_annotation(type_str)
-  assert _test_getattr(parsed, "cst_node") is not None
+  assert isinstance(parsed.cst_node, cst.BaseExpression)
   # wait, my parser parses 'int + float' as a BinaryOperation and returns Unknown
   # the cst_node is set!
-  module = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=_test_getattr(parsed, "cst_node"))])])
-  assert _test_getattr(module, "code").strip() == type_str
+  module = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=parsed.cst_node)])])
+  assert module.code.strip() == type_str
 
 
 def test_subscript_slice_non_expression() -> None:
   """Test _process_slice_elt with non-Index, non-BaseExpression element."""
   parser = TypeAnnotationParser()
-  dummy_subscript = _test_getattr(
-    {
-      "v": _test_getattr({"v": cst.Subscript}, "__getitem__")("v")(
-        value=cst.Name("Array"),
-        slice=_test_getattr(
-          {
-            "v": [
-              _test_getattr(
-                {
-                  "v": _test_getattr(
-                    {"v": _test_getattr({"v": cst}, "__getitem__")("v").SubscriptElement}, "__getitem__"
-                  )("v")(
-                    slice=_test_getattr(
-                      {
-                        "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Pass}, "__getitem__")(
-                          "v"
-                        )()
-                      },
-                      "__getitem__",
-                    )("v")
-                  )
-                },
-                "__getitem__",
-              )("v")
-            ]
-          },
-          "__getitem__",
-        )("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
+  dummy_subscript = cst.Subscript(
+    value=cst.Name("Array"),
+    slice=[cst.SubscriptElement(slice=cst.Slice(lower=None, upper=None))],
+  )
   res = parser.visit_Subscript(dummy_subscript)
   assert isinstance(res, TensorType)
+  assert res.dims is None
+  assert res == TensorType(dims=None)
+  assert res.cst_node is dummy_subscript
 
 
 def test_subscript_slice_direct_expression_and_custom() -> None:
   """Test _process_slice_elt with direct BaseExpression element and custom generic subscript."""
   parser = TypeAnnotationParser()
-  node = _test_getattr(
-    {
-      "v": _test_getattr({"v": cst.Subscript}, "__getitem__")("v")(
-        value=cst.Name("Array"),
-        slice=_test_getattr(
-          {
-            "v": [
-              _test_getattr(
-                {
-                  "v": _test_getattr(
-                    {"v": _test_getattr({"v": cst}, "__getitem__")("v").SubscriptElement}, "__getitem__"
-                  )("v")(
-                    slice=_test_getattr(
-                      {
-                        "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
-                          _test_getattr({"v": "N"}, "__getitem__")("v")
-                        )
-                      },
-                      "__getitem__",
-                    )("v")
-                  )
-                },
-                "__getitem__",
-              )("v")
-            ]
-          },
-          "__getitem__",
-        )("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
+  mock_elem = MagicMock(spec=cst.SubscriptElement)
+  mock_elem.slice = cst.Name("N")
+  node = cst.Subscript(
+    value=cst.Name("Array"),
+    slice=[mock_elem],
+  )
   res = parser.visit_Subscript(node)
   assert res == TensorType(dims=["N"])
 

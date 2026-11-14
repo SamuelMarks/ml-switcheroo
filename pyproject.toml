@@ -87,13 +87,41 @@ indent-width = 2
 target-version = "py310"
 
 [tool.ruff.lint]
-select = ["E4", "E7", "E9", "F", "D", "UP006", "UP007", "UP045", "TID251"]
-ignore = ["D200", "D205", "D415"]
+select = [
+    "E4",
+    "E7",
+    "E9",
+    "F",
+    "D",
+    "B",
+    "BLE",
+    "C90",
+    "SIM",
+    "RUF",
+    "PT",
+    "S101",
+    "I",
+    "PIE",
+    "RET",
+    "PERF",
+    "PLR0913",
+    "UP006",
+    "UP007",
+    "UP045",
+    "TID251",
+]
+ignore = []
 fixable = ["ALL"]
 unfixable = []
 
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
+
+[tool.ruff.lint.pylint]
+max-args = 7
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "operator.attrgetter".msg = "Do not use operator.attrgetter; use explicit protocols or typed attributes."
@@ -106,6 +134,10 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 "typing.cast".msg = "Do not use typing.cast; use explicit type narrowing."
 "typing_extensions.Any".msg = "Do not use typing_extensions.Any; use explicit types or protocols."
 "typing_extensions.cast".msg = "Do not use typing_extensions.cast; use explicit type narrowing."
+"unittest.mock".msg = "Do not import unittest.mock in production code; use typed protocols and dependency injection."
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["TID251", "S101", "BLE001"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -123,26 +155,64 @@ docstring-code-format = false
 docstring-code-line-length = "dynamic"
 
 [tool.mypy]
-mypy_path = "src"
+mypy_path = ["src", "typings"]
 strict = true
 warn_return_any = true
 disallow_untyped_defs = true
 disallow_any_generics = true
 warn_unused_ignores = true
-ignore_missing_imports = true
 disallow_any_explicit = true
 disallow_subclassing_any = true
 warn_redundant_casts = true
 warn_unreachable = true
 strict_equality = true
 enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
-disable_error_code = ["import-untyped", "import-not-found", "override"]
+disable_error_code = ["import-untyped"]
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
-module = ["tests.gold.*", "tests.examples.*"]
-disallow_subclassing_any = false
+module = [
+    "chex",
+    "chex.*",
+    "flax",
+    "flax.*",
+    "jax",
+    "jax.*",
+    "keras",
+    "keras.*",
+    "mlx",
+    "mlx.*",
+    "onnx",
+    "onnx.*",
+    "optax",
+    "optax.*",
+    "paxml",
+    "paxml.*",
+    "praxis",
+    "praxis.*",
+    "tensorflow",
+    "tensorflow.*",
+    "tensorflow_addons",
+    "tensorflow_addons.*",
+    "torch",
+    "torch.*",
+]
+ignore_missing_imports = true
 
+
+[tool.coverage.run]
+branch = true
+source = ["src", "scripts", "docs"]
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
+skip_covered = false
+exclude_also = [
+    "if __name__ == .__main__.:",
+    "if typing.TYPE_CHECKING:",
+    "if TYPE_CHECKING:",
+]
 
 [tool.interrogate]
 ignore-init-method = false
@@ -153,7 +223,7 @@ ignore-private = false
 ignore-property-decorators = false
 ignore-module = false
 fail-under = 100
-exclude = ["setup.py", "docs", "build", "onnx", "array-api", "out.py"]
+exclude = ["setup.py", "_build", "docs/_build", "build", "onnx", "array-api", "out.py"]
 ignore-regex = []
 color = true
 omit-covered-files = false

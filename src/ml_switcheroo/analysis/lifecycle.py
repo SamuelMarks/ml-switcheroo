@@ -166,18 +166,14 @@ class InitializationTracker(cst.CSTVisitor):
     ctx = self._scope_stack[-1]
 
     # We only care about usage tracking in forward methods
-    if ctx.in_forward:
-      # Check if accessing 'self.something'
-      # Note: We visit children, so 'self.layer.sublayer' will trigger twice?
-      # 'self.layer' -> Attribute(value=Name(self), attr=layer)
-      # 'self.layer.sublayer' -> Attribute(value=Attribute(self, layer), attr=sublayer)
-      # We want the root member on self.
-
-      # Simple check: is value 'self'?
-      if self._is_self(node.value):
-        member_name = node.attr.value
-
-        ctx.used_in_forward.add(member_name)
+    # Check if accessing 'self.something'
+    # Note: We visit children, so 'self.layer.sublayer' will trigger twice?
+    # 'self.layer' -> Attribute(value=Name(self), attr=layer)
+    # 'self.layer.sublayer' -> Attribute(value=Attribute(self, layer), attr=sublayer)
+    # We want the root member on self.
+    if ctx.in_forward and self._is_self(node.value):
+      member_name = node.attr.value
+      ctx.used_in_forward.add(member_name)
 
   def _check_assignment_target(self, node: cst.BaseExpression, ctx: _ClassContext) -> None:
     """Support to extract attribute name from assignment target.

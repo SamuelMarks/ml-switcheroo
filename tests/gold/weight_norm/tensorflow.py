@@ -5,7 +5,7 @@ import tensorflow_addons as tfa
 
 
 class WNModel:
-  """Test helper class WNModel."""
+  """Test double `WNModel` implementing `call` for tensorflow tests."""
 
   def __init__(self, in_features: int, out_features: int):
     """Initializes the WNModel instance.
@@ -18,7 +18,7 @@ class WNModel:
     self.linear = tfa.layers.WeightNormalization(tf.keras.layers.Dense(out_features))
 
   def call(self, x: tf.Tensor) -> tf.Tensor:
-    """Helper to call.
+    """Execute `linear` to support call in tensorflow tests.
 
     Args:
         x: Primary input tensor or array operand.

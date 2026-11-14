@@ -1,487 +1,247 @@
-"""Tests for Ghost Core (Introspection & Serialization).
-
-Verifies that:
-1. Live objects (Functions) are correctly inspected.
-2. Live objects (Classes) have their __init__ signature extracted.
-3. Serialization/Hydration (Ghost Mode) works seamlessly.
-4. Edge cases (defaults, annotations, missing signatures) are handled.
-"""
-
-from tests.conftest import _test_getattr
+"""Unit tests for `GhostInspector`, `GhostRef`, and `GhostParam` (`ml_switcheroo.core.ghost`)."""
 
 import typing
 
 import pytest
+from ml_switcheroo_ir.schema.ghost import ParameterKind
 
-from ml_switcheroo.core.ghost import GhostInspector, GhostRef
-
-# --- Mock Objects for Inspection ---
-
-
-def simple_func(x: int, y: int = 10) -> int:
-  """A simple mock function used to test basic inspection of parameters and defaults.
-
-  Args:
-      x: The first operand, typically a number.
-      y: The second operand, typically a number with a default of 10.
-
-  Returns:
-      The sum of x and y.
-  """
-  return x + y
+from ml_switcheroo.core.ghost import GhostInspector, GhostParam, GhostRef
+from ml_switcheroo.enums import InspectionObject, RuntimeTensorOrValue
 
 
-def typed_func(x: int, opt: str | None = None) -> None:
-  """A mock function with type annotations to test type hint stringification.
+def _sample_func(a: str, b: int = 10, *args: int, c: int = 2, opt: str | None = None) -> int:
+  """Compute a dummy integer from positional, vararg, and keyword-only arguments.
 
   Args:
-      x: An integer argument to test standard type extraction.
-      opt: An optional string argument to test Union/Optional type extraction.
+      a: String prefix argument.
+      b: Integer argument with default `10`.
+      *args: Variable integer arguments.
+      c: Keyword-only integer argument with default `2`.
+      opt: Optional string argument.
 
   Returns:
-      None.
+      Integer sum `b + c`.
   """
-  pass
+  _ = (a, args, opt)
+  return b + c
 
 
-class SimpleClass:
-  """A standard mock class to test introspection of class __init__ methods.
-
-  This class simulates a typical neural network layer or model block with an
-  initialization method containing multiple parameters.
-  """
+class _SampleLayer:
+  """Simulated neural layer class with typed `__init__` parameters."""
 
   def __init__(self, output_dim: int, activation: str = "relu") -> None:
-    """Initializes the SimpleClass instance.
+    """Store `output_dim` and `activation`.
 
     Args:
-        output_dim: The output dimension of the simulated layer.
-        activation: The activation function name, defaulting to "relu".
-
-    Returns:
-        None.
+        output_dim: Output feature dimension.
+        activation: Activation name string.
     """
-    self.out = output_dim
+    self.output_dim = output_dim
+    self.activation = activation
 
 
-class BuiltinLike:
-  """A class mimicking built-ins that might fail signature inspection.
-
-  Used to test the fallback behavior of GhostInspector when standard signature
-  inspection raises a ValueError.
-  """
-
-  pass
+class _EmptyClass:
+  """Class without custom `__init__`."""
 
 
-# --- Tests ---
+def _noop_callback() -> None:
+  """Default callable value used to verify callable-default sanitization."""
 
 
-def test_inspect_simple_function() -> None:
-  """Verifies that basic function inspection extracts correct parameters, defaults, and attributes.
+class _HexAddressStr:
+  """Object whose `__str__` contains a simulated `0x...` memory address."""
 
-  Returns:
-      None.
-  """
-  ref: GhostRef = _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        _test_getattr({"v": simple_func}, "__getitem__")("v"),
-        _test_getattr({"v": "test.simple_func"}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
-
-  assert ref.name == "simple_func"
-  assert ref.kind == "function"
-  assert ref.api_path == "test.simple_func"
-  assert (
-    ref.docstring
-    == "A simple mock function used to test basic inspection of parameters and defaults.\n\nArgs:\n    x: The first operand, typically a number.\n    y: The second operand, typically a number with a default of 10.\n\nReturns:\n    The sum of x and y."
-  )
-
-  assert len(ref.params) == 2
-  p0 = ref.params[0]
-  p1 = ref.params[1]
-
-  assert p0.name == "x"
-  assert p0.default is None
-
-  assert p1.name == "y"
-  assert p1.default == "10"
-
-
-def test_inspect_class_init() -> None:
-  """Verifies that class inspection inspects the __init__ signature and skips 'self'.
-
-  Returns:
-      None.
-  """
-  ref: GhostRef = GhostInspector.inspect(SimpleClass, "test.SimpleClass")
-
-  assert ref.name == "SimpleClass"
-  assert ref.kind == "class"
-  assert (
-    ref.docstring
-    == "A standard mock class to test introspection of class __init__ methods.\n\nThis class simulates a typical neural network layer or model block with an\ninitialization method containing multiple parameters."
-  )
-
-  # Should detect 'output_dim' and 'activation'
-  # Should SKIP 'self'
-  assert len(ref.params) == 2
-  assert ref.params[0].name == "output_dim"
-  assert ref.params[1].name == "activation"
-  assert ref.params[1].default == "relu"
-
-
-def test_inspect_typed_signature() -> None:
-  """Verifies that type hints are successfully extracted and stringified by the inspector.
-
-  Returns:
-      None.
-  """
-  ref: GhostRef = _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        _test_getattr({"v": typed_func}, "__getitem__")("v"), _test_getattr({"v": "test.typed"}, "__getitem__")("v")
-      )
-    },
-    "__getitem__",
-  )("v")
-
-  p0 = ref.params[0]
-  assert p0.name == "x"
-  assert p0.annotation == "int"
-
-  p1 = ref.params[1]
-  assert p1.name == "opt"
-  # Representation of Optional[...] varies by python version, just check it exists stringified
-  assert p1.annotation is not None
-  assert "Optional" in p1.annotation or "Union" in p1.annotation or "None" in p1.annotation
-
-
-def test_ghost_hydration_roundtrip() -> None:
-  """Verifies that GhostRef can be serialized to a dict and hydrated back correctly.
-
-  Returns:
-      None.
-  """
-  # 1. Inspect Live
-  live_ref: GhostRef = _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        _test_getattr({"v": simple_func}, "__getitem__")("v"), _test_getattr({"v": "func"}, "__getitem__")("v")
-      )
-    },
-    "__getitem__",
-  )("v")
-
-  # 2. Serialize
-  data = live_ref.model_dump()
-
-  # 3. Hydrate
-  ghost_ref: GhostRef = GhostInspector.hydrate(data)
-
-  assert ghost_ref == live_ref
-  assert ghost_ref.has_arg("y")
-  assert not ghost_ref.has_arg("z")
-
-  legacy_ref: GhostRef = GhostRef.model_validate({"name": "fn", "api": "pkg.fn"})
-  assert legacy_ref.api_path == "pkg.fn"
-
-
-def test_inspect_failure_handling(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Verifies that the inspector falls back safely when signature inspection raises ValueError.
-
-  Args:
-      monkeypatch: The pytest monkeypatch fixture used to mock inspect.signature.
-
-  Returns:
-      None.
-  """
-
-  # We patch signature to raise ValueError mimics C-ext failure
-  def mock_sig(obj: type | typing.Callable[[], None]) -> None:
-    """Mocks inspect.signature to simulate inspection failures.
-
-    Args:
-        obj: The object whose signature is being requested.
+  def __repr__(self) -> str:
+    """Return address-free repr string.
 
     Returns:
-        Never returns normally; always raises ValueError.
+        Safe repr string.
+    """
+    return "SafeRepr"
+
+  def __str__(self) -> str:
+    """Return string containing `0x` address token.
+
+    Returns:
+        String containing `0x1234`.
+    """
+    return "Instance at 0x1234"
+
+
+class _ExplodingStr:
+  """Object whose `__str__` raises `RuntimeError`."""
+
+  def __repr__(self) -> str:
+    """Return address-free repr string.
+
+    Returns:
+        Safe repr string.
+    """
+    return "SafeRepr"
+
+  def __str__(self) -> str:
+    """Raise `RuntimeError` during stringification.
+
+    Returns:
+        Never returns; raises `RuntimeError`.
 
     Raises:
-        ValueError: Always raised to simulate inspection failures on C-extensions.
+        RuntimeError: Always raised.
+    """
+    raise RuntimeError("cannot stringify")
+
+
+_HEX_DEFAULT = _HexAddressStr()
+_EXPLODING_DEFAULT = _ExplodingStr()
+
+
+def test_ghost_ref_and_hydrate_variants() -> None:
+  """Verify `GhostRef.has_arg`, roundtrip serialization, and legacy `api` / `returns_type` hydration."""
+  manual_ref = GhostRef(
+    name="test",
+    api_path="pkg.test",
+    kind="function",
+    params=[
+      GhostParam(name="x", kind=ParameterKind.POSITIONAL_OR_KEYWORD),
+      GhostParam(name="y", kind=ParameterKind.POSITIONAL_OR_KEYWORD),
+    ],
+  )
+  assert manual_ref.has_arg("x") is True
+  assert manual_ref.has_arg("y") is True
+  assert manual_ref.has_arg("z") is False
+
+  live_ref = GhostInspector.inspect(_sample_func, "pkg.sample_func")
+  raw_dump: dict[str, RuntimeTensorOrValue] = live_ref.model_dump()
+  hydrated = GhostInspector.hydrate(raw_dump)
+  assert hydrated == live_ref
+  assert hydrated.has_arg("b") is True
+  assert hydrated.has_arg("missing") is False
+
+  legacy_api = GhostInspector.hydrate({"name": "fn1", "api": "pkg.fn1", "returns_type": "Tensor"})
+  assert legacy_api.api_path == "pkg.fn1"
+  assert legacy_api.return_annotation == "Tensor"
+  assert legacy_api.returns_type == "Tensor"
+
+  explicit_ret = GhostInspector.hydrate({"name": "fn2", "api_path": "pkg.fn2", "return_annotation": "Array"})
+  assert explicit_ret.return_annotation == "Array"
+  assert explicit_ret.returns_type == "Array"
+
+
+def test_ghost_inspector_functions_classes_and_unbound_methods() -> None:
+  """Verify `GhostInspector.inspect` on functions, classes with/without `__init__`, and `self`-prefixed functions."""
+  fn_ref = GhostInspector.inspect(_sample_func, "pkg._sample_func")
+  assert fn_ref.name == "_sample_func"
+  assert fn_ref.kind == "function"
+  assert fn_ref.has_varargs is True
+  assert fn_ref.docstring is not None
+  assert "Compute a dummy integer" in fn_ref.docstring
+  assert {p.name for p in fn_ref.params} == {"a", "b", "args", "c", "opt"}
+
+  b_param = next(p for p in fn_ref.params if p.name == "b")
+  assert b_param.default == "10"
+  c_param = next(p for p in fn_ref.params if p.name == "c")
+  assert c_param.annotation == "int"
+  opt_param = next(p for p in fn_ref.params if p.name == "opt")
+  assert opt_param.annotation is not None
+  assert "None" in opt_param.annotation
+
+  cls_ref = GhostInspector.inspect(_SampleLayer, "pkg._SampleLayer")
+  assert cls_ref.name == "_SampleLayer"
+  assert cls_ref.kind == "class"
+  assert [p.name for p in cls_ref.params] == ["output_dim", "activation"]
+  assert cls_ref.params[1].default == "relu"
+
+  empty_cls_ref = GhostInspector.inspect(_EmptyClass, "pkg._EmptyClass")
+  assert empty_cls_ref.name == "_EmptyClass"
+  assert empty_cls_ref.kind == "class"
+
+  def _unbound_method(self: _EmptyClass, dim: int) -> None:
+    """Unbound function carrying an explicit `self` parameter.
+
+    Args:
+        self: Receiver instance.
+        dim: Dimension size.
+    """
+    _ = (self, dim)
+
+  method_ref = GhostInspector.inspect(_unbound_method, "pkg.method")
+  assert [p.name for p in method_ref.params] == ["dim"]
+
+
+def test_ghost_inspector_sanitization_and_c_extension_fallbacks(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify default sanitization, nameless annotations, and `inspect.signature` `ValueError` fallbacks.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
+
+  def _fn_with_special_defaults(
+    cb: typing.Callable[[], None] = _noop_callback,
+    addr: _HexAddressStr = _HEX_DEFAULT,
+    boom: _ExplodingStr = _EXPLODING_DEFAULT,
+  ) -> None:
+    """Function carrying callable, hex-address, and exploding-`__str__` defaults.
+
+    Args:
+        cb: Callable default.
+        addr: Default stringifying with `0x`.
+        boom: Default raising `RuntimeError` in `__str__`.
+    """
+    _ = (cb, addr, boom)
+
+  special_ref = GhostInspector.inspect(_fn_with_special_defaults, "pkg.special")
+  assert special_ref.params[0].default is None
+  assert special_ref.params[1].default is None
+  assert special_ref.params[2].default == "<unrepresentable>"
+
+  class _NamelessAnnotation:
+    """Annotation instance without `__name__`."""
+
+    def __str__(self) -> str:
+      """Return string representation `'CustomAnno'`.
+
+      Returns:
+          Literal `'CustomAnno'`.
+      """
+      return "CustomAnno"
+
+  def _fn_custom_anno(x: int) -> None:
+    """Function whose `__annotations__['x']` is replaced with a nameless object.
+
+    Args:
+        x: Annotated parameter.
+    """
+    _ = x
+
+  _fn_custom_anno.__annotations__["x"] = _NamelessAnnotation()
+  anno_ref = GhostInspector.inspect(_fn_custom_anno, "pkg.anno")
+  assert anno_ref.params[0].annotation == "CustomAnno"
+
+  # C-extension signature failure: function gets `*args, **kwargs`, class gets `[]`
+  def _raise_sig_error(_obj: InspectionObject) -> typing.Never:
+    """Simulate `inspect.signature` raising `ValueError` on C-builtins.
+
+    Args:
+        _obj: Inspected object.
+
+    Returns:
+        Never returns; raises `ValueError`.
+
+    Raises:
+        ValueError: Always raised.
     """
     raise ValueError("no signature found")
 
-  monkeypatch.setattr("inspect.signature", mock_sig)
-
-  ref: GhostRef = GhostInspector.inspect(BuiltinLike, "test.BuiltinLike")
-
-  # Should return a valid Ref object with empty params
-  assert ref.name == "BuiltinLike"
-  assert ref.params == []
-  # Docstring should still be captured if inspect.getdoc works
-  assert "mimicking" in (ref.docstring or "")
-
-
-def test_ghost_ref_helper_methods() -> None:
-  """Verifies helper methods such as has_arg on the GhostRef class.
-
-  Returns:
-      None.
-  """
-  ref: GhostRef = _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        _test_getattr({"v": simple_func}, "__getitem__")("v"), _test_getattr({"v": "foo"}, "__getitem__")("v")
-      )
-    },
-    "__getitem__",
-  )("v")
-
-  assert ref.has_arg("x") is True
-  assert ref.has_arg("non_existent") is False
-
-
-def test_ghost_varargs() -> None:
-  """Verifies that GhostInspector correctly identifies functions with variable positional arguments (*args).
-
-  Returns:
-      None.
-  """
-
-  def func_with_args(*args: int) -> None:
-    """A mock function accepting variable positional arguments.
-
-    Args:
-        *args: Variable length argument list.
-
-    Returns:
-        None.
-    """
-    pass
-
-  ref: GhostRef = _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        _test_getattr({"v": func_with_args}, "__getitem__")("v"),
-        _test_getattr({"v": "func_with_args"}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
-  assert ref.has_varargs is True
-
-
-def test_ghost_callable_default() -> None:
-  """Verifies that callables used as default values are treated as None to avoid serializing memory addresses.
-
-  Returns:
-      None.
-  """
-
-  def some_callable() -> None:
-    """A mock callable default value.
-
-    Returns:
-        None.
-    """
-    pass
-
-  def func_with_callable(cb: typing.Callable[[], None] = some_callable) -> None:
-    """A mock function with a callable as a default argument.
-
-    Args:
-        cb: A callback function, defaulting to some_callable.
-
-    Returns:
-        None.
-    """
-    pass
-
-  ref: GhostRef = _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        _test_getattr({"v": func_with_callable}, "__getitem__")("v"),
-        _test_getattr({"v": "func_with_callable"}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
-  assert ref.params[0].default is None
-
-
-def test_ghost_unrepresentable_default() -> None:
-  """Verifies handling of default arguments with unrepresentable string values.
-
-  Returns:
-      None.
-  """
-
-  class BadRepr:
-    """A class designed to have a string representation that includes a hex address.
-
-    Used to test that standard string representations containing addresses are ignored
-    or converted to None.
-    """
-
-    def __repr__(self) -> str:
-      """Returns a safe representation of BadRepr.
-
-      Returns:
-          The string "GoodRepr".
-      """
-      return "GoodRepr"
-
-    def __str__(self) -> str:
-      """Returns a string representation that mimics a memory address.
-
-      Returns:
-          A string containing a mock memory address.
-      """
-      return "BadStr at 0x123"
-
-  class ExplodingStr:
-    """A class designed to raise an exception when stringified.
-
-    Used to test robustness of default value string conversion.
-    """
-
-    def __repr__(self) -> str:
-      """Returns a safe representation of ExplodingStr.
-
-      Returns:
-          The string "SafeRepr".
-      """
-      return "SafeRepr"
-
-    def __str__(self) -> str:
-      """Simulates a failure during string conversion.
-
-      Returns:
-          Never returns normally.
-
-      Raises:
-          RuntimeError: Always raised to simulate a failure.
-      """
-      raise RuntimeError("Boom")
-
-  def func_with_bad_str(x: BadRepr = BadRepr(), y: ExplodingStr = ExplodingStr()) -> None:
-    """A mock function with unrepresentable default values.
-
-    Args:
-        x: A parameter with a mock address string representation, defaulting to BadRepr().
-        y: A parameter that raises an exception on __str__, defaulting to ExplodingStr().
-
-    Returns:
-        None.
-    """
-    pass
-
-  ref: GhostRef = _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        _test_getattr({"v": func_with_bad_str}, "__getitem__")("v"),
-        _test_getattr({"v": "func_with_bad_str"}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
-  assert ref.params[0].default is None
-  assert ref.params[1].default == "<unrepresentable>"
-
-
-def test_ghost_annotation_without_name() -> None:
-  """Verifies that annotations without a standard name attribute are serialized correctly using their string representation.
-
-  Returns:
-      None.
-  """
-
-  class NoNameAnnotation:
-    """An annotation mock object that does not possess a __name__ attribute.
-
-    Used to test fallback logic in type annotation stringification.
-    """
-
-    def __str__(self) -> str:
-      """Returns the string representation of the annotation object.
-
-      Returns:
-          The string "NoName".
-      """
-      return "NoName"
-
-  def func_with_anno(x: NoNameAnnotation) -> None:  # Cannot annotate with instance
-    """Execute func with anno helper logic.
-
-    Args:
-        x: The x (NoNameAnnotation) for func with anno.
-    """
-    pass
-
-  # We manually override annotations for the test
-  func_with_anno.__annotations__["x"] = NoNameAnnotation()
-
-  ref: GhostRef = _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        _test_getattr({"v": func_with_anno}, "__getitem__")("v"),
-        _test_getattr({"v": "func_with_anno"}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
-  assert ref.params[0].annotation == "NoName"
-
-
-def test_ghost_function_c_extension_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Verifies fallback parameter generation for regular functions when inspection raises ValueError (e.g. C-extensions).
-
-  Args:
-      monkeypatch: The pytest monkeypatch fixture used to mock inspect.signature.
-
-  Returns:
-      None.
-  """
-
-  def mock_sig(obj: type | typing.Callable[[], None]) -> None:
-    """Mocks inspect.signature to raise ValueError.
-
-    Args:
-        obj: The object whose signature is being inspected.
-
-    Returns:
-        Never returns normally; always raises ValueError.
-
-    Raises:
-        ValueError: Always raised to simulate inspection failure.
-    """
-    raise ValueError("no signature found")
-
-  monkeypatch.setattr("inspect.signature", mock_sig)
-
-  def dummy_func() -> None:
-    """A mock dummy function to test fallback behavior.
-
-    Returns:
-        None.
-    """
-    pass
-
-  ref: GhostRef = _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        _test_getattr({"v": dummy_func}, "__getitem__")("v"), _test_getattr({"v": "dummy_func"}, "__getitem__")("v")
-      )
-    },
-    "__getitem__",
-  )("v")
-  assert ref.name == "dummy_func"
-  assert ref.has_varargs is True
-  assert len(ref.params) == 2
-  assert ref.params[0].name == "args"
-  assert ref.params[1].name == "kwargs"
+  monkeypatch.setattr("ml_switcheroo.core.ghost.inspect.signature", _raise_sig_error)
+  c_fn_ref = GhostInspector.inspect(_sample_func, "pkg.c_fn")
+  assert c_fn_ref.has_varargs is True
+  assert [p.name for p in c_fn_ref.params] == ["args", "kwargs"]
+
+  c_cls_ref = GhostInspector.inspect(_EmptyClass, "pkg.c_cls")
+  assert c_cls_ref.params == []
+
+  import math
+
+  mod_ref = GhostInspector.inspect(math, "math")
+  assert mod_ref.name == "math"
+  assert mod_ref.has_varargs is True

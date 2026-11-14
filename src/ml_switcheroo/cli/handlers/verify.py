@@ -8,6 +8,7 @@ from pathlib import Path
 
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.hooks import load_plugins
+from ml_switcheroo.exceptions import MLSwitcherooError
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.testing.batch_runner import BatchValidator
 from ml_switcheroo.testing.bisector import SemanticsBisector
@@ -34,7 +35,7 @@ def handle_ci(update_readme: bool, readme_path: Path, json_report: Path | None, 
       loaded = load_plugins(extra_dirs=config.plugin_paths)
       if loaded > 0:
         log_info(f"Loaded {loaded} external extensions for CI environment.")
-  except Exception as e:
+  except (OSError, ValueError, TypeError, RuntimeError, MLSwitcherooError) as e:
     log_warning(f"Could not load project config: {e}")
 
   semantics = SemanticsManager()
@@ -86,7 +87,7 @@ def handle_ci(update_readme: bool, readme_path: Path, json_report: Path | None, 
       with open(json_report, "wt", encoding="utf-8") as f:
         json.dump(results, f, indent=2, sort_keys=True)
       log_success(f"Verification report saved to [path]{json_report}[/path]")
-    except Exception as e:
+    except (OSError, TypeError, ValueError, RuntimeError) as e:
       log_error(f"Failed to save report: {e}")
       return 1
   return 0

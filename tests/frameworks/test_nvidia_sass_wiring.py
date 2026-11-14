@@ -8,7 +8,7 @@ from ml_switcheroo.core.compiler.backends.nvidia_sass.synthesizer import NvidiaS
 
 
 def test_synthesizer_wires_macros() -> None:
-  """Verifies the behavior of synthesizer wires macros."""
+  """Verify `NvidiaSassSynthesizer` emits `Conv2d` for synthesizer wires macros."""
   semantics_mock = MagicMock()
   synth = NvidiaSassSynthesizer(semantics_mock)
   assert "Conv2d" in synth.macro_registry
@@ -18,7 +18,7 @@ def test_synthesizer_wires_macros() -> None:
 
 
 def test_backend_wires_synthesizer() -> None:
-  """Verifies the behavior of backend wires synthesizer."""
+  """Verify `NvidiaSassBackend` emits `Conv2d` for backend wires synthesizer."""
   semantics_mock = MagicMock()
   backend = NvidiaSassBackend(semantics=semantics_mock)
   assert isinstance(backend.synthesizer, NvidiaSassSynthesizer)

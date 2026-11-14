@@ -10,33 +10,25 @@ import typing
 
 import pydantic
 
-from ml_switcheroo.core.cst.base import CstFieldValue
+from ml_switcheroo.core.cst.base import CstFieldValue, TriviaInput
 from ml_switcheroo.core.markup.cst import MarkupNode
 from ml_switcheroo.utils.formatting import StructuredFormatter, escape_html
 
 
 class HtmlNode(MarkupNode):
-  """Abstract base class for all HTML DSL elements.
-
-  Attributes:
-      leading_trivia: Whitespace or comments preceding this node.
-      trailing_trivia: Whitespace or comments succeeding this node.
-  """
-
-  leading_trivia: str = ""
-  trailing_trivia: str = ""
+  """Abstract base class for all HTML DSL elements."""
 
   def __init__(
     self,
-    leading_trivia: str = "",
-    trailing_trivia: str = "",
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
     **kwargs: CstFieldValue,
   ) -> None:
     """Initialize HtmlNode.
 
     Args:
-        leading_trivia: Leading trivia string.
-        trailing_trivia: Trailing trivia string.
+        leading_trivia: Leading trivia string or sequence.
+        trailing_trivia: Trailing trivia string or sequence.
         **kwargs: Subclass field values forwarded to MarkupNode.
     """
     super().__init__(leading_trivia=leading_trivia, trailing_trivia=trailing_trivia, **kwargs)
@@ -76,15 +68,15 @@ class TextNode(HtmlNode):
   def __init__(
     self,
     content: str = "",
-    leading_trivia: str = "",
-    trailing_trivia: str = "",
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize TextNode.
 
     Args:
         content: Raw text content.
-        leading_trivia: Leading trivia string.
-        trailing_trivia: Trailing trivia string.
+        leading_trivia: Leading trivia string or sequence.
+        trailing_trivia: Trailing trivia string or sequence.
     """
     super().__init__(content=content, leading_trivia=leading_trivia, trailing_trivia=trailing_trivia)
 
@@ -97,7 +89,7 @@ class TextNode(HtmlNode):
     Returns:
         str: The raw text content with leading and trailing trivia.
     """
-    return f"{self.leading_trivia}{self.content}{self.trailing_trivia}"
+    return f"{self.leading_trivia_text()}{self.content}{self.trailing_trivia_text()}"
 
 
 class CommentNode(HtmlNode):
@@ -112,15 +104,15 @@ class CommentNode(HtmlNode):
   def __init__(
     self,
     content: str = "",
-    leading_trivia: str = "",
-    trailing_trivia: str = "",
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize CommentNode.
 
     Args:
         content: Comment content string.
-        leading_trivia: Leading trivia string.
-        trailing_trivia: Trailing trivia string.
+        leading_trivia: Leading trivia string or sequence.
+        trailing_trivia: Trailing trivia string or sequence.
     """
     super().__init__(content=content, leading_trivia=leading_trivia, trailing_trivia=trailing_trivia)
 
@@ -133,7 +125,7 @@ class CommentNode(HtmlNode):
     Returns:
         str: The formatted HTML comment with leading and trailing trivia.
     """
-    return f"{self.leading_trivia}<!--{self.content}-->{self.trailing_trivia}"
+    return f"{self.leading_trivia_text()}<!--{self.content}-->{self.trailing_trivia_text()}"
 
 
 class AttributeNode(HtmlNode):
@@ -154,8 +146,8 @@ class AttributeNode(HtmlNode):
     name: str = "",
     value: str | None = None,
     quote_style: str = '"',
-    leading_trivia: str = "",
-    trailing_trivia: str = "",
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize AttributeNode.
 
@@ -163,8 +155,8 @@ class AttributeNode(HtmlNode):
         name: Attribute name.
         value: Attribute value.
         quote_style: Quote style character.
-        leading_trivia: Leading trivia string.
-        trailing_trivia: Trailing trivia string.
+        leading_trivia: Leading trivia string or sequence.
+        trailing_trivia: Trailing trivia string or sequence.
     """
     super().__init__(
       name=name,
@@ -183,9 +175,11 @@ class AttributeNode(HtmlNode):
     Returns:
         str: The rendered attribute string with leading and trailing trivia.
     """
+    lead = self.leading_trivia_text()
+    trail = self.trailing_trivia_text()
     if self.value is None:
-      return f"{self.leading_trivia}{self.name}{self.trailing_trivia}"
-    return f"{self.leading_trivia}{self.name}={self.quote_style}{self.value}{self.quote_style}{self.trailing_trivia}"
+      return f"{lead}{self.name}{trail}"
+    return f"{lead}{self.name}={self.quote_style}{self.value}{self.quote_style}{trail}"
 
 
 class TagNode(HtmlNode):
@@ -209,8 +203,8 @@ class TagNode(HtmlNode):
     attributes: typing.Sequence[AttributeNode] | None = None,
     children: typing.Sequence[HtmlNode] | None = None,
     self_closing: bool = False,
-    leading_trivia: str = "",
-    trailing_trivia: str = "",
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize TagNode.
 
@@ -219,8 +213,8 @@ class TagNode(HtmlNode):
         attributes: List of attributes.
         children: List of child nodes.
         self_closing: Whether the tag is self-closing.
-        leading_trivia: Leading trivia string.
-        trailing_trivia: Trailing trivia string.
+        leading_trivia: Leading trivia string or sequence.
+        trailing_trivia: Trailing trivia string or sequence.
     """
     super().__init__(
       name=name,
@@ -294,7 +288,7 @@ class TagNode(HtmlNode):
     Returns:
         str: The fully rendered HTML tag string.
     """
-    parts = [self.leading_trivia, f"<{self.name}"]
+    parts = [self.leading_trivia_text(), f"<{self.name}"]
     for attr in self.attributes:
       if not attr.leading_trivia:
         parts.append(" ")
@@ -302,15 +296,14 @@ class TagNode(HtmlNode):
 
     if self.self_closing:
       parts.append("/>")
-      parts.append(self.trailing_trivia)
+      parts.append(self.trailing_trivia_text())
       return "".join(parts)
 
     parts.append(">")
-    for child in self.children:
-      parts.append(child.emit(indent_level))
+    parts.extend(child.emit(indent_level) for child in self.children)
 
     parts.append(f"</{self.name}>")
-    parts.append(self.trailing_trivia)
+    parts.append(self.trailing_trivia_text())
     return "".join(parts)
 
 
@@ -334,43 +327,6 @@ class SvgArrow(HtmlNode):
   style_class: str = ""
   marker_end: str = ""
   parent_style: str = ""
-
-  def __init__(
-    self,
-    x1: int = 0,
-    y1: int = 0,
-    x2: int = 0,
-    y2: int = 0,
-    style_class: str = "",
-    marker_end: str = "",
-    parent_style: str = "",
-    leading_trivia: str = "",
-    trailing_trivia: str = "",
-  ) -> None:
-    """Initialize SvgArrow.
-
-    Args:
-        x1: Starting X coordinate.
-        y1: Starting Y coordinate.
-        x2: Ending X coordinate.
-        y2: Ending Y coordinate.
-        style_class: CSS class for the line.
-        marker_end: Marker-end attribute value.
-        parent_style: CSS style attribute for SVG container.
-        leading_trivia: Leading trivia string.
-        trailing_trivia: Trailing trivia string.
-    """
-    super().__init__(
-      x1=x1,
-      y1=y1,
-      x2=x2,
-      y2=y2,
-      style_class=style_class,
-      marker_end=marker_end,
-      parent_style=parent_style,
-      leading_trivia=leading_trivia,
-      trailing_trivia=trailing_trivia,
-    )
 
   def to_tag(self) -> TagNode:
     """Convert the arrow to a pure CST TagNode.
@@ -434,45 +390,18 @@ class GridBox(HtmlNode):
   arrows: list[SvgArrow] = pydantic.Field(default_factory=list)
   z_index: int | None = None
 
-  def __init__(
-    self,
-    row: int = 0,
-    col: int = 0,
-    css_class: str = "",
-    header_text: str = "",
-    code_text: str | None = None,
-    body_text: str | None = None,
-    arrows: typing.Sequence[SvgArrow] | None = None,
-    z_index: int | None = None,
-    leading_trivia: str = "",
-    trailing_trivia: str = "",
-  ) -> None:
-    """Initialize GridBox.
+  @pydantic.field_validator("arrows", mode="before")
+  @classmethod
+  def _coerce_arrows(cls, v: typing.Sequence[SvgArrow] | None) -> list[SvgArrow]:
+    """Normalize optional arrow sequences into a mutable list of ``SvgArrow`` nodes.
 
     Args:
-        row: CSS grid row index.
-        col: CSS grid column index.
-        css_class: CSS class for the element.
-        header_text: Header label for the box.
-        code_text: Optional code block content.
-        body_text: Optional body content text.
-        arrows: Connection arrows stemming from this grid box.
-        z_index: Optional z-index styling.
-        leading_trivia: Leading trivia string.
-        trailing_trivia: Trailing trivia string.
+        v: Raw arrow sequence or ``None``.
+
+    Returns:
+        List of ``SvgArrow`` instances.
     """
-    super().__init__(
-      row=row,
-      col=col,
-      css_class=css_class,
-      header_text=header_text,
-      code_text=code_text,
-      body_text=body_text,
-      arrows=list(arrows) if arrows is not None else [],
-      z_index=z_index,
-      leading_trivia=leading_trivia,
-      trailing_trivia=trailing_trivia,
-    )
+    return list(v) if v is not None else []
 
   def to_tag(self) -> TagNode:
     """Convert the grid box to a pure CST TagNode.
@@ -507,8 +436,7 @@ class GridBox(HtmlNode):
       safe_body = escape_html(self.body_text.strip())
       children.append(TextNode(content=safe_body))
 
-    for arrow in self.arrows:
-      children.append(arrow.to_tag())
+    children.extend(arrow.to_tag() for arrow in self.arrows)
 
     return TagNode(
       name="div",
@@ -546,16 +474,16 @@ class HtmlDocument(HtmlNode):
     self,
     model_name: str = "",
     children: typing.Sequence[HtmlNode] | None = None,
-    leading_trivia: str = "",
-    trailing_trivia: str = "",
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize HtmlDocument.
 
     Args:
         model_name: Name of the model representing the content.
         children: Child elements inside the HTML document.
-        leading_trivia: Leading trivia string.
-        trailing_trivia: Trailing trivia string.
+        leading_trivia: Leading trivia string or sequence.
+        trailing_trivia: Trailing trivia string or sequence.
     """
     super().__init__(
       model_name=model_name,
@@ -654,10 +582,9 @@ class HtmlDocument(HtmlNode):
     # vs structured representation
     is_pure_cst = bool(self.children) and all(isinstance(c, (TagNode, TextNode, CommentNode)) for c in self.children)
     if is_pure_cst:
-      parts = [self.leading_trivia]
-      for child in self.children:
-        parts.append(child.emit(indent_level))
-      parts.append(self.trailing_trivia)
+      parts = [self.leading_trivia_text()]
+      parts.extend(child.emit(indent_level) for child in self.children)
+      parts.append(self.trailing_trivia_text())
       return "".join(parts)
 
     fmt = StructuredFormatter()

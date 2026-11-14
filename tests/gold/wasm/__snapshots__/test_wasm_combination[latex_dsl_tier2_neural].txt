@@ -1,0 +1,41 @@
+--- Forward ---
+// Input x -> R0
+// BEGIN Conv2d (conv)
+    mov             R1, RZ;
+    mov             R2, RZ;
+L_KY_conv:
+    mov             R3, RZ;
+L_KX_conv:
+// Calc Address & Load Image Pixel
+    imad            R6, R2, 32, R3;
+    iadd3           R6, R6, R3, RZ;
+    ldg.e.f32       R4, [R6];
+// Calc Address & Load Weight
+    imad            R6, R2, 16, R4;
+    iadd3           R6, R6, R3, RZ;
+    ldg.e.f32       R5, [R6];
+    ffma            R1, R4, R5, R1;
+    iadd3           R3, R3, 1, RZ;
+    isetp.lt.and    P0, PT, R3, 3, PT;
+    @P0 bra         L_KX_conv:;
+    iadd3           R2, R2, 1, RZ;
+    isetp.lt.and    P0, PT, R2, 3, PT;
+    @P0 bra         L_KY_conv:;
+// END Conv2d (conv)
+
+--- Backward ---
+% ------------------------------------------------------------------
+% [Requirement] midl.sty
+% This document uses the Machine Intelligence Definition Language.
+% Ensure 'midl.sty' is in your LaTeX path.
+% ------------------------------------------------------------------
+\documentclass[tikz, border=10pt, landscape]{standalone}
+\usepackage{midl}
+\begin{document}
+\begin{DefModel}{DecompiledModel}
+  \Attribute{conv}{Conv2d}{}
+  \Input{input}{[_]}
+  \StateOp{op_conv}{conv}{input}{[_]}
+  \Return{last_step}
+\end{DefModel}
+\end{document}

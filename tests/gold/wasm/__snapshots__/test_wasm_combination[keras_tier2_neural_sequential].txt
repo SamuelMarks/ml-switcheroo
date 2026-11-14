@@ -1,0 +1,25 @@
+--- Forward ---
+import tensorflow as tf
+import keras
+from keras import layers
+
+def build_model(input_shape):
+  # Tier 2: Keras Sequential
+  model = keras.Sequential([
+      tf.keras.layers.Dense(64, activation='relu', input_shape=input_shape),
+      tf.keras.layers.Dense(10, activation='softmax')
+  ])
+  return model
+
+--- Backward ---
+import numpy as np
+import keras
+from keras import layers
+
+def build_model(input_shape):
+  # Tier 2: Keras Sequential
+  model = keras.Sequential([
+      layers.Dense(64, activation='relu', input_shape=input_shape),
+      layers.Dense(10, activation='softmax')
+  ])
+  return model

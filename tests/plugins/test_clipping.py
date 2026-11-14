@@ -1,7 +1,5 @@
 """Test suite for the Clipping module."""
 
-from tests.conftest import _test_getattr, _test_setattr
-
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -29,13 +27,13 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Execute rewriter helper logic.
+  """Create a configured `PivotRewriter` fixture for clipping tests.
 
   Returns:
       Configured `rewriter` fixture value (PivotRewriter).
   """
-  _test_getattr(hooks._HOOKS, "__setitem__")("grad_clipper", transform_grad_clipping)
-  hooks._PLUGINS_LOADED = True
+  hooks.register_hook("grad_clipper")(transform_grad_clipping)
+  hooks.set_plugins_loaded(True)
   mgr = MagicMock()
   clip_def = {
     "variants": {
@@ -53,7 +51,7 @@ def rewriter() -> PivotRewriter:
 
 
 def test_clip_transform(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of clip transform.
+  """Verify `rewrite_code` emits `.update(grads, None)` for clip transform.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -66,7 +64,7 @@ def test_clip_transform(rewriter: PivotRewriter) -> None:
 
 
 def test_clip_with_variable_args(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of clip with variable arguments.
+  """Verify `rewrite_code` emits `clip_by_global_norm(max_val)` for clip with variable args.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -77,16 +75,18 @@ def test_clip_with_variable_args(rewriter: PivotRewriter) -> None:
   assert "update(g," in res
 
 
-def test_ignores_if_traits_missing(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of ignores if traits missing.
+def test_ignores_if_traits_missing(rewriter: PivotRewriter, monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `rewrite_code` handles ignores if traits missing as expected.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
-  _test_setattr(
+  monkeypatch.setattr(
     rewriter.semantics.get_framework_config,
     "return_value",
     {"plugin_traits": PluginTraits(requires_functional_state=False)},
+    raising=False,
   )
   code: str = "torch.nn.utils.clip_grad_norm_(g, 1.0)"
   res: str = rewrite_code(rewriter, code)
@@ -94,7 +94,7 @@ def test_ignores_if_traits_missing(rewriter: PivotRewriter) -> None:
 
 
 def test_clip_with_missing_args(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of clip with missing arguments.
+  """Verify `rewrite_code` handles clip with missing args as expected.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.

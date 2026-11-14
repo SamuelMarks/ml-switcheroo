@@ -10,19 +10,20 @@ Core Responsibilities:
 3.  **Coordination**: Triggers file loaders and code hydrators on initialization.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
 import copy
 import json
 import logging
 import typing
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 
+import yaml
 from ml_switcheroo_ir.schema.ghost import SemanticTier as SemanticTier
 from pydantic import JsonValue
-import yaml
 
-from ml_switcheroo.core.dsl import PatternDef
+from ml_switcheroo.core.dsl import FrameworkVariant, OperationDef, PatternDef
+from ml_switcheroo.enums import RuntimeTensorOrValue
 
 # Use base directly to avoid cycle
 from ml_switcheroo.frameworks.base import FrameworkAdapter, get_adapter
@@ -31,34 +32,76 @@ from ml_switcheroo.frameworks.base import FrameworkAdapter, get_adapter
 from ml_switcheroo.semantics.file_loader import KnowledgeBaseLoader
 from ml_switcheroo.semantics.paths import resolve_semantics_dir
 from ml_switcheroo.semantics.registry_loader import RegistryLoader
+from ml_switcheroo.semantics.schema import FrameworkTraits
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class _ManagerStateSnapshot:
-  """Cached state snapshot for ``SemanticsManager``."""
+  """Cached state snapshot for ``SemanticsManager``.
+
+  Attributes:
+      data: The data (`dict[str, dict[str, JsonValue]]`).
+      operations: Validated ``OperationDef`` models keyed by abstract operation ID.
+      framework_configs: The framework configs (`dict[str, dict[str, JsonValue]]`).
+      framework_traits: Validated ``FrameworkTraits`` models keyed by framework ID.
+      test_templates: The test templates (`dict[str, dict[str, str]]`).
+      known_rng_methods: The known rng methods (`set[str]`).
+      known_magic_args: The known magic args (`set[str]`).
+      patterns: The patterns (`list[PatternDef]`).
+      reverse_index: The reverse index (`dict[str, tuple[str, dict[str, JsonValue]]]`).
+      typed_reverse_index: Reverse index mapping concrete APIs directly to ``(abstract_id, OperationDef)``.
+      variant_cache: The variant cache (`dict[tuple[str, str], dict[str, JsonValue] | None]`).
+      typed_variant_cache: Typed cache mapping ``(abstract_id, framework)`` to ``FrameworkVariant | None``.
+      key_origins: The key origins (`dict[str, str]`).
+      validation_status: The validation status (`dict[str, bool]`).
+      providers: The providers (`dict[str, dict[SemanticTier | str, dict[str, str | None]]]`).
+      source_registry: The source registry (`dict[str, tuple[str, SemanticTier | str]]`).
+  """
 
   data: dict[str, dict[str, JsonValue]]
+  operations: dict[str, OperationDef]
   framework_configs: dict[str, dict[str, JsonValue]]
+  framework_traits: dict[str, FrameworkTraits]
   test_templates: dict[str, dict[str, str]]
   known_rng_methods: set[str]
   known_magic_args: set[str]
   patterns: list[PatternDef]
   reverse_index: dict[str, tuple[str, dict[str, JsonValue]]]
+  typed_reverse_index: dict[str, tuple[str, OperationDef]]
   variant_cache: dict[tuple[str, str], dict[str, JsonValue] | None]
+  typed_variant_cache: dict[tuple[str, str], FrameworkVariant | None]
   key_origins: dict[str, str]
   validation_status: dict[str, bool]
   providers: dict[str, dict[SemanticTier | str, dict[str, str | None]]]
   source_registry: dict[str, tuple[str, SemanticTier | str]]
 
 
-_MANAGER_CACHE: _ManagerStateSnapshot | dict[str, RuntimeTensorOrValue] | None = None
+@lru_cache(maxsize=1)
+def _get_cached_default_snapshot() -> _ManagerStateSnapshot:
+  """Build and cache the default ``SemanticsManager`` state snapshot via ``functools.lru_cache``.
+
+  Returns:
+      Cached ``_ManagerStateSnapshot`` populated from knowledge graph files and active registries.
+  """
+  mgr = SemanticsManager(load_defaults=False)
+  mgr._load_from_sources()
+  return mgr._save_to_cache()
+
+
+def clear_semantics_cache() -> None:
+  """Clear the ``lru_cache`` holding the default ``SemanticsManager`` state snapshot."""
+  _get_cached_default_snapshot.cache_clear()
 
 
 @typing.runtime_checkable
 class _InheritsFromProtocol(typing.Protocol):
-  """Protocol for adapters exposing `inherits_from`."""
+  """Protocol for adapters exposing `inherits_from`.
+
+  Attributes:
+      inherits_from: The inherits from (`str | None`).
+  """
 
   inherits_from: str | None
 
@@ -71,16 +114,18 @@ class SemanticsManager:
   2.  **Code Registry**: Python classes (`FrameworkAdapter`, `Plugin`).
   """
 
-  def __init__(self) -> None:
-    """Initialize the manager and loads all knowledge sources."""
-    global _MANAGER_CACHE
-    if _MANAGER_CACHE is not None:
-      self._restore_from_cache(_MANAGER_CACHE)
-      return
+  def __init__(self, *, load_defaults: bool = True) -> None:
+    """Initialize the manager and optionally hydrate from cached knowledge sources.
 
+    Args:
+        load_defaults: When True (default), restores knowledge graph and registry definitions
+            from the ``lru_cache``-backed default snapshot. When False, initializes an empty manager.
+    """
     # Core Data Stores
     self.data: dict[str, dict[str, JsonValue]] = {}
+    self.operations: dict[str, OperationDef] = {}
     self.framework_configs: dict[str, dict[str, JsonValue]] = {}
+    self.framework_traits: dict[str, FrameworkTraits] = {}
     self.test_templates: dict[str, dict[str, str]] = {}
     self._known_rng_methods: set[str] = set()
     self.known_magic_args: set[str] = set()
@@ -88,7 +133,9 @@ class SemanticsManager:
 
     # Indexes
     self._reverse_index: dict[str, tuple[str, dict[str, JsonValue]]] = {}
+    self._typed_reverse_index: dict[str, tuple[str, OperationDef]] = {}
     self._variant_cache: dict[tuple[str, str], dict[str, JsonValue] | None] = {}
+    self._typed_variant_cache: dict[tuple[str, str], FrameworkVariant | None] = {}
     self._key_origins: dict[str, str] = {}
     self._validation_status: dict[str, bool] = {}
 
@@ -98,6 +145,20 @@ class SemanticsManager:
     # Map[ImportPath, Tuple[Framework, Tier]]
     self._source_registry: dict[str, tuple[str, SemanticTier | str]] = {}
 
+    if load_defaults:
+      self._restore_from_cache(_get_cached_default_snapshot())
+
+  @classmethod
+  def empty(cls) -> "SemanticsManager":
+    """Construct an empty ``SemanticsManager`` without performing disk or registry hydration.
+
+    Returns:
+        Empty ``SemanticsManager`` instance.
+    """
+    return cls(load_defaults=False)
+
+  def _load_from_sources(self) -> None:
+    """Populate semantic tables from file loaders, registry hydration, and reverse indexing."""
     # --- Phase 1: File System Loading (Hub & Spokes) ---
     file_loader = KnowledgeBaseLoader(self)
     file_loader.load_knowledge_graph()
@@ -109,8 +170,6 @@ class SemanticsManager:
     # --- Phase 3: Indexing ---
     self._build_index()
 
-    _MANAGER_CACHE = self._save_to_cache()
-
   def _save_to_cache(self) -> _ManagerStateSnapshot:
     """Create a shallow-copied snapshot of the manager's state for caching.
 
@@ -119,54 +178,45 @@ class SemanticsManager:
     """
     return _ManagerStateSnapshot(
       data=copy.copy(self.data),
+      operations=copy.copy(self.operations),
       framework_configs=copy.copy(self.framework_configs),
+      framework_traits=copy.copy(self.framework_traits),
       test_templates=copy.copy(self.test_templates),
       known_rng_methods=copy.copy(self._known_rng_methods),
       known_magic_args=copy.copy(self.known_magic_args),
       patterns=copy.copy(self.patterns),
       reverse_index=copy.copy(self._reverse_index),
+      typed_reverse_index=copy.copy(self._typed_reverse_index),
       variant_cache=copy.copy(self._variant_cache),
+      typed_variant_cache=copy.copy(self._typed_variant_cache),
       key_origins=copy.copy(self._key_origins),
       validation_status=copy.copy(self._validation_status),
       providers=copy.copy(self._providers),
       source_registry=copy.copy(self._source_registry),
     )
 
-  def _restore_from_cache(
-    self,
-    cached: _ManagerStateSnapshot | dict[str, RuntimeTensorOrValue],
-  ) -> None:
-    """Restore manager fields from a cached snapshot.
+  def _restore_from_cache(self, cached: _ManagerStateSnapshot) -> None:
+    """Restore manager fields from a cached ``_ManagerStateSnapshot``.
 
     Args:
-        cached: Previously saved ``_ManagerStateSnapshot`` (or legacy dict).
+        cached: Previously saved ``_ManagerStateSnapshot``.
     """
-    if isinstance(cached, _ManagerStateSnapshot):
-      self.data = copy.copy(cached.data)
-      self.framework_configs = copy.copy(cached.framework_configs)
-      self.test_templates = copy.copy(cached.test_templates)
-      self._known_rng_methods = copy.copy(cached.known_rng_methods)
-      self.known_magic_args = copy.copy(cached.known_magic_args)
-      self.patterns = copy.copy(cached.patterns)
-      self._reverse_index = copy.copy(cached.reverse_index)
-      self._variant_cache = copy.copy(cached.variant_cache)
-      self._key_origins = copy.copy(cached.key_origins)
-      self._validation_status = copy.copy(cached.validation_status)
-      self._providers = copy.copy(cached.providers)
-      self._source_registry = copy.copy(cached.source_registry)
-    else:
-      self.data = {}
-      self.framework_configs = {}
-      self.test_templates = {}
-      self._known_rng_methods = set()
-      self.known_magic_args = set()
-      self.patterns = []
-      self._reverse_index = {}
-      self._variant_cache = {}
-      self._key_origins = {}
-      self._validation_status = {}
-      self._providers = {}
-      self._source_registry = {}
+    self.data = copy.copy(cached.data)
+    self.operations = copy.copy(cached.operations)
+    self.framework_configs = copy.copy(cached.framework_configs)
+    self.framework_traits = copy.copy(cached.framework_traits)
+    self.test_templates = copy.copy(cached.test_templates)
+    self._known_rng_methods = copy.copy(cached.known_rng_methods)
+    self.known_magic_args = copy.copy(cached.known_magic_args)
+    self.patterns = copy.copy(cached.patterns)
+    self._reverse_index = copy.copy(cached.reverse_index)
+    self._typed_reverse_index = copy.copy(cached.typed_reverse_index)
+    self._variant_cache = copy.copy(cached.variant_cache)
+    self._typed_variant_cache = copy.copy(cached.typed_variant_cache)
+    self._key_origins = copy.copy(cached.key_origins)
+    self._validation_status = copy.copy(cached.validation_status)
+    self._providers = copy.copy(cached.providers)
+    self._source_registry = copy.copy(cached.source_registry)
 
   def _build_index(self) -> None:
     """Construct the reverse index mapping from concrete API endpoints back to their abstract definitions."""
@@ -249,6 +299,59 @@ class SemanticsManager:
         ecosystem.add(current)
 
     return ecosystem - {""}
+
+  def get_operation(self, op_name: str) -> OperationDef | None:
+    """Return the validated ``OperationDef`` model for an operation ID or concrete API path.
+
+    Args:
+        op_name: Canonical abstract operation identifier or concrete API string.
+
+    Returns:
+        Validated ``OperationDef`` instance if resolved, else ``None``.
+    """
+    from ml_switcheroo.semantics.resolution import ResolutionEngine
+
+    return ResolutionEngine.get_operation(self, op_name)
+
+  def resolve_operation(self, api_name: str) -> tuple[str, OperationDef] | None:
+    """Resolve a concrete API path or abstract ID to ``(abstract_id, OperationDef)``.
+
+    Args:
+        api_name: Concrete API path (e.g., ``'torch.abs'``) or abstract operation ID.
+
+    Returns:
+        Tuple of ``(abstract_id, OperationDef)`` if resolved, else ``None``.
+    """
+    from ml_switcheroo.semantics.resolution import ResolutionEngine
+
+    return ResolutionEngine.resolve_operation(self, api_name)
+
+  def get_variant(self, op_name: str, framework: str) -> FrameworkVariant | None:
+    """Return the validated ``FrameworkVariant`` for ``op_name`` in ``framework``.
+
+    Args:
+        op_name: Canonical abstract operation identifier.
+        framework: Target framework key.
+
+    Returns:
+        Validated ``FrameworkVariant`` instance if mapped, else ``None``.
+    """
+    from ml_switcheroo.semantics.resolution import ResolutionEngine
+
+    return ResolutionEngine.get_variant(self, op_name, framework)
+
+  def get_framework_traits(self, framework: str) -> FrameworkTraits:
+    """Return the validated ``FrameworkTraits`` model for ``framework``.
+
+    Args:
+        framework: Target framework identifier.
+
+    Returns:
+        Validated ``FrameworkTraits`` instance (default empty model if unconfigured).
+    """
+    from ml_switcheroo.semantics.resolution import ResolutionEngine
+
+    return ResolutionEngine.get_framework_traits(self, framework)
 
   def resolve_variant(self, abstract_id: str, target_framework: str) -> dict[str, JsonValue] | None:
     """Resolve the implementation of an abstract operation.
@@ -395,16 +498,17 @@ class SemanticsManager:
     """
     from ml_switcheroo.semantics.validator import SemanticsValidator
 
-    final_data = SemanticsValidator.validate_and_dump(abstract_id, new_data)
-    if not final_data:
+    validated_model = SemanticsValidator.validate_model(abstract_id, new_data)
+    if validated_model is None:
       return
+    final_data: dict[str, JsonValue] = validated_model.model_dump(by_alias=True, exclude_unset=True)
 
     self.data[abstract_id] = final_data
-    variants = final_data.get("variants", {})
-    assert isinstance(variants, dict)
-    for _, impl in variants.items():
-      if isinstance(impl, dict) and isinstance(impl.get("api"), str):
-        self._reverse_index[str(impl["api"])] = (abstract_id, final_data)
+    self.operations[abstract_id] = validated_model
+    for impl in validated_model.variants.values():
+      if impl is not None and impl.api:
+        self._reverse_index[impl.api] = (abstract_id, final_data)
+        self._typed_reverse_index[impl.api] = (abstract_id, validated_model)
 
     safe_name = abstract_id.replace("/", "_")
     filename = f"{safe_name}.yaml"

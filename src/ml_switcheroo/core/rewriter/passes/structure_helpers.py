@@ -7,6 +7,7 @@ preambles, injecting statements into function bodies, wrapping/unwrapping
 one-liners, managing `super().__init__()` calls, and updating docstrings.
 """
 
+import logging
 import typing
 
 import libcst as cst
@@ -102,6 +103,24 @@ class StructuralTransformerHelpersMixin:
     new_params_node = node.params.with_changes(params=params)
     return node.with_changes(params=new_params_node)
 
+  @staticmethod
+  def _parse_structural_preamble_snippet(
+    code: str,
+  ) -> typing.Sequence[cst.SimpleStatementLine | cst.BaseCompoundStatement]:
+    """Parse a structural preamble source string into CST statements.
+
+    Args:
+        code: Source code snippet to parse as a CST module.
+
+    Returns:
+        Parsed module body statements, or an empty tuple if parsing fails.
+    """
+    try:
+      return cst.parse_module(code).body
+    except (cst.ParserSyntaxError, ValueError, TypeError) as exc:
+      logging.getLogger(__name__).debug("Skipping invalid structural preamble '%s': %s", code, exc)
+      return ()
+
   def _apply_preamble(self, node: cst.FunctionDef, stmts_code: list[str]) -> cst.FunctionDef:
     """Inject source code statements at the start of the function body.
 
@@ -117,11 +136,7 @@ class StructuralTransformerHelpersMixin:
     """
     new_stmts: list[cst.SimpleStatementLine | cst.BaseCompoundStatement] = []
     for code in stmts_code:
-      try:
-        mod = cst.parse_module(code)
-        new_stmts.extend(mod.body)
-      except Exception:
-        pass
+      new_stmts.extend(self._parse_structural_preamble_snippet(code))
 
     return self._inject_stmts_to_body(node, new_stmts)
 
@@ -281,7 +296,7 @@ class StructuralTransformerHelpersMixin:
       new_val = f'"""{content}{injection}\n    """'
       new_expr = expr.with_changes(value=cst.SimpleString(new_val))
       new_stmt = stmt.with_changes(body=[new_expr])
-      return node.with_changes(body=node.body.with_changes(body=[new_stmt] + list(node.body.body[1:])))
+      return node.with_changes(body=node.body.with_changes(body=[new_stmt, *list(node.body.body[1:])]))
 
     return node
 
@@ -317,5 +332,5 @@ class StructuralTransformerHelpersMixin:
     if new_val != val:
       new_expr = expr.with_changes(value=cst.SimpleString(new_val))
       new_stmt = stmt.with_changes(body=[new_expr])
-      return node.with_changes(body=node.body.with_changes(body=[new_stmt] + list(node.body.body[1:])))
+      return node.with_changes(body=node.body.with_changes(body=[new_stmt, *list(node.body.body[1:])]))
     return node

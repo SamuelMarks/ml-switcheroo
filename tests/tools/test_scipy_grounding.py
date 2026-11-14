@@ -101,9 +101,11 @@ def test_load_scipy_snapshot_errors(tmp_path: Path) -> None:
 
   empty_dir = tmp_path / "empty_snaps"
   empty_dir.mkdir()
-  with patch("ml_switcheroo.tools.injector_fw.scipy_grounding.resolve_snapshots_dir", return_value=empty_dir):
-    with pytest.raises(FileNotFoundError, match="No SciPy snapshot found"):
-      load_scipy_snapshot()
+  with (
+    patch("ml_switcheroo.tools.injector_fw.scipy_grounding.resolve_snapshots_dir", return_value=empty_dir),
+    pytest.raises(FileNotFoundError, match="No SciPy snapshot found"),
+  ):
+    load_scipy_snapshot()
 
 
 def test_extract_scipy_endpoints_from_macro() -> None:

@@ -6,8 +6,6 @@ that blocks can be created, linked correctly, and that algorithms like DFS
 traversal execute as expected.
 """
 
-from tests.conftest import _test_getattr
-
 import pytest
 
 from ml_switcheroo.analysis.cfg import BasicBlock, ControlFlowGraph
@@ -48,10 +46,11 @@ def test_control_flow_graph() -> None:
   return the existing block instance (singleton per ID).
   """
   cfg: ControlFlowGraph = ControlFlowGraph()
-  assert cfg.entry_block is None
+  initial_entry: BasicBlock | None = cfg.entry_block
+  assert initial_entry is None
 
   bb1: BasicBlock = cfg.get_or_create_block("block1")
-  assert _test_getattr(cfg, "entry_block") == bb1
+  assert cfg.entry_block == bb1
 
   bb2: BasicBlock = cfg.get_or_create_block("block2")
   bb1.add_successor(bb2)
@@ -77,7 +76,7 @@ def test_cfg_set_entry_block() -> None:
   cfg.set_entry_block("block2")
   assert cfg.entry_block == bb2
 
-  with pytest.raises(ValueError, match="Cannot set entry block: Block ID 'block3' not found in CFG."):
+  with pytest.raises(ValueError, match=r"Cannot set entry block: Block ID 'block3' not found in CFG\."):
     cfg.set_entry_block("block3")
 
 
@@ -122,5 +121,5 @@ def test_cfg_traverse_dfs_no_entry() -> None:
   Verifies that calling DFS on an empty ControlFlowGraph safely raises a ValueError.
   """
   cfg: ControlFlowGraph = ControlFlowGraph()
-  with pytest.raises(ValueError, match="Cannot traverse CFG: No entry block defined."):
+  with pytest.raises(ValueError, match=r"Cannot traverse CFG: No entry block defined\."):
     cfg.traverse_dfs()

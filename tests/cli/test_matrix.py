@@ -1,19 +1,23 @@
 """Test suite for matrix."""
 
-from tests.conftest import _test_setattr
-
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from ml_switcheroo.cli.matrix import CompatibilityMatrix
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-def test_compatibility_matrix_get_json() -> None:
-  """Verify compatibility matrix get json behavior."""
+def test_compatibility_matrix_get_json(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `SemanticsManager` returns `2` for compatibility matrix get JSON.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   semantics = SemanticsManager()
 
   # Mock data
-  _test_setattr(
+  monkeypatch.setattr(
     semantics,
     "get_known_apis",
     MagicMock(
@@ -22,6 +26,7 @@ def test_compatibility_matrix_get_json() -> None:
         "add": {"variants": {"torch": {"api": "torch.add"}}},
       }
     ),
+    raising=False,
   )
 
   semantics._key_origins = {"Conv2d": "neural_net", "add": "math"}
@@ -47,27 +52,29 @@ def test_compatibility_matrix_get_json() -> None:
 
 
 def test_compatibility_matrix_render() -> None:
-  """Verify compatibility matrix render behavior."""
+  """Verify `SemanticsManager` handles compatibility matrix render as expected."""
   semantics = SemanticsManager()
   matrix = CompatibilityMatrix(semantics)
 
   mock_json: list[dict[str, str]] = [{"operation": "test_op", "tier": "Test", "torch": "✅", "jax": "❌"}]
 
-  with patch.object(matrix, "get_json", return_value=mock_json):
-    with patch.object(matrix, "_get_sorted_engines", return_value=["torch", "jax"]):
-      with patch.object(matrix.console, "print") as mock_print:
-        matrix.render()
+  with (
+    patch.object(matrix, "get_json", return_value=mock_json),
+    patch.object(matrix, "_get_sorted_engines", return_value=["torch", "jax"]),
+    patch.object(matrix.console, "print") as mock_print,
+  ):
+    matrix.render()
 
-        mock_print.assert_called_once()
-        table = mock_print.call_args[0][0]
-        assert table.title == "ml-switcheroo Compatibility Matrix"
-        # Check columns
-        cols: list[str] = [c.header for c in table.columns]
-        assert cols == ["Operation", "Tier", "TORCH", "JAX"]
+    mock_print.assert_called_once()
+    table = mock_print.call_args[0][0]
+    assert table.title == "ml-switcheroo Compatibility Matrix"
+    # Check columns
+    cols: list[str] = [c.header for c in table.columns]
+    assert cols == ["Operation", "Tier", "TORCH", "JAX"]
 
 
 def test_compatibility_matrix_get_status_icon() -> None:
-  """Verify compatibility matrix get status icon behavior."""
+  """Verify `CompatibilityMatrix` handles compatibility matrix get status icon as expected."""
   matrix = CompatibilityMatrix(SemanticsManager())
 
   assert matrix._get_status_icon(None) == "❌"
@@ -77,7 +84,7 @@ def test_compatibility_matrix_get_status_icon() -> None:
 
 
 def test_compatibility_matrix_get_sorted_engines() -> None:
-  """Verify compatibility matrix get sorted engines behavior."""
+  """Verify `CompatibilityMatrix` handles compatibility matrix get sorted engines as expected."""
   matrix = CompatibilityMatrix(SemanticsManager())
   with patch("ml_switcheroo.cli.matrix.get_framework_priority_order", return_value=["a", "b"]):
     assert matrix._get_sorted_engines() == ["a", "b"]

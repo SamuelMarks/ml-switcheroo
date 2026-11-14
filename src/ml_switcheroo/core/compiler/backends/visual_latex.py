@@ -9,7 +9,7 @@ import typing
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.backends.python_strategies.init import _INTERNAL_TRIVIA_KEYS
-from ml_switcheroo.core.compiler.ir import LogicalGraph
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.core.latex.nodes import (
   ComputeNode,
   InputNode,
@@ -22,6 +22,17 @@ from ml_switcheroo.core.latex.nodes import (
 
 if typing.TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
+
+
+@typing.runtime_checkable
+class _PendingEdgesProtocol(typing.Protocol):
+  """Protocol for LogicalGraph instances exposing `_pending_edges`.
+
+  Attributes:
+      _pending_edges: Deferred edges accumulated prior to node materialization.
+  """
+
+  _pending_edges: list[LogicalEdge]
 
 
 class LatexBackend(CompilerBackend):
@@ -83,6 +94,75 @@ class LatexBackend(CompilerBackend):
     footer = nl + r"\end{document}"
     return comment_block + header + content + footer
 
+  @staticmethod
+  def _build_memory_nodes(state_registry: dict[str, LogicalNode]) -> list[LatexNode]:
+    """Create ``MemoryNode`` declarations for stateful non-boundary ``LogicalNode`` entries.
+
+    Args:
+        state_registry: Mapping of node IDs to ``LogicalNode`` instances.
+
+    Returns:
+        Ordered list of ``MemoryNode`` AST elements.
+    """
+    memories: list[LatexNode] = []
+    for node_id, node in sorted(state_registry.items()):
+      op_type = str(node.op_type)
+      if op_type in ("Input", "Output") or node_id.startswith("func_"):
+        continue
+      config = {str(k): str(v) for k, v in node.attributes.items() if k not in _INTERNAL_TRIVIA_KEYS}
+      memories.append(MemoryNode(node_id=node_id, op_type=op_type, config=config))
+    return memories
+
+  @staticmethod
+  def _build_compute_node(
+    step_id: str,
+    op_type: str,
+    args: list[str],
+    node_data: LogicalNode | None,
+  ) -> ComputeNode:
+    """Construct a functional ``ComputeNode`` with formatted positional and keyword metadata.
+
+    Args:
+        step_id: Generated step identifier string.
+        op_type: Raw logical operation type string.
+        args: Incoming edge argument reference strings.
+        node_data: Optional ``LogicalNode`` holding operation attributes.
+
+    Returns:
+        Constructed ``ComputeNode`` instance.
+    """
+    meta_args: list[str] = []
+    if node_data:
+      for k, v in node_data.attributes.items():
+        if k in _INTERNAL_TRIVIA_KEYS:
+          continue
+        val_str = str(v)
+        meta_args.append(val_str if k.startswith("arg") else f"{k}={val_str}")
+
+    clean_type = op_type
+    if clean_type.startswith("func_"):
+      clean_type = clean_type[5:]
+    elif "." in clean_type:
+      clean_type = clean_type.split(".")[-1]
+    return ComputeNode(step_id, clean_type.capitalize(), args + meta_args, "[_]")
+
+  @staticmethod
+  def _build_return_node(graph: LogicalGraph, id_map: dict[str, str]) -> ReturnNode:
+    """Construct the terminal ``ReturnNode`` referencing the graph output producer.
+
+    Args:
+        graph: Source ``LogicalGraph``.
+        id_map: Mapping of logical node IDs to emitted LaTeX step identifiers.
+
+    Returns:
+        Constructed ``ReturnNode`` instance.
+    """
+    sources_to_output = [e.source for e in graph.edges if e.target in ("output", "Output")]
+    if sources_to_output:
+      final_src = sources_to_output[0]
+      return ReturnNode(target_id=id_map.get(final_src, f"op_{final_src}"))
+    return ReturnNode(target_id="last_step")
+
   def _transcode_graph(self, graph: LogicalGraph, name: str) -> ModelContainer:
     """Transform LogicalNode and LogicalEdge objects into a LatexNode hierarchy.
 
@@ -93,54 +173,24 @@ class LatexBackend(CompilerBackend):
     Returns:
         ModelContainer: Root node representing the LaTeX model container AST.
     """
-    children: list[LatexNode] = []
     state_registry = dict(graph.nodes)
+    children: list[LatexNode] = self._build_memory_nodes(state_registry)
 
-    for node_id, node in sorted(state_registry.items()):
-      op_type = str(node.op_type)
-      if op_type in ["Input", "Output"]:
-        continue
-      if node_id.startswith("func_"):
-        continue
-      config = {str(k): str(v) for k, v in node.attributes.items() if k not in _INTERNAL_TRIVIA_KEYS}
-      mem = MemoryNode(node_id=node_id, op_type=op_type, config=config)
-      children.append(mem)
-
-    input_node = next(
-      (n for n in graph.nodes.values() if n.op_type == "Input"),
-      None,
-    )
+    input_node = next((n for n in graph.nodes.values() if n.op_type == "Input"), None)
     input_name = "input"
     children.append(InputNode(name=input_name, shape="[_]"))
+    id_map: dict[str, str] = {input_node.id if input_node else "input": input_name}
 
-    id_map = {}
-    if input_node:
-      id_map[input_node.id] = input_name
-    else:
-      id_map["input"] = input_name
-
-    output_node = next(
-      (n for n in graph.nodes.values() if n.op_type == "Output"),
-      None,
-    )
-    visited_ops = set()
+    output_node = next((n for n in graph.nodes.values() if n.op_type == "Output"), None)
+    visited_ops: set[str] = set()
 
     all_edges = list(graph.edges)
-    try:
-      import inspect
-
-      pending = inspect.getattr_static(graph, "_pending_edges")
-    except AttributeError:
-      pending = None
-    if isinstance(pending, list):
-      all_edges.extend(pending)
+    if isinstance(graph, _PendingEdgesProtocol) and isinstance(graph._pending_edges, list):
+      all_edges.extend(graph._pending_edges)
 
     for edge in all_edges:
       target_id = edge.target
-      source_id = edge.source
-      if target_id == "output" or (output_node and target_id == output_node.id):
-        continue
-      if target_id in visited_ops:
+      if target_id == "output" or (output_node and target_id == output_node.id) or target_id in visited_ops:
         continue
 
       is_stateful = (target_id in state_registry) and not target_id.startswith("func_")
@@ -148,40 +198,15 @@ class LatexBackend(CompilerBackend):
       op_type = str(node_data.op_type) if node_data else "Unknown"
       step_id = f"op_{target_id}"
       id_map[target_id] = step_id
-      arg_ref = id_map.get(source_id, f"op_{source_id}")
-      args = [arg_ref]
+      args = [id_map.get(edge.source, f"op_{edge.source}")]
 
       if is_stateful:
         children.append(StateOpNode(step_id, target_id, args, "[_]"))
       else:
-        meta_args = []
-        if node_data:
-          for k, v in node_data.attributes.items():
-            if k in _INTERNAL_TRIVIA_KEYS:
-              continue
-            val_str = str(v)
-            if k.startswith("arg"):
-              meta_args.append(val_str)
-            else:
-              meta_args.append(f"{k}={val_str}")
-        final_args = args + meta_args
-        clean_type = op_type
-        if clean_type.startswith("func_"):
-          clean_type = clean_type[5:]
-        elif "." in clean_type:
-          clean_type = clean_type.split(".")[-1]
-        clean_type = clean_type.capitalize()
-        children.append(ComputeNode(step_id, clean_type, final_args, "[_]"))
-
+        children.append(self._build_compute_node(step_id, op_type, args, node_data))
       visited_ops.add(target_id)
 
     if visited_ops:
-      sources_to_output = [e.source for e in graph.edges if e.target == "output" or e.target == "Output"]
-      if sources_to_output:
-        final_src = sources_to_output[0]
-        final_ref = id_map.get(final_src, f"op_{final_src}")
-        children.append(ReturnNode(target_id=final_ref))
-      else:
-        children.append(ReturnNode(target_id="last_step"))
+      children.append(self._build_return_node(graph, id_map))
 
     return ModelContainer(name, children)

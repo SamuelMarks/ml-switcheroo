@@ -4,7 +4,7 @@ import torch
 
 
 def relu_activation(x: torch.Tensor) -> torch.Tensor:
-  """Helper to relu activation.
+  """Execute `torch.relu` to support relu activation in pytorch tests.
 
   Args:
       x: Primary input tensor or array operand.

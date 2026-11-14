@@ -37,6 +37,8 @@ __pycache__/
 docs/_build/
 docs/api/
 docs/ops/
+docs/operations.yaml
+docs/generated_operations.yaml
 docs/ARCHITECTURE.md
 docs/EXTENDING.md
 docs/EXTENDING_WITH_DSL.md
@@ -104,8 +106,11 @@ coverage.xml
 !test-requirements.txt
 !docs/docs-requirements.txt
 !legacy-requirements.txt
-!tests/integration/__snapshots__/*.txt
+!tests/e2e/__snapshots__/*.txt
+!tests/gold/wasm/__snapshots__/*.txt
 !src/ml_switcheroo/utils/doc_*.py
+
+uv.lock
 
 
 # Additional scratch files

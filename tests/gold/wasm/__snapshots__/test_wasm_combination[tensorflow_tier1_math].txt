@@ -1,0 +1,22 @@
+--- Forward ---
+import mlx
+import mlx.core as mx
+
+def math_ops(x, y):
+  # Tier 1: Core TensorFlow Math
+  a = mx.abs(x)
+  b = tf.math.add(a, y)
+  return tf.math.reduce_mean(b)
+
+--- Backward ---
+import tensorflow as tf
+
+def math_ops(x, y):
+  # Tier 1: Core TensorFlow Math
+  a = tf.abs(x)
+  # <SWITCHEROO_FAILED_TO_TRANS>
+  # Reason: Macro expansion failed: Macro template requires argument 'input' but it was missing/unresolvable.
+  b = tf.math.add(a, y)
+  # </SWITCHEROO_FAILED_TO_TRANS>
+  ...
+  return tf.math.reduce_mean(b)

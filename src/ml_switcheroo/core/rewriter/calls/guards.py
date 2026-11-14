@@ -1,16 +1,18 @@
 """Strict Mode Guards Injection."""
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 
 import libcst as cst
 from pydantic import JsonValue
+
+from ml_switcheroo.enums import RuntimeTensorOrValue
 
 if typing.TYPE_CHECKING:
   from ml_switcheroo.core.rewriter.calls.strategy import StrategyRewriterProtocol
   from ml_switcheroo.core.rewriter.interface import RewriterHost
 
 
+@typing.runtime_checkable
 class _HookCtxProtocol(typing.Protocol):
   """Minimal hook context protocol for strict guard preamble injection."""
 
@@ -21,7 +23,6 @@ class _HookCtxProtocol(typing.Protocol):
     Returns:
         Hook context metadata dictionary.
     """
-    ...
 
   def inject_preamble(self, code_str: str) -> None:
     """Inject preamble code into the module.
@@ -29,22 +30,22 @@ class _HookCtxProtocol(typing.Protocol):
     Args:
         code_str: Preamble code string to inject.
     """
-    ...
 
 
+@typing.runtime_checkable
 class _ContextWithHookProtocol(typing.Protocol):
   """Minimal rewriter context protocol exposing hook_context."""
 
   @property
-  def hook_context(self) -> _HookCtxProtocol:
+  def hook_context(self) -> _HookCtxProtocol | None:
     """Return hook context.
 
     Returns:
-        Active hook context.
+        Active hook context or None.
     """
-    ...
 
 
+@typing.runtime_checkable
 class GuardRewriterProtocol(typing.Protocol):
   """Minimal rewriter protocol required by apply_strict_guards."""
 
@@ -55,7 +56,6 @@ class GuardRewriterProtocol(typing.Protocol):
     Returns:
         Active rewriter context.
     """
-    ...
 
 
 STRICT_RANK_HELPER = """
@@ -84,7 +84,6 @@ def apply_strict_guards(
 
   Returns:
       List[cst.Arg]: A new list of arguments, potentially wrapped in assertion logic.
-
   """
   raw_std_args = details.get("std_args", [])
   std_args = raw_std_args if isinstance(raw_std_args, list) else []
@@ -134,14 +133,10 @@ def apply_strict_guards(
     else:
       new_args.append(arg)
 
-  if guards_applied:
-    from ml_switcheroo.core.rewriter.calls.pre import _resolve_attr
-
-    ctx = _resolve_attr(rewriter, "context")
-    hook_ctx = _resolve_attr(ctx, "hook_context")
-    if hook_ctx is not None:
-      if not hook_ctx.metadata.get("strict_helper_injected"):
-        hook_ctx.inject_preamble(STRICT_RANK_HELPER)
-        hook_ctx.metadata["strict_helper_injected"] = True
+  if guards_applied and isinstance(rewriter, GuardRewriterProtocol):
+    hook_ctx = rewriter.context.hook_context
+    if hook_ctx is not None and not hook_ctx.metadata.get("strict_helper_injected"):
+      hook_ctx.inject_preamble(STRICT_RANK_HELPER)
+      hook_ctx.metadata["strict_helper_injected"] = True
 
   return new_args

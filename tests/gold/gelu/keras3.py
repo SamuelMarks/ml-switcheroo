@@ -4,11 +4,11 @@ import keras
 
 
 def gelu_activation(x: keras.KerasTensor, approximate: bool = False) -> keras.KerasTensor:
-  """Helper to gelu activation.
+  """Execute `gelu` to support gelu activation in keras3 tests.
 
   Args:
       x: Primary input tensor or array operand.
-      approximate: The approximate (bool) for gelu activation.
+      approximate: Input `approximate` parameter value (`bool`).
 
   Returns:
       Resulting `keras.KerasTensor` from gelu activation.

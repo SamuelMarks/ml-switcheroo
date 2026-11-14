@@ -4,7 +4,7 @@ import mlx.core as mx
 
 
 def bmm_einsum(x: mx.array, y: mx.array) -> mx.array:
-  """Helper to bmm einsum.
+  """Execute `mx.matmul` to support bmm einsum in MLX tests.
 
   Args:
       x: Primary input tensor or array operand.

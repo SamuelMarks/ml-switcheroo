@@ -440,5 +440,5 @@ class HtmlParser:
     """
     try:
       return cst.parse_expression(v)
-    except Exception:
+    except (cst.ParserSyntaxError, ValueError, TypeError):
       return cst.SimpleString(f"'{v}'")

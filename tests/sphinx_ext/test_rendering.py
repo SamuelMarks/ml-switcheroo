@@ -8,14 +8,14 @@ from ml_switcheroo.sphinx_ext.rendering import _render_flavour_dropdown, _render
 
 
 def test_render_primary_options_empty() -> None:
-  """Verify render primary options empty behavior."""
+  """Verify `_render_primary_options` handles empty as expected."""
   hierarchy: dict[str, list[dict[str, str]]] = {}
   html: str = _render_primary_options(hierarchy)
   assert html == ""
 
 
 def test_render_primary_options_standard() -> None:
-  """Verify render primary options standard behavior."""
+  """Verify `_render_primary_options` handles standard as expected."""
   hierarchy: dict[str, list[dict[str, str]]] = {
     "torch": [{"key": "t1", "label": "t1"}],
     "jax": [],
@@ -79,7 +79,7 @@ def test_render_primary_options_ir_grouped() -> None:
 
 
 def test_render_flavour_dropdown_empty() -> None:
-  """Verify render flavour dropdown empty behavior."""
+  """Verify `_render_flavour_dropdown` emits `display:none;` for empty."""
   hierarchy: dict[str, list[dict[str, str]]] = {"torch": [], "jax": []}
   html: str = _render_flavour_dropdown("src", hierarchy, "torch")
   assert '<option value="" disabled selected data-parent="">No Flavours</option>' in html
@@ -87,7 +87,7 @@ def test_render_flavour_dropdown_empty() -> None:
 
 
 def test_render_flavour_dropdown_with_flavours() -> None:
-  """Verify render flavour dropdown with flavours behavior."""
+  """Verify `_render_flavour_dropdown` emits `display:inline-block;` for with flavours."""
   hierarchy: dict[str, list[dict[str, str]]] = {
     "torch": [{"key": "torch.nn", "label": "Torch NN"}, {"key": "torch.fx", "label": "Torch FX"}],
     "jax": [],
@@ -126,53 +126,55 @@ def test_render_demo_html_basic(tmp_path: Path) -> None:
       """
       self.display_name: str = name.capitalize()
 
-  with mock.patch("ml_switcheroo.sphinx_ext.rendering.get_adapter", side_effect=MockAdapter):
-    # We need to mock path to not look at actual dist folder if we want a clean test
-    with mock.patch("ml_switcheroo.sphinx_ext.rendering.Path") as mock_path_cls:
-      mock_root: mock.MagicMock = mock.MagicMock()
-      mock_dist: mock.MagicMock = mock.MagicMock()
-      mock_dist.exists.return_value = False
-      mock_root.__truediv__.return_value = mock_dist
+  # We need to mock path to not look at actual dist folder if we want a clean test
+  with (
+    mock.patch("ml_switcheroo.sphinx_ext.rendering.get_adapter", side_effect=MockAdapter),
+    mock.patch("ml_switcheroo.sphinx_ext.rendering.Path") as mock_path_cls,
+  ):
+    mock_root: mock.MagicMock = mock.MagicMock()
+    mock_dist: mock.MagicMock = mock.MagicMock()
+    mock_dist.exists.return_value = False
+    mock_root.__truediv__.return_value = mock_dist
 
-      mock_parents = [None, None, None, mock_root]
-      mock_path_obj: mock.MagicMock = mock.MagicMock()
-      mock_path_obj.parents = mock_parents
-      mock_path_cls.return_value = mock_path_obj
+    mock_parents = [None, None, None, mock_root]
+    mock_path_obj: mock.MagicMock = mock.MagicMock()
+    mock_path_obj.parents = mock_parents
+    mock_path_cls.return_value = mock_path_obj
 
-      html: str = render_demo_html(hierarchy, '{"ex": "1"}', '{"tier": "1"}')
+    html: str = render_demo_html(hierarchy, '{"ex": "1"}', '{"tier": "1"}')
 
-      assert 'window.SWITCHEROO_PRELOADED_EXAMPLES = {"ex": "1"};' in html
-      assert 'window.SWITCHEROO_FRAMEWORK_TIERS = {"tier": "1"};' in html
-      assert "ml_switcheroo-latest-py3-none-any.whl" in html
-      assert 'value="torch" selected' in html
-      assert 'value="jax" selected' in html
-      assert 'id="chk-on-device-exec"' in html
-      assert 'id="on-device-config-bar"' in html
-      assert 'id="select-conversion-mode"' in html
-      assert '<option value="preserve_trivia" selected>' in html
-      assert '<option value="optimized">' in html
-      assert 'id="select-opt-level"' in html
-      assert 'id="select-exec-backend"' in html
-      assert '<option value="webgpu" selected>' in html
-      assert '<option value="cuda">' in html
-      assert '<option value="metal">' in html
-      assert 'id="select-input-preset"' in html
-      assert 'id="input-tensor-shape"' in html
-      assert 'id="select-input-dtype"' in html
-      assert 'id="input-random-seed"' in html
-      assert 'id="select-loss-reduction"' in html
-      assert 'id="chk-inject-annotations"' in html
-      assert 'id="chk-inject-assertions"' in html
-      assert 'id="chk-emit-bwd-code"' in html
-      assert 'id="tab-runtime"' in html
-      assert 'id="panel-runtime"' in html
-      assert 'id="runtime-summary-badges"' in html
-      assert 'id="runtime-impasse-card"' in html
-      assert 'id="runtime-telemetry-table"' in html
-      assert 'id="runtime-param-grads-table"' in html
-      assert 'id="runtime-ir-inspector"' in html
-      assert 'id="select-ir-inspector-view"' in html
-      assert 'id="runtime-ir-inspector-code"' in html
+    assert 'window.SWITCHEROO_PRELOADED_EXAMPLES = {"ex": "1"};' in html
+    assert 'window.SWITCHEROO_FRAMEWORK_TIERS = {"tier": "1"};' in html
+    assert "ml_switcheroo-latest-py3-none-any.whl" in html
+    assert 'value="torch" selected' in html
+    assert 'value="jax" selected' in html
+    assert 'id="chk-on-device-exec"' in html
+    assert 'id="on-device-config-bar"' in html
+    assert 'id="select-conversion-mode"' in html
+    assert '<option value="preserve_trivia" selected>' in html
+    assert '<option value="optimized">' in html
+    assert 'id="select-opt-level"' in html
+    assert 'id="select-exec-backend"' in html
+    assert '<option value="webgpu" selected>' in html
+    assert '<option value="cuda">' in html
+    assert '<option value="metal">' in html
+    assert 'id="select-input-preset"' in html
+    assert 'id="input-tensor-shape"' in html
+    assert 'id="select-input-dtype"' in html
+    assert 'id="input-random-seed"' in html
+    assert 'id="select-loss-reduction"' in html
+    assert 'id="chk-inject-annotations"' in html
+    assert 'id="chk-inject-assertions"' in html
+    assert 'id="chk-emit-bwd-code"' in html
+    assert 'id="tab-runtime"' in html
+    assert 'id="panel-runtime"' in html
+    assert 'id="runtime-summary-badges"' in html
+    assert 'id="runtime-impasse-card"' in html
+    assert 'id="runtime-telemetry-table"' in html
+    assert 'id="runtime-param-grads-table"' in html
+    assert 'id="runtime-ir-inspector"' in html
+    assert 'id="select-ir-inspector-view"' in html
+    assert 'id="runtime-ir-inspector-code"' in html
 
 
 def test_render_demo_html_with_wheels(tmp_path: Path) -> None:
@@ -206,21 +208,23 @@ def test_render_demo_html_with_wheels(tmp_path: Path) -> None:
       """
       self.display_name: str = name.capitalize()
 
-  with mock.patch("ml_switcheroo.sphinx_ext.rendering.get_adapter", side_effect=MockAdapter):
-    # Patch the file path directly to use our tmp_path structure
-    with mock.patch("ml_switcheroo.sphinx_ext.rendering.Path") as mock_path_cls:
-      mock_root: Path = tmp_path
-      mock_parents = [None, None, None, mock_root]
-      mock_path_obj: mock.MagicMock = mock.MagicMock()
-      mock_path_obj.parents = mock_parents
-      mock_path_cls.return_value = mock_path_obj
+  # Patch the file path directly to use our tmp_path structure
+  with (
+    mock.patch("ml_switcheroo.sphinx_ext.rendering.get_adapter", side_effect=MockAdapter),
+    mock.patch("ml_switcheroo.sphinx_ext.rendering.Path") as mock_path_cls,
+  ):
+    mock_root: Path = tmp_path
+    mock_parents = [None, None, None, mock_root]
+    mock_path_obj: mock.MagicMock = mock.MagicMock()
+    mock_path_obj.parents = mock_parents
+    mock_path_cls.return_value = mock_path_obj
 
-      html: str = render_demo_html(hierarchy, "{}", "{}")
+    html: str = render_demo_html(hierarchy, "{}", "{}")
 
-      # Should have chosen the newer wheel
-      assert 'data-wheel="ml_switcheroo-1.1.0-py3-none-any.whl"' in html
-      # Without torch, def_source should be jax (based on default priority)
-      assert 'value="jax" selected' in html
+    # Should have chosen the newer wheel
+    assert 'data-wheel="ml_switcheroo-1.1.0-py3-none-any.whl"' in html
+    # Without torch, def_source should be jax (based on default priority)
+    assert 'value="jax" selected' in html
 
 
 def test_render_demo_html_empty_wheels_and_fallback(tmp_path: Path) -> None:
@@ -236,7 +240,7 @@ def test_render_demo_html_empty_wheels_and_fallback(tmp_path: Path) -> None:
   dist_dir.mkdir()
 
   class MockAdapter:
-    """Test helper class MockAdapter."""
+    """Sentinel `MockAdapter` fixture class used in rendering tests."""
 
     def __init__(self, name: str) -> None:
       """Initialize mock adapter with capitalized display name.
@@ -246,19 +250,21 @@ def test_render_demo_html_empty_wheels_and_fallback(tmp_path: Path) -> None:
       """
       self.display_name: str = name.capitalize()
 
-  with mock.patch("ml_switcheroo.sphinx_ext.rendering.get_adapter", side_effect=MockAdapter):
-    with mock.patch("ml_switcheroo.sphinx_ext.rendering.Path") as mock_path_cls:
-      mock_root: Path = tmp_path
-      mock_parents = [None, None, None, mock_root]
-      mock_path_obj: mock.MagicMock = mock.MagicMock()
-      mock_path_obj.parents = mock_parents
-      mock_path_cls.return_value = mock_path_obj
+  with (
+    mock.patch("ml_switcheroo.sphinx_ext.rendering.get_adapter", side_effect=MockAdapter),
+    mock.patch("ml_switcheroo.sphinx_ext.rendering.Path") as mock_path_cls,
+  ):
+    mock_root: Path = tmp_path
+    mock_parents = [None, None, None, mock_root]
+    mock_path_obj: mock.MagicMock = mock.MagicMock()
+    mock_path_obj.parents = mock_parents
+    mock_path_cls.return_value = mock_path_obj
 
-      html: str = render_demo_html(hierarchy, "{}", "{}")
+    html: str = render_demo_html(hierarchy, "{}", "{}")
 
-      assert "ml_switcheroo-latest-py3-none-any.whl" in html
-      assert 'value="numpy"' in html
-      assert 'value="mlir"' in html
+    assert "ml_switcheroo-latest-py3-none-any.whl" in html
+    assert 'value="numpy"' in html
+    assert 'value="mlir"' in html
 
 
 def test_render_demo_html_no_priority_order(tmp_path: Path) -> None:
@@ -270,7 +276,7 @@ def test_render_demo_html_no_priority_order(tmp_path: Path) -> None:
   hierarchy: dict[str, list[dict[str, str]]] = {"numpy": []}
 
   class MockAdapter:
-    """Test helper class MockAdapter."""
+    """Sentinel `MockAdapter` fixture class used in rendering tests."""
 
     def __init__(self, name: str) -> None:
       """Initialize mock adapter with capitalized display name.
@@ -280,13 +286,15 @@ def test_render_demo_html_no_priority_order(tmp_path: Path) -> None:
       """
       self.display_name: str = name.capitalize()
 
-  with mock.patch("ml_switcheroo.sphinx_ext.rendering.get_adapter", side_effect=MockAdapter):
-    with mock.patch("ml_switcheroo.sphinx_ext.rendering.Path") as mock_path_cls:
-      mock_root: Path = tmp_path
-      mock_path_obj: mock.MagicMock = mock.MagicMock()
-      mock_path_obj.parents = [None, None, None, mock_root]
-      mock_path_cls.return_value = mock_path_obj
+  with (
+    mock.patch("ml_switcheroo.sphinx_ext.rendering.get_adapter", side_effect=MockAdapter),
+    mock.patch("ml_switcheroo.sphinx_ext.rendering.Path") as mock_path_cls,
+  ):
+    mock_root: Path = tmp_path
+    mock_path_obj: mock.MagicMock = mock.MagicMock()
+    mock_path_obj.parents = [None, None, None, mock_root]
+    mock_path_cls.return_value = mock_path_obj
 
-      with mock.patch("ml_switcheroo.sphinx_ext.rendering.get_framework_priority_order", return_value=[]):
-        html: str = render_demo_html(hierarchy, "{}", "{}")
-        assert 'value="source_placeholder"' not in html  # it gets replaced by numpy maybe? Actually wait.
+    with mock.patch("ml_switcheroo.sphinx_ext.rendering.get_framework_priority_order", return_value=[]):
+      html: str = render_demo_html(hierarchy, "{}", "{}")
+      assert 'value="source_placeholder"' not in html  # it gets replaced by numpy maybe? Actually wait.

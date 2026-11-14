@@ -5,7 +5,7 @@ from praxis.layers import activations
 
 
 def relu_activation(x: jnp.ndarray) -> jnp.ndarray:
-  """Helper to relu activation.
+  """Execute `instantiate` to support relu activation in PaxML tests.
 
   Args:
       x: Primary input tensor or array operand.

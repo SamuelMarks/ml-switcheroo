@@ -1,13 +1,10 @@
 """Test suite for the Scatter module."""
 
-from tests.conftest import _test_getattr
-
-import typing
-from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
 import pytest
+from pydantic import JsonValue
 
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.config import RuntimeConfig
@@ -30,21 +27,20 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 
 @pytest.fixture
-def rewriter() -> typing.Generator[PivotRewriter, None, None]:
+def rewriter() -> PivotRewriter:
   """Provides a mock rewriter for testing.
 
-  Yields:
+  Returns:
       PivotRewriter: A mock rewriter instance.
   """
-  _test_getattr(
-    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
-  )("scatter_indexer", _test_getattr({"v": transform_scatter}, "__getitem__")("v"))
-  hooks._PLUGINS_LOADED = True
+  hooks.register_hook("scatter_indexer")(transform_scatter)
+  hooks.set_plugins_loaded(True)
   mgr: MagicMock = MagicMock()
-  scatter_def = {
+  jax_variant: dict[str, JsonValue] = {"api": "at_set", "requires_plugin": "scatter_indexer"}
+  scatter_def: dict[str, JsonValue] = {
     "variants": {
       "torch": {"api": "torch.Tensor.scatter_"},
-      "jax": {"api": "at_set", "requires_plugin": "scatter_indexer"},
+      "jax": jax_variant,
     }
   }
 
@@ -58,29 +54,24 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
         Optional[Tuple[str, dict[str, JsonValue]]]: Definition tuple.
     """
     if "scatter" in name:
-      _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
-        {
-          "v": (
-            _test_getattr({"v": "Scatter"}, "__getitem__")("v"),
-            _test_getattr({"v": scatter_def}, "__getitem__")("v"),
-          )
-        },
-        "__getitem__",
-      )("v")
+      _ret_v: tuple[str, dict[str, JsonValue]] | None = (
+        "Scatter",
+        scatter_def,
+      )
       return _ret_v
     return None
 
   mgr.get_definition.side_effect = get_def
-  mgr.resolve_variant.side_effect = lambda aid, fw: scatter_def["variants"]["jax"] if fw == "jax" else None
+  mgr.resolve_variant.side_effect = lambda aid, fw: jax_variant if fw == "jax" else None
   mgr.is_verified.return_value = True
   mgr.get_known_apis.return_value = {"Scatter": scatter_def}
   mgr.get_framework_config.return_value = {}
   cfg: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
-  yield PivotRewriter(mgr, cfg)
+  return PivotRewriter(mgr, cfg)
 
 
 def test_scatter_simple_rewrite(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of scatter simple rewrite.
+  """Verify `rewrite_code` emits `x.at[idx]` for scatter simple rewrite.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
@@ -89,11 +80,12 @@ def test_scatter_simple_rewrite(rewriter: PivotRewriter) -> None:
   res: str = rewrite_code(rewriter, code)
   assert "x.at[idx]" in res
   assert ".set(src)" in res
-  assert ", 1," not in res and "(1," not in res
+  assert ", 1," not in res
+  assert "(1," not in res
 
 
 def test_scatter_add_rewrite(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of scatter add rewrite.
+  """Verify `rewrite_code` emits `x.at[idx]` for scatter add rewrite.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
@@ -105,7 +97,7 @@ def test_scatter_add_rewrite(rewriter: PivotRewriter) -> None:
 
 
 def test_scatter_keywords(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of scatter keywords.
+  """Verify `rewrite_code` emits `x.at[indices]` for scatter keywords.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
@@ -117,7 +109,7 @@ def test_scatter_keywords(rewriter: PivotRewriter) -> None:
 
 
 def test_ignore_tf_target(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of ignore tf target.
+  """Verify `rewrite_code` handles ignore TensorFlow target as expected.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
@@ -153,8 +145,28 @@ def test_missing_args() -> None:
 
 
 def test_scatter_too_few_args() -> None:
-  """Verifies the behavior of scatter too few arguments."""
+  """Verify `Call` handles scatter too few args as expected."""
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("scatter")), args=[])
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
   res: cst.CSTNode | cst.Call = transform_scatter(node, ctx)
   assert res is node
+
+
+def test_scatter_functional_and_keyword_receiver() -> None:
+  """Verify functional 4-arg scatter and keyword input= scatter forms."""
+  ctx = HookContext(
+    semantics=MagicMock(),
+    config=RuntimeConfig(source_framework="torch", target_framework="jax"),
+  )
+
+  func_4arg = cst.ensure_type(cst.parse_expression("torch.scatter(x, 1, idx, src, *extra)"), cst.Call)
+  res_4arg = transform_scatter(func_4arg, ctx)
+  assert cst.Module(body=[]).code_for_node(res_4arg) == "x.at[idx].set(src)"
+
+  kw_recv = cst.ensure_type(cst.parse_expression("scatter(input=x, index=idx, src=val)"), cst.Call)
+  res_kw = transform_scatter(kw_recv, ctx)
+  assert cst.Module(body=[]).code_for_node(res_kw) == "x.at[idx].set(val)"
+
+  callable_expr = cst.ensure_type(cst.parse_expression("(get_fn())(x, 0, idx, val)"), cst.Call)
+  res_call = transform_scatter(callable_expr, ctx)
+  assert cst.Module(body=[]).code_for_node(res_call) == "x.at[idx].set(val)"

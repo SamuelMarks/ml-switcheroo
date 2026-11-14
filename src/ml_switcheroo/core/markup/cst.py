@@ -1,25 +1,29 @@
 """Common Markup Concrete Syntax Tree (CST) Nodes for Visual DSLs.
 
-Defines the shared AST node hierarchy for HTML, LaTeX, and TikZ visualizations.
+Defines the shared CST node hierarchy for HTML, LaTeX, and TikZ visualizations,
+inheriting directly from :class:`ml_switcheroo.core.cst.base.CSTNode`.
 """
 
-import pydantic
-
-from ml_switcheroo.core.cst.base import CSTNode, CstFieldValue, Trivia
+from ml_switcheroo.core.cst.base import CstFieldValue, CSTNode, TriviaInput
 
 
-class MarkupNode(pydantic.BaseModel):
+class MarkupNode(CSTNode):
   """Abstract base class for all markup DSL elements."""
 
-  model_config = pydantic.ConfigDict(extra="forbid", arbitrary_types_allowed=True)
-
-  def __init__(self, **kwargs: CstFieldValue) -> None:
+  def __init__(
+    self,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
+    **kwargs: CstFieldValue,
+  ) -> None:
     """Initialize MarkupNode.
 
     Args:
-        **kwargs: Subclass field values forwarded to BaseModel.
+        leading_trivia: Optional leading trivia preceding this node.
+        trailing_trivia: Optional trailing trivia following this node.
+        **kwargs: Subclass field values forwarded to CSTNode.
     """
-    super().__init__(**kwargs)
+    super().__init__(leading_trivia=leading_trivia, trailing_trivia=trailing_trivia, **kwargs)
 
   def emit(self, indent_level: int = 0) -> str:
     """Render this node to its string representation with indentation.
@@ -29,6 +33,9 @@ class MarkupNode(pydantic.BaseModel):
 
     Returns:
         str: The structured markup source code.
+
+    Raises:
+        NotImplementedError: Must be implemented by concrete `MarkupNode` subclasses.
     """
     raise NotImplementedError
 
@@ -41,20 +48,23 @@ class MarkupNode(pydantic.BaseModel):
     return self.emit(0)
 
 
-class TriviaNode(CSTNode, MarkupNode):
-  """Represent non-semantic textual elements (whitespace, newlines, comments)."""
+class TriviaNode(MarkupNode):
+  """Represent non-semantic textual elements (whitespace, newlines, comments).
+
+  Attributes:
+      content: Raw trivia text content (`str`).
+      kind: Trivia classification (`str`).
+  """
 
   content: str = ""
   kind: str = "whitespace"
-  leading_trivia: list[Trivia] = pydantic.Field(default_factory=list)
-  trailing_trivia: list[Trivia] = pydantic.Field(default_factory=list)
 
   def __init__(
     self,
     content: str = "",
     kind: str = "whitespace",
-    leading_trivia: list[Trivia] | None = None,
-    trailing_trivia: list[Trivia] | None = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize TriviaNode.
 
@@ -67,8 +77,8 @@ class TriviaNode(CSTNode, MarkupNode):
     super().__init__(
       content=content,
       kind=kind,
-      leading_trivia=leading_trivia if leading_trivia is not None else [],
-      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
     )
 
   def emit(self, indent_level: int = 0) -> str:
@@ -83,18 +93,20 @@ class TriviaNode(CSTNode, MarkupNode):
     return self.content
 
 
-class TextNode(CSTNode, MarkupNode):
-  """Represent standard text content within markup."""
+class TextNode(MarkupNode):
+  """Represent standard text content within markup.
+
+  Attributes:
+      content: Text content (`str`).
+  """
 
   content: str = ""
-  leading_trivia: list[Trivia] = pydantic.Field(default_factory=list)
-  trailing_trivia: list[Trivia] = pydantic.Field(default_factory=list)
 
   def __init__(
     self,
     content: str = "",
-    leading_trivia: list[Trivia] | None = None,
-    trailing_trivia: list[Trivia] | None = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize TextNode.
 
@@ -105,8 +117,8 @@ class TextNode(CSTNode, MarkupNode):
     """
     super().__init__(
       content=content,
-      leading_trivia=leading_trivia if leading_trivia is not None else [],
-      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
     )
 
   def emit(self, indent_level: int = 0) -> str:
@@ -118,7 +130,4 @@ class TextNode(CSTNode, MarkupNode):
     Returns:
         str: Text string with leading and trailing trivia.
     """
-    res = "".join(t.text for t in self.leading_trivia)
-    res += self.content
-    res += "".join(t.text for t in self.trailing_trivia)
-    return res
+    return f"{self.leading_trivia_text()}{self.content}{self.trailing_trivia_text()}"

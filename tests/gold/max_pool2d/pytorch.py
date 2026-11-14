@@ -5,7 +5,7 @@ import torch.nn as nn
 
 
 class MaxPoolModel(nn.Module):
-  """Test helper class MaxPoolModel."""
+  """Stub `nn.Module` subclass implementing `forward` for pytorch tests."""
 
   def __init__(self, kernel_size: int = 2, stride: int = 2):
     """Initializes the MaxPoolModel instance.
@@ -18,7 +18,7 @@ class MaxPoolModel(nn.Module):
     self.pool = nn.MaxPool2d(kernel_size, stride=stride)
 
   def forward(self, x: torch.Tensor) -> torch.Tensor:
-    """Helper to forward.
+    """Compute the forward pass of `MaxPoolModel` on input tensors.
 
     Args:
         x: Primary input tensor or array operand.

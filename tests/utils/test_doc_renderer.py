@@ -6,7 +6,7 @@ from ml_switcheroo.utils.doc_renderer import OpPageRenderer
 
 
 def test_render_rst_full() -> None:
-  """Verify render rst full behavior."""
+  """Verify `OpPageRenderer` emits `Abs` for render rst full."""
   renderer: OpPageRenderer = OpPageRenderer()
   context: dict[str, JsonValue] = {
     "name": "Abs",
@@ -43,7 +43,7 @@ def test_render_rst_full() -> None:
 
 
 def test_render_rst_no_variants_no_args() -> None:
-  """Verify render rst no variants no args behavior."""
+  """Verify `OpPageRenderer` emits `Dummy` for render rst no variants no args."""
   renderer: OpPageRenderer = OpPageRenderer()
   context: dict[str, JsonValue] = {"name": "Dummy", "description": "Dummy desc.", "args": [], "variants": []}
 
@@ -53,7 +53,7 @@ def test_render_rst_no_variants_no_args() -> None:
 
 
 def test_rst_header_structure() -> None:
-  """Verify rst header structure behavior."""
+  """Verify `OpPageRenderer` emits `Linear` for rst header structure."""
   renderer: OpPageRenderer = OpPageRenderer()
   context: dict[str, JsonValue] = {
     "name": "Linear",
@@ -66,7 +66,7 @@ def test_rst_header_structure() -> None:
 
 
 def test_rst_args_block() -> None:
-  """Verify rst args block behavior."""
+  """Verify `OpPageRenderer` emits `in: int, out: int` for rst args block."""
   renderer: OpPageRenderer = OpPageRenderer()
   context: dict[str, JsonValue] = {
     "name": "Linear",
@@ -79,7 +79,7 @@ def test_rst_args_block() -> None:
 
 
 def test_html_injection() -> None:
-  """Verify html injection behavior."""
+  """Verify `OpPageRenderer` emits `raw:: html` for HTML injection."""
   renderer: OpPageRenderer = OpPageRenderer()
   context: dict[str, JsonValue] = {
     "name": "Linear",
@@ -92,7 +92,7 @@ def test_html_injection() -> None:
 
 
 def test_html_tabs_content() -> None:
-  """Verify html tabs content behavior."""
+  """Verify `OpPageRenderer` emits `>PyTorch</button>` for HTML tabs content."""
   renderer: OpPageRenderer = OpPageRenderer()
   variants: list[dict[str, JsonValue]] = [
     {

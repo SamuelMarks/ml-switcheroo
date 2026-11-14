@@ -18,32 +18,32 @@ from ml_switcheroo.core.wasm.cst import (
 
 
 def test_wat_node_base() -> None:
-  """Verify wat node base behavior."""
+  """Verify `WatNode` raises `NotImplementedError` during wat node base."""
   node = WatNode()
   with pytest.raises(NotImplementedError):
     node.to_text()
 
 
 def test_wat_param() -> None:
-  """Verify wat param behavior."""
+  """Verify `WatParam` handles wat param as expected."""
   param = WatParam(WasmRegister("x"), "f32")
   assert param.to_text() == "(param $x f32)"
 
 
 def test_wat_result() -> None:
-  """Verify wat result behavior."""
+  """Verify `WatResult` handles wat result as expected."""
   result = WatResult("f32")
   assert result.to_text() == "(result f32)"
 
 
 def test_wat_local() -> None:
-  """Verify wat local behavior."""
+  """Verify `WatLocal` handles wat local as expected."""
   local = WatLocal(WasmRegister("temp"), "f32")
   assert local.to_text() == "(local $temp f32)"
 
 
 def test_wat_instr() -> None:
-  """Verify wat instr behavior."""
+  """Verify `WatInstr` handles wat instr as expected."""
   instr1 = WatInstr(WasmOpcode("f32.add"))
   assert instr1.to_text() == "f32.add"
 
@@ -52,7 +52,7 @@ def test_wat_instr() -> None:
 
 
 def test_wat_func() -> None:
-  """Verify wat func behavior."""
+  """Verify `WatFunc` emits `(local $c f32)` for wat func."""
   func = WatFunc(
     name="add_two",
     export=True,
@@ -75,7 +75,7 @@ def test_wat_func() -> None:
 
 
 def test_wat_module() -> None:
-  """Verify wat module behavior."""
+  """Verify `WatModule` emits `(module` for wat module."""
   mod = WatModule(functions=[WatFunc(name="main", body=[WatInstr(WasmOpcode("nop"))])])
   text = mod.to_text()
   assert "(module\n" in text
@@ -86,7 +86,7 @@ def test_wat_module() -> None:
 
 
 def test_wat_parser_roundtrip() -> None:
-  """Verify wat parser roundtrip behavior."""
+  """Verify `WatParser` handles wat parser roundtrip as expected."""
   from ml_switcheroo.core.wasm.cst import WatParser
 
   text = """(module
@@ -106,7 +106,7 @@ def test_wat_parser_roundtrip() -> None:
 
 
 def test_wasm_parser_empty_peek_consume() -> None:
-  """Verify wasm parser empty peek consume behavior."""
+  """Verify `WatParser` raises `ValueError` during Wasm parser empty peek consume."""
   parser = WatParser("")
   assert parser._peek() == ""
   with pytest.raises(ValueError, match="Unexpected EOF"):
@@ -114,15 +114,15 @@ def test_wasm_parser_empty_peek_consume() -> None:
 
 
 def test_wasm_parser_consume_mismatch() -> None:
-  """Verify wasm parser consume mismatch behavior."""
+  """Verify `WatParser` raises `ValueError` during Wasm parser consume mismatch."""
   parser = WatParser("(module)")
+  parser._consume("(")
   with pytest.raises(ValueError, match="Expected func, got module"):
-    parser._consume("(")
     parser._consume("func")
 
 
 def test_wasm_parser_skip_unrecognized_blocks() -> None:
-  """Verify wasm parser skip unrecognized blocks behavior."""
+  """Verify `WatParser` handles Wasm parser skip unrecognized blocks as expected."""
   text: str = '(module (import "env" "memory" (memory 1)) (func))'
   parser = WatParser(text)
   mod = parser.parse()
@@ -130,7 +130,7 @@ def test_wasm_parser_skip_unrecognized_blocks() -> None:
 
 
 def test_wasm_parser_func_unrecognized_block() -> None:
-  """Verify wasm parser func unrecognized block behavior."""
+  """Verify `WatParser` handles Wasm parser func unrecognized block as expected."""
   text: str = "(module (func (unrecognized_stuff) nop))"
   parser = WatParser(text)
   mod = parser.parse()
@@ -138,7 +138,7 @@ def test_wasm_parser_func_unrecognized_block() -> None:
 
 
 def test_wasm_parser_func_sexpr_instruction() -> None:
-  """Verify wasm parser func sexpr instruction behavior."""
+  """Verify `WatParser` handles Wasm parser func sexpr instruction as expected."""
   text: str = "(module (func (local.get $x)))"
   parser = WatParser(text)
   mod = parser.parse()
@@ -147,7 +147,7 @@ def test_wasm_parser_func_sexpr_instruction() -> None:
 
 
 def test_wasm_parser_comments() -> None:
-  """Verify wasm parser comments behavior."""
+  """Verify `WatParser` returns `1` for Wasm parser comments."""
   text: str = "(module ;; comment here\n (func))"
   parser = WatParser(text)
   mod = parser.parse()
@@ -155,7 +155,7 @@ def test_wasm_parser_comments() -> None:
 
 
 def test_wasm_parser_param_local_no_name() -> None:
-  """Verify wasm parser param local no name behavior."""
+  """Verify `WatParser` handles Wasm parser param local no name as expected."""
   text: str = "(module (func (param f32) (local i32) nop))"
   parser = WatParser(text)
   mod = parser.parse()
@@ -166,14 +166,14 @@ def test_wasm_parser_param_local_no_name() -> None:
 
 
 def test_wasm_parser_fallback_token() -> None:
-  """Verify wasm parser fallback token behavior."""
+  """Verify `WatParser` emits `@` for Wasm parser fallback token."""
   text: str = "(module @)"
   parser = WatParser(text)
   assert "@" in parser.tokens
 
 
 def test_wasm_parser_bad_string() -> None:
-  """Verify wasm parser bad string behavior."""
+  """Verify `WatParser` handles Wasm parser bad string as expected."""
   # an unclosed string might hit the fallback logic in _tokenize
   # but re.match handles the pattern, if it fails, it's not a match.
   text: str = '(module "unclosed)'

@@ -11,20 +11,20 @@ def train_step(
 
   Args:
       model: Neural network model instance under test.
-      optimizer: The optimizer (jnp.ndarray) for train step.
+      optimizer: Input `optimizer` parameter value (`jnp.ndarray`).
       x: Primary input tensor or array operand.
       y: Secondary input tensor or target operand.
-      loss_fn: The loss fn (jnp.ndarray) for train step.
+      loss_fn: Input `loss_fn` parameter value (`jnp.ndarray`).
 
   Returns:
       Resulting `jnp.ndarray` from train step.
   """
 
   def loss_closure(model_ref: jnp.ndarray) -> jnp.ndarray:
-    """Helper to loss closure.
+    """Execute `model_ref` to support loss closure in flax NNX tests.
 
     Args:
-        model_ref: The model ref (jnp.ndarray) for loss closure.
+        model_ref: Input `model_ref` parameter value (`jnp.ndarray`).
 
     Returns:
         Resulting `jnp.ndarray` from loss closure.

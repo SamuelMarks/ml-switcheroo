@@ -1,0 +1,52 @@
+--- Forward ---
+; RDNA Code Generation Initialized (Arch: gfx1030)
+; BEGIN Conv2d (conv)
+; Zero Accumulator
+    v_mov_b32       v0, 0;
+    s_mov_b32       v1, 0;
+L_KY_conv:
+    s_mov_b32       v2, 0;
+L_KX_conv:
+; Calc Address & Load Image
+    v_add_f32       v5, v6, v6;
+    global_load_dword v3, v5, off;
+; Load Weight
+    global_load_dword v4, v7, off;
+    s_waitcnt       vmcnt(0);
+    v_fmac_f32      v0, v3, v4;
+    s_add_i32       v2, v2, 1;
+    s_cmp_lt_i32    v2, 3;
+    s_cbranch_scc1  L_KX_conv;
+    s_add_i32       v1, v1, 1;
+    s_cmp_lt_i32    v1, 3;
+    s_cbranch_scc1  L_KY_conv;
+; END Conv2d (conv)
+; BEGIN Flatten (flatten)
+; END Flatten (flatten)
+
+--- Backward ---
+// BEGIN Conv2d (conv)
+    mov             R0, RZ;
+    mov             R1, RZ;
+L_KY_conv:
+    mov             R2, RZ;
+L_KX_conv:
+// Calc Address & Load Image Pixel
+    imad            R5, R1, 32, R3;
+    iadd3           R5, R5, R2, RZ;
+    ldg.e.f32       R3, [R5];
+// Calc Address & Load Weight
+    imad            R5, R1, 16, R4;
+    iadd3           R5, R5, R2, RZ;
+    ldg.e.f32       R4, [R5];
+    ffma            R0, R3, R4, R0;
+    iadd3           R2, R2, 1, RZ;
+    isetp.lt.and    P0, PT, R2, 3, PT;
+    @P0 bra         L_KX_conv:;
+    iadd3           R1, R1, 1, RZ;
+    isetp.lt.and    P0, PT, R1, 3, PT;
+    @P0 bra         L_KY_conv:;
+// END Conv2d (conv)
+// BEGIN Flatten (flatten)
+    mov             R6, R2;
+// END Flatten (flatten)

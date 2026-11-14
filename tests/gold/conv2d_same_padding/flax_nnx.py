@@ -1,12 +1,11 @@
 """Test suite for the Flax Nnx module."""
 
 import jax.numpy as jnp
-
 from flax import nnx
 
 
 class SameConvModel(nnx.Module):
-  """Test helper class SameConvModel."""
+  """Minimal `nnx.Module` test double used in flax NNX tests."""
 
   def __init__(self, in_channels: int, out_channels: int, kernel_size: int = 3, rngs: nnx.Rngs | None = None):
     """Initializes the SameConvModel instance.

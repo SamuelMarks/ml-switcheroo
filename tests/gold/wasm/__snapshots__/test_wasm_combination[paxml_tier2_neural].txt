@@ -1,0 +1,40 @@
+--- Forward ---
+import praxis.layers as pl
+from praxis import base_layer
+
+class SimpleMLP(base_layer.BaseLayer):
+    # Tier 2: Praxis Layer Definition
+    # Note the use of 'setup()' instead of '__init__'
+
+    def setup(self):
+        # Layers are instantiated in setup()
+        self.fc1 = pl.Linear(output_dims=128)
+        self.fc2 = pl.Linear(output_dims=10)
+        self.dropout = pl.Dropout(keep_prob=0.5)
+
+    def __call__(self, x):
+        x = self.fc1(x)
+        x = pl.relu(x)
+        x = self.dropout(x)
+        return self.fc2(x)
+
+--- Backward ---
+import praxis.layers as pl
+from praxis import base_layer
+
+class SimpleMLP(base_layer.BaseLayer):
+    # Tier 2: Praxis Layer Definition
+    # Note the use of 'setup()' instead of '__init__'
+
+    def setup(self):
+        # Layers are instantiated in setup()
+        self.fc1 = pl.Linear(output_dims=128)
+        self.fc2 = pl.Linear(output_dims=10)
+        self.dropout = pl.Dropout(keep_prob=1.0-0.5)
+
+    def __call__(self, x):
+        rng = jax.random.PRNGKey(0)
+        x = self.fc1(x)
+        x = pl.relu(x)
+        x = self.dropout(x)
+        return self.fc2(x)

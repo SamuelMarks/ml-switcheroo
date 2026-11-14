@@ -4,7 +4,7 @@ import keras
 
 
 class Model:
-  """Test helper class Model."""
+  """Test double `Model` implementing `call` for keras3 tests."""
 
   def __init__(self, in_features: int, out_features: int) -> None:
     """Initializes the Model instance.
@@ -17,7 +17,7 @@ class Model:
     self.linear = keras.layers.Dense(out_features, input_dim=in_features)
 
   def call(self, x: keras.KerasTensor) -> keras.KerasTensor:
-    """Helper to call.
+    """Execute `linear` to support call in keras3 tests.
 
     Args:
         x: Primary input tensor or array operand.

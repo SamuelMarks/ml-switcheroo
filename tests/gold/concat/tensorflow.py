@@ -4,12 +4,12 @@ import tensorflow as tf
 
 
 def concat_tensors(x: tf.Tensor, y: tf.Tensor, axis: int = -1) -> tf.Tensor:
-  """Helper to concat tensors.
+  """Execute `tf.concat` to support concat tensors in tensorflow tests.
 
   Args:
       x: Primary input tensor or array operand.
       y: Secondary input tensor or target operand.
-      axis: The axis (int) for concat tensors.
+      axis: Input `axis` parameter value (`int`).
 
   Returns:
       Resulting `tf.Tensor` from concat tensors.

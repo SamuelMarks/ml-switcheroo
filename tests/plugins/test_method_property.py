@@ -1,14 +1,10 @@
 """Test suite for the Method Property module."""
 
-from tests.conftest import _test_getattr, _test_setattr
-
-import typing
-
-from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
 import pytest
+from pydantic import JsonValue
 
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.config import RuntimeConfig
@@ -31,20 +27,21 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 
 @pytest.fixture
-def rewriter() -> typing.Iterator[PivotRewriter]:
+def rewriter() -> PivotRewriter:
   """Provides a mock rewriter for testing.
 
-  Yields:
+  Returns:
       PivotRewriter: A mock rewriter instance.
   """
-  _test_getattr(
-    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
-  )("method_to_property", _test_getattr({"v": transform_method_to_property}, "__getitem__")("v"))
-  hooks._PLUGINS_LOADED = True
+  hooks.register_hook("method_to_property")(transform_method_to_property)
+  hooks.set_plugins_loaded(True)
   mgr: MagicMock = MagicMock()
-  size_def = {"variants": {"jax": {"api": "shape", "requires_plugin": "method_to_property"}}}
-  data_ptr_def = {"variants": {"jax": {"api": "data", "requires_plugin": "method_to_property"}}}
-  all_defs = {"size": size_def, "data_ptr": data_ptr_def}
+  size_variants: dict[str, dict[str, JsonValue]] = {"jax": {"api": "shape", "requires_plugin": "method_to_property"}}
+  data_ptr_variants: dict[str, dict[str, JsonValue]] = {"jax": {"api": "data", "requires_plugin": "method_to_property"}}
+  size_def: dict[str, JsonValue] = {"variants": dict[str, JsonValue](size_variants)}
+  data_ptr_def: dict[str, JsonValue] = {"variants": dict[str, JsonValue](data_ptr_variants)}
+  all_defs: dict[str, dict[str, JsonValue]] = {"size": size_def, "data_ptr": data_ptr_def}
+  all_variants: dict[str, dict[str, dict[str, JsonValue]]] = {"size": size_variants, "data_ptr": data_ptr_variants}
 
   def get_def_side_effect(name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Gets def side effect.
@@ -56,11 +53,7 @@ def rewriter() -> typing.Iterator[PivotRewriter]:
         Optional[Tuple[str, dict[str, JsonValue]]]: Definition or None.
     """
     if name == "size" or name.endswith(".size"):
-      _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
-        {"v": (_test_getattr({"v": "size"}, "__getitem__")("v"), _test_getattr({"v": size_def}, "__getitem__")("v"))},
-        "__getitem__",
-      )("v")
-      return _ret_v
+      return ("size", size_def)
     return None
 
   mgr.get_definition.side_effect = get_def_side_effect
@@ -76,37 +69,19 @@ def rewriter() -> typing.Iterator[PivotRewriter]:
     Returns:
         Optional[dict[str, JsonValue]]: Variant definition.
     """
-    if aid in all_defs:
-      _ret_v: dict[str, JsonValue] | None = _test_getattr(
-        {
-          "v": _test_getattr(
-            {
-              "v": _test_getattr(
-                {
-                  "v": _test_getattr({"v": _test_getattr({"v": all_defs}, "__getitem__")("v")[aid]}, "__getitem__")("v")[
-                    "variants"
-                  ]
-                },
-                "__getitem__",
-              )("v").get
-            },
-            "__getitem__",
-          )("v")(_test_getattr({"v": fw}, "__getitem__")("v"))
-        },
-        "__getitem__",
-      )("v")
-      return _ret_v
+    if aid in all_variants:
+      return all_variants[aid].get(fw)
     return None
 
   mgr.resolve_variant.side_effect = resolve_variant_side_effect
   mgr.is_verified.return_value = True
   mgr.get_framework_config.return_value = {}
   cfg: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
-  yield PivotRewriter(mgr, cfg)
+  return PivotRewriter(mgr, cfg)
 
 
 def test_simple_size_conversion(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of simple size conversion.
+  """Verify `rewrite_code` emits `x.shape` for simple size conversion.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
@@ -115,7 +90,7 @@ def test_simple_size_conversion(rewriter: PivotRewriter) -> None:
 
 
 def test_indexed_size_conversion(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of indexed size conversion.
+  """Verify `rewrite_code` emits `x.shape[0]` for indexed size conversion.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
@@ -124,7 +99,7 @@ def test_indexed_size_conversion(rewriter: PivotRewriter) -> None:
 
 
 def test_ignore_other_methods(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of ignore other methods.
+  """Verify `rewrite_code` emits `x.other()` for ignore other methods.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
@@ -132,39 +107,42 @@ def test_ignore_other_methods(rewriter: PivotRewriter) -> None:
   assert "x.other()" in rewrite_code(rewriter, "x.other()")
 
 
-def test_obj_type_not_tensor(rewriter: PivotRewriter) -> None:
+def test_obj_type_not_tensor(rewriter: PivotRewriter, monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies that the method is not rewritten if the receiver is known to not be a tensor.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
-  _test_setattr(rewriter.ctx, "resolve_type", MagicMock(return_value="Module"))
+  monkeypatch.setattr(rewriter.ctx, "resolve_type", MagicMock(return_value="Module"), raising=False)
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("size")))
   res: cst.CSTNode | cst.Subscript | cst.Attribute = transform_method_to_property(node, rewriter.ctx)
   assert res is node
 
 
-def test_missing_target_prop(rewriter: PivotRewriter) -> None:
+def test_missing_target_prop(rewriter: PivotRewriter, monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies that the method is not rewritten if lookup_api fails.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
-  _test_setattr(rewriter.ctx, "resolve_type", MagicMock(return_value="Tensor"))
-  _test_setattr(rewriter.ctx, "lookup_api", MagicMock(return_value=None))
+  monkeypatch.setattr(rewriter.ctx, "resolve_type", MagicMock(return_value="Tensor"), raising=False)
+  monkeypatch.setattr(rewriter.ctx, "lookup_api", MagicMock(return_value=None), raising=False)
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("size")))
   res: cst.CSTNode | cst.Subscript | cst.Attribute = transform_method_to_property(node, rewriter.ctx)
   assert res is node
 
 
-def test_too_many_args(rewriter: PivotRewriter) -> None:
+def test_too_many_args(rewriter: PivotRewriter, monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies that the method is not rewritten if it has multiple args.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
-  _test_setattr(rewriter.ctx, "resolve_type", MagicMock(return_value="Tensor"))
-  _test_setattr(rewriter.ctx, "lookup_api", MagicMock(return_value="shape"))
+  monkeypatch.setattr(rewriter.ctx, "resolve_type", MagicMock(return_value="Tensor"), raising=False)
+  monkeypatch.setattr(rewriter.ctx, "lookup_api", MagicMock(return_value="shape"), raising=False)
   node: cst.Call = cst.Call(
     func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("size")),
     args=[cst.Arg(cst.Integer("0")), cst.Arg(cst.Integer("1"))],
@@ -174,7 +152,7 @@ def test_too_many_args(rewriter: PivotRewriter) -> None:
 
 
 def test_data_ptr_mapping(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of data ptr mapping.
+  """Verify `Call` handles data ptr mapping as expected.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
@@ -208,7 +186,7 @@ def test_unknown_method(rewriter: PivotRewriter) -> None:
 
 
 def test_method_property_not_attribute() -> None:
-  """Verifies the behavior of method property not attribute."""
+  """Verify `Call` handles method property not attribute as expected."""
   node: cst.Call = cst.Call(func=cst.Name("size"))
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
   res: cst.CSTNode | cst.Subscript | cst.Attribute = transform_method_to_property(node, ctx)
@@ -216,7 +194,7 @@ def test_method_property_not_attribute() -> None:
 
 
 def test_method_property_unknown_method() -> None:
-  """Verifies the behavior of method property unknown method."""
+  """Verify `Call` handles method property unknown method as expected."""
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("unknown")))
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
   res: cst.CSTNode | cst.Subscript | cst.Attribute = transform_method_to_property(node, ctx)

@@ -1,84 +1,69 @@
-"""Test suite for the Pipeline module."""
-
-from tests.conftest import _test_getattr
-
-from unittest.mock import MagicMock
+"""Unit tests for `RewriterPipeline` and `RewriterPass` (`ml_switcheroo.core.rewriter.pipeline`)."""
 
 import libcst as cst
 import pytest
 
+from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.core.rewriter.interface import RewriterPass
 from ml_switcheroo.core.rewriter.pipeline import RewriterPipeline
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-class MockPass(RewriterPass):
-  """Test helper class MockPass."""
+class _HeaderCommentPass(RewriterPass):
+  """Concrete `RewriterPass` appending a labeled comment line to `module.header`."""
 
   def __init__(self, label: str) -> None:
-    """Initializes the MockPass instance.
+    """Initialize pass label.
 
     Args:
-        label: The label (str) for init.
+        label: Marker label written into the module header comment.
     """
     self.label = label
 
   def transform(self, module: cst.Module, context: RewriterContext) -> cst.Module:
-    """Mock implementation of transform.
+    """Append `# Pass: <label>` to `module.header`.
 
     Args:
-        module: The module (cst.Module) for transform.
-        context: The context (RewriterContext) for transform.
+        module: Input CST module.
+        context: Active `RewriterContext`.
 
     Returns:
-        Resulting `cst.Module` from transform.
+        Updated `cst.Module` with the header comment appended.
     """
     header = list(module.header)
     header.append(cst.EmptyLine(comment=cst.Comment(f"# Pass: {self.label}"), newline=cst.Newline()))
     return module.with_changes(header=header)
 
 
-def test_pipeline_execution_sequence() -> None:
-  """Verifies the behavior of pipeline execution sequence."""
-  ctx = MagicMock(spec=RewriterContext)
-  pass1 = MockPass("A")
-  pass2 = MockPass("B")
-  pipeline = RewriterPipeline([pass1, pass2])
+def test_pipeline_ordered_execution_and_empty_noop() -> None:
+  """Verify `RewriterPipeline.run` threads the `cst.Module` sequentially through passes and handles `[]`."""
+  ctx = RewriterContext(
+    semantics=SemanticsManager(),
+    config=RuntimeConfig(source_framework="torch", target_framework="jax"),
+  )
   module = cst.parse_module("x = 1")
-  result = pipeline.run(module, ctx)
+
+  result = RewriterPipeline([_HeaderCommentPass("A"), _HeaderCommentPass("B")]).run(module, ctx)
   code = result.code
   assert "# Pass: A" in code
   assert "# Pass: B" in code
-  idx_a = code.find("# Pass: A")
-  idx_b = code.find("# Pass: B")
-  assert idx_a < idx_b
+  assert code.index("# Pass: A") < code.index("# Pass: B")
+  assert "x = 1" in code
+
+  empty_res = RewriterPipeline([]).run(module, ctx)
+  assert empty_res.code == "x = 1"
 
 
-def test_pipeline_empty() -> None:
-  """Verifies the behavior of pipeline empty."""
-  ctx = MagicMock(spec=RewriterContext)
-  pipeline = RewriterPipeline([])
-  module = cst.parse_module("x = 1")
-  result = pipeline.run(module, ctx)
-  assert result.code == module.code
-
-
-def test_interface_enforcement() -> None:
-  """Verifies the behavior of interface enforcement."""
+def test_rewriter_pass_abc_enforcement() -> None:
+  """Verify `RewriterPass` declares `transform` abstract and rejects incomplete subclasses at runtime."""
+  assert RewriterPass.__abstractmethods__ == frozenset({"transform"})
+  incomplete_cls = type("_IncompletePass", (RewriterPass,), {})
   with pytest.raises(TypeError):
+    incomplete_cls()
 
-    class InvalidPass(RewriterPass):
-      """Test helper class InvalidPass."""
+  ctx = RewriterContext(semantics=SemanticsManager(), config=RuntimeConfig())
+  assert RewriterPass.transform(_HeaderCommentPass("Base"), cst.parse_module("x = 1"), ctx) is None
 
-      pass
-
-    cls = InvalidPass
-    _test_getattr({"v": cls}, "__getitem__")("v")()
-
-
-def test_interface_base_call() -> None:
-  """Verifies calling RewriterPass.transform directly executes base method."""
-  ctx = MagicMock(spec=RewriterContext)
-  pass_inst = MockPass("Base")
-  res = RewriterPass.transform(pass_inst, cst.parse_module("x = 1"), ctx)
-  assert res is None
+  del ctx.hook_registry
+  assert RewriterPipeline([]).run(cst.parse_module("x = 1"), ctx).code == "x = 1"

@@ -1,18 +1,17 @@
 """Test suite for the Paxml module."""
 
-from praxis import base_layer
 import jax.numpy as jnp
-
+from praxis import base_layer
 from praxis.layers import normalizations
 
 
 class BNModel(base_layer.BaseLayer):
-  """Test helper class BNModel."""
+  """Stub `base_layer.BaseLayer` subclass implementing `setup` for PaxML tests."""
 
   num_features = 0
 
   def setup(self) -> None:
-    """Helper to setup."""
+    """Execute `create_child` to support setup in PaxML tests."""
     self.create_child("bn", normalizations.BatchNorm.HParams(dim=self.num_features))
 
   def __call__(self, x: jnp.ndarray) -> jnp.ndarray:

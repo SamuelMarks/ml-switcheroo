@@ -59,12 +59,13 @@ repos:
         language: script
         types: [python]
 
-      - id: prevent-hardcoded-frameworks
-        name: prevent-hardcoded-frameworks
-        entry: scripts/prevent_hardcoded_frameworks.sh
-        language: script
+      - id: lint-architecture
+        name: lint-architecture
+        entry: uv run python scripts/lint_architecture.py src scripts
+        language: system
         types: [python]
-        files: ^(src|scripts)/
+        pass_filenames: false
+        always_run: true
 
       - id: verify-ml-ecosystem-snapshots-present
         name: verify-ml-ecosystem-snapshots-present
@@ -202,7 +203,14 @@ repos:
 
       - id: pytest-coverage
         name: pytest-coverage
-        entry: uv run --all-extras pytest -n auto --cov=src --cov=scripts --cov=docs --cov-fail-under=100 --cov-branch -W error::DeprecationWarning tests
+        entry: uv run --all-extras pytest -n auto --cov=src --cov=scripts --cov=docs --cov-fail-under=100 --cov-branch --cov-report=json -W error::DeprecationWarning tests
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: check-function-coverage
+        name: check-function-coverage
+        entry: uv run python scripts/check_function_coverage.py
         language: system
         pass_filenames: false
         always_run: true

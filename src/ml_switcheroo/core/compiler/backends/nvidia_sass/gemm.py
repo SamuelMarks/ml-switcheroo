@@ -113,7 +113,7 @@ def expand_linear(
   nodes.append(NvidiaSassInstruction(opcode="BRA", operands=[l_gemm], predicate=p_loop))
 
   # 4. Optional Bias
-  if "bias" in metadata and metadata["bias"]:
+  if metadata.get("bias"):
     nodes.append(NvidiaSassComment(text="Add Bias"))
     r_bias_val = allocator.allocate_temp()
     r_bias_ptr = NvidiaSassRegister(name="R5")  # Assumed

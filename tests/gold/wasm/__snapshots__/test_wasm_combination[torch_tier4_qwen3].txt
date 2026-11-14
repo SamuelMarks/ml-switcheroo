@@ -1,0 +1,58 @@
+--- Forward ---
+import jax.numpy as jnp
+import flax.nnx as nnx
+
+class QwenBlock(nnx.Module):
+    def __init__(self, rngs: nnx.Rngs):
+        # Standard HF-style separate projections
+        self.q_proj = nnx.Linear(1024, 1024, rngs=rngs)
+        self.k_proj = nnx.Linear(1024, 1024, rngs=rngs)
+        self.v_proj = nnx.Linear(1024, 1024, rngs=rngs)
+
+        self.gate_proj = nnx.Linear(1024, 4096, rngs=rngs)
+        self.up_proj = nnx.Linear(1024, 4096, rngs=rngs)
+        self.down_proj = nnx.Linear(4096, 1024, rngs=rngs)
+
+    def __call__(self, x):
+        # Attention
+        q = self.q_proj(x)
+        k = self.k_proj(x)
+        v = self.v_proj(x)
+
+        # SwiGLU MLP
+        gate = self.gate_proj(x)
+        up = self.up_proj(x)
+        # Note: switcheroo handles the fusion with SwiGLU
+        mlp_out = self.down_proj(gate * up)
+
+        return q, mlp_out
+
+--- Backward ---
+import torch
+import torch.nn as nn
+
+class QwenBlock(nn.Module):
+    def __init__(self):
+        super().__init__()
+        # Standard HF-style separate projections
+        self.q_proj = nn.Linear(1024, 1024)
+        self.k_proj = nn.Linear(1024, 1024)
+        self.v_proj = nn.Linear(1024, 1024)
+
+        self.gate_proj = nn.Linear(1024, 4096)
+        self.up_proj = nn.Linear(1024, 4096)
+        self.down_proj = nn.Linear(4096, 1024)
+
+    def forward(self, x):
+        # Attention
+        q = self.q_proj(x)
+        k = self.k_proj(x)
+        v = self.v_proj(x)
+
+        # SwiGLU MLP
+        gate = self.gate_proj(x)
+        up = self.up_proj(x)
+        # Note: switcheroo handles the fusion with SwiGLU
+        mlp_out = self.down_proj(gate * up)
+
+        return q, mlp_out

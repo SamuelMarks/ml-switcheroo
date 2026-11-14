@@ -9,7 +9,7 @@ from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
 @pytest.fixture
 def adapter() -> TensorFlowAdapter:
-  """Execute adapter helper logic.
+  """Create a configured `TensorFlowAdapter` fixture for tensorflow examples tests.
 
   Returns:
       Configured `adapter` fixture value (TensorFlowAdapter).
@@ -18,7 +18,7 @@ def adapter() -> TensorFlowAdapter:
 
 
 def test_tensorflow_examples_structure(adapter: TensorFlowAdapter) -> None:
-  """Verifies the behavior of TensorFlow examples structure.
+  """Verify `adapter.get_tiered_examples` emits `tier1_math` for tensorflow examples structure.
 
   Args:
       adapter: FrameworkAdapter instance under test.
@@ -31,7 +31,7 @@ def test_tensorflow_examples_structure(adapter: TensorFlowAdapter) -> None:
 
 
 def test_tier1_math_validity(adapter: TensorFlowAdapter) -> None:
-  """Verifies the behavior of tier1 math validity.
+  """Verify `parse` emits `import tensorflow as tf` for tier1 math validity.
 
   Args:
       adapter: FrameworkAdapter instance under test.
@@ -45,7 +45,7 @@ def test_tier1_math_validity(adapter: TensorFlowAdapter) -> None:
 
 
 def test_tier2_neural_validity(adapter: TensorFlowAdapter) -> None:
-  """Verifies the behavior of tier2 neural validity.
+  """Verify `parse` emits `class Model(tf.Module):` for tier2 neural validity.
 
   Args:
       adapter: FrameworkAdapter instance under test.
@@ -59,7 +59,7 @@ def test_tier2_neural_validity(adapter: TensorFlowAdapter) -> None:
 
 
 def test_tier3_extras_validity(adapter: TensorFlowAdapter) -> None:
-  """Verify tier3 extras validity behavior.
+  """Verify `parse` emits `.shuffle` for tier3 extras validity.
 
   Args:
       adapter: FrameworkAdapter instance under test.

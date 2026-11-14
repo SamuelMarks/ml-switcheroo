@@ -8,8 +8,8 @@ def split_tensor(x: torch.Tensor, split_size: int, dim: int = -1) -> torch.Tenso
 
   Args:
       x: Primary input tensor or array operand.
-      split_size: The split size (int) for split tensor.
-      dim: The dim (int) for split tensor.
+      split_size: Input `split_size` parameter value (`int`).
+      dim: Input `dim` parameter value (`int`).
 
   Returns:
       Resulting `torch.Tensor` from split tensor.

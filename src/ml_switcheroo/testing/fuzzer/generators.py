@@ -6,12 +6,14 @@ and dummy callables respecting specified constraints (min, max, dtype).
 Feature Update: Added broadcasting logic generator.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
+import contextlib
 import random
 import typing
 
 import numpy as np
 from pydantic import JsonValue
+
+from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
 def generate_scalar_int(constraints: typing.Mapping[str, RuntimeTensorOrValue]) -> int:
@@ -99,11 +101,9 @@ def generate_array(
   # Resolve explicit dtype constraint if present
   dtype_req = constraints.get("dtype")
   explicit_dtype: np.dtype[NumpyScalar] | None = None
-  if dtype_req:
-    try:
+  if dtype_req is not None and dtype_req != "":
+    with contextlib.suppress(TypeError):
       explicit_dtype = np.dtype(str(dtype_req))
-    except TypeError:
-      pass
 
   # Use explicit dtype to override heuristic type_lbl if available
   if explicit_dtype:

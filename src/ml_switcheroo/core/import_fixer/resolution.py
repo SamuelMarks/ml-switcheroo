@@ -15,6 +15,11 @@ class ImportReq(pydantic.BaseModel):
   """Represent a normalized import requirement.
 
   Can represent `import module as alias` or `from module import sub as alias`.
+
+  Attributes:
+      module: The module (`str`).
+      subcomponent: The subcomponent (`str | None`).
+      alias: The alias (`str | None`).
   """
 
   model_config = pydantic.ConfigDict(extra="forbid", frozen=True)
@@ -58,19 +63,28 @@ class ImportReq(pydantic.BaseModel):
 
 
 class ResolutionPlan(pydantic.BaseModel):
-  """Execute strategy for the ImportFixer to execute."""
+  """Execute strategy for the ImportFixer to execute.
+
+  Attributes:
+      required_imports: The required imports (`list[ImportReq]`).
+      mappings: The mappings (`dict[str, ImportReq]`).
+      path_to_alias: The path to alias (`dict[str, str]`).
+      target_framework: Target framework identifier (`str | None`).
+  """
 
   model_config = pydantic.ConfigDict(extra="forbid")
 
   required_imports: list[ImportReq] = pydantic.Field(default_factory=list)
   mappings: dict[str, ImportReq] = pydantic.Field(default_factory=dict)
   path_to_alias: dict[str, str] = pydantic.Field(default_factory=dict)
+  target_framework: str | None = None
 
   def __init__(
     self,
     required_imports: list[ImportReq] | None = None,
     mappings: dict[str, ImportReq] | None = None,
     path_to_alias: dict[str, str] | None = None,
+    target_framework: str | None = None,
   ) -> None:
     """Initialize ResolutionPlan.
 
@@ -78,11 +92,13 @@ class ResolutionPlan(pydantic.BaseModel):
         required_imports: List of required import specifications.
         mappings: Mapping of source import paths to target ImportReq objects.
         path_to_alias: Mapping of module paths to local alias names.
+        target_framework: Optional target framework identifier.
     """
     super().__init__(
       required_imports=required_imports if required_imports is not None else [],
       mappings=mappings if mappings is not None else {},
       path_to_alias=path_to_alias if path_to_alias is not None else {},
+      target_framework=target_framework,
     )
 
 
@@ -192,7 +208,12 @@ class ImportResolver:
       if tgt_alias:
         path_to_alias[full_target_path] = tgt_alias
 
-    return ResolutionPlan(required_imports=_deduplicate(required), mappings=mappings, path_to_alias=path_to_alias)
+    return ResolutionPlan(
+      required_imports=_deduplicate(required),
+      mappings=mappings,
+      path_to_alias=path_to_alias,
+      target_framework=target_framework,
+    )
 
   def _is_used(self, tree: cst.Module, name: str) -> bool:
     """Check whether a simple identifier ``name`` is referenced anywhere in ``tree``.

@@ -1,0 +1,113 @@
+--- Forward ---
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  .sw-grid {
+      display: grid;
+      grid-template-columns: 1fr 200px 1fr;
+      gap: 40px;
+      position: relative;
+      max-width: 950px;
+      font-family: sans-serif;
+      font-size: 14px;
+      background-color: #fcfcfc;
+      padding: 20px;
+    }
+
+    /* Middle Column Borders (Background) */
+    .col-mid-bg {
+      grid-column: 2;
+      /* Span from row 1 to the end */
+      grid-row: 1 / -1;
+      border-left: 2px dotted #bbb;
+      border-right: 2px dotted #bbb;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* HEADERS */
+    .sw-grid h3 { margin: 0; font-size: 16px; text-decoration: underline; white-space: nowrap; align-self: end; padding-bottom: 10px; color: #333; }
+
+    /* BOX STYLES */
+    .sw-grid .box {
+      border: 2px solid;
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: white;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      box-sizing: border-box;
+      height: 100%;
+      z-index: 2;
+    }
+
+    .sw-grid .header-txt { font-weight: bold; color: black; margin-bottom: 4px; display: block; }
+    .sw-grid code { font-family: monospace; font-size: 12px; color: #444; display: block; background: rgba(0,0,0,0.05); padding: 2px; border-radius: 3px; }
+
+    /* COLORS & SPECIFICS */
+    .sw-grid .r { border-color: #d00; background: #ffecec; }
+    .sw-grid .b { border-color: #00d; background: #ecf0ff; width: 90%; justify-self: center; }
+    .sw-grid .g { border-color: #080; background: #ecffec; }
+
+    .sw-grid .circ {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: darkblue; color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: bold;
+      justify-self: center; align-self: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      z-index: 2;
+    }
+
+    /* SVG Overlays */
+    .sw-arrow {
+      position: absolute;
+      overflow: visible;
+      pointer-events: none;
+      z-index: 10;
+      width: 1px;
+      height: 1px;
+    }
+
+    .sw-grid .s-red   { stroke: #d00; stroke-width: 2; stroke-dasharray: 4; fill: none; }
+    .sw-grid .s-blue  { stroke: #00d; stroke-width: 2; fill: none; }
+    .sw-grid .s-green { stroke: #080; stroke-width: 2; stroke-dasharray: 4; fill: none; }
+  /* Explicit Row Heights */
+  .sw-grid {
+    grid-template-rows: 30px repeat(0, 80px);
+  }
+</style>
+</head>
+<body>
+
+<!-- MARKERS: Must be visible to DOM engine but hidden from layout -->
+<svg style="width:0;height:0;position:absolute;overflow:hidden;" aria-hidden="true">
+  <defs>
+    <marker id="mr" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#d00"/></marker>
+    <marker id="mb" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#00d"/></marker>
+    <marker id="mg" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#080"/></marker>
+  </defs>
+</svg>
+
+<h3>Model: DecompiledNet</h3>
+
+<div class="sw-grid">
+  <div class="col-mid-bg"></div>
+
+  <!-- HEADERS -->
+  <div style="grid-row:1; grid-column:1;"><h3>Memory (Init)</h3></div>
+  <div style="grid-row:1; grid-column:2; text-align:center;"><h3>Computer (forward)</h3></div>
+  <div style="grid-row:1; grid-column:3;"><h3>Data (shape)</h3></div>
+
+</div>
+
+</body>
+</html>
+--- Backward ---
+; RDNA Code Generation Initialized (Arch: gfx1030)
+; Input x -> v0
+; Return: v0

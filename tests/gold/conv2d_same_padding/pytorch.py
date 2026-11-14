@@ -5,7 +5,7 @@ import torch.nn as nn
 
 
 class SameConvModel(nn.Module):
-  """Test helper class SameConvModel."""
+  """Stub `nn.Module` subclass implementing `forward` for pytorch tests."""
 
   def __init__(self, in_channels: int, out_channels: int, kernel_size: int = 3):
     """Initializes the SameConvModel instance.
@@ -19,7 +19,7 @@ class SameConvModel(nn.Module):
     self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, padding="same")
 
   def forward(self, x: torch.Tensor) -> torch.Tensor:
-    """Helper to forward.
+    """Compute the forward pass of `SameConvModel` on input tensors.
 
     Args:
         x: Primary input tensor or array operand.

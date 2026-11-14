@@ -1,52 +1,39 @@
-"""Test suite for define."""
+"""Unit tests for the `define` CLI command handler (`ml_switcheroo.cli.handlers.define`)."""
 
 from pathlib import Path
-from unittest.mock import patch
 
+import pytest
+import yaml
+
+import ml_switcheroo.cli.handlers.define as define_mod
 from ml_switcheroo.cli.handlers.define import handle_define
 
 
-def test_handle_define_not_found(tmp_path: Path) -> None:
-  """Verify handle define not found behavior.
+def test_handle_define_missing_malformed_invalid_and_valid(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `handle_define` rejects missing, malformed, and schema-invalid files and copies valid ODL specs.
 
   Args:
-      tmp_path: Pytest temporary directory path fixture.
+      tmp_path: Pytest temporary directory fixture.
+      monkeypatch: Pytest monkeypatch fixture.
   """
-  assert handle_define(tmp_path / "not_found.yaml") == 1
+  assert handle_define(tmp_path / "does_not_exist.yaml") == 1
 
+  bad_yaml = tmp_path / "malformed.yaml"
+  bad_yaml.write_text("invalid: yaml: [}", encoding="utf-8")
+  assert handle_define(bad_yaml) == 1
 
-def test_handle_define_invalid_yaml(tmp_path: Path) -> None:
-  """Verify handle define invalid yaml behavior.
+  bad_schema = tmp_path / "invalid_schema.yaml"
+  bad_schema.write_text("description: Missing required operation field", encoding="utf-8")
+  assert handle_define(bad_schema) == 1
 
-  Args:
-      tmp_path: Pytest temporary directory path fixture.
-  """
-  f: Path = tmp_path / "def.yaml"
-  f.write_text("invalid: yaml: :")
-  assert handle_define(f) == 1
+  dest_dir = tmp_path / "semantics"
+  monkeypatch.setattr(define_mod, "resolve_semantics_dir", lambda: dest_dir)
 
+  valid_yaml = yaml.dump({"operation": "MyOp", "description": "Test op", "variants": {}})
+  source_path = tmp_path / "source.yaml"
+  source_path.write_text(valid_yaml, encoding="utf-8")
 
-def test_handle_define_invalid_schema(tmp_path: Path) -> None:
-  """Verify handle define invalid schema behavior.
-
-  Args:
-      tmp_path: Pytest temporary directory path fixture.
-  """
-  f: Path = tmp_path / "def.yaml"
-  f.write_text("id: valid_yaml_but_missing_fields")
-  assert handle_define(f) == 1
-
-
-def test_handle_define_success(tmp_path: Path) -> None:
-  """Verify handle define success behavior.
-
-  Args:
-      tmp_path: Pytest temporary directory path fixture.
-  """
-  f: Path = tmp_path / "def.yaml"
-  f.write_text("id: my_op\ntier: math\ndescription: op")
-  with patch("ml_switcheroo.cli.handlers.define.OperationDef"):
-    with patch("ml_switcheroo.cli.handlers.define.resolve_semantics_dir", return_value=tmp_path):
-      with patch("shutil.copy2") as mock_copy:
-        assert handle_define(f) == 0
-        mock_copy.assert_called_once()
+  assert handle_define(source_path) == 0
+  target_path = dest_dir / "odl" / "MyOp.yaml"
+  assert target_path.exists()
+  assert target_path.read_text(encoding="utf-8") == valid_yaml

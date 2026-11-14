@@ -80,12 +80,10 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     if self._cached_traits:
       return self._cached_traits
 
-    conf = self.context.semantics.get_framework_config(self.context.target_framework)
-    if conf and "traits" in conf:
-      self._cached_traits = StructuralTraits.model_validate(conf["traits"])
-    else:
-      self._cached_traits = StructuralTraits()
+    from ml_switcheroo.semantics.resolution import query_framework_traits
 
+    fw_traits = query_framework_traits(self.context.semantics, self.context.target_framework)
+    self._cached_traits = fw_traits.traits if fw_traits.traits is not None else StructuralTraits()
     return self._cached_traits
 
   def _get_qualified_name(self, node: cst.BaseExpression) -> str | None:
@@ -125,7 +123,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     """
     if isinstance(node, cst.Name):
       return node.value
-    elif isinstance(node, cst.Attribute):
+    if isinstance(node, cst.Attribute):
       base = self._cst_to_string(node.value)
       if base:
         return f"{base}.{node.attr.value}"
@@ -233,7 +231,8 @@ class AuxiliaryTransformer(cst.CSTTransformer):
 
     _, details = lookup
     raw_variants = details.get("variants", {})
-    assert isinstance(raw_variants, dict)
+    if not isinstance(raw_variants, dict):
+      return updated_node
     variants = raw_variants
 
     if self.context.target_framework not in variants:
@@ -252,10 +251,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
       current_expr = updated_node.decorator
 
       new_expr: cst.BaseExpression
-      if isinstance(current_expr, cst.Call):
-        new_expr = current_expr.with_changes(func=new_name_node)
-      else:
-        new_expr = new_name_node
+      new_expr = current_expr.with_changes(func=new_name_node) if isinstance(current_expr, cst.Call) else new_name_node
 
       return updated_node.with_changes(decorator=new_expr)
 
@@ -282,11 +278,11 @@ class AuxiliaryTransformer(cst.CSTTransformer):
         new_node = static_hook(updated_node, self.context.hook_context)
         if new_node is not updated_node and _is_loop_return(new_node):
           return new_node
-      except Exception as e:
+      except (cst.CSTValidationError, ValueError, TypeError, KeyError, IndexError, AttributeError, RuntimeError) as e:
         import traceback
 
         traceback.print_exc()
-        self._report_warning(f"Static loop unrolling failed: {str(e)}")
+        self._report_warning(f"Static loop unrolling failed: {e!s}")
 
     # -  General Safety Check Hook
     hook = get_hook("transform_for_loop")
@@ -295,11 +291,11 @@ class AuxiliaryTransformer(cst.CSTTransformer):
         new_node = hook(updated_node, self.context.hook_context)
         if new_node is not updated_node and _is_loop_return(new_node):
           return new_node
-      except Exception as e:
-        self._report_failure(f"Loop transformation failed: {str(e)}")
+      except (cst.CSTValidationError, ValueError, TypeError, KeyError, IndexError, AttributeError, RuntimeError) as e:
+        self._report_failure(f"Loop transformation failed: {e!s}")
         # Since Compound statements aren't handled by leave_SimpleStatementLine error logic,
         # we must wrap manually here.
-        failed = EscapeHatch.mark_failure(original_node, f"Loop transformation failed: {str(e)}")
+        failed = EscapeHatch.mark_failure(original_node, f"Loop transformation failed: {e!s}")
         if isinstance(failed, (cst.BaseStatement, cst.FlattenSentinel)):
           return failed
 

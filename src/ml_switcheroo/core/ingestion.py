@@ -35,7 +35,6 @@ class CustomParserFactoryProtocol(typing.Protocol):
     Returns:
         Parser implementing ``parse() -> cst.Module``.
     """
-    ...
 
 
 def _has_custom_parser(
@@ -49,11 +48,7 @@ def _has_custom_parser(
   Returns:
       True if `obj` provides `create_parser`.
   """
-  if obj is None:
-    return False
-  from ml_switcheroo.core.rewriter.calls.pre import _resolve_attr
-
-  return callable(_resolve_attr(obj, "create_parser"))
+  return isinstance(obj, CustomParserFactoryProtocol)
 
 
 if typing.TYPE_CHECKING:
@@ -109,7 +104,10 @@ def ingest_code(
       tree = parser.parse()
       tracer.log_mutation("Transformed Ingestion", "(Raw Source)", "(AST Parsed)")
       tracer.end_phase()
-      assert isinstance(tree, cst.Module)
+      if not isinstance(tree, cst.Module):
+        raise IngestionParseError(
+          f"Custom parser for '{source_framework}' returned {type(tree).__name__}, expected cst.Module."
+        )
       return tree
     except _INGEST_EXCEPTIONS as e:
       tracer.end_phase()
@@ -119,15 +117,11 @@ def ingest_code(
   if source_framework in ["mlir", "stablehlo"]:
     tracer.start_phase(f"{source_framework.upper()} Ingest", f"{source_framework.upper()} Text -> Python CST")
     try:
-      if source_framework == "stablehlo":
-        mlir_mod = StableHloParser(code).parse()
-      else:
-        mlir_mod = MlirParser(code).parse()
+      mlir_mod = StableHloParser(code).parse() if source_framework == "stablehlo" else MlirParser(code).parse()
       gen = MlirToPythonGenerator()
       tree = gen.generate(mlir_mod)
       tracer.log_mutation("Ingestion", f"({source_framework.upper()} Text)", "(Python CST)")
       tracer.end_phase()
-      assert isinstance(tree, cst.Module)
       return tree
     except _INGEST_EXCEPTIONS as e:
       tracer.end_phase()
@@ -148,7 +142,6 @@ def ingest_code(
       tree = cst.parse_module(py_code)
       tracer.log_mutation("Ingestion", "(TikZ Source)", f"(Python CST)\n{py_code}")
       tracer.end_phase()
-      assert isinstance(tree, cst.Module)
       return tree
     except _INGEST_EXCEPTIONS as e:
       tracer.end_phase()
@@ -166,7 +159,6 @@ def ingest_code(
       tree = generator.generate(graph)
       tracer.log_mutation("Ingestion", "(IR Source)", "(Python CST)")
       tracer.end_phase()
-      assert isinstance(tree, cst.Module)
       return tree
     except _INGEST_EXCEPTIONS as e:
       tracer.end_phase()
@@ -178,7 +170,6 @@ def ingest_code(
     tree = cst.parse_module(code)
     tracer.log_mutation("Transformed Module", "(Raw Source)", "(AST Parsed)")
     tracer.end_phase()
-    assert isinstance(tree, cst.Module)
     return tree
   except _INGEST_EXCEPTIONS as e:
     tracer.end_phase()

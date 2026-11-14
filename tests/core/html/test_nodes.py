@@ -30,6 +30,8 @@ def test_htmlnode_emit_not_implemented() -> None:
   node = HtmlNode()
   with pytest.raises(NotImplementedError):
     node.emit()
+  with pytest.raises(NotImplementedError):
+    node.to_html()
 
 
 def test_textnode() -> None:

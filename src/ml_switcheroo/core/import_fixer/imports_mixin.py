@@ -1,67 +1,49 @@
-"""Import Logic Mixin.
+"""Import Statement Rewriter Collaborator.
 
-Handles visiting, cleaning, and rewriting `Import` and `ImportFrom` nodes based
-on the centralized `ResolutionPlan`.
+Handles visiting, cleaning, and rewriting ``cst.Import`` and ``cst.ImportFrom``
+nodes based on the centralized ``ResolutionPlan`` stored in ``ImportFixerState``.
 """
-
-import typing
 
 import libcst as cst
 
-from ml_switcheroo.core.import_fixer.resolution import ImportReq, ResolutionPlan
+from ml_switcheroo.core.import_fixer.base import ImportFixerState
+from ml_switcheroo.core.import_fixer.resolution import ImportReq
 from ml_switcheroo.core.import_fixer.utils import create_dotted_name
 from ml_switcheroo.core.scanners import get_full_name
 
 
-class ImportMixin(cst.CSTTransformer):
-  """Mixin for transforming imports during CST traversal.
-
-  This class provides methods to process, rewrite, and clean up `Import`
-  and `ImportFrom` nodes based on a centralized resolution plan.
+class ImportStatementRewriter:
+  """Collaborator rewriting and pruning ``Import`` and ``ImportFrom`` CST statements.
 
   Attributes:
-      plan: The resolution plan containing mappings and required imports.
-      source_frameworks: List of target source frameworks.
-      used_names: Set of names actually used in the code body (for dead-code elimination).
-      _track_definition: A set or callback to track imported definition names.
-      _satisfied_injections: A set of signatures of satisfied injected imports.
+      state: Shared ``ImportFixerState`` instance.
   """
 
-  plan: ResolutionPlan
-  source_frameworks: "set[str]"
-  used_names: "set[str]"
-  _track_definition: typing.Callable[[cst.ImportAlias], None]
-  _satisfied_injections: "set[str]"
-
-  def _make_alias_node(self, req: ImportReq) -> cst.ImportAlias:
-    """Support to construct a CST ImportAlias from an import requirement.
-
-    Handles alias redundancy, checking if the alias differs from the module
-    leaf, or if a dotted path import needs an alias to bind specific names.
+  def __init__(self, state: ImportFixerState) -> None:
+    """Initialize the import statement rewriter with shared ``ImportFixerState``.
 
     Args:
-        req: The import requirement details.
+        state: Shared ``ImportFixerState`` instance.
+    """
+    self.state: ImportFixerState = state
+
+  def make_alias_node(self, req: ImportReq) -> cst.ImportAlias:
+    """Construct a CST ``ImportAlias`` from an ``ImportReq``.
+
+    Args:
+        req: Target import requirement details.
 
     Returns:
-        A cst.ImportAlias node representing the target import.
+        Constructed ``cst.ImportAlias`` node.
     """
     name_str = f"{req.module}.{req.subcomponent}" if req.subcomponent else req.module
 
     asname_node = None
     should_alias = False
 
-    # Logic for alias redundancy:
     if req.alias:
       leaf = req.subcomponent if req.subcomponent else req.module.split(".")[-1]
-
-      # 1. Alias differs from leaf? -> Use alias.
-      if req.alias != leaf:
-        should_alias = True
-
-      # 2. Dotted path import needs alias to bind specific name (flattening)?
-      # e.g. import torch.nn as nn OR import flax.nnx as nnx
-      # We check name_str (the full path) for dots
-      if "." in name_str:
+      if req.alias != leaf or "." in name_str:
         should_alias = True
 
     if should_alias and req.alias:
@@ -69,52 +51,43 @@ class ImportMixin(cst.CSTTransformer):
 
     return cst.ImportAlias(name=create_dotted_name(name_str), asname=asname_node)
 
-  def leave_Import(self, original_node: cst.Import, updated_node: cst.Import) -> cst.Import | cst.RemovalSentinel:
-    """Execute rewrite/removal logic on `Import` nodes after visiting.
-
-    Iterates through names in the import node, checking for mappings and updating
-    or pruning them based on whether they belong to the source frameworks.
+  def rewrite_import(self, original_node: cst.Import, updated_node: cst.Import) -> cst.Import | cst.RemovalSentinel:
+    """Rewrite or prune an ``Import`` node using ``self.state``.
 
     Args:
-        original_node: The original Import node before traversal.
-        updated_node: The updated Import node.
+        original_node: Original ``cst.Import`` node prior to traversal.
+        updated_node: Updated ``cst.Import`` node.
 
     Returns:
-        The modified Import node, or RemoveFromParent() if all names are pruned.
+        Rewritten ``cst.Import`` node or ``cst.RemoveFromParent()`` if all aliases are pruned.
     """
-    new_aliases = []
+    new_aliases: list[cst.ImportAlias] = []
+    plan = self.state.plan
 
     for alias in updated_node.names:
       full_name = get_full_name(alias.name)
       root_pkg = full_name.split(".")[0]
 
-      # 1. Check for Specific Mapping (e.g. import torch.nn)
-      if full_name in self.plan.mappings and root_pkg in self.source_frameworks:
-        req = self.plan.mappings[full_name]
+      if full_name in plan.mappings and root_pkg in self.state.source_frameworks:
+        req = plan.mappings[full_name]
+        new_alias = self.make_alias_node(req)
 
-        new_alias = self._make_alias_node(req)
-
-        # Preserve alias if not specified in requirement but present in source
         if not req.alias and alias.asname and not new_alias.asname:
           new_alias = new_alias.with_changes(asname=alias.asname)
 
         new_aliases.append(new_alias)
-        self._track_definition(new_alias)
-
-        self._satisfied_injections.add(req.signature)
+        self.state.track_definition(new_alias)
+        self.state.satisfied_injections.add(req.signature)
         continue
 
-      self._track_definition(alias)
+      self.state.track_definition(alias)
 
-      # 2. Existence Check
-      for req in self.plan.required_imports:
+      for req in plan.required_imports:
         if req.module == full_name and not req.subcomponent:
-          self._satisfied_injections.add(req.signature)
+          self.state.satisfied_injections.add(req.signature)
 
-      # 3. Prune using DCE (Dead Code Elimination)
       bound_name = alias.asname.name.value if (alias.asname and isinstance(alias.asname.name, cst.Name)) else root_pkg
-
-      if bound_name in self.used_names:
+      if bound_name in self.state.used_names:
         new_aliases.append(alias)
 
     if not new_aliases:
@@ -126,52 +99,46 @@ class ImportMixin(cst.CSTTransformer):
 
     return updated_node.with_changes(names=new_aliases)
 
-  def leave_ImportFrom(
-    self, original_node: cst.ImportFrom, updated_node: cst.ImportFrom
+  def rewrite_import_from(
+    self,
+    original_node: cst.ImportFrom,
+    updated_node: cst.ImportFrom,
   ) -> cst.ImportFrom | cst.Import | cst.RemovalSentinel:
-    """Execute rewrite/removal logic on `ImportFrom` nodes after visiting.
-
-    Checks the imported module and individual names, applying mapping replacements
-    and converting them to standard `Import` nodes if specified by the plan.
-    Otherwise, prunes them if they are from the source frameworks and not preserved.
+    """Rewrite or prune an ``ImportFrom`` node using ``self.state``.
 
     Args:
-        original_node: The original ImportFrom node before traversal.
-        updated_node: The updated ImportFrom node.
+        original_node: Original ``cst.ImportFrom`` node prior to traversal.
+        updated_node: Updated ``cst.ImportFrom`` node.
 
     Returns:
-        The modified node (ImportFrom or Import), or RemoveFromParent() if pruned.
+        Modified ``cst.ImportFrom`` or ``cst.Import`` node, or ``cst.RemoveFromParent()`` if pruned.
     """
     if not updated_node.module:
       return updated_node
 
     module_name = get_full_name(updated_node.module)
     root_pkg = module_name.split(".")[0]
+    plan = self.state.plan
 
     if isinstance(updated_node.names, cst.ImportStar):
-      if root_pkg in self.source_frameworks:
-        # We cannot safely DCE an ImportStar without knowing exported symbols,
-        # so we rely on source_frameworks to prune it if it belongs to the source framework.
+      if root_pkg in self.state.source_frameworks:
         return cst.RemoveFromParent()
       return updated_node
 
-    # Check if this statement matches a mapping key (e.g. "torch.nn")
     if len(updated_node.names) == 1 and isinstance(updated_node.names[0], cst.ImportAlias):
       import_name = updated_node.names[0].name.value
       lookup_key = f"{module_name}.{import_name}"
 
-      if lookup_key in self.plan.mappings and root_pkg in self.source_frameworks:
-        req = self.plan.mappings[lookup_key]
-        # Convert to Import for robustness (prevents deep from-imports if preferred)
-        new_node = cst.Import(names=[self._make_alias_node(req)])
-        self._satisfied_injections.add(req.signature)
-        # Track definition manually since we bypass leave_Import logic
-        self._track_definition(new_node.names[0])
+      if lookup_key in plan.mappings and root_pkg in self.state.source_frameworks:
+        req = plan.mappings[lookup_key]
+        new_node = cst.Import(names=[self.make_alias_node(req)])
+        self.state.satisfied_injections.add(req.signature)
+        self.state.track_definition(new_node.names[0])
         return new_node
 
-    new_aliases = []
+    new_aliases: list[cst.ImportAlias] = []
     for alias in updated_node.names:
-      self._track_definition(alias)
+      self.state.track_definition(alias)
 
       if alias.asname and isinstance(alias.asname.name, cst.Name):
         bound_name = alias.asname.name.value
@@ -179,7 +146,7 @@ class ImportMixin(cst.CSTTransformer):
         bound_name = alias.name.value
       else:
         bound_name = ""
-      if bound_name in self.used_names:
+      if bound_name in self.state.used_names:
         new_aliases.append(alias)
 
     if not new_aliases:
@@ -191,3 +158,6 @@ class ImportMixin(cst.CSTTransformer):
         new_aliases[-1] = last_alias.with_changes(comma=cst.MaybeSentinel.DEFAULT)
 
     return updated_node.with_changes(names=new_aliases)
+
+
+__all__ = ["ImportStatementRewriter"]

@@ -18,8 +18,8 @@ Unsupported combinations degrade gracefully by returning False.
 
 import pprint
 import textwrap
-from pathlib import Path
 import typing
+from pathlib import Path
 
 import libcst as cst
 
@@ -27,6 +27,7 @@ from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.compiler.ir import LogicalNode
 from ml_switcheroo.core.graph import GraphExtractor
 from ml_switcheroo.core.rewriter.calls.utils import compute_permutation
+from ml_switcheroo.exceptions import ConfigurationError, MLSwitcherooError
 from ml_switcheroo.frameworks import get_adapter
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.utils.console import log_error, log_success
@@ -68,7 +69,7 @@ class WeightScriptGenerator:
 
     try:
       code = source_path.read_text(encoding="utf-8")
-    except Exception as e:
+    except (OSError, UnicodeError, ValueError, RuntimeError) as e:
       log_error(f"Failed to read source file: {e}")
       return False
 
@@ -82,7 +83,7 @@ class WeightScriptGenerator:
         log_error("No layers detected in source file. Ensure it contains a class with layers in __init__.")
         return False
 
-    except Exception as e:
+    except (cst.ParserSyntaxError, ValueError, TypeError, AttributeError, RuntimeError, MLSwitcherooError) as e:
       log_error(f"Failed to parse source AST: {e}")
       return False
 
@@ -97,7 +98,7 @@ class WeightScriptGenerator:
       output_script.write_text(script_content, encoding="utf-8")
       log_success(f"Generated weight migration script at [path]{output_script}[/path]")
       return True
-    except Exception as e:
+    except (OSError, ValueError, RuntimeError) as e:
       log_error(f"Failed to write output script: {e}")
       return False
 
@@ -117,37 +118,32 @@ class WeightScriptGenerator:
     # If Source -> Hub (Permute A) -> Target (Permute B).
     # Typically layout_map is on the JAX/TF side (Target).
 
-    # Assume Torch is Source (Standard Layout)
-    is_torch_src = "torch" in self.source_framework
+    from ml_switcheroo.config import default_source_framework
+
+    is_hub_src = default_source_framework() in self.source_framework
 
     abstract_params = ["weight", "bias", "running_mean", "running_var", "scale"]
 
     for layer_name, node in layer_registry.items():
       op_kind = str(node.op_type)  # e.g. "Conv2d"
 
-      # Lookup Semantics
-      definition = self.semantics.get_definition(op_kind)
-      if not definition:
-        definition = self.semantics.get_definition(f"{self.source_framework}.nn.{op_kind}")
+      from ml_switcheroo.semantics.resolution import query_resolve_operation, query_variant
 
-      if not definition:
+      resolved = query_resolve_operation(self.semantics, op_kind)
+      if resolved is None:
+        resolved = query_resolve_operation(self.semantics, f"{self.source_framework}.nn.{op_kind}")
+      if resolved is None:
         continue
-
-      _, details = definition
-      raw_vars = details.get("variants", {})
-      variants = raw_vars if isinstance(raw_vars, dict) else {}
-
-      raw_src_var = variants.get(self.source_framework)
-      src_variant = raw_src_var if isinstance(raw_src_var, dict) else {}
-      raw_tgt_var = variants.get(self.target_framework)
-      tgt_variant = raw_tgt_var if isinstance(raw_tgt_var, dict) else {}
-
-      raw_src_args = src_variant.get("args", {})
-      src_args_map = raw_src_args if isinstance(raw_src_args, dict) else {}
-      raw_tgt_args = tgt_variant.get("args", {})
-      tgt_args_map = raw_tgt_args if isinstance(raw_tgt_args, dict) else {}
-      raw_tgt_layout = tgt_variant.get("layout_map", {})
-      tgt_layout = raw_tgt_layout if isinstance(raw_tgt_layout, dict) else {}
+      abstract_id, op_def = resolved
+      src_var = op_def.variants.get(self.source_framework) or query_variant(
+        self.semantics, abstract_id, self.source_framework
+      )
+      tgt_var = op_def.variants.get(self.target_framework) or query_variant(
+        self.semantics, abstract_id, self.target_framework
+      )
+      src_args_map = dict(src_var.args) if src_var is not None and src_var.args else {}
+      tgt_args_map = dict(tgt_var.args) if tgt_var is not None and tgt_var.args else {}
+      tgt_layout = dict(tgt_var.layout_map) if tgt_var is not None and tgt_var.layout_map else {}
 
       for p_name in abstract_params:
         # 1. Determine Source Key Suffix
@@ -166,7 +162,7 @@ class WeightScriptGenerator:
           rule = str(tgt_layout[p_name])  # e.g. "OIHW->HWIO"
           if "->" in rule:
             fmt_in, fmt_out = rule.split("->")
-            if is_torch_src:
+            if is_hub_src:
               perm = compute_permutation(fmt_in.strip(), fmt_out.strip())
             else:
               # Going HWIO -> OIHW
@@ -195,9 +191,11 @@ class WeightScriptGenerator:
     Returns:
         The generated Python script as a string.
 
+    Raises:
+        ConfigurationError: If either ``source_adapter`` or ``target_adapter`` is unavailable.
     """
-    assert self.source_adapter is not None
-    assert self.target_adapter is not None
+    if self.source_adapter is None or self.target_adapter is None:
+      raise ConfigurationError("WeightScriptGenerator requires both source_adapter and target_adapter.")
     src_imports = "\n".join(self.source_adapter.get_weight_conversion_imports())
     tgt_imports = "\n".join(self.target_adapter.get_weight_conversion_imports())
 

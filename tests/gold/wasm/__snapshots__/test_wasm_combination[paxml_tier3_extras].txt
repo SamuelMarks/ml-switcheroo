@@ -1,0 +1,27 @@
+--- Forward ---
+import praxis.layers as pl
+from praxis import pax_fiddle
+
+def get_model_config():
+    # Tier 3: HParams Configuration
+    # Praxis often relies on fiddle/HParams for configuration
+
+    p = pax_fiddle.Config(pl.Linear, name="my_linear")
+    p.input_dims = 64
+    p.output_dims = 10
+
+    return p
+
+--- Backward ---
+import praxis.layers as pl
+from praxis import pax_fiddle
+
+def get_model_config():
+    # Tier 3: HParams Configuration
+    # Praxis often relies on fiddle/HParams for configuration
+
+    p = pax_fiddle.Config(pl.Linear, name="my_linear")
+    p.input_dims = 64
+    p.output_dims = 10
+
+    return p

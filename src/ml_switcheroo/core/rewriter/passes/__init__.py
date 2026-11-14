@@ -5,10 +5,10 @@ from ml_switcheroo.core.rewriter.passes.auxiliary import AuxiliaryPass, Auxiliar
 from ml_switcheroo.core.rewriter.passes.structure import StructuralPass, StructuralTransformer
 
 __all__ = [
-  "StructuralPass",
-  "StructuralTransformer",
   "ApiPass",
   "ApiTransformer",
   "AuxiliaryPass",
   "AuxiliaryTransformer",
+  "StructuralPass",
+  "StructuralTransformer",
 ]

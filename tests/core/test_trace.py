@@ -1,12 +1,10 @@
 """Test suite for the Trace module."""
 
-from tests.conftest import _test_getattr
-
 from ml_switcheroo.core.tracer import TraceEventType, TraceLogger
 
 
 def test_phase_nesting() -> None:
-  """Verifies the behavior of phase nesting."""
+  """Verify `TraceLogger` returns `4` for phase nesting."""
   logger = TraceLogger()
   p1 = logger.start_phase("Parent")
   logger.start_phase("Child")
@@ -20,34 +18,25 @@ def test_phase_nesting() -> None:
 
 
 def test_trace_logging_integration() -> None:
-  """Verifies the behavior of trace logging integration."""
+  """Verify `TraceLogger` returns `1` for trace logging integration."""
   logger = TraceLogger()
   logger.log_match("torch.abs", "jax.numpy.abs", "abs")
   events = logger.export()
   assert len(events) == 1
   assert events[0]["type"] == TraceEventType.MATCH_SEMANTICS
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {"v": _test_getattr({"v": _test_getattr({"v": events}, "__getitem__")("v")[0]}, "__getitem__")("v")["metadata"]},
-        "__getitem__",
-      )("v")["source"]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "torch.abs"}, "__getitem__")("v")
+  meta = events[0]["metadata"]
+  assert isinstance(meta, dict)
+  assert meta["source"] == "torch.abs"
 
 
 def test_snapshot_includes_source_code() -> None:
-  """Verifies the behavior of snapshot includes source code."""
+  """Verify `TraceLogger` returns `1` for snapshot includes source code."""
   logger = TraceLogger()
   logger.log_snapshot("Test Snap", "graph TD", "x = 1")
   events = logger.export()
   assert len(events) == 1
   assert events[0]["type"] == TraceEventType.AST_SNAPSHOT
   meta = events[0]["metadata"]
-  assert _test_getattr({"v": _test_getattr({"v": meta}, "__getitem__")("v")["mermaid"]}, "__getitem__")(
-    "v"
-  ) == _test_getattr({"v": "graph TD"}, "__getitem__")("v")
-  assert _test_getattr({"v": _test_getattr({"v": meta}, "__getitem__")("v")["code"]}, "__getitem__")(
-    "v"
-  ) == _test_getattr({"v": "x = 1"}, "__getitem__")("v")
+  assert isinstance(meta, dict)
+  assert meta["mermaid"] == "graph TD"
+  assert meta["code"] == "x = 1"

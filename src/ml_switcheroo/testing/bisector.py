@@ -18,7 +18,16 @@ import typing
 
 from pydantic import JsonValue
 
+from ml_switcheroo.exceptions import VerificationExecutionError
 from ml_switcheroo.testing.runner import EquivalenceRunner
+
+_UnpackedOpSpec: typing.TypeAlias = tuple[
+  dict[str, JsonValue],
+  list[str],
+  dict[str, str],
+  dict[str, dict[str, JsonValue]],
+  str | None,
+]
 
 
 class SemanticsBisector:
@@ -38,6 +47,42 @@ class SemanticsBisector:
     self.runner = runner
     self.logger = logging.getLogger(__name__)
 
+  def _verify_relaxation_step(
+    self,
+    runner: EquivalenceRunner,
+    op_name: str,
+    spec: _UnpackedOpSpec,
+    rtol: float,
+    atol: float,
+  ) -> bool:
+    """Execute a single tolerance relaxation verification step.
+
+    Args:
+        runner: Active ``EquivalenceRunner`` instance.
+        op_name: Name of the operation being verified.
+        spec: Unpacked ``(variants, params, hints, constraints, shape_calc)`` tuple.
+        rtol: Candidate relative tolerance.
+        atol: Candidate absolute tolerance.
+
+    Returns:
+        ``True`` if verification succeeded at ``(rtol, atol)``, otherwise ``False``.
+    """
+    variants, params, hints, constraints, output_shape_calc = spec
+    try:
+      success, _ = runner.verify(
+        variants,
+        params,
+        hints=hints,
+        constraints=constraints,
+        shape_calc=output_shape_calc,
+        rtol=rtol,
+        atol=atol,
+      )
+      return bool(success)
+    except (ValueError, TypeError, KeyError, AttributeError, RuntimeError, VerificationExecutionError) as exc:
+      self.logger.debug("Bisector relaxation step (%s, %s) failed for %s: %s", rtol, atol, op_name, exc)
+      return False
+
   def propose_fix(self, op_name: str, op_def: typing.Mapping[str, JsonValue]) -> dict[str, JsonValue] | None:
     """Attempt to satisfy verification by mutating verification parameters.
 
@@ -51,6 +96,8 @@ class SemanticsBisector:
     Returns:
         Dict: A patched version of op_def if a fix was found, else None.
 
+    Raises:
+        VerificationExecutionError: If ``self.runner`` is ``None``.
     """
     # Standard Relaxation Ladder
     # (rtol, atol) tuples
@@ -99,37 +146,25 @@ class SemanticsBisector:
         params.append(arg)
 
     # Iterate steps
+    if self.runner is None:
+      raise VerificationExecutionError("SemanticsBisector requires an active EquivalenceRunner instance.")
+    spec: _UnpackedOpSpec = (variants, params, hints, constraints, output_shape_calc)
     for rtol, atol in relaxation_steps:
-      try:
-        assert self.runner is not None
-        success, _ = self.runner.verify(
-          variants,
-          params,
-          hints=hints,
-          constraints=constraints,
-          shape_calc=output_shape_calc,
-          rtol=rtol,
-          atol=atol,
-        )
+      if self._verify_relaxation_step(self.runner, op_name, spec, rtol, atol):
+        # If this passed, check if it's different from original defaults declared in op_def
+        orig_rtol = op_def.get("test_rtol", 1e-3)
+        orig_atol = op_def.get("test_atol", 1e-4)
 
-        if success:
-          # If this passed, check if it's different from original defaults declared in op_def
-          orig_rtol = op_def.get("test_rtol", 1e-3)
-          orig_atol = op_def.get("test_atol", 1e-4)
+        # Only propose a fix if values are different than current config
+        if rtol != orig_rtol or atol != orig_atol:
+          self.logger.info(f"Bisector found fix for {op_name}: rtol={rtol}, atol={atol}")
+          patch: dict[str, JsonValue] = copy.deepcopy(dict(op_def))
+          patch["test_rtol"] = rtol
+          patch["test_atol"] = atol
+          return patch
 
-          # Only propose a fix if values are different than current config
-          if rtol != orig_rtol or atol != orig_atol:
-            self.logger.info(f"Bisector found fix for {op_name}: rtol={rtol}, atol={atol}")
-            patch: dict[str, JsonValue] = copy.deepcopy(dict(op_def))
-            patch["test_rtol"] = rtol
-            patch["test_atol"] = atol
-            return patch
-
-          # If it passed with settings matching current config (or standard default),
-          # then no fix needed (false alarm or flaky test).
-          return None
-
-      except Exception:
-        continue
+        # If it passed with settings matching current config (or standard default),
+        # then no fix needed (false alarm or flaky test).
+        return None
 
     return None

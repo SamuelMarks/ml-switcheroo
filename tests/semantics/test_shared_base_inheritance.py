@@ -1,6 +1,5 @@
 """Test suite for the Shared Base Inheritance module."""
 
-import typing
 from unittest.mock import patch
 
 import pytest
@@ -9,32 +8,32 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockAdapterWithParent:
-  """Test helper class MockAdapterWithParent."""
+  """Sentinel `MockAdapterWithParent` fixture class used in shared base inheritance tests."""
 
   def __init__(self, parent: str) -> None:
     """Initializes the MockAdapterWithParent instance.
 
     Args:
-        parent: The parent (str) for   init  .
+        parent: Input `parent` parameter value (`str`).
     """
     self.inherits_from: str = parent
 
 
 @pytest.fixture
-def manager() -> typing.Generator[SemanticsManager, None, None]:
+def manager() -> SemanticsManager:
   """Provides a mock manager for testing.
 
-  Yields:
+  Returns:
       SemanticsManager: A semantics manager instance.
   """
   mgr: SemanticsManager = SemanticsManager()
   mgr._reverse_index = {}
   mgr.data = {}
-  yield mgr
+  return mgr
 
 
 def test_immediate_fallback(manager: SemanticsManager) -> None:
-  """Verifies the behavior of immediate fallback.
+  """Verify `manager.resolve_variant` handles immediate fallback as expected.
 
   Args:
       manager (SemanticsManager): The manager fixture.
@@ -48,7 +47,7 @@ def test_immediate_fallback(manager: SemanticsManager) -> None:
 
 
 def test_explicit_override_precedence(manager: SemanticsManager) -> None:
-  """Verifies the behavior of explicit override precedence.
+  """Verify `manager.resolve_variant` handles explicit override precedence as expected.
 
   Args:
       manager (SemanticsManager): The manager fixture.
@@ -62,7 +61,7 @@ def test_explicit_override_precedence(manager: SemanticsManager) -> None:
 
 
 def test_deep_inheritance_chain(manager: SemanticsManager) -> None:
-  """Verifies the behavior of deep inheritance chain.
+  """Verify `manager.resolve_variant` handles deep inheritance chain as expected.
 
   Args:
       manager (SemanticsManager): The manager fixture.
@@ -91,7 +90,7 @@ def test_deep_inheritance_chain(manager: SemanticsManager) -> None:
 
 
 def test_circular_inheritance_safety(manager: SemanticsManager) -> None:
-  """Verifies the behavior of circular inheritance safety.
+  """Verify `manager.resolve_variant` handles circular inheritance safety as expected.
 
   Args:
       manager (SemanticsManager): The manager fixture.
@@ -119,7 +118,7 @@ def test_circular_inheritance_safety(manager: SemanticsManager) -> None:
 
 
 def test_integration_with_json_confg_fallback(manager: SemanticsManager) -> None:
-  """Verifies the behavior of integration with JSON confg fallback.
+  """Verify `manager.resolve_variant` handles integration with JSON confg fallback as expected.
 
   Args:
       manager (SemanticsManager): The manager fixture.
@@ -133,7 +132,7 @@ def test_integration_with_json_confg_fallback(manager: SemanticsManager) -> None
 
 
 def test_json_overrides_adapter_inheritance(manager: SemanticsManager) -> None:
-  """Verifies the behavior of JSON overrides adapter inheritance.
+  """Verify `manager.resolve_variant` handles JSON overrides adapter inheritance as expected.
 
   Args:
       manager (SemanticsManager): The manager fixture.
@@ -141,7 +140,7 @@ def test_json_overrides_adapter_inheritance(manager: SemanticsManager) -> None:
   manager.data["op"] = {"variants": {"parent_B": {"api": "found_In_B"}}}
 
   class MockAdapterA:
-    """Test helper class MockAdapterA."""
+    """Sentinel `MockAdapterA` fixture class used in shared base inheritance tests."""
 
     inherits_from: str = "parent_A"
 

@@ -56,8 +56,35 @@ class GraphOptimizer:
     # Work on a copy to avoid mutating source in place if retrying
     current_graph = copy.deepcopy(graph)
 
-    fused = self._apply_fusion_pass(current_graph)
-    return fused
+    return self._apply_fusion_pass(current_graph)
+
+  @staticmethod
+  def _reroute_fused_edges(
+    edges: list[LogicalEdge],
+    node_to_fused_id: dict[str, str],
+    fusion_map: dict[str, dict[str, str]],
+  ) -> list[LogicalEdge]:
+    """Rewrite ``edges`` around newly fused pattern head/tail endpoints.
+
+    Args:
+        edges: Original graph edges prior to fusion.
+        node_to_fused_id: Mapping from absorbed node IDs to their fused node ID.
+        fusion_map: Mapping from fused node ID to ``{'head': id, 'tail': id}``.
+
+    Returns:
+        Rewritten list of external ``LogicalEdge`` connections.
+    """
+    final_edges: list[LogicalEdge] = []
+    for e in edges:
+      src_fused = node_to_fused_id.get(e.source)
+      tgt_fused = node_to_fused_id.get(e.target)
+
+      final_src = e.source if not src_fused else (src_fused if e.source == fusion_map[src_fused]["tail"] else None)
+      final_tgt = e.target if not tgt_fused else (tgt_fused if e.target == fusion_map[tgt_fused]["head"] else None)
+
+      if final_src and final_tgt and final_src != final_tgt:
+        final_edges.append(LogicalEdge(source=final_src, target=final_tgt))
+    return final_edges
 
   def _apply_fusion_pass(self, graph: LogicalGraph) -> LogicalGraph:
     """Execute a single pass of greedy pattern matching.
@@ -69,120 +96,45 @@ class GraphOptimizer:
         The optimized graph.
 
     """
-    # 1. Build Adjacency and Lookup Maps
-    # node_id -> Node
     node_map = {n.id: n for n in graph.nodes.values()}
-    # source_id -> [target_id]
-    out_edges = defaultdict(list)
-    # target_id -> [source_id]
-    in_edges = defaultdict(list)
-
+    out_edges: dict[str, list[str]] = defaultdict(list)
     for e in graph.edges:
       out_edges[e.source].append(e.target)
-      in_edges[e.target].append(e.source)
 
     sorted_nodes = topological_sort(graph)
-
-    # Track which original node maps to which fused node (or itself if not fused)
-    # However, since we process greedily, we can just track fusion events
     node_to_fused_id: dict[str, str] = {}
-
-    # Details of fusion: fused_id -> {head: id, tail: id}
     fusion_map: dict[str, dict[str, str]] = {}
-
     processed_ids: set[str] = set()
     new_nodes: list[LogicalNode] = []
 
-    # Iterate via sorted list
     for node in sorted_nodes:
       if node.id in processed_ids:
         continue
 
-      # Try to match patterns starting at 'node'
       matched_pattern = None
-      matched_ids = []
-
+      matched_ids: list[str] = []
       for pattern in self.patterns:
         ids = self._match_sequence(node, pattern.sequence, node_map, out_edges, processed_ids)
         if ids:
           matched_pattern = pattern
           matched_ids = ids
-          break  # Greedy
+          break
 
       if matched_pattern and matched_ids:
-        match_root = matched_ids[0]
-        match_tail = matched_ids[-1]
+        match_root, match_tail = matched_ids[0], matched_ids[-1]
         fused_id = f"fused_{match_root}"
-
-        # Merge Attributes / Metadata
         merged_meta: dict[str, AttributeValue] = {}
         for mid in matched_ids:
-          mnode = node_map[mid]
-          merged_meta.update(mnode.attributes)
-
-        fused_node = LogicalNode(id=fused_id, op_type=matched_pattern.replace_with, attributes=merged_meta)
-        new_nodes.append(fused_node)
-
+          merged_meta.update(node_map[mid].attributes)
+        new_nodes.append(LogicalNode(id=fused_id, op_type=matched_pattern.replace_with, attributes=merged_meta))
         fusion_map[fused_id] = {"head": match_root, "tail": match_tail}
-
-        # Mark involved nodes
         for mid in matched_ids:
           processed_ids.add(mid)
           node_to_fused_id[mid] = fused_id
-
       else:
-        # No match, keep node as is
         new_nodes.append(node)
 
-    # Rebuild Edges
-    # We iterate over original edges and effectively re-route them
-    final_edges: list[LogicalEdge] = []
-
-    for e in graph.edges:
-      src = e.source
-      tgt = e.target
-
-      src_fused = node_to_fused_id.get(src)
-      tgt_fused = node_to_fused_id.get(tgt)
-
-      # Logic Table:
-      # 1. src Not Fused, tgt Not Fused -> Keep edge intact.
-      # 2. src Fused (F1), tgt Not Fused ->
-      #    If src == F1.tail -> Add edge F1 -> tgt.
-      #    Else (internal logic) -> Drop.
-      # 3. src Not Fused, tgt Fused (F2) ->
-      #    If tgt == F2.head -> Add edge src -> F2.
-      #    Else (internal logic) -> Drop.
-      # 4. src Fused (F1), tgt Fused (F2) ->
-      #    If F1 == F2 -> Drop (Internal).
-      #    If F1 != F2, src == F1.tail, tgt == F2.head -> Add edge F1 -> F2.
-
-      final_src = None
-      final_tgt = None
-
-      # Resolve Source
-      if not src_fused:
-        final_src = src
-      else:
-        info = fusion_map[src_fused]
-        if src == info["tail"]:
-          final_src = src_fused
-        # Else: src is internal non-tail, this edge is invalid for graph flow unless
-        # we support branching inside patterns (not supported yet).
-
-      # Resolve Target
-      if not tgt_fused:
-        final_tgt = tgt
-      else:
-        info = fusion_map[tgt_fused]
-        if tgt == info["head"]:
-          final_tgt = tgt_fused
-        # Else: target is internal non-head.
-
-      if final_src and final_tgt and final_src != final_tgt:
-        final_edges.append(LogicalEdge(source=final_src, target=final_tgt))
-
-    # Clear prior inputs from new_nodes to prevent stale edge derivations
+    final_edges = self._reroute_fused_edges(graph.edges, node_to_fused_id, fusion_map)
     for n in new_nodes:
       n.inputs = []
 

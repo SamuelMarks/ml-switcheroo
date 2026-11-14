@@ -1,0 +1,17 @@
+--- Forward ---
+import mlx.core as mx
+
+def data_pipeline(tensors, batch_size=32):
+  # Tier 3: tf.data Input Pipeline
+  dataset = tf.data.Dataset.from_tensor_slices(tensors)
+  loader = dataset.shuffle(1024).batch(batch_size)
+  return loader
+
+--- Backward ---
+import tensorflow as tf
+
+def data_pipeline(tensors, batch_size=32):
+  # Tier 3: tf.data Input Pipeline
+  dataset = tf.data.Dataset.from_tensor_slices(tensors)
+  loader = dataset.shuffle(1024).batch(batch_size)
+  return loader

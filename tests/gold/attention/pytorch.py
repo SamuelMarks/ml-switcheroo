@@ -5,25 +5,25 @@ import torch.nn as nn
 
 
 class AttentionModel(nn.Module):
-  """Test helper class AttentionModel."""
+  """Stub `nn.Module` subclass implementing `forward` for pytorch tests."""
 
   def __init__(self, embed_dim: int, num_heads: int):
     """Initializes the AttentionModel instance.
 
     Args:
-        embed_dim: The embed dim (int) for   init  .
-        num_heads: The num heads (int) for   init  .
+        embed_dim: Input `embed_dim` parameter value (`int`).
+        num_heads: Input `num_heads` parameter value (`int`).
     """
     super().__init__()
     self.mha = nn.MultiheadAttention(embed_dim, num_heads, batch_first=True)
 
   def forward(self, query: torch.Tensor, key: torch.Tensor, value: torch.Tensor) -> torch.Tensor:
-    """Helper to forward.
+    """Compute the forward pass of `AttentionModel` on input tensors.
 
     Args:
-        query: The query (torch.Tensor) for forward.
-        key: The key (torch.Tensor) for forward.
-        value: The value (torch.Tensor) for forward.
+        query: Input `query` parameter value (`torch.Tensor`).
+        key: Input `key` parameter value (`torch.Tensor`).
+        value: Input `value` parameter value (`torch.Tensor`).
 
     Returns:
         Output tensor or value computed by the forward pass.

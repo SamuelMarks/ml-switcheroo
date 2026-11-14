@@ -15,7 +15,13 @@ from ml_switcheroo.core.compiler.isa.analysis import IsaAnalyzer
 
 
 class RdnaAnalyzer(IsaAnalyzer):
-  """Analyze sequences of RDNA instructions to reverse-engineer high-level parameters."""
+  """Analyze sequences of RDNA instructions to reverse-engineer high-level parameters.
+
+  Attributes:
+      CMP_OPCODE: The cmp opcode (`str`).
+      IMMEDIATE_TYPE: The immediate type (`type[RdnaImmediate]`).
+      LOOP_PARAMETER_RULES: The loop parameter rules (`typing.Mapping[str, tuple[str, str]]`).
+  """
 
   CMP_OPCODE: str = "s_cmp_lt_i32"
   IMMEDIATE_TYPE: type[RdnaImmediate] = RdnaImmediate

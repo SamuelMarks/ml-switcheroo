@@ -1,12 +1,12 @@
 """Unit tests for Phase 12: Synthesizing Target-Framework Forward + Backward VJP Code."""
 
 from __future__ import annotations
-from tests.conftest import _test_setattr
 
 import types
 from unittest import mock
 
 import libcst as cst
+import pytest
 from ml_switcheroo_ir import DType, LogicalEdge, LogicalGraph, LogicalNode
 
 from ml_switcheroo.config import RuntimeConfig
@@ -54,14 +54,16 @@ def test_render_logical_graph_mermaid() -> None:
   assert "classDef gradNode" in mermaid
 
 
-def test_synthesize_target_backward_code_live_and_fallback() -> None:
-  """Verify synthesize_target_backward_code across target frameworks and PythonBackend fallback."""
+def test_synthesize_target_backward_code_live_and_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify synthesize_target_backward_code across target frameworks and PythonBackend fallback.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   g = _sample_backward_graph()
   stub_ir_to_ast = types.ModuleType("ml_switcheroo_compiler.backends.ir_to_ast")
-  _test_setattr(
-    stub_ir_to_ast,
-    "emit_ir_to_ast",
-    lambda graph, fw: cst.parse_module("grad_x = x\nreturn grad_x\n"),
+  monkeypatch.setattr(
+    stub_ir_to_ast, "emit_ir_to_ast", lambda graph, fw: cst.parse_module("grad_x = x\nreturn grad_x\n"), raising=False
   )
   with mock.patch("importlib.import_module", return_value=stub_ir_to_ast):
     for target in ("jax", "torch", "mlx", "keras", "tensorflow"):
@@ -70,7 +72,7 @@ def test_synthesize_target_backward_code_live_and_fallback() -> None:
 
   # Empty CST module emitted by emit_ir_to_ast falls back to PythonBackend
   stub_empty_ir_to_ast = types.ModuleType("ml_switcheroo_compiler.backends.ir_to_ast")
-  _test_setattr(stub_empty_ir_to_ast, "emit_ir_to_ast", lambda graph, fw: cst.Module(body=[]))
+  monkeypatch.setattr(stub_empty_ir_to_ast, "emit_ir_to_ast", lambda graph, fw: cst.Module(body=[]), raising=False)
   with mock.patch("importlib.import_module", return_value=stub_empty_ir_to_ast):
     empty_fallback = synthesize_target_backward_code(g, target_fw="jax")
     assert "Synthesized Backward/VJP Graph (jax)" in empty_fallback

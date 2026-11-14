@@ -4,12 +4,12 @@ import keras
 
 
 def concat_tensors(x: keras.KerasTensor, y: keras.KerasTensor, axis: int = -1) -> keras.KerasTensor:
-  """Helper to concat tensors.
+  """Execute `concatenate` to support concat tensors in keras3 tests.
 
   Args:
       x: Primary input tensor or array operand.
       y: Secondary input tensor or target operand.
-      axis: The axis (int) for concat tensors.
+      axis: Input `axis` parameter value (`int`).
 
   Returns:
       Resulting `keras.KerasTensor` from concat tensors.

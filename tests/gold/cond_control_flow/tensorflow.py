@@ -4,10 +4,10 @@ import tensorflow as tf
 
 
 def conditional_op(pred: tf.Tensor, x: tf.Tensor) -> tf.Tensor:
-  """Helper to conditional op.
+  """Execute `tf.cond` to support conditional operation in tensorflow tests.
 
   Args:
-      pred: The pred (tf.Tensor) for conditional op.
+      pred: Input `pred` parameter value (`tf.Tensor`).
       x: Primary input tensor or array operand.
 
   Returns:

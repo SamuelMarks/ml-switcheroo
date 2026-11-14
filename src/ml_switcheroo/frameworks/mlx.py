@@ -12,15 +12,24 @@ It supports:
 Definitions are loaded from `frameworks/definitions/mlx.json`.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
 import logging
 from types import ModuleType
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
 
-from ml_switcheroo.frameworks.base import ImportConfig, PluginTraits, StandardMap, StructuralTraits, register_framework
+from ml_switcheroo.enums import RuntimeTensorOrValue
+from ml_switcheroo.frameworks.base import (
+  FrameworkSnapshot,
+  ImportConfig,
+  InitMode,
+  PluginTraits,
+  SnapshotBackedAdapter,
+  StandardMap,
+  StructuralTraits,
+  load_snapshot_for_adapter,
+  register_framework,
+)
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.frameworks.mlx_io import MlxIOMixin
 
@@ -39,11 +48,37 @@ except (ImportError, AttributeError, TypeError, ValueError) as exc:
 
 @register_framework("mlx")
 class MLXAdapter(MlxIOMixin):
-  """Adapter for Apple MLX (Silicon-optimized tensor framework)."""
+  """Adapter for Apple MLX (Silicon-optimized tensor framework).
+
+  Attributes:
+      display_name: The display name (`str`).
+      inherits_from: The inherits from (`str | None`).
+      ui_priority: The ui priority (`int`).
+  """
 
   display_name: str = "Apple MLX"
   inherits_from: str | None = None
   ui_priority: int = 50
+
+  def __init__(self) -> None:
+    """Initialize MLX adapter with typed ``FrameworkSnapshot`` storage."""
+    import importlib.util
+    import sys
+
+    if "mlx" in sys.modules:
+      mlx_available = sys.modules["mlx"] is not None
+    else:
+      try:
+        mlx_available = importlib.util.find_spec("mlx") is not None
+      except (ImportError, ValueError, AttributeError):
+        mlx_available = False
+    self._snapshot = SnapshotBackedAdapter(
+      "mlx",
+      is_live_available=mlx_available,
+      loader=load_snapshot_for_adapter,
+    )
+    self._mode: InitMode = self._snapshot.mode
+    self._snapshot_data: FrameworkSnapshot | None = self._snapshot.snapshot
 
   @property
   def import_alias(self) -> tuple[str, str]:
@@ -241,7 +276,7 @@ class MLXAdapter(MlxIOMixin):
       if np is not None and isinstance(data, (np.ndarray, np.generic)):
         res_np: RuntimeTensorOrValue = mx.array(data)
         return res_np
-      elif isinstance(data, (list, tuple)):
+      if isinstance(data, (list, tuple)):
         res_seq: RuntimeTensorOrValue = mx.array(data)
         return res_seq
     except (ImportError, AttributeError, TypeError, ValueError, RuntimeError) as exc:
@@ -354,10 +389,7 @@ class Qwen3VLPatchEmbed(nn.Module):
 
     """
     clean_type = device_type.strip("'\"").lower()
-    if clean_type in ("cuda", "gpu", "mps"):
-      backend = "mx.gpu"
-    else:
-      backend = "mx.cpu"
+    backend = "mx.gpu" if clean_type in ("cuda", "gpu", "mps") else "mx.cpu"
     args = [backend]
     if device_index:
       args.append(str(device_index))
@@ -405,7 +437,6 @@ class Qwen3VLPatchEmbed(nn.Module):
         snapshot: Snapshotdict.
 
     """
-    pass
 
   def get_doc_url(self, api_name: str) -> str | None:
     """Generate documentation URL for MLX APIs using autosummary pattern.

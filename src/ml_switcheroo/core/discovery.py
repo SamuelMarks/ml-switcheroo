@@ -97,14 +97,7 @@ class SimulatedReflection:
     candidates: list[tuple[str, str]] = []
 
     for mod_name in self.search_modules:
-      try:
-        mod = importlib.import_module(mod_name)
-        # Collect all public members
-        candidates.extend(
-          [(name, f"{mod_name}.{name}") for name, _ in inspect.getmembers(mod) if not name.startswith("_")]
-        )
-      except ImportError:
-        continue
+      candidates.extend(self._collect_module_candidates(mod_name))
 
     if not candidates:
       return None
@@ -120,6 +113,22 @@ class SimulatedReflection:
       return candidate_dict[matches[0]]
 
     return None
+
+  @staticmethod
+  def _collect_module_candidates(mod_name: str) -> list[tuple[str, str]]:
+    """Collect public member name and qualified API path pairs from a module.
+
+    Args:
+        mod_name (str): Dotted module name to import and inspect.
+
+    Returns:
+        list[tuple[str, str]]: Public ``(name, qualified_path)`` pairs, or empty list on ``ImportError``.
+    """
+    try:
+      mod = importlib.import_module(mod_name)
+    except ImportError:
+      return []
+    return [(name, f"{mod_name}.{name}") for name, _ in inspect.getmembers(mod) if not name.startswith("_")]
 
   def _normalize(self, s: str) -> str:
     """Normalize a string for comparison (lowercase, no underscores).

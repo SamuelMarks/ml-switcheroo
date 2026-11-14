@@ -1,10 +1,10 @@
 """Report generation and metrics formatting."""
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 
 from pydantic import JsonValue
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -30,7 +30,7 @@ def generate_audit_report(
 
   for target in targets:
     mapped_count = 0
-    for _op_name, op_details in manager.data.items():
+    for op_details in manager.data.values():
       variants = op_details.get("variants")
       if isinstance(variants, dict) and target in variants:
         mapped_count += 1
@@ -43,7 +43,7 @@ def generate_audit_report(
       "status": "valid" if len(target_errors) == 0 else "mismatched",
     }
 
-  loaded_snaps: list[JsonValue] = [str(k) for k in snapshots.keys()]
+  loaded_snaps: list[JsonValue] = [str(k) for k in snapshots]
   checksum_json: dict[str, JsonValue] = {str(k): str(v) for k, v in (checksums or {}).items()}
 
   return {

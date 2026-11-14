@@ -4,11 +4,11 @@ import keras
 
 
 def setup_adam(model: keras.Model, lr: float = 0.001) -> keras.KerasTensor:
-  """Helper to setup adam.
+  """Execute `Adam` to support setup adam in keras3 tests.
 
   Args:
       model: Neural network model instance under test.
-      lr: The lr (float) for setup adam.
+      lr: Input `lr` parameter value (`float`).
 
   Returns:
       Resulting `keras.KerasTensor` from setup adam.

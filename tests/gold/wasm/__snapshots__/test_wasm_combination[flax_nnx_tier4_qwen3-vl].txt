@@ -1,0 +1,63 @@
+--- Forward ---
+import numpy as np
+from flax import nnx
+
+class Qwen3VLVisionConfig:
+    in_channels: int = 3
+    hidden_size: int = 1280
+    temporal_patch_size: int = 2
+    patch_size: int = 14
+
+class Qwen3VLPatchEmbed(nnx.Module):
+    '''3D Convolutional patch embedding for vision input using nnx.Conv.'''
+    def __init__(self, config: Qwen3VLVisionConfig, *, rngs: nnx.Rngs):
+        self.config = config
+        kernel = (config.temporal_patch_size, config.patch_size, config.patch_size)
+        self.proj = nnx.Conv(
+            in_features=config.in_channels,
+            out_features=config.hidden_size,
+            kernel_size=kernel,
+            strides=kernel,
+            padding="VALID",
+            use_bias=True,
+            rngs=rngs)
+
+    def __call__(self, hidden_states: np.ndarray) -> np.ndarray:
+        cfg = self.config
+        seq_len = hidden_states.shape[0]
+
+        hidden_states = hidden_states.reshape(
+            seq_len, cfg.in_channels, cfg.temporal_patch_size, cfg.patch_size, cfg.patch_size
+        )
+        hidden_states = hidden_states.transpose(0, 2, 3, 4, 1)
+
+        return self.proj(hidden_states).reshape(seq_len, cfg.hidden_size)
+
+--- Backward ---
+import jax.numpy as jnp
+from flax import nnx
+
+class Qwen3VLVisionConfig:
+    in_channels: int = 3
+    hidden_size: int = 1280
+    temporal_patch_size: int = 2
+    patch_size: int = 14
+
+class Qwen3VLPatchEmbed(nnx.Module):
+    '''3D Convolutional patch embedding for vision input using nnx.Conv.'''
+    def __init__(self, rngs: nnx.Rngs, config: Qwen3VLVisionConfig, *, rngs: nnx.Rngs):
+        self.config = config
+        kernel = (config.temporal_patch_size, config.patch_size, config.patch_size)
+        self.proj = nnx.Conv(
+            kernel_size=kernel, in_features=config.in_channels, out_features=config.hidden_size, strides=kernel, padding="VALID", use_bias=True, rngs=rngs)
+
+    def __call__(self, hidden_states: jax.Array) -> jax.Array:
+        cfg = self.config
+        seq_len = hidden_states.shape[0]
+
+        hidden_states = hidden_states.reshape(
+            seq_len, cfg.in_channels, cfg.temporal_patch_size, cfg.patch_size, cfg.patch_size
+        )
+        hidden_states = hidden_states.transpose(0, 2, 3, 4, 1)
+
+        return self.proj(hidden_states).reshape(seq_len, cfg.hidden_size)

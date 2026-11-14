@@ -1,0 +1,55 @@
+--- Forward ---
+from praxis import base_layer
+from praxis import layers
+
+class Qwen3VLVisionConfig:
+    in_channels: int = 3
+    hidden_size: int = 1280
+    temporal_patch_size: int = 2
+    patch_size: int = 14
+
+class Qwen3VLPatchEmbed(base_layer.BaseLayer):
+    '''3D Convolutional patch embedding for vision input.'''
+    config: Qwen3VLVisionConfig = Qwen3VLVisionConfig()
+
+    def setup(self):
+        cfg = self.config
+        kernel = (cfg.temporal_patch_size, cfg.patch_size, cfg.patch_size)
+        self.create_child('proj', layers.Conv3D(
+            input_dims=cfg.in_channels,
+            filter_dims=cfg.hidden_size,
+            filter_shape=kernel,
+            filter_stride=kernel,
+            padding="VALID"
+        ))
+
+    def __call__(self, hidden_states):
+        return self.proj(hidden_states)
+
+--- Backward ---
+from praxis import base_layer
+from praxis import layers
+
+class Qwen3VLVisionConfig:
+    in_channels: int = 3
+    hidden_size: int = 1280
+    temporal_patch_size: int = 2
+    patch_size: int = 14
+
+class Qwen3VLPatchEmbed(base_layer.BaseLayer):
+    '''3D Convolutional patch embedding for vision input.'''
+    config: Qwen3VLVisionConfig = Qwen3VLVisionConfig()
+
+    def setup(self):
+        cfg = self.config
+        kernel = (cfg.temporal_patch_size, cfg.patch_size, cfg.patch_size)
+        self.create_child('proj', layers.Conv3D(
+            input_dims=cfg.in_channels,
+            filter_dims=cfg.hidden_size,
+            filter_shape=kernel,
+            filter_stride=kernel,
+            padding="VALID"
+        ))
+
+    def __call__(self, hidden_states):
+        return self.proj(hidden_states)

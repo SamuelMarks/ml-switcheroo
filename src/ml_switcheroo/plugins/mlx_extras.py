@@ -1,88 +1,92 @@
-"""Plugin for MLX Ecosystem Mapping.
+"""Plugin for JIT Compilation and Device Barrier Ecosystem Mapping.
 
-Handles:
-1. Compilation: `@torch.compile` -> `@mx.compile`.
-2. Eager Evaluation: `torch.cuda.synchronize()` -> Warning/No-op.
+Rewrites JIT compilation decorators/wrappers and global device synchronization
+calls strictly from ``HookContext.current_variant`` without hardcoded target
+framework strings.
 """
+
+import typing
 
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
-from ml_switcheroo.plugins.utils import create_dotted_name
+from ml_switcheroo.plugins.utils import create_dotted_name, resolve_variant_api
+
+_CALLABLE_KEYWORDS = frozenset({"fn", "fun", "func", "model"})
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """Support: Creates a CST Attribute chain from string.
+  """Create a CST attribute chain from a dotted API path.
 
   Args:
-      name_str: A dot-separated string representing the target name (e.g., "mlx.core.compile").
+      name_str: Dot-separated API path string.
 
   Returns:
-      A LibCST expression node corresponding to the dotted name structure.
+      LibCST expression node corresponding to ``name_str``.
   """
   return create_dotted_name(name_str)
 
 
-@register_hook("mlx_compiler")
-def transform_compiler(node: cst.Decorator | cst.Call | cst.CSTNode, ctx: HookContext) -> cst.CSTNode:
-  """Transform Maps JIT compilation decorators.
-
-  Triggers: Operations mapped with `requires_plugin: "mlx_compiler"`.
-
-  Transformation:
-      Input:  `@torch.compile(fullgraph=True, dynamic=True)`
-      Output: `@mx.compile` (stripping incompatible kwargs).
-
-  Decoupling:
-      Looks up the `Compile` operation API in semantics (e.g. `mlx.core.compile`).
+def _extract_compiled_target_arg(args: typing.Sequence[cst.Arg]) -> list[cst.Arg]:
+  """Extract the primary callable/model argument from positional or keyword args.
 
   Args:
-      node: The CST decorator or call node representing the JIT compilation target.
-      ctx: The hook context containing helper methods for looking up target API mappings.
+      args: Sequence of call arguments passed to ``compile(...)``.
 
   Returns:
-      The transformed CST node compatible with the MLX JIT compiler.
+      Single-element list containing the cleaned positional callable argument, or empty list.
   """
-  # Resolve Target API dynamically
-  target_api = ctx.lookup_api("Compile") or "mlx.core.compile"
+  for arg in args:
+    if arg.keyword is None and not arg.star:
+      return [arg.with_changes(comma=cst.MaybeSentinel.DEFAULT)]
+  for arg in args:
+    if arg.keyword is not None and arg.keyword.value in _CALLABLE_KEYWORDS:
+      return [
+        arg.with_changes(
+          keyword=None,
+          equal=cst.MaybeSentinel.DEFAULT,
+          comma=cst.MaybeSentinel.DEFAULT,
+        )
+      ]
+  return []
+
+
+@register_hook("mlx_compiler")
+def transform_compiler(node: cst.Decorator | cst.Call | cst.CSTNode, ctx: HookContext) -> cst.CSTNode:
+  """Map JIT compilation decorators and functional wrappers via ``current_variant``.
+
+  Args:
+      node: Decorator or Call CST node representing the compilation target.
+      ctx: Hook context providing variant and semantic API resolution.
+
+  Returns:
+      Transformed CST node, or ``node`` unchanged if ``Compile`` is unmapped.
+  """
+  target_api = resolve_variant_api(ctx, ("Compile", "compile"))
+  if not target_api:
+    return node
+
   new_func = _create_dotted_name(target_api)
 
-  # Validating Input Type
-  # Is it a Decorator node?
   if isinstance(node, cst.Decorator):
-    # Strip arguments completely because Torch kwargs (backend="inductor")
-    # are invalid in MLX.
-    # Return decorator with just the function name (no Call node)
     return node.with_changes(decorator=new_func)
 
-  # If it's a Call node (e.g. used as functional wrapper `c_fn = torch.compile(fn)`),
-  # strip kwargs and just return `mx.compile(fn)`.
   if isinstance(node, cst.Call):
-    # Keep positional arg 0 (the function)
-    new_args = []
-    if node.args:
-      new_args.append(node.args[0])
-    return node.with_changes(func=new_func, args=new_args)
+    return node.with_changes(func=new_func, args=_extract_compiled_target_arg(node.args))
 
   return node
 
 
 @register_hook("mlx_synchronize")
 def transform_synchronize(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """Transform Maps barrier synchronization to a warning.
-
-  MLX is lazy, but `torch.cuda.synchronize()` implies a global device barrier.
-  Equivalent `mx.eval()` requires arguments. Since we cannot infer state variables here,
-  we replace the call with a print statement to alert the user.
+  """Map global barrier synchronization calls to an explicit diagnostic warning.
 
   Args:
-      node: The CST call node representing the CUDA synchronization invocation.
-      ctx: The hook context.
+      node: Synchronization CST Call node.
+      ctx: Hook execution context.
 
   Returns:
-      A transformed CST node containing a print statement warning about global synchronization.
+      Print call warning that target lazy frameworks require explicit tensor arguments.
   """
   message_str = "# [Switcheroo] Global sync requires explicit tensor args in target framework."
-
-  # Return a print call: print("...")
   return cst.Call(func=cst.Name("print"), args=[cst.Arg(value=cst.SimpleString(f"'{message_str}'"))])

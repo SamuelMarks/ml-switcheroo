@@ -9,7 +9,7 @@ from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
 @pytest.fixture
 def adapter() -> NumpyAdapter:
-  """Execute adapter helper logic.
+  """Create a configured `NumpyAdapter` fixture for numpy examples tests.
 
   Returns:
       Configured `adapter` fixture value (NumpyAdapter).
@@ -18,7 +18,7 @@ def adapter() -> NumpyAdapter:
 
 
 def test_numpy_examples_structure(adapter: NumpyAdapter) -> None:
-  """Verifies the behavior of NumPy examples structure.
+  """Verify `adapter.get_tiered_examples` emits `tier1_math` for numpy examples structure.
 
   Args:
       adapter: FrameworkAdapter instance under test.
@@ -31,7 +31,7 @@ def test_numpy_examples_structure(adapter: NumpyAdapter) -> None:
 
 
 def test_tier1_math_validity(adapter: NumpyAdapter) -> None:
-  """Verifies the behavior of tier1 math validity.
+  """Verify `parse` emits `import numpy as np` for tier1 math validity.
 
   Args:
       adapter: FrameworkAdapter instance under test.
@@ -45,7 +45,7 @@ def test_tier1_math_validity(adapter: NumpyAdapter) -> None:
 
 
 def test_tier2_neural_validity(adapter: NumpyAdapter) -> None:
-  """Verifies the behavior of tier2 neural validity.
+  """Verify `parse` emits `Out of Scope` for tier2 neural validity.
 
   Args:
       adapter: FrameworkAdapter instance under test.
@@ -57,7 +57,7 @@ def test_tier2_neural_validity(adapter: NumpyAdapter) -> None:
 
 
 def test_tier3_extras_validity(adapter: NumpyAdapter) -> None:
-  """Verify tier3 extras validity behavior.
+  """Verify `parse` emits `np.save` for tier3 extras validity.
 
   Args:
       adapter: FrameworkAdapter instance under test.

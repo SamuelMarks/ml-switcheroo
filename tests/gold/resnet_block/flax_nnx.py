@@ -6,13 +6,13 @@ from flax import nnx
 
 
 class ResidualBlock(nnx.Module):
-  """Test helper class ResidualBlock."""
+  """Minimal `nnx.Module` test double used in flax NNX tests."""
 
   def __init__(self, channels: int, rngs: nnx.Rngs):
     """Initializes the ResidualBlock instance.
 
     Args:
-        channels: The channels (int) for   init  .
+        channels: Input `channels` parameter value (`int`).
         rngs: Flax NNX Rngs container for stochastic parameter initialization.
     """
     self.conv1 = nnx.Conv(channels, channels, kernel_size=(3, 3), padding="SAME", rngs=rngs)
@@ -25,7 +25,7 @@ class ResidualBlock(nnx.Module):
 
     Args:
         x: Primary input tensor or array operand.
-        use_running_average: The use running average (bool) for   call  .
+        use_running_average: Input `use_running_average` parameter value (`bool`).
 
     Returns:
         Output tensor or value computed by the forward pass.
@@ -37,5 +37,4 @@ class ResidualBlock(nnx.Module):
     out = self.conv2(out)
     out = self.bn2(out, use_running_average=use_running_average)
     out = out + residual
-    out = jax.nn.relu(out)
-    return out
+    return jax.nn.relu(out)

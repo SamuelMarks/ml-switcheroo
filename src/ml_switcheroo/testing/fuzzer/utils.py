@@ -9,7 +9,11 @@ import random
 
 from ml_switcheroo.enums import (
   ArrayLikeProtocol as ArrayLikeProtocol,
+)
+from ml_switcheroo.enums import (
   FuzzValue as FuzzValue,
+)
+from ml_switcheroo.enums import (
   RuntimeTensorOrValue as RuntimeTensorOrValue,
 )
 
@@ -130,10 +134,9 @@ def adjust_shape_rank(shape: tuple[int, ...], required_rank: int) -> tuple[int, 
   current_rank = len(shape)
   if current_rank == required_rank:
     return shape
-  elif current_rank < required_rank:
+  if current_rank < required_rank:
     # Pad with random dimensions
     extra = tuple(random.randint(2, 5) for _ in range(required_rank - current_rank))
     return shape + extra
-  else:
-    # Truncate
-    return shape[:required_rank]
+  # Truncate
+  return shape[:required_rank]

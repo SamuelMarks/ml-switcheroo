@@ -5,7 +5,7 @@ import numpy.typing
 
 
 class SameConvModel:
-  """Test helper class SameConvModel."""
+  """Sentinel `SameConvModel` fixture class used in numpy tests."""
 
   def __init__(self, in_channels: int, out_channels: int, kernel_size: int = 3):
     """Initializes the SameConvModel instance.
@@ -15,7 +15,6 @@ class SameConvModel:
         out_channels: Number of output convolution channels.
         kernel_size: Convolution or pooling spatial kernel size.
     """
-    pass
 
   def __call__(self, x: np.typing.NDArray[np.float64]) -> np.typing.NDArray[np.float64]:
     """Executes the callable instance.

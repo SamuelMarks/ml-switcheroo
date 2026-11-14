@@ -1,13 +1,45 @@
 """Validation models."""
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 
-from pydantic import JsonValue
+from pydantic import JsonValue, ValidationError
+
+from ml_switcheroo.core.dsl import OperationDef
+from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
 class SemanticsValidator:
   """Schema validation for Operation definitions."""
+
+  @staticmethod
+  def validate_model(
+    abstract_id: str,
+    new_data: typing.Mapping[str, RuntimeTensorOrValue],
+  ) -> OperationDef | None:
+    """Validate ``new_data`` and return a typed ``OperationDef`` model or ``None`` on failure.
+
+    Args:
+        abstract_id: Canonical abstract operation identifier.
+        new_data: Raw operation definition dictionary to validate.
+
+    Returns:
+        Validated ``OperationDef`` instance if valid, else ``None``.
+    """
+    details_to_validate = dict(new_data)
+    if "operation" not in details_to_validate:
+      details_to_validate["operation"] = abstract_id
+    if "variants" not in details_to_validate:
+      details_to_validate["variants"] = {}
+    if "description" not in details_to_validate:
+      details_to_validate["description"] = f"Definition for {abstract_id}"
+    if "std_args" not in details_to_validate:
+      details_to_validate["std_args"] = []
+
+    try:
+      return OperationDef.model_validate(details_to_validate)
+    except ValidationError as e:
+      print(f"❌ Cannot update invalid definition for '{abstract_id}': {e}")
+      return None
 
   @staticmethod
   def validate_and_dump(
@@ -22,26 +54,8 @@ class SemanticsValidator:
     Returns:
         Validated and serialized dictionary if valid, else None.
     """
-    from pydantic import ValidationError
-
-    from ml_switcheroo.core.dsl import OperationDef
-
-    details_to_validate = dict(new_data)
-
-    # 1. Inject missing fields required by Schema if not present
-    if "operation" not in details_to_validate:
-      details_to_validate["operation"] = abstract_id
-    if "variants" not in details_to_validate:
-      details_to_validate["variants"] = {}
-    if "description" not in details_to_validate:
-      details_to_validate["description"] = f"Definition for {abstract_id}"
-    if "std_args" not in details_to_validate:
-      details_to_validate["std_args"] = []
-
-    try:
-      validated = OperationDef.model_validate(details_to_validate)
-      res: dict[str, JsonValue] = validated.model_dump(by_alias=True, exclude_unset=True)
-      return res
-    except ValidationError as e:
-      print(f"❌ Cannot update invalid definition for '{abstract_id}': {e}")
+    validated = SemanticsValidator.validate_model(abstract_id, new_data)
+    if validated is None:
       return None
+    res: dict[str, JsonValue] = validated.model_dump(by_alias=True, exclude_unset=True)
+    return res

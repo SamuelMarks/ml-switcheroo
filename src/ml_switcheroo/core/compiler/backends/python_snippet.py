@@ -32,15 +32,18 @@ class PythonSnippetEmitter:
   and functional namespace prefixes).
   """
 
-  def __init__(self, framework: str = "torch") -> None:
+  def __init__(self, framework: str = "") -> None:
     """Initialize the snippet emitter.
 
     Args:
-        framework: The target framework key (e.g., 'torch', 'jax', 'flax_nnx').
+        framework: Target framework key (defaults to primary registered framework).
 
     """
-    self.framework = framework
-    adapter = get_adapter(framework)
+    from ml_switcheroo.config import default_source_framework
+
+    resolved_fw = framework or default_source_framework()
+    self.framework = resolved_fw
+    adapter = get_adapter(resolved_fw)
     self.traits: StructuralTraits = adapter.structural_traits if adapter is not None else StructuralTraits()
 
   def emit_init(self, node: LogicalNode) -> cst.SimpleStatementLine:
@@ -61,10 +64,11 @@ class PythonSnippetEmitter:
 
     args_list = self._build_args_from_metadata(node.attributes)
 
-    if self.traits.requires_rng_in_init:
+    if self.traits.requires_rng_in_init and not any(
+      isinstance(a.keyword, cst.Name) and a.keyword.value == "rngs" for a in args_list
+    ):
       # Needs rngs=rngs, inject it directly if it doesn't already exist.
-      if not any(isinstance(a.keyword, cst.Name) and a.keyword.value == "rngs" for a in args_list):
-        args_list.append(cst.Arg(keyword=cst.Name("rngs"), equal=cst.AssignEqual(), value=cst.Name("rngs")))
+      args_list.append(cst.Arg(keyword=cst.Name("rngs"), equal=cst.AssignEqual(), value=cst.Name("rngs")))
 
     call_node = cst.Call(func=func_node, args=args_list)
     assign_target = cst.AssignTarget(target=cst.Attribute(value=cst.Name("self"), attr=cst.Name(node.id)))
@@ -121,9 +125,7 @@ class PythonSnippetEmitter:
         func_name = self._resolve_api_name(node.op_type)
         func_node = cst.parse_expression(func_name)
 
-      args_list = []
-      for v in input_vars:
-        args_list.append(cst.Arg(value=cst.parse_expression(v)))
+      args_list = [cst.Arg(value=cst.parse_expression(v)) for v in input_vars]
 
       attrs = node.attributes
       if not self._is_stateful_layer(node) and attrs:
@@ -149,9 +151,7 @@ class PythonSnippetEmitter:
     if op_type.startswith("func_") or "functional" in op_type or "ops" in op_type:
       return False
     leaf = op_type.split(".")[-1]
-    if leaf and leaf[0].isupper():
-      return True
-    return False
+    return bool(leaf and leaf[0].isupper())
 
   def _resolve_api_name(self, kind: str) -> str:
     """Resolve the API name based on the framework.

@@ -26,7 +26,12 @@ except ImportError:
 
 @typing.runtime_checkable
 class DiffResultProtocol(typing.Protocol):
-  """Protocol for snapshot diff results."""
+  """Protocol for snapshot diff results.
+
+  Attributes:
+      removed: The removed (`typing.Sequence[str]`).
+      breaking_signature_changed: The breaking signature changed (`typing.Sequence[str]`).
+  """
 
   removed: typing.Sequence[str]
   breaking_signature_changed: typing.Sequence[str]
@@ -140,14 +145,14 @@ def run_regression_check(
 
   try:
     snap_old = load_snapshot_file(older)
-  except Exception as e:
+  except (OSError, json.JSONDecodeError, ValueError, TypeError, KeyError, RuntimeError) as e:
     print(f"Error loading older snapshot: {e}", file=sys.stderr)
     return 1
 
   if newer:
     try:
       snap_new = load_snapshot_file(newer)
-    except Exception as e:
+    except (OSError, json.JSONDecodeError, ValueError, TypeError, KeyError, RuntimeError) as e:
       print(f"Error loading newer snapshot: {e}", file=sys.stderr)
       return 1
   elif framework:

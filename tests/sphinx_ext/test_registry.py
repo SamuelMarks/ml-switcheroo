@@ -1,8 +1,7 @@
 """Test suite for the Registry module."""
 
-import typing
-
 import json
+import typing
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.sphinx_ext.registry import scan_registry
@@ -41,7 +40,7 @@ def test_scan_registry_else_fallback(
     return adapter
 
   mock_get_adapter.side_effect = get_adapter_side_effect
-  hierarchy, examples_json, tier_metadata_json = scan_registry()
+  _hierarchy, examples_json, _tier_metadata_json = scan_registry()
   examples = json.loads(examples_json)
   # torch will fall back to custom1 (first candidate)
   assert examples["torch_example1"]["tgtFw"] == "custom1"
@@ -77,7 +76,7 @@ def test_scan_registry(mock_get_adapter: MagicMock, mock_priority: MagicMock, mo
       adapter.supported_tiers = None
       adapter.get_tiered_examples.return_value = {"tier1_math": "torch_math"}
       return adapter
-    elif name == "jax":
+    if name == "jax":
       adapter = MagicMock()
       adapter.inherits_from = None
       adapter.display_name = "JAX"
@@ -86,7 +85,7 @@ def test_scan_registry(mock_get_adapter: MagicMock, mock_priority: MagicMock, mo
       adapter.supported_tiers = [tier]
       adapter.get_tiered_examples.return_value = {"tier2_neural": "jax_nn"}
       return adapter
-    elif name == "flax_nnx":
+    if name == "flax_nnx":
       adapter = MagicMock()
       adapter.inherits_from = "jax"
       adapter.display_name = "Flax"
@@ -144,7 +143,7 @@ def test_scan_registry_extra(mock_get_adapter: MagicMock, mock_priority: MagicMo
     return None
 
   mock_get_adapter.side_effect = get_adapter_side_effect
-  hierarchy, examples_json, tier_metadata_json = scan_registry()
+  _hierarchy, examples_json, _tier_metadata_json = scan_registry()
   examples = json.loads(examples_json)
   assert examples["unknown_tier1_math"]["tgtFw"] == "jax"
 
@@ -184,7 +183,7 @@ def test_scan_registry_no_candidates(
     return None
 
   mock_get_adapter.side_effect = get_adapter_side_effect
-  hierarchy, examples_json, tier_metadata_json = scan_registry()
+  _hierarchy, examples_json, _tier_metadata_json = scan_registry()
   examples = json.loads(examples_json)
   assert "torch_tier3_extras" in examples
   assert examples["torch_tier3_extras"]["requiredTier"] == "extras"
@@ -297,6 +296,6 @@ def test_scan_registry_rotated_exhaust(
   adapter.get_tiered_examples.return_value = {"tier1_math": "torch_math"}
   mock_get_adapter.return_value = adapter
 
-  hierarchy, examples_json, tier_metadata_json = scan_registry()
+  _hierarchy, examples_json, _tier_metadata_json = scan_registry()
   examples = json.loads(examples_json)
   assert examples["torch_tier1_math"]["tgtFw"] == "target_placeholder"

@@ -5,10 +5,10 @@ from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
 
 
 def gen_code_from_block(ops: list[OperationNode]) -> str:
-  """Helper to generation code from block.
+  """Execute `ModuleNode` to support gen code from block in MLIR generator reroll tests.
 
   Args:
-      ops: The ops (list[OperationNode]) for gen code from block.
+      ops: Input `ops` parameter value (`list[OperationNode]`).
 
   Returns:
       Resulting `str` from gen code from block.
@@ -19,7 +19,7 @@ def gen_code_from_block(ops: list[OperationNode]) -> str:
 
 
 def test_default_rerolling_structure() -> None:
-  """Verifies the behavior of default rerolling structure."""
+  """Verify `OperationNode` emits `_0 = _foo()` for default rerolling structure."""
   op1 = OperationNode(name="sw.call", results=[ValueNode(name="%0")], operands=[ValueNode(name="%foo")])
   op2 = OperationNode(
     name="sw.call", results=[ValueNode(name="%1")], operands=[ValueNode(name="%bar"), ValueNode(name="%0")]
@@ -30,7 +30,7 @@ def test_default_rerolling_structure() -> None:
 
 
 def test_reroll_nested_chain() -> None:
-  """Verifies the behavior of reroll nested chain."""
+  """Verify `OperationNode` emits `_a = _funcA()` for reroll nested chain."""
   op1 = OperationNode(name="sw.call", results=[ValueNode(name="%a")], operands=[ValueNode(name="%funcA")])
   op2 = OperationNode(
     name="sw.call", results=[ValueNode(name="%b")], operands=[ValueNode(name="%funcB"), ValueNode(name="%a")]

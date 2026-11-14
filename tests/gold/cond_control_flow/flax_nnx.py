@@ -5,10 +5,10 @@ import jax.numpy as jnp
 
 
 def conditional_op(pred: jnp.ndarray, x: jnp.ndarray) -> jnp.ndarray:
-  """Helper to conditional op.
+  """Execute `cond` to support conditional operation in flax NNX tests.
 
   Args:
-      pred: The pred (jnp.ndarray) for conditional op.
+      pred: Input `pred` parameter value (`jnp.ndarray`).
       x: Primary input tensor or array operand.
 
   Returns:

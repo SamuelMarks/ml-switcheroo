@@ -60,6 +60,18 @@ class ConsensusEngine:
     # Map of normalized token to original qualified paths
     self.vocabulary: dict[str, list[str]] = {}
 
+  def _ingest_framework(self, fw: str) -> None:
+    """Import a single framework module and scan its public API surface.
+
+    Args:
+        fw: Framework module path to import and scan.
+    """
+    try:
+      mod = importlib.import_module(fw)
+      self._scan_module(mod, fw)
+    except ImportError:
+      logger.warning(f"Could not import framework '{fw}' for ingestion.")
+
   def ingest(self) -> None:
     """Step 1: Scans the API surface of all installed frameworks (Spokes).
 
@@ -70,11 +82,7 @@ class ConsensusEngine:
         None.
     """
     for fw in self.frameworks:
-      try:
-        mod = importlib.import_module(fw)
-        self._scan_module(mod, fw)
-      except ImportError:
-        logger.warning(f"Could not import framework '{fw}' for ingestion.")
+      self._ingest_framework(fw)
 
   def _scan_module(self, mod: InspectionObject, prefix: str, depth: int = 0) -> None:
     """Recursively scans a module's members to populate the vocabulary.

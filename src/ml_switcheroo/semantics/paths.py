@@ -107,8 +107,7 @@ def resolve_snapshots_dir() -> Path:
     return cache_dir
 
   # 6. Return canonical sibling ml-ecosystem-snapshots path
-  candidate = repos_root / "ml-ecosystem-snapshots"
-  return candidate
+  return repos_root / "ml-ecosystem-snapshots"
 
 
 __all__ = ["files", "get_custom_snapshots_paths", "resolve_semantics_dir", "resolve_snapshots_dir"]

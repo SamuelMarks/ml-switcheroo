@@ -1,7 +1,5 @@
 """Test suite for the Device Checks module."""
 
-from tests.conftest import _test_getattr, _test_setattr
-
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -28,13 +26,13 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Execute rewriter helper logic.
+  """Create a configured `PivotRewriter` fixture for device checks tests.
 
   Returns:
       Configured `rewriter` fixture value (PivotRewriter).
   """
-  _test_getattr(hooks._HOOKS, "__setitem__")("cuda_is_available", dc.transform_cuda_check)
-  hooks._PLUGINS_LOADED = True
+  hooks.register_hook("cuda_is_available")(dc.transform_cuda_check)
+  hooks.set_plugins_loaded(True)
   mgr = MagicMock()
   op_def = {"variants": {"jax": {"api": "jax.devices", "requires_plugin": "cuda_is_available"}}}
   mgr.get_definition.return_value = ("cuda_is", op_def)
@@ -55,7 +53,7 @@ def test_is_available_transform(rewriter: PivotRewriter) -> None:
 
 
 def test_assignment_transform(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of assignment transform.
+  """Verify `rewrite_code` emits `len(jax.devices('gpu')) > 0` for assignment transform.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -65,18 +63,17 @@ def test_assignment_transform(rewriter: PivotRewriter) -> None:
   assert "len(jax.devices('gpu')) > 0" in res
 
 
-def test_ignore_wrong_fw(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of ignore wrong framework.
+def test_ignore_wrong_fw(rewriter: PivotRewriter, monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `rewrite_code` emits `torch.cuda` for ignore wrong fw.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
   rewriter.context.config.target_framework = "numpy"
   rewriter.context.hook_context.target_framework = "numpy"
-  _test_setattr(
-    rewriter.semantics.resolve_variant,
-    "side_effect",
-    lambda a, f: None if f == "numpy" else {},
+  monkeypatch.setattr(
+    rewriter.semantics.resolve_variant, "side_effect", lambda a, f: None if f == "numpy" else {}, raising=False
   )
   code: str = "x = torch.cuda.is_available()"
   assert "torch.cuda" in rewrite_code(rewriter, code)
@@ -92,15 +89,12 @@ def test_device_checks_adapter_error(mock_get_adapter: MagicMock, rewriter: Pivo
   """
 
   def raiser(fw: str) -> None:
-    """Execute raiser helper logic.
+    """Execute `RuntimeError` to support raiser in device checks tests.
 
     Args:
         fw: Framework identifier string (e.g., torch, jax, mlx).
-
-    Returns:
-        Resulting `None` from raiser.
     """
-    raise Exception("Adapter crashed")
+    raise RuntimeError("Adapter crashed")
 
   mock_get_adapter.side_effect = raiser
   code: str = "torch.cuda.is_available()"
@@ -179,7 +173,7 @@ def test_device_checks_adapter_exception(mock_get_adapter: MagicMock, rewriter: 
       rewriter: Configured CST rewriter test helper instance.
   """
   mock_adapter = MagicMock()
-  mock_adapter.get_device_check_syntax.side_effect = Exception()
+  mock_adapter.get_device_check_syntax.side_effect = RuntimeError()
   mock_get_adapter.return_value = mock_adapter
   code: str = "torch.cuda.is_available()"
   res: str = rewrite_code(rewriter, code)
@@ -194,5 +188,5 @@ def test_device_checks_get_adapter_raises() -> None:
   ctx = MagicMock(spec=HookContext)
   ctx.target_framework = "jax"
   node = cst.ensure_type(cst.parse_expression("torch.cuda.is_available()"), cst.Call)
-  with patch("ml_switcheroo.plugins.device_checks.get_adapter", side_effect=Exception("mock")):
+  with patch("ml_switcheroo.plugins.device_checks.get_adapter", side_effect=RuntimeError("mock")):
     assert transform_cuda_check(node, ctx) == node

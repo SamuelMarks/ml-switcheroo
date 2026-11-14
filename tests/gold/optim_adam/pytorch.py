@@ -6,11 +6,11 @@ import torch.optim as optim
 
 
 def setup_adam(model: nn.Module, lr: float = 0.001) -> torch.Tensor:
-  """Helper to setup adam.
+  """Execute `optim.Adam` to support setup adam in pytorch tests.
 
   Args:
       model: Neural network model instance under test.
-      lr: The lr (float) for setup adam.
+      lr: Input `lr` parameter value (`float`).
 
   Returns:
       Resulting `torch.Tensor` from setup adam.

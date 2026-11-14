@@ -1,121 +1,105 @@
-"""Plugin for converting Flax NNX Variable definitions to PyTorch-style Parameters.
+"""Plugin for Converting Explicit State Variable Wrappers to Parameter Constructors.
 
-This module provides AST transformations to handle the impedance mismatch between
-Flax NNX's explicit variable declarations (`nnx.Param`, `nnx.BatchStat`) and
-PyTorch's `nn.Parameter` pattern.
-
-It handles:
-
-1.  **Trainable Parameters**: `nnx.Param(val)` -> `TargetParam(val)`.
-2.  **Non-Trainable State**: `nnx.BatchStat(val)` -> `TargetParam(val, requires_grad=False)`.
-
-Decoupling:
-    Logic is triggered solely by the `requires_plugin="nnx_param_to_torch"` wiring.
-    The target class name is resolved via `ctx.lookup_api` based on the abstract Operation ID.
-    If no mapping is found in the Knowledge Base, the transformation aborts (returns original node),
-    preventing hardcoded fallbacks to `torch.nn.Parameter`.
+Handles impedance mismatches between explicit state container declarations
+(``Param``, ``BatchStat``, ``Variable``) and parameter wrappers using
+``HookContext.current_variant`` without hardcoded target framework paths.
 """
+
+import typing
 
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
-from ml_switcheroo.plugins.utils import create_dotted_name
+from ml_switcheroo.plugins.utils import (
+  create_dotted_name,
+  resolve_variant_api,
+  resolve_variant_arg_name,
+)
+
+_NON_TRAINABLE_KINDS = frozenset({"BatchStat", "Variable", "Cache", "Intermediate"})
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
   """Create a CST attribute chain from a dot-separated string name.
 
   Args:
-      name_str: A dot-separated string representation of the attribute chain
-          (e.g., "torch.nn.Parameter").
+      name_str: Dot-separated API path string.
 
   Returns:
-      cst.BaseExpression: The constructed CST BaseExpression, which will be a
-          nested cst.Attribute structure (or cst.Name if there are no dots).
+      Constructed CST ``Name`` or nested ``Attribute`` expression.
   """
   return create_dotted_name(name_str)
 
 
 def _extract_leaf_name(node: cst.BaseExpression) -> str | None:
-  """Support to extract the right-most name from a call signature.
+  """Extract the right-most identifier name from a call target expression.
 
   Args:
-      node: The CST BaseExpression to extract the leaf name from.
+      node: Call ``func`` expression node.
 
   Returns:
-      Optional[str]: The name string of the right-most attribute/name,
-          or None if the node is of an unsupported type.
+      Right-most identifier string, or ``None`` if unsupported.
   """
   if isinstance(node, cst.Name):
     return node.value
-  elif isinstance(node, cst.Attribute):
+  if isinstance(node, cst.Attribute):
     return node.attr.value
-  else:
-    return None
+  return None
+
+
+def _normalize_param_args(args: typing.Sequence[cst.Arg]) -> list[cst.Arg]:
+  """Normalize ``value=`` keyword wrappers into positional initializers where needed.
+
+  Args:
+      args: Original call arguments.
+
+  Returns:
+      Normalized list of ``cst.Arg`` nodes.
+  """
+  normalized: list[cst.Arg] = []
+  for idx, arg in enumerate(args):
+    if idx == 0 and arg.keyword is not None and arg.keyword.value == "value":
+      normalized.append(arg.with_changes(keyword=None, equal=cst.MaybeSentinel.DEFAULT))
+    else:
+      normalized.append(arg)
+  return normalized
 
 
 @register_hook("nnx_param_to_torch")
 def transform_nnx_param(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """Plugin Transform Transforms valid NNX Variable declarations into PyTorch-style Parameters.
-
-  Triggers:
-      Operations marked with `requires_plugin: "nnx_param_to_torch"`.
-      Targeting: `flax.nnx.Param`, `flax.nnx.Variable`, `flax.nnx.BatchStat`.
-
-  Logic:
-      1. Determines if the source variable was trainable (`Param`) or not (`BatchStat`, `Variable`).
-      2. Looks up the target API for the current operation.
-      3. Injects `requires_grad=False` if not trainable.
+  """Transform explicit Variable/Param declarations via ``HookContext.current_variant``.
 
   Args:
-      node: The original CST Call node (e.g., `nnx.Param(zeros(1))`).
-      ctx: The HookContext containing configuration.
+      node: Original CST Call node (e.g., ``nnx.Param(zeros(1))``).
+      ctx: HookContext containing active operation ID and variant configuration.
 
   Returns:
-      cst.Call: The transformed CST Call node or original if mapping missing.
-
+      Transformed ``cst.Call`` node, or ``node`` unchanged if target API is unmapped.
   """
-  # 1. Determine Source Type (Trainable vs Non-Trainable)
-  # We infer this from the function name being replaced.
-  original_func_name = _extract_leaf_name(node.func)
-  is_trainable = True
+  leaf_name = _extract_leaf_name(node.func)
+  op_kind = ctx.current_op_id if isinstance(ctx.current_op_id, str) and ctx.current_op_id else leaf_name
+  is_trainable = op_kind not in _NON_TRAINABLE_KINDS and leaf_name not in _NON_TRAINABLE_KINDS
 
-  if original_func_name in ["BatchStat", "Variable", "Cache", "Intermediate"]:
-    is_trainable = False
-
-  # 2. Resolve Target API
-  # Use context to look up what "Param" or the specific Op maps to in the target framework.
-  # If lookup fails, we return the original node to avoid hallucinating APIs.
-  target_api = ctx.lookup_api(ctx.current_op_id or "Param")
+  target_api = resolve_variant_api(ctx, "Param")
   if not target_api:
     return node
 
   new_func = _create_dotted_name(target_api)
+  new_args = _normalize_param_args(node.args)
+  grad_kw = resolve_variant_arg_name(ctx, "requires_grad", "requires_grad")
 
-  # 3. Construct Arguments
-  new_args: list[cst.Arg] = list(node.args)
-
-  # Only inject requires_grad if it's non-trainable
-  if not is_trainable:
-    # Check if 'requires_grad' is already present to avoid duplication
-    if not any(a.keyword and a.keyword.value == "requires_grad" for a in new_args):
-      # Inject requires_grad=False
-      req_grad_arg = cst.Arg(
-        keyword=cst.Name("requires_grad"),
+  if not is_trainable and not any(a.keyword and a.keyword.value == grad_kw for a in new_args):
+    if new_args and new_args[-1].comma == cst.MaybeSentinel.DEFAULT:
+      new_args[-1] = new_args[-1].with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
+    new_args.append(
+      cst.Arg(
+        keyword=cst.Name(grad_kw),
         value=cst.Name("False"),
         equal=cst.AssignEqual(
           whitespace_before=cst.SimpleWhitespace(""),
           whitespace_after=cst.SimpleWhitespace(""),
         ),
       )
+    )
 
-      # Ensure comma on previous arg
-      if new_args:
-        last = new_args[-1]
-        if last.comma == cst.MaybeSentinel.DEFAULT:
-          new_args[-1] = last.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
-
-      new_args.append(req_grad_arg)
-
-  # 4. Return Transformed Node
   return node.with_changes(func=new_func, args=new_args)

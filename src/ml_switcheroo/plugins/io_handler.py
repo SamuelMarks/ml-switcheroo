@@ -124,5 +124,5 @@ def transform_io_calls(node: cst.Call, ctx: HookContext) -> cst.BaseExpression:
 
     # 3. Parse back to CST
     return cst.parse_expression(new_code)
-  except Exception:
+  except (cst.ParserSyntaxError, AttributeError, ValueError, TypeError, KeyError, NotImplementedError, RuntimeError):
     return node

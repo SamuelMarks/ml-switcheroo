@@ -8,15 +8,15 @@ AST transpilation.
 
 from __future__ import annotations
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
 import ast
 import json
 import re
-from pathlib import Path
 import typing
+from pathlib import Path
 
 from pydantic import JsonValue
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.semantics.paths import resolve_snapshots_dir
 
 
@@ -94,7 +94,7 @@ def extract_scipy_endpoints_from_macro(macro: str) -> set[str]:
       if isinstance(curr, ast.Name):
         chain.append(curr.id)
         full_path = ".".join(reversed(chain))
-        if full_path.startswith("scipy.") or full_path.startswith("jax.scipy."):
+        if full_path.startswith(("scipy.", "jax.scipy.")):
           endpoints.add(full_path)
   return endpoints
 
@@ -173,7 +173,7 @@ def audit_injected_scipy_fallbacks(
   if snapshot is None:
     try:
       snapshot = load_scipy_snapshot()
-    except Exception as e:
+    except (OSError, ValueError, TypeError, KeyError, ImportError, RuntimeError) as e:
       return [f"Failed to load SciPy snapshot for audit: {e}"]
 
   errors: list[str] = []

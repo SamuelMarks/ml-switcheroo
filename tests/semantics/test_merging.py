@@ -73,7 +73,7 @@ def test_merge_patterns(caplog: pytest.LogCaptureFixture) -> None:
 
 
 def test_normalize_args() -> None:
-  """Verifies the behavior of normalize arguments."""
+  """Verify `_normalize_args` produces expected results across merging inputs."""
   res = _normalize_args(
     ["simple_str", {"name": "dict_str", "type": "int"}, {"no_name": "here"}, ["list_str", "int"], [], 123]
   )
@@ -223,9 +223,13 @@ def test_merge_overlay_data_fallback_filename() -> None:
   tmps: dict[str, dict[str, str]] = {}
   content: dict[str, JsonValue] = {"mappings": {}}
   merge_overlay_data(data, origins, fws, tmps, content, "bad_name.json")
-  assert not fws
+  assert fws == {}
+  assert data == {}
   merge_overlay_data(data, origins, fws, tmps, content, "torch_v1.0.json")
-  assert not fws
+  assert fws == {}
+  assert data == {}
+  assert origins == {}
+  assert tmps == {}
 
 
 def test_merge_overlay_data_full() -> None:

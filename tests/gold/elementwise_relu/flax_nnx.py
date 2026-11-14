@@ -5,7 +5,7 @@ import jax.numpy as jnp
 
 
 def relu_activation(x: jnp.ndarray) -> jnp.ndarray:
-  """Helper to relu activation.
+  """Execute `relu` to support relu activation in flax NNX tests.
 
   Args:
       x: Primary input tensor or array operand.

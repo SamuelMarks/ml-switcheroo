@@ -13,7 +13,7 @@ def create_sequential(
 
   Args:
       in_features: Number of input linear features.
-      hidden: The hidden (int) for create sequential.
+      hidden: Input `hidden` parameter value (`int`).
       out_features: Number of output linear features.
 
   Returns:
@@ -21,15 +21,15 @@ def create_sequential(
   """
 
   class SequentialImpl:
-    """Test helper class SequentialImpl."""
+    """Sentinel `SequentialImpl` fixture class used in numpy tests."""
 
     def __init__(self, in_feat: int, hid: int, out_feat: int) -> None:
       """Initializes the SequentialImpl instance.
 
       Args:
-          in_feat: The in feat (int) for   init  .
-          hid: The hid (int) for   init  .
-          out_feat: The out feat (int) for   init  .
+          in_feat: Input `in_feat` parameter value (`int`).
+          hid: Input `hid` parameter value (`int`).
+          out_feat: Input `out_feat` parameter value (`int`).
       """
       self.w1 = np.random.randn(in_feat, hid)
       self.b1 = np.zeros(hid)

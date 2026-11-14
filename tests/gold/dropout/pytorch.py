@@ -5,19 +5,19 @@ import torch.nn as nn
 
 
 class DropoutModel(nn.Module):
-  """Test helper class DropoutModel."""
+  """Stub `nn.Module` subclass implementing `forward` for pytorch tests."""
 
   def __init__(self, p: float = 0.5):
     """Initializes the DropoutModel instance.
 
     Args:
-        p: The p (float) for   init  .
+        p: Input `p` parameter value (`float`).
     """
     super().__init__()
     self.dropout = nn.Dropout(p)
 
   def forward(self, x: torch.Tensor) -> torch.Tensor:
-    """Helper to forward.
+    """Compute the forward pass of `DropoutModel` on input tensors.
 
     Args:
         x: Primary input tensor or array operand.

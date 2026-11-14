@@ -1,0 +1,63 @@
+--- Forward ---
+import tensorflow as tf
+import keras
+
+class Qwen3VLVisionConfig:
+    in_channels: int = 3
+    hidden_size: int = 1280
+    temporal_patch_size: int = 2
+    patch_size: int = 14
+
+class Qwen3VLPatchEmbed(keras.Layer):
+    '''3D Convolutional patch embedding for vision input.'''
+    def __init__(self, config: Qwen3VLVisionConfig):
+        super().__init__()
+        self.config = config
+        kernel = (config.temporal_patch_size, config.patch_size, config.patch_size)
+        self.proj = tf.keras.layers.Conv3D(
+            filters=config.hidden_size, kernel_size=kernel, strides=kernel, padding="valid", use_bias=True)
+
+    def call(self, hidden_states):
+        cfg = self.config
+        seq_len = keras.ops.shape(hidden_states)[0]
+
+        hidden_states = keras.ops.reshape(
+            hidden_states,
+            [seq_len, cfg.in_channels, cfg.temporal_patch_size, cfg.patch_size, cfg.patch_size]
+        )
+        hidden_states = keras.ops.transpose(hidden_states, axes=[0, 2, 3, 4, 1])
+
+        out = self.proj(hidden_states)
+        return keras.ops.reshape(out, [seq_len, cfg.hidden_size])
+
+--- Backward ---
+import keras.layers as layers
+import numpy as np
+import keras
+
+class Qwen3VLVisionConfig:
+    in_channels: int = 3
+    hidden_size: int = 1280
+    temporal_patch_size: int = 2
+    patch_size: int = 14
+
+class Qwen3VLPatchEmbed(keras.Layer):
+    '''3D Convolutional patch embedding for vision input.'''
+    def __init__(self, config: Qwen3VLVisionConfig):
+        super().__init__()
+        self.config = config
+        kernel = (config.temporal_patch_size, config.patch_size, config.patch_size)
+        self.proj = layers.Conv3D(
+            filters=config.hidden_size, kernel_size=kernel, strides=kernel, padding="valid", use_bias=True)
+
+    def call(self, hidden_states):
+        cfg = self.config
+        seq_len = keras.ops.shape(hidden_states)[0]
+
+        hidden_states = keras.ops.reshape(
+            hidden_states, [seq_len, cfg.in_channels, cfg.temporal_patch_size, cfg.patch_size, cfg.patch_size]
+        )
+        hidden_states = keras.ops.transpose(hidden_states, axes=[0, 2, 3, 4, 1])
+
+        out = self.proj(hidden_states)
+        return keras.ops.reshape(out, [seq_len, cfg.hidden_size])

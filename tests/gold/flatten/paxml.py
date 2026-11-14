@@ -1,11 +1,11 @@
 """Test suite for the Paxml module."""
 
-from praxis import base_layer
 import jax.numpy as jnp
+from praxis import base_layer
 
 
 class FlattenModel(base_layer.BaseLayer):
-  """Test helper class FlattenModel."""
+  """Minimal `base_layer.BaseLayer` test double used in PaxML tests."""
 
   start_dim = 1
 

@@ -5,13 +5,13 @@ from flax import nnx
 
 
 class LayerNormModel(nnx.Module):
-  """Test helper class LayerNormModel."""
+  """Minimal `nnx.Module` test double used in flax NNX tests."""
 
   def __init__(self, normalized_shape: int, rngs: nnx.Rngs):
     """Initializes the LayerNormModel instance.
 
     Args:
-        normalized_shape: The normalized shape (int) for   init  .
+        normalized_shape: Input `normalized_shape` parameter value (`int`).
         rngs: Flax NNX Rngs container for stochastic parameter initialization.
     """
     self.ln = nnx.LayerNorm(normalized_shape, rngs=rngs)

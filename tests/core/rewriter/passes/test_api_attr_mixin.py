@@ -1,29 +1,30 @@
 """Test suite for the Api Attr Mixin module."""
 
-from tests.conftest import _test_getattr, _test_setattr
-
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
 import typing
-from ml_switcheroo.semantics.schema import StructuralTraits
-from pydantic import JsonValue
 
 import libcst as cst
 import pytest
+from pydantic import JsonValue
 
-from ml_switcheroo.core.rewriter.passes.api_attr_mixin import ApiTransformerAttrMixin
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.rewriter.context import RewriterContext
+from ml_switcheroo.core.rewriter.passes.api_attr_mixin import AttributeRewriteHandler
+from ml_switcheroo.enums import RuntimeTensorOrValue
+from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.semantics.schema import StructuralTraits
 
 
-class MockSemantics:
-  """Test helper class MockSemantics."""
+class MockSemantics(SemanticsManager):
+  """Test double `MockSemantics` implementing `get_definition` for API attr mixin tests."""
 
   def __init__(self, defs: dict[str, tuple[str, dict[str, JsonValue]]], origins: dict[str, str]) -> None:
     """Initializes the MockSemantics instance.
 
     Args:
-        defs: The defs (dict[str, tuple[str, dict[str, JsonValue]]]) for init.
-        origins: The origins (dict[str, str]) for init.
+        defs: Input `defs` parameter value (`dict[str, tuple[str, dict[str, JsonValue]]]`).
+        origins: Input `origins` parameter value (`dict[str, str]`).
     """
+    super().__init__(load_defaults=False)
     self.defs = defs
     self._key_origins = origins
 
@@ -39,16 +40,20 @@ class MockSemantics:
     return self.defs.get(name)
 
 
-class MockContext:
-  """Test helper class MockContext."""
+class MockContext(RewriterContext):
+  """Sentinel `MockContext` fixture class used in API attr mixin tests."""
 
   def __init__(self) -> None:
     """Initializes the MockContext instance."""
-    self.scope_stack: list[set[str]] = [set(), set()]
+    super().__init__(
+      SemanticsManager(load_defaults=False),
+      RuntimeConfig(source_framework="torch", target_framework="jax"),
+    )
+    self.scope_stack = [set(), set()]
 
 
-class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
-  """Test helper class MockTransformer."""
+class MockTransformer(cst.CSTTransformer):
+  """Test helper class MockTransformer composing ``AttributeRewriteHandler``."""
 
   def __init__(
     self,
@@ -60,21 +65,40 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
 
     Args:
         semantics: SemanticsManager instance or mock providing operation mappings.
-        context: The context (MockContext) for init.
-        traits: The traits (StructuralTraits | None) for init.
+        context: Execution context passed to the pass or hook (`MockContext`).
+        traits: Plugin or framework structural trait configuration (`StructuralTraits | None`).
     """
-    _test_setattr(
-      _test_getattr({"v": self}, "__getitem__")("v"), "semantics", _test_getattr({"v": semantics}, "__getitem__")("v")
-    )
-    _test_setattr(
-      _test_getattr({"v": self}, "__getitem__")("v"), "context", _test_getattr({"v": context}, "__getitem__")("v")
-    )
-    _test_setattr(
-      _test_getattr({"v": self}, "__getitem__")("v"), "target_framework", _test_getattr({"v": "jax"}, "__getitem__")("v")
-    )
+    self.semantics: SemanticsManager = semantics
+    self.context: RewriterContext = context
+    self.target_framework: str = "jax"
     if traits:
       self.source_traits = traits
     self.marked: set[str] = set()
+    self._handler = AttributeRewriteHandler(self)
+
+  def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign) -> cst.Assign:
+    """Delegate ``leave_Assign`` to ``AttributeRewriteHandler``.
+
+    Args:
+        original_node: Original ``cst.Assign`` node.
+        updated_node: Updated ``cst.Assign`` node.
+
+    Returns:
+        Rewritten ``cst.Assign`` node.
+    """
+    return self._handler.rewrite_assign(original_node, updated_node)
+
+  def leave_Attribute(self, original_node: cst.Attribute, updated_node: cst.Attribute) -> cst.BaseExpression:
+    """Delegate ``leave_Attribute`` to ``AttributeRewriteHandler``.
+
+    Args:
+        original_node: Original ``cst.Attribute`` node.
+        updated_node: Updated ``cst.Attribute`` node.
+
+    Returns:
+        Rewritten ``cst.BaseExpression``.
+    """
+    return self._handler.rewrite_attribute(original_node, updated_node)
 
   def _get_qualified_name(self, node: cst.CSTNode) -> str | None:
     """Get name.
@@ -104,7 +128,7 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
 
     Args:
         name: Identifier or operation name string.
-        silent: The silent (bool) for get mapping.
+        silent: Input `silent` parameter value (`bool`).
 
     Returns:
         Resulting `dict[str, JsonValue] | None` from get mapping.
@@ -113,33 +137,18 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
     if result is None:
       return None
     _, details = result
-    _ret_v: dict[str, JsonValue] | None = _test_getattr(
-      {
-        "v": _test_getattr(
-          {
-            "v": _test_getattr(
-              {
-                "v": _test_getattr({"v": _test_getattr({"v": details}, "__getitem__")("v").get}, "__getitem__")("v")(
-                  _test_getattr({"v": "variants"}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v")
-                )
-              },
-              "__getitem__",
-            )("v").get
-          },
-          "__getitem__",
-        )("v")(_test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").target_framework}, "__getitem__")("v"))
-      },
-      "__getitem__",
-    )("v")
-    return _ret_v
+    variants = details.get("variants")
+    if not isinstance(variants, dict):
+      return None
+    fw_variant = variants.get(self.target_framework)
+    return fw_variant if isinstance(fw_variant, dict) else None
 
   def _handle_variant_imports(self, impl: typing.Mapping[str, RuntimeTensorOrValue]) -> None:
     """Imp.
 
     Args:
-        impl: The impl (typing.Mapping[str, RuntimeTensorOrValue]) for handle variant imports.
+        impl: Input `impl` parameter value (`typing.Mapping[str, RuntimeTensorOrValue]`).
     """
-    pass
 
   def _create_dotted_name(self, name: str) -> cst.Name | cst.Attribute:
     """Dot.
@@ -157,7 +166,7 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
 
 
 def test_leave_Assign_state_tracking() -> None:
-  """Verifies the behavior of leave Assign state tracking."""
+  """Verify `tree.visit` emits `self.layer` for leave assign state tracking."""
   semantics = MockSemantics({"nn.Linear": ("Linear", {"variants": {}})}, {"Linear": "neural"})
   transformer = MockTransformer(semantics, MockContext())
   tree = cst.parse_module("self.layer = nn.Linear()\nx = nn.Linear()")
@@ -167,68 +176,22 @@ def test_leave_Assign_state_tracking() -> None:
 
 
 def test_leave_Assign_unwrap() -> None:
-  """Verifies the behavior of leave Assign unwrap."""
-
-  class Traits:
-    """Traits."""
-
-    functional_execution_method = "apply"
-
+  """Verify `tree.visit` handles leave assign unwrap as expected."""
   semantics = MockSemantics({}, {})
-  transformer = _test_getattr(
-    {
-      "v": _test_getattr({"v": MockTransformer}, "__getitem__")("v")(
-        _test_getattr({"v": semantics}, "__getitem__")("v"),
-        _test_getattr({"v": _test_getattr({"v": MockContext}, "__getitem__")("v")()}, "__getitem__")("v"),
-        traits=_test_getattr({"v": _test_getattr({"v": Traits}, "__getitem__")("v")()}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
+  transformer = MockTransformer(
+    semantics,
+    MockContext(),
+    traits=StructuralTraits(functional_execution_method="apply"),
+  )
   tree = cst.parse_module("out, state = model.apply(params, x)")
   new_tree = tree.visit(transformer)
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr(
-            {
-              "v": _test_getattr(
-                {
-                  "v": _test_getattr(
-                    {
-                      "v": _test_getattr(
-                        {
-                          "v": _test_getattr(
-                            {
-                              "v": _test_getattr(
-                                {"v": _test_getattr({"v": new_tree}, "__getitem__")("v").body}, "__getitem__"
-                              )("v")[0]
-                            },
-                            "__getitem__",
-                          )("v").body
-                        },
-                        "__getitem__",
-                      )("v")[0]
-                    },
-                    "__getitem__",
-                  )("v").targets
-                },
-                "__getitem__",
-              )("v")[0]
-            },
-            "__getitem__",
-          )("v").target
-        },
-        "__getitem__",
-      )("v").value
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "out"}, "__getitem__")("v")
+  stmt = cst.ensure_type(new_tree.body[0], cst.SimpleStatementLine)
+  assign = cst.ensure_type(stmt.body[0], cst.Assign)
+  assert cst.ensure_type(assign.targets[0].target, cst.Name).value == "out"
 
 
 def test_leave_Attribute() -> None:
-  """Verifies the behavior of leave Attribute."""
+  """Verify `tree.visit` emits `float32` for leave attribute."""
   semantics = MockSemantics(
     {
       "torch.float32": ("dtype", {"variants": {"jax": {"api": "jnp.float32"}}, "op_type": "attribute"}),
@@ -263,7 +226,7 @@ def test_leave_Attribute_no_name() -> None:
 
 
 def test_leave_Attribute_macro_exception() -> None:
-  """Verifies the behavior of leave Attribute macro correctly handling an exception."""
+  """Verify `context` emits `inf` for leave attribute macro exception."""
   semantics = MockSemantics(
     {"torch.inf": ("inf", {"variants": {"jax": {"macro_template": "INVALID"}}, "op_type": "attribute"})}, {}
   )
@@ -272,6 +235,22 @@ def test_leave_Attribute_macro_exception() -> None:
   with pytest.MonkeyPatch().context() as m:
     import ml_switcheroo.core.rewriter.calls.transformers as trans
 
-    m.setattr(trans, "rewrite_as_macro", lambda t, a, k: 1 / 0)
+    def _bad_macro(t: str, a: list[str], k: list[str]) -> cst.BaseExpression:
+      """Raise ``ValueError`` to simulate malformed macro template.
+
+      Args:
+          t: Macro template string.
+          a: Positional args.
+          k: Keyword args.
+
+      Returns:
+          Never returns normally.
+
+      Raises:
+          ValueError: Always raised.
+      """
+      raise ValueError("bad macro")
+
+    m.setattr(trans, "rewrite_as_macro", _bad_macro)
     new_tree = tree.visit(transformer)
     assert "inf" in new_tree.code

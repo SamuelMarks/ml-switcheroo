@@ -1,12 +1,11 @@
 """Test suite for the Mlx module."""
 
 import mlx.core as mx
-
 import mlx.nn as nn
 
 
 class Model:
-  """Test helper class Model."""
+  """Sentinel `Model` fixture class used in MLX tests."""
 
   def __init__(self, in_features: int, out_features: int):
     """Initializes the Model instance.

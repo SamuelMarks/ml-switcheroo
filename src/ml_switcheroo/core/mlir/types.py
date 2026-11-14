@@ -4,13 +4,13 @@ This module defines strong typing structures for MLIR types, specifically focusi
 on the types required for StableHLO operations (Tensors, Elements, etc.).
 """
 
-from abc import ABC, abstractmethod
 import typing
+from abc import ABC, abstractmethod
 
 import pydantic
+from ml_switcheroo_ir import SymInt, SymNode
 
 from ml_switcheroo.core.cst.base import CstFieldValue
-
 
 _DTYPE_TO_MLIR_ELEMENT: dict[str, str] = {
   "float16": "f16",
@@ -35,7 +35,7 @@ _DTYPE_TO_MLIR_ELEMENT: dict[str, str] = {
 
 
 def format_mlir_tensor_type(
-  shape: typing.Sequence[int | str | typing.Hashable | None] | None,
+  shape: typing.Sequence[int | float | str | SymNode | SymInt | None] | None,
   dtype: str = "float32",
 ) -> str:
   """Format a shape tuple and dtype string into an MLIR/StableHLO ``tensor<...>`` type string.
@@ -79,7 +79,11 @@ class MLIRType(pydantic.BaseModel, ABC):
 
 
 class IntegerType(MLIRType):
-  """Represent an MLIR Integer Type (e.g., i1, i32, i64)."""
+  """Represent an MLIR Integer Type (e.g., i1, i32, i64).
+
+  Attributes:
+      width: The width (`int`).
+  """
 
   width: int
 
@@ -101,7 +105,11 @@ class IntegerType(MLIRType):
 
 
 class FloatType(MLIRType):
-  """Represent an MLIR Float Type (e.g., f32, f64, bf16)."""
+  """Represent an MLIR Float Type (e.g., f32, f64, bf16).
+
+  Attributes:
+      name: The name (`str`).
+  """
 
   name: str
 
@@ -123,7 +131,11 @@ class FloatType(MLIRType):
 
 
 class ComplexType(MLIRType):
-  """Represent an MLIR Complex Type (e.g., complex<f32>)."""
+  """Represent an MLIR Complex Type (e.g., complex<f32>).
+
+  Attributes:
+      element_type: The element type (`FloatType`).
+  """
 
   element_type: FloatType
 
@@ -145,7 +157,12 @@ class ComplexType(MLIRType):
 
 
 class TensorType(MLIRType):
-  """Represent an MLIR Tensor Type (e.g., tensor<2x?xi32>)."""
+  """Represent an MLIR Tensor Type (e.g., tensor<2x?xi32>).
+
+  Attributes:
+      element_type: The element type (`MLIRType`).
+      shape: The shape (`list[int | str] | None`).
+  """
 
   element_type: MLIRType
   shape: list[int | str] | None = None  # None means unranked (*), '?' means dynamic dimension
@@ -181,7 +198,12 @@ class TensorType(MLIRType):
 
 
 class FunctionType(MLIRType):
-  """Represent an MLIR Function Type (e.g., (tensor<f32>) -> tensor<f32>)."""
+  """Represent an MLIR Function Type (e.g., (tensor<f32>) -> tensor<f32>).
+
+  Attributes:
+      inputs: The inputs (`list[MLIRType]`).
+      results: The results (`list[MLIRType]`).
+  """
 
   inputs: list[MLIRType]
   results: list[MLIRType]

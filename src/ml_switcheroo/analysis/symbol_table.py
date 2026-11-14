@@ -12,12 +12,17 @@ The `SymbolTableAnalyzer` visitor populates a `SymbolTable` by tracking:
 4.  **Control Flow**: Handling type ambiguity in branches (Phi nodes) via Union types.
 """
 
+import typing
+
 import libcst as cst
 
 from ml_switcheroo.analysis.symbol_types import ModuleType, Scope, SymbolType, TensorType, UnionType
 from ml_switcheroo.core.scanners import get_full_name
 from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.exceptions import CSTValidationError
+
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class SymbolTable:
@@ -56,7 +61,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
   track module imports, variable assignments, scoped entities, and control flow branching.
   """
 
-  def __init__(self, semantics: SemanticsManager):
+  def __init__(self, semantics: "SemanticsManager"):
     """Initialize the symbol table analyzer with a semantics manager and root scope.
 
     Args:
@@ -85,8 +90,11 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     Args:
         node: The ClassDef CST node representing the class definition.
 
+    Raises:
+        CSTValidationError: If the active class scope has no parent scope.
     """
-    assert self.current_scope.parent is not None
+    if self.current_scope.parent is None:
+      raise CSTValidationError("Cannot exit ClassDef scope: already at root scope.")
     self.current_scope = self.current_scope.parent
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> None:
@@ -104,8 +112,11 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     Args:
         node: The FunctionDef CST node representing the function definition.
 
+    Raises:
+        CSTValidationError: If the active function scope has no parent scope.
     """
-    assert self.current_scope.parent is not None
+    if self.current_scope.parent is None:
+      raise CSTValidationError("Cannot exit FunctionDef scope: already at root scope.")
     self.current_scope = self.current_scope.parent
 
   # --- Control Flow Support ---

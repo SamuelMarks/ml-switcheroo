@@ -5,16 +5,15 @@ import numpy.typing
 
 
 class LSTMModel:
-  """Test helper class LSTMModel."""
+  """Sentinel `LSTMModel` fixture class used in numpy tests."""
 
   def __init__(self, input_size: int, hidden_size: int):
     """Initializes the LSTMModel instance.
 
     Args:
-        input_size: The input size (int) for   init  .
-        hidden_size: The hidden size (int) for   init  .
+        input_size: Input `input_size` parameter value (`int`).
+        hidden_size: Input `hidden_size` parameter value (`int`).
     """
-    pass
 
   def __call__(self, x: np.typing.NDArray[np.float64]) -> np.typing.NDArray[np.float64]:
     """Executes the callable instance.

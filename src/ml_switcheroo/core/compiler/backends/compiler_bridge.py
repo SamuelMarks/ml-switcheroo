@@ -19,6 +19,45 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph
 if typing.TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
 
+
+@typing.runtime_checkable
+class _BackendCodeGeneratorProtocol(typing.Protocol):
+  """Protocol for instantiated `ml-switcheroo-compiler` backend code generators."""
+
+  def generate(self) -> str:
+    """Emit compiled target kernel or source code.
+
+    Returns:
+        Generated target source string.
+    """
+
+
+@typing.runtime_checkable
+class _BackendRegistryProtocol(typing.Protocol):
+  """Protocol for `ml_switcheroo_compiler.backends.registry.BackendRegistry`."""
+
+  def get(self, key: str) -> typing.Callable[[LogicalGraph], _BackendCodeGeneratorProtocol]:
+    """Look up a backend code generator constructor by registry key.
+
+    Args:
+        key: Canonical backend registry key.
+
+    Returns:
+        Code generator constructor accepting a `LogicalGraph`.
+    """
+
+
+@typing.runtime_checkable
+class _BackendRegistryModuleProtocol(typing.Protocol):
+  """Protocol for the `ml_switcheroo_compiler.backends.registry` module.
+
+  Attributes:
+      BackendRegistry: Registry class/singleton mapping keys to code generators.
+  """
+
+  BackendRegistry: _BackendRegistryProtocol
+
+
 _BACKEND_REGISTRY_ALIASES: dict[str, str] = {
   "webgpu": "webgpu",
   "auto": "webgpu",
@@ -81,14 +120,13 @@ def compile_logical_graph_with_backend(
   ensure_compiler_and_zero_on_path()
   reg_key = resolve_compiler_registry_key(target)
   try:
-    import inspect
-
     reg_mod = importlib.import_module("ml_switcheroo_compiler.backends.registry")
-    backend_reg = inspect.getattr_static(reg_mod, "BackendRegistry")
-    gen_cls = backend_reg.get(reg_key)
+    if not isinstance(reg_mod, _BackendRegistryModuleProtocol):
+      raise ImportError("ml_switcheroo_compiler.backends.registry lacks BackendRegistry")
+    gen_cls = reg_mod.BackendRegistry.get(reg_key)
     generator = gen_cls(graph)
     return str(generator.generate())
-  except Exception:
+  except (ImportError, KeyError, ValueError, TypeError, AttributeError, NotImplementedError, RuntimeError):
     g_name = graph.name or "graph"
     if reg_key in ("edge_wasm", "edge_wasm_simd"):
       return f"""(module

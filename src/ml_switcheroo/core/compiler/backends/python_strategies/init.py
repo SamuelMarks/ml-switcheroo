@@ -4,8 +4,8 @@ import inspect
 import typing
 
 import libcst as cst
-from ml_switcheroo_ir import AttributeValue
 import pydantic
+from ml_switcheroo_ir import AttributeValue
 
 from ml_switcheroo.core.compiler.ir import LogicalNode
 from ml_switcheroo.core.runtime_models import RuntimeTraceReport
@@ -35,11 +35,9 @@ def _resolve_traits(
   base = adapter.structural_traits.model_copy() if adapter is not None else StructuralTraits()
   if traits is not None:
     merged = base.model_dump()
-    for field_name in StructuralTraits.model_fields:
-      try:
-        merged[field_name] = inspect.getattr_static(traits, field_name)
-      except AttributeError:
-        pass
+    for field_name, val in inspect.getmembers(traits):
+      if field_name in StructuralTraits.model_fields and not callable(val):
+        merged[field_name] = val
     return StructuralTraits.model_validate(merged)
   return base
 
@@ -169,9 +167,7 @@ def is_stateful_layer(node: LogicalNode) -> bool:
   op_type: str = str(node.op_type)
   if op_type in ["Input", "Output"]:
     return False
-  if "." in op_type and not op_type.startswith("nn."):
-    return False
-  return True
+  return not ("." in op_type and not op_type.startswith("nn."))
 
 
 def _extract_inferred_dim(
@@ -237,10 +233,7 @@ def generate_layer_init(
   if "." not in kind:
     rewritten_leaf = resolved_traits.layer_name_rewrites.get(kind, kind)
     prefix = resolved_traits.layer_namespace_prefix
-    if prefix:
-      kind = f"{prefix}.{rewritten_leaf}"
-    else:
-      kind = rewritten_leaf
+    kind = f"{prefix}.{rewritten_leaf}" if prefix else rewritten_leaf
 
   effective_attrs: dict[str, AttributeValue] = dict(node.attributes) if node.attributes else {}
   dim_kw = resolved_traits.lazy_layer_dim_arg_map.get(leaf_op)
@@ -252,18 +245,13 @@ def generate_layer_init(
         effective_attrs[dim_kw] = str(inferred_dim)
 
   args_str = format_args_from_metadata(effective_attrs)
-  if resolved_traits.requires_rng_in_init:
-    if "rngs" not in args_str:
-      suffix = ", rngs=rngs" if args_str else "rngs=rngs"
-      args_str += suffix
+  if resolved_traits.requires_rng_in_init and "rngs" not in args_str:
+    suffix = ", rngs=rngs" if args_str else "rngs=rngs"
+    args_str += suffix
 
   reg_method = resolved_traits.child_registration_method
-  if reg_method:
-    code = f"self.{reg_method}('{node.id}', {kind}({args_str}))"
-  else:
-    code = f"self.{node.id} = {kind}({args_str})"
-  stmt = cst.parse_statement(code)
-  assert isinstance(stmt, cst.SimpleStatementLine)
+  code = f"self.{reg_method}('{node.id}', {kind}({args_str}))" if reg_method else f"self.{node.id} = {kind}({args_str})"
+  stmt = cst.ensure_type(cst.parse_statement(code), cst.SimpleStatementLine)
   return apply_node_trivia_to_stmt(stmt, node, include_runtime_comment=False)
 
 
@@ -289,9 +277,9 @@ def build_init(
   if resolved_traits.requires_super_init:
     stmts.append(cst.parse_statement("super().__init__()"))
 
-  for node in nodes:
-    if is_stateful_layer(node):
-      stmts.append(generate_layer_init(node, framework, semantics, resolved_traits))
+  stmts.extend(
+    generate_layer_init(node, framework, semantics, resolved_traits) for node in nodes if is_stateful_layer(node)
+  )
 
   if not stmts:
     stmts.append(cst.SimpleStatementLine(body=[cst.Pass()]))

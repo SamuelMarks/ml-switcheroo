@@ -1,13 +1,8 @@
 """API Logic Pass.
 
-This module consolidates all API-level transformations, including:
-
-1.  **Function Calls**: Remapping APIs (e.g., `torch.abs` -> `jnp.abs`), applying argument normalization,
-    handling layout permutations, and executing transformation strategies (infix, lambda, macros).
-2.  **Attributes**: Remapping attributes/constants (e.g., `torch.float32` -> `jnp.float32`).
-3.  **Assignments**: Unwrapping functional return patterns (e.g., `layer.apply`).
-4.  **Symbol Resolution**: Resolving aliases to fully qualified names for lookup.
-5.  **Scoping**: Tracking stateful variables (layers) to inform call rewriting logic.
+Provides ``ApiPass`` and ``ApiTransformer``, a single-inheritance ``cst.CSTTransformer``
+composing ``CallRewriteHandler``, ``AttributeRewriteHandler``, and ``MappingResolver``
+over a typed ``ApiPassState`` container.
 """
 
 from __future__ import annotations
@@ -15,16 +10,18 @@ from __future__ import annotations
 import typing
 
 import libcst as cst
+from pydantic import JsonValue
 
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.escape_hatch import EscapeHatch
 from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.core.rewriter.interface import RewriterPass
-from ml_switcheroo.core.rewriter.passes.api_attr_mixin import ApiTransformerAttrMixin
-from ml_switcheroo.core.rewriter.passes.api_call_mixin import ApiTransformerCallMixin
-from ml_switcheroo.core.rewriter.passes.api_helpers import ApiHelpersMixin
+from ml_switcheroo.core.rewriter.passes.api_attr_mixin import AttributeRewriteHandler
+from ml_switcheroo.core.rewriter.passes.api_call_mixin import CallRewriteHandler
+from ml_switcheroo.core.rewriter.passes.api_helpers import ApiPassState, MappingResolver
 from ml_switcheroo.core.rewriter.types import SignatureContext
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.semantics.schema import StructuralTraits
 
 if typing.TYPE_CHECKING:
@@ -32,181 +29,414 @@ if typing.TYPE_CHECKING:
 
 
 class ApiPass(RewriterPass):
-  """Transformation pass for rewiring API usage.
-
-  Handles resolving function calls to Abstract Operations (The Hub) and then projecting
-  them to the Target Framework (The Spoke). Also handles attribute renaming and
-  stateful assignment tracking.
-  """
+  """Transformation pass for rewiring API usage across frameworks."""
 
   def transform(self, module: cst.Module, context: RewriterContext) -> cst.Module:
-    """Execute the API transformation logic.
+    """Execute the API transformation pass over ``module``.
 
     Args:
-        module: The source CST.
-        context: Shared rewriter state.
+        module: Source CST module.
+        context: Shared ``RewriterContext``.
 
     Returns:
-        The transformed CST.
+        Transformed CST module.
     """
     transformer = ApiTransformer(context)
     return module.visit(transformer)
 
 
-class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCallMixin, cst.CSTTransformer):
-  """LibCST Transformer for API Logic.
+class ApiTransformer(cst.CSTTransformer):
+  """Single-inheritance LibCST transformer composing ``ApiPassState`` and rewrite handlers.
 
-  This class centralizes the logic for:
-  - Resolving names/aliases.
-  - Tracking scope/state.
-  - Rewriting Calls, Attributes, and Assignments.
+  Attributes:
+      context: Shared ``RewriterContext`` for the current pass.
+      state: Typed ``ApiPassState`` holding trait caches and scope state helpers.
+      resolver: ``MappingResolver`` handling FQN resolution, variant lookups, and injections.
+      attr_handler: ``AttributeRewriteHandler`` handling ``Assign`` and ``Attribute`` nodes.
+      call_handler: ``CallRewriteHandler`` handling ``Call`` expressions.
   """
 
-  context: RewriterContext
-
   def __init__(self, context: RewriterContext) -> None:
-    """Initialize the transformer.
+    """Initialize ``ApiTransformer`` and its composed handlers over ``context``.
 
     Args:
-        context: The shared rewriter context.
+        context: Shared ``RewriterContext``.
     """
-    self.context = context
-    self._cached_source_traits: StructuralTraits | None = None
-    self._cached_target_traits: StructuralTraits | None = None
+    self.context: RewriterContext = context
+    self.state: ApiPassState = ApiPassState(context=context)
+    self.resolver: MappingResolver = MappingResolver(self.state)
+    self.attr_handler: AttributeRewriteHandler = AttributeRewriteHandler(self)
+    self.call_handler: CallRewriteHandler = CallRewriteHandler(self)
 
-  # --- Properties & Helpers ---
+  @property
+  def _cached_source_traits(self) -> StructuralTraits | None:
+    """Return cached source ``StructuralTraits`` stored on ``self.state``.
+
+    Returns:
+        Cached source ``StructuralTraits`` or ``None``.
+    """
+    return self.state.cached_source_traits
+
+  @_cached_source_traits.setter
+  def _cached_source_traits(self, value: StructuralTraits | None) -> None:
+    """Update cached source ``StructuralTraits`` stored on ``self.state``.
+
+    Args:
+        value: ``StructuralTraits`` instance or ``None``.
+    """
+    self.state.cached_source_traits = value
+
+  @property
+  def _cached_target_traits(self) -> StructuralTraits | None:
+    """Return cached target ``StructuralTraits`` stored on ``self.state``.
+
+    Returns:
+        Cached target ``StructuralTraits`` or ``None``.
+    """
+    return self.state.cached_target_traits
+
+  @_cached_target_traits.setter
+  def _cached_target_traits(self, value: StructuralTraits | None) -> None:
+    """Update cached target ``StructuralTraits`` stored on ``self.state``.
+
+    Args:
+        value: ``StructuralTraits`` instance or ``None``.
+    """
+    self.state.cached_target_traits = value
 
   @property
   def semantics(self) -> "SemanticsManager":
-    """Accessor for semantics manager.
+    """Return the ``SemanticsManager`` bound to ``self.state``.
 
     Returns:
-        The semantics manager instance bound to the current context.
+        Active ``SemanticsManager``.
     """
-    return self.context.semantics
+    return self.state.semantics
 
   @property
   def config(self) -> RuntimeConfig:
-    """Accessor for runtime config.
+    """Return the ``RuntimeConfig`` bound to ``self.state``.
 
     Returns:
-        The runtime configuration instance bound to the current context.
+        Active ``RuntimeConfig``.
     """
-    res: RuntimeConfig = self.context.config
-    return res
+    return self.state.config
 
   @property
   def source_framework(self) -> str:
-    """Accessor for source framework key.
+    """Return the source framework identifier.
 
     Returns:
-        The string identifier for the source framework (e.g., 'torch').
+        Source framework name.
     """
-    return str(self.context.source_framework)
+    return self.state.source_framework
 
   @property
   def target_framework(self) -> str:
-    """Accessor for target framework key.
+    """Return the target framework identifier.
 
     Returns:
-        The string identifier for the target framework (e.g., 'jax').
+        Target framework name.
     """
-    return str(self.context.target_framework)
+    return self.state.target_framework
 
   @property
   def strict_mode(self) -> bool:
-    """Accessor for strict mode flag.
+    """Return whether strict mode is enabled.
 
     Returns:
-        True if strict mode is enabled, False otherwise.
+        ``True`` if strict mode is active.
     """
-    return self.config.strict_mode
+    return self.state.strict_mode
+
+  @property
+  def ctx(self) -> HookContext:
+    """Return the ``HookContext`` exposed for plugin execution.
+
+    Returns:
+        Bound ``HookContext``.
+    """
+    return self.state.ctx
 
   @property
   def source_traits(self) -> StructuralTraits:
-    """Lazily loads source framework traits.
+    """Return lazily loaded ``StructuralTraits`` for the source framework.
 
     Returns:
-        The structural traits configuration of the source framework.
+        Source ``StructuralTraits``.
     """
-    if self._cached_source_traits:
-      return self._cached_source_traits
+    return self.state.source_traits
 
-    config_dict = self.semantics.get_framework_config(self.source_framework)
-    if config_dict and "traits" in config_dict:
-      self._cached_source_traits = StructuralTraits.model_validate(config_dict["traits"])
-    else:
-      self._cached_source_traits = StructuralTraits()
-    return self._cached_source_traits
+  @property
+  def target_traits(self) -> StructuralTraits:
+    """Return lazily loaded ``StructuralTraits`` for the target framework.
+
+    Returns:
+        Target ``StructuralTraits``.
+    """
+    return self.state.target_traits
 
   def _get_target_traits(self) -> StructuralTraits:
-    """Lazily loads target framework traits.
+    """Return lazily loaded ``StructuralTraits`` for the target framework.
 
     Returns:
-        The structural traits configuration of the target framework.
+        Target ``StructuralTraits``.
     """
-    if self._cached_target_traits:
-      return self._cached_target_traits
-
-    config_dict = self.semantics.get_framework_config(self.target_framework)
-    if config_dict and "traits" in config_dict:
-      self._cached_target_traits = StructuralTraits.model_validate(config_dict["traits"])
-    else:
-      self._cached_target_traits = StructuralTraits()
-
-    return self._cached_target_traits
+    return self.state.target_traits
 
   def _get_source_lifecycle_lists(self) -> tuple[set[str], set[str]]:
-    """Return strip and warn method sets for lifecycle management.
+    """Return strip and warning lifecycle method sets for the source framework.
 
     Returns:
-        A tuple containing two sets:
-        - The first set contains method names that should be stripped.
-        - The second set contains method names that should trigger a warning.
+        Tuple of ``(strip_methods, warn_methods)``.
     """
-    traits = self.source_traits
-    return (
-      set(traits.lifecycle_strip_methods),
-      set(traits.lifecycle_warn_methods),
-    )
+    return self.state.get_source_lifecycle_lists()
 
   def _report_failure(self, reason: str) -> None:
-    """Record a failure in the context error buffer.
+    """Record a statement-level failure message.
 
     Args:
-        reason: A message describing the cause of the failure.
+        reason: Failure description string.
     """
-    self.context.current_stmt_errors.append(reason)
+    self.state.report_failure(reason)
 
   def _report_warning(self, reason: str) -> None:
-    """Record a warning in the context warning buffer.
+    """Record a statement-level warning message.
 
     Args:
-        reason: A message describing the warning condition.
+        reason: Warning description string.
     """
-    self.context.current_stmt_warnings.append(reason)
+    self.state.report_warning(reason)
 
-  # --- Preamble Output ---
-  # Use simple implementation for now without deduplication on identity which might be complex,
-  # as simple set of strings works for identical injects.
-  def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
-    """Inject accumulated module-level preamble statements if they haven't been flushed yet.
-
-    If preambles were gathered during traversal, inject them into the module's body.
-    We deduplicate based on string content.
+  def _mark_stateful(self, var_name: str) -> None:
+    """Mark ``var_name`` as stateful in the innermost lexical scope.
 
     Args:
-        original_node: The CST node representing the original module before traversal.
-        updated_node: The transformed CST module node.
+        var_name: Variable name to mark stateful.
+    """
+    self.state.mark_stateful(var_name)
+
+  def _is_stateful(self, var_name: str) -> bool:
+    """Return whether ``var_name`` is marked stateful in any active scope.
+
+    Args:
+        var_name: Variable name to inspect.
 
     Returns:
-        The final transformed CST module containing any newly injected preamble statements.
+        ``True`` if ``var_name`` is stateful.
+    """
+    return self.state.is_stateful(var_name)
+
+  # --- Delegated Resolver Methods (supporting RewriterHost protocol) ---
+
+  def _cst_to_string(self, node: cst.CSTNode) -> str | None:
+    """Delegate CST expression flattening to ``self.resolver``.
+
+    Args:
+        node: CST node to flatten.
+
+    Returns:
+        Dotted string representation or ``None``.
+    """
+    return self.resolver.cst_to_string(node)
+
+  def _get_qualified_name(self, node: cst.BaseExpression) -> str | None:
+    """Delegate alias-resolved FQN lookup to ``self.resolver``.
+
+    Args:
+        node: CST expression node.
+
+    Returns:
+        Fully qualified name string or ``None``.
+    """
+    return self.resolver.get_qualified_name(node, cst_to_string_fn=self._cst_to_string)
+
+  def _create_name_node(self, api_path: str) -> cst.Name | cst.Attribute:
+    """Delegate CST ``Name``/``Attribute`` construction to ``self.resolver``.
+
+    Args:
+        api_path: Dotted API path string.
+
+    Returns:
+        Constructed ``cst.Name`` or ``cst.Attribute``.
+    """
+    return self.resolver.create_name_node(api_path)
+
+  def _create_dotted_name(self, name_str: str) -> cst.Name | cst.Attribute:
+    """Delegate dotted CST expression construction to ``self.resolver``.
+
+    Args:
+        name_str: Dotted name string.
+
+    Returns:
+        Constructed ``cst.Name`` or ``cst.Attribute``.
+    """
+    return self.resolver.create_dotted_name(name_str)
+
+  def _is_module_alias(self, node: cst.CSTNode) -> bool:
+    """Delegate module-alias detection to ``self.resolver``.
+
+    Args:
+        node: CST node to inspect.
+
+    Returns:
+        ``True`` if ``node`` references a module alias or framework root.
+    """
+    return self.resolver.is_module_alias(node, cst_to_string_fn=self._cst_to_string)
+
+  def _apply_preamble(self, node: cst.FunctionDef, stmts_code: list[str]) -> cst.FunctionDef:
+    """Delegate function preamble statement injection to ``self.resolver``.
+
+    Args:
+        node: Target ``cst.FunctionDef`` node.
+        stmts_code: List of Python statement strings to inject.
+
+    Returns:
+        Updated ``cst.FunctionDef``.
+    """
+    return self.resolver.apply_preamble(node, stmts_code)
+
+  def _inject_stmts_to_body(
+    self,
+    node: cst.FunctionDef,
+    new_stmts: typing.Sequence[cst.SimpleStatementLine | cst.BaseCompoundStatement],
+  ) -> cst.FunctionDef:
+    """Delegate statement body insertion to ``self.resolver``.
+
+    Args:
+        node: Target ``cst.FunctionDef`` node.
+        new_stmts: Statements to insert after any docstring.
+
+    Returns:
+        Updated ``cst.FunctionDef``.
+    """
+    return self.resolver.inject_stmts_to_body(node, new_stmts)
+
+  def _convert_to_indented_block(self, node: cst.FunctionDef) -> cst.FunctionDef:
+    """Delegate one-liner suite normalization to ``self.resolver``.
+
+    Args:
+        node: ``cst.FunctionDef`` node to normalize.
+
+    Returns:
+        Updated ``cst.FunctionDef``.
+    """
+    return self.resolver.convert_to_indented_block(node)
+
+  def _get_mapping(self, name: str, silent: bool = False) -> dict[str, JsonValue] | None:
+    """Delegate semantic variant lookup to ``self.resolver``.
+
+    Args:
+        name: Fully qualified source API name.
+        silent: Whether to suppress failure reporting.
+
+    Returns:
+        Target variant mapping dict or ``None``.
+    """
+    return self.resolver.get_mapping(name, silent=silent, report_failure_fn=self._report_failure)
+
+  def _handle_variant_imports(self, variant: typing.Mapping[str, RuntimeTensorOrValue]) -> None:
+    """Delegate variant ``required_imports`` preamble injection to ``self.resolver``.
+
+    Args:
+        variant: Target variant mapping dictionary.
+    """
+    self.resolver.handle_variant_imports(variant)
+
+  def _is_framework_base(self, name: str) -> bool:
+    """Delegate framework module-base detection to ``self.resolver``.
+
+    Args:
+        name: Candidate class name.
+
+    Returns:
+        ``True`` if ``name`` matches a known framework module base.
+    """
+    return self.resolver.is_framework_base(name)
+
+  def check_version_constraints(self, min_v: str | None, max_v: str | None) -> str | None:
+    """Delegate version constraint checking to ``self.resolver``.
+
+    Args:
+        min_v: Optional minimum version string.
+        max_v: Optional maximum version string.
+
+    Returns:
+        Warning string if violated, else ``None``.
+    """
+    return self.resolver.check_version_constraints(min_v, max_v)
+
+  def _inject_argument_to_signature(
+    self,
+    node: cst.FunctionDef,
+    arg_name: str,
+    annotation: str | None,
+  ) -> cst.FunctionDef:
+    """Delegate function parameter injection to ``self.resolver``.
+
+    Args:
+        node: Target ``cst.FunctionDef``.
+        arg_name: Parameter name to inject.
+        annotation: Optional type annotation string.
+
+    Returns:
+        Updated ``cst.FunctionDef``.
+    """
+    return self.resolver.inject_argument_to_signature(node, arg_name, annotation)
+
+  # --- CST Visitor & Transformer Hooks ---
+
+  def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign) -> cst.Assign:
+    """Delegate ``cst.Assign`` rewriting to ``self.attr_handler``.
+
+    Args:
+        original_node: Assign node prior to child traversal.
+        updated_node: Assign node after child traversal.
+
+    Returns:
+        Transformed or unchanged ``cst.Assign``.
+    """
+    return self.attr_handler.rewrite_assign(original_node, updated_node)
+
+  def leave_Attribute(self, original_node: cst.Attribute, updated_node: cst.Attribute) -> cst.BaseExpression:
+    """Delegate ``cst.Attribute`` rewriting to ``self.attr_handler``.
+
+    Args:
+        original_node: Attribute node prior to child traversal.
+        updated_node: Attribute node after child traversal.
+
+    Returns:
+        Transformed ``cst.BaseExpression``.
+    """
+    return self.attr_handler.rewrite_attribute(original_node, updated_node)
+
+  def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.BaseExpression:
+    """Delegate ``cst.Call`` rewriting to ``self.call_handler``.
+
+    Args:
+        original_node: Call node prior to child traversal.
+        updated_node: Call node after child traversal.
+
+    Returns:
+        Transformed ``cst.BaseExpression``.
+    """
+    return self.call_handler.rewrite_call(original_node, updated_node)
+
+  def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
+    """Flush accumulated module-level preamble statements onto ``updated_node``.
+
+    Args:
+        original_node: Original ``cst.Module`` prior to traversal.
+        updated_node: Transformed ``cst.Module``.
+
+    Returns:
+        Updated ``cst.Module`` with deduplicated preamble statements prepended.
     """
     if not self.context.module_preamble:
       return updated_node
 
     new_stmts: list[cst.SimpleStatementLine | cst.BaseCompoundStatement] = []
-    seen = set()
+    seen: set[str] = set()
     for code in self.context.module_preamble:
       if code in seen:
         continue
@@ -214,10 +444,9 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
       try:
         mod = cst.parse_module(code)
         new_stmts.extend(mod.body)
-      except (cst.ParserSyntaxError, Exception):
+      except cst.ParserSyntaxError:
         pass
 
-    # Clear buffer to prevent re-injection
     self.context.module_preamble.clear()
 
     if not new_stmts:
@@ -225,41 +454,14 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
 
     return updated_node.with_changes(body=new_stmts + list(updated_node.body))
 
-  # --- Scoping Logic ---
-
-  def _mark_stateful(self, var_name: str) -> None:
-    """Mark variable as stateful in current scope.
-
-    Args:
-        var_name: The name of the variable being assigned a stateful component.
-    """
-    if self.context.scope_stack:
-      self.context.scope_stack[-1].add(var_name)
-
-  def _is_stateful(self, var_name: str) -> bool:
-    """Check if variable is stateful (traversing up scopes).
-
-    Args:
-        var_name: The name of the variable to check.
-
-    Returns:
-        True if the variable is marked stateful in the current or any enclosing scope.
-    """
-    for scope in reversed(self.context.scope_stack):
-      if var_name in scope:
-        return True
-    return False
-
-  # --- Context Stack Mirroring (Essential for Preamble Injection in Logic Plugins) ---
-
   def visit_ClassDef(self, node: cst.ClassDef) -> bool | None:
-    """Enter class scope and detect Module.
+    """Enter class lexical scope and detect framework ``Module`` subclasses.
 
     Args:
-        node: The CST ClassDef node being visited.
+        node: ``cst.ClassDef`` being visited.
 
     Returns:
-        True to continue traversing children.
+        ``True`` to traverse child nodes.
     """
     self.context.scope_stack.append(set())
 
@@ -270,7 +472,6 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
         is_module = True
         break
 
-    # Fallback raw check
     if not is_module:
       for base in node.bases:
         raw_name = self._cst_to_string(base.value)
@@ -284,14 +485,14 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
     return True
 
   def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
-    """Exit class scope.
+    """Pop class lexical scope and reset ``in_module_class``.
 
     Args:
-        original_node: The CST ClassDef node prior to visiting children.
-        updated_node: The transformed CST ClassDef node after visiting children.
+        original_node: ``cst.ClassDef`` prior to child traversal.
+        updated_node: ``cst.ClassDef`` after child traversal.
 
     Returns:
-        The updated CST ClassDef node.
+        Unchanged ``updated_node``.
     """
     self.context.scope_stack.pop()
     if self.context.in_module_class:
@@ -299,21 +500,17 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
     return updated_node
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> bool | None:
-    """Enter function scope.
+    """Push function lexical scope and ``SignatureContext`` frame.
 
     Args:
-        node: The CST FunctionDef node being visited.
+        node: ``cst.FunctionDef`` being visited.
 
     Returns:
-        True to continue traversing children.
+        ``True`` to traverse child nodes.
     """
     self.context.scope_stack.append(set())
 
-    existing_args = set()
-    for param in node.params.params:
-      if isinstance(param.name, cst.Name):
-        existing_args.add(param.name.value)
-
+    existing_args = {param.name.value for param in node.params.params}
     is_init = node.name.value == "__init__"
     self.context.signature_stack.append(
       SignatureContext(
@@ -325,44 +522,34 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
     return True
 
   def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> cst.FunctionDef:
-    """Exit function scope.
-
-    Flush any pending preamble statements requested by plugins during this pass.
-    Also apply any pending signature injections (arguments).
+    """Pop function scope and apply pending signature argument and preamble injections.
 
     Args:
-        original_node: The CST FunctionDef node prior to visiting children.
-        updated_node: The transformed CST FunctionDef node.
+        original_node: ``cst.FunctionDef`` prior to child traversal.
+        updated_node: ``cst.FunctionDef`` after child traversal.
 
     Returns:
-        The updated CST FunctionDef node with any injected arguments or preamble statements.
+        Updated ``cst.FunctionDef`` with injected parameters and preamble statements.
     """
     self.context.scope_stack.pop()
 
     if self.context.signature_stack:
       sig_ctx = self.context.signature_stack.pop()
-
-      # 1. Apply Argument Injection (e.g. from Plugins like rng_threading)
-      # New Logic: ApiPass can now modify signatures if plugins request it
       for name, annotation in sig_ctx.injected_args:
         updated_node = self._inject_argument_to_signature(updated_node, name, annotation)
-
-      # 2. Apply Preambles
       if sig_ctx.preamble_stmts:
         updated_node = self._apply_preamble(updated_node, sig_ctx.preamble_stmts)
 
     return updated_node
 
-  # --- Error Handling & Statement Processing ---
-
   def visit_SimpleStatementLine(self, node: cst.SimpleStatementLine) -> bool | None:
-    """Reset statement-level error buffers.
+    """Reset per-statement error and warning buffers.
 
     Args:
-        node: The CST SimpleStatementLine node being visited.
+        node: ``cst.SimpleStatementLine`` being visited.
 
     Returns:
-        True to continue traversing children.
+        ``True`` to traverse child nodes.
     """
     self.context.current_stmt_errors = []
     self.context.current_stmt_warnings = []
@@ -373,37 +560,33 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
     original_node: cst.SimpleStatementLine,
     updated_node: cst.SimpleStatementLine,
   ) -> cst.BaseStatement | cst.FlattenSentinel[cst.BaseStatement] | cst.RemovalSentinel:
-    """Check for errors generated by child expressions and wrap if needed.
+    """Wrap ``original_node`` or ``updated_node`` via ``EscapeHatch`` if diagnostics were recorded.
 
     Args:
-        original_node: The CST node prior to transformation.
-        updated_node: The transformed CST node.
+        original_node: ``cst.SimpleStatementLine`` prior to child traversal.
+        updated_node: ``cst.SimpleStatementLine`` after child traversal.
 
     Returns:
-        The transformed line, possibly wrapped via EscapeHatch if errors or warnings were logged.
+        Updated statement or ``EscapeHatch``-marked statement sentinel.
     """
     if self.context.current_stmt_errors:
       unique_errors = list(dict.fromkeys(self.context.current_stmt_errors))
-      message = "; ".join(unique_errors)
-      return EscapeHatch.mark_failure(original_node, message)
+      return EscapeHatch.mark_failure(original_node, "; ".join(unique_errors))
 
     if self.context.current_stmt_warnings:
       unique_warnings = list(dict.fromkeys(self.context.current_stmt_warnings))
-      message = "; ".join(unique_warnings)
-      return EscapeHatch.mark_failure(updated_node, message)
+      return EscapeHatch.mark_failure(updated_node, "; ".join(unique_warnings))
 
     return updated_node
 
-  # --- Resolver Logic ---
-
   def visit_Import(self, node: cst.Import) -> bool | None:
-    """Track import aliases.
+    """Record ``import`` aliases in ``self.context.alias_map``.
 
     Args:
-        node: The CST Import node being visited.
+        node: ``cst.Import`` node being visited.
 
     Returns:
-        False to prevent deeper traversal, since aliases are fully captured here.
+        ``False`` because import children do not require expression rewriting.
     """
     for alias in node.names:
       full_name = self._cst_to_string(alias.name)
@@ -411,30 +594,26 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
         continue
 
       if alias.asname and isinstance(alias.asname.name, cst.Name):
-        local_name = alias.asname.name.value
-        self.context.alias_map[local_name] = full_name
+        self.context.alias_map[alias.asname.name.value] = full_name
       else:
         root = full_name.split(".")[0]
         self.context.alias_map[root] = root
     return False
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> bool | None:
-    """Track from-import aliases.
+    """Record ``from ... import ...`` aliases in ``self.context.alias_map``.
 
     Args:
-        node: The CST ImportFrom node being visited.
+        node: ``cst.ImportFrom`` node being visited.
 
     Returns:
-        False to prevent deeper traversal.
+        ``False`` because import children do not require expression rewriting.
     """
     if node.relative:
       return False
 
     module_name = self._cst_to_string(node.module) if node.module else ""
-    if not module_name:
-      return False
-
-    if isinstance(node.names, cst.ImportStar):
+    if not module_name or isinstance(node.names, cst.ImportStar):
       return False
 
     for alias in node.names:
@@ -446,13 +625,12 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
 
     return False
 
-  # --- Hook Accessors (Proxy) ---
-  @property
-  def ctx(self) -> HookContext:
-    """Expose hook context for strategy invocation.
 
-    Returns:
-        The hook context associated with this traversal.
-    """
-    res: HookContext = self.context.hook_context
-    return res
+__all__ = [
+  "ApiPass",
+  "ApiPassState",
+  "ApiTransformer",
+  "AttributeRewriteHandler",
+  "CallRewriteHandler",
+  "MappingResolver",
+]

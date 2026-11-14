@@ -1,15 +1,14 @@
 """Test suite for the Doc Gen module."""
 
-from pydantic import JsonValue
-
 import pytest
+from pydantic import JsonValue
 
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
 
 
 class MockSemantics(SemanticsManager):
-  """Test helper class MockSemantics."""
+  """Stub `SemanticsManager` subclass implementing `_inject`, `get_known_apis` for doc gen tests."""
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
@@ -37,12 +36,12 @@ class MockSemantics(SemanticsManager):
     )
 
   def _inject(self, name: str, tier: str, variants: dict[str, JsonValue], std_args: list[JsonValue]) -> None:
-    """Mock implementation of  inject.
+    """Execute `_inject` on `MockSemantics` for doc gen tests.
 
     Args:
         name: Identifier or operation name string.
-        tier: The tier (str) for  inject.
-        variants: The variants (dict[str, JsonValue]) for  inject.
+        tier: Input `tier` parameter value (`str`).
+        variants: Per-framework operation variant mappings (`dict[str, JsonValue]`).
         std_args: Standardized ODL parameter list.
     """
     self.data[name] = {"variants": variants, "std_args": std_args}
@@ -70,7 +69,7 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def generator() -> MigrationGuideGenerator:
-  """Execute generator helper logic.
+  """Create a configured `MigrationGuideGenerator` fixture for doc gen tests.
 
   Returns:
       Configured `generator` fixture value (MigrationGuideGenerator).
@@ -80,7 +79,7 @@ def generator() -> MigrationGuideGenerator:
 
 
 def test_markdown_structure(generator: MigrationGuideGenerator) -> None:
-  """Verifies the behavior of markdown structure.
+  """Verify `generator.generate` emits `## Array` for markdown structure.
 
   Args:
       generator: Code or MLIR generator instance under test.
@@ -93,7 +92,7 @@ def test_markdown_structure(generator: MigrationGuideGenerator) -> None:
 
 
 def test_simple_match_row(generator: MigrationGuideGenerator) -> None:
-  """Verifies the behavior of simple match row.
+  """Verify `generator.generate` handles simple match row as expected.
 
   Args:
       generator: Code or MLIR generator instance under test.
@@ -103,7 +102,7 @@ def test_simple_match_row(generator: MigrationGuideGenerator) -> None:
 
 
 def test_argument_diff_logic(generator: MigrationGuideGenerator) -> None:
-  """Verifies the behavior of argument diff logic.
+  """Verify `generator.generate` handles argument diff logic as expected.
 
   Args:
       generator: Code or MLIR generator instance under test.
@@ -115,7 +114,7 @@ def test_argument_diff_logic(generator: MigrationGuideGenerator) -> None:
 
 
 def test_missing_target(generator: MigrationGuideGenerator) -> None:
-  """Verifies the behavior of missing target.
+  """Verify `generator.generate` handles missing target as expected.
 
   Args:
       generator: Code or MLIR generator instance under test.
@@ -126,7 +125,7 @@ def test_missing_target(generator: MigrationGuideGenerator) -> None:
 
 
 def test_plugin_annotation(generator: MigrationGuideGenerator) -> None:
-  """Verifies the behavior of plugin annotation.
+  """Verify `generator.generate` emits `*(Plugin: magic_fix)*` for plugin annotation.
 
   Args:
       generator: Code or MLIR generator instance under test.
@@ -136,7 +135,7 @@ def test_plugin_annotation(generator: MigrationGuideGenerator) -> None:
 
 
 def test_tier_ordering(generator: MigrationGuideGenerator) -> None:
-  """Verifies the behavior of tier ordering.
+  """Verify `generator.generate` handles tier ordering as expected.
 
   Args:
       generator: Code or MLIR generator instance under test.
@@ -150,7 +149,7 @@ def test_tier_ordering(generator: MigrationGuideGenerator) -> None:
 
 
 def test_filtering_missing_source(generator: MigrationGuideGenerator) -> None:
-  """Verifies the behavior of filtering missing source.
+  """Verify `generator.generate` handles filtering missing source as expected.
 
   Args:
       generator: Code or MLIR generator instance under test.
@@ -162,11 +161,11 @@ def test_filtering_missing_source(generator: MigrationGuideGenerator) -> None:
 
 
 def test_doc_gen_missing() -> None:
-  """Verifies the behavior of documentation generation missing."""
+  """Verify `MigrationGuideGenerator` handles doc gen missing as expected."""
   from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
 
   class DummySM(SemanticsManager):
-    """Test helper class DummySM."""
+    """Stub `SemanticsManager` subclass implementing `get_definition_by_id` for doc gen tests."""
 
     def get_definition_by_id(self, op_name: str) -> dict[str, JsonValue] | None:
       """Mock implementation of get definition by id.
@@ -187,11 +186,11 @@ def test_doc_gen_missing() -> None:
 
 
 def test_doc_gen_missing_tuple_arg() -> None:
-  """Verifies the behavior of documentation generation missing tuple argument."""
+  """Verify `MigrationGuideGenerator` handles doc gen missing tuple arg as expected."""
   from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
 
   class DummySM(SemanticsManager):
-    """Test helper class DummySM."""
+    """Stub `SemanticsManager` subclass implementing `get_definition_by_id` for doc gen tests."""
 
     def get_definition_by_id(self, op_name: str) -> dict[str, JsonValue] | None:
       """Mock implementation of get definition by id.
@@ -202,19 +201,28 @@ def test_doc_gen_missing_tuple_arg() -> None:
       Returns:
           Resulting `dict[str, JsonValue] | None` from get definition by id.
       """
+      if op_name == "renamed":
+        return {
+          "std_args": [["a", "int"]],
+          "variants": {
+            "jax": {"api": "jnp.foo", "args": {"a": "x"}},
+            "torch": {"api": "torch.foo", "args": {"a": "input"}},
+          },
+        }
       return {"std_args": [["a", "int"]]}
 
   m = MigrationGuideGenerator(DummySM())
   res: str = m._generate_op_row("foo", "jax", "torch")
-  assert res is not None
+  assert res == "| `—` | `—` | - |"
+  assert m._generate_op_row("renamed", "jax", "torch") == "| `jnp.foo` | `torch.foo` | `x`&#8594;`input` |"
 
 
 def test_doc_gen_missing_dict_arg() -> None:
-  """Verifies the behavior of documentation generation missing dictionary argument."""
+  """Verify `MigrationGuideGenerator` handles doc gen missing dict arg as expected."""
   from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
 
   class DummySM(SemanticsManager):
-    """Dummy sm."""
+    """Stub `SemanticsManager` subclass for dict `std_args` doc gen tests."""
 
     def get_definition_by_id(self, op_name: str) -> dict[str, JsonValue] | None:
       """Get definition by id.
@@ -225,8 +233,17 @@ def test_doc_gen_missing_dict_arg() -> None:
       Returns:
           Resulting `dict[str, JsonValue] | None` from get definition by id.
       """
+      if op_name == "renamed":
+        return {
+          "std_args": [{"name": "a", "type": "int"}],
+          "variants": {
+            "jax": {"api": "jnp.bar", "args": {"a": "val"}},
+            "torch": {"api": "torch.bar", "args": {"a": "tensor"}},
+          },
+        }
       return {"std_args": [{"name": "a", "type": "int"}]}
 
   m = MigrationGuideGenerator(DummySM())
   res: str = m._generate_op_row("foo", "jax", "torch")
-  assert res is not None
+  assert res == "| `—` | `—` | - |"
+  assert m._generate_op_row("renamed", "jax", "torch") == "| `jnp.bar` | `torch.bar` | `val`&#8594;`tensor` |"

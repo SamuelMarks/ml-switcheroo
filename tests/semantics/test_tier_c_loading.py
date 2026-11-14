@@ -1,33 +1,32 @@
 """Test suite for the Tier C Loading module."""
 
-from tests.conftest import _test_getattr
-
-import typing
 import json
+import typing
 from pathlib import Path
 from unittest.mock import patch
 
 import libcst as cst
 import pytest
+from pydantic import JsonValue
 
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.core.hooks import _HOOKS
+from ml_switcheroo.core.hooks import register_hook
 from ml_switcheroo.plugins.data_loader import transform_dataloader
 from ml_switcheroo.semantics.manager import SemanticsManager
 from tests.conftest import TestRewriter as PivotRewriter
 
 
 @pytest.fixture
-def mock_specs(tmp_path: Path) -> typing.Generator[Path, None, None]:
+def mock_specs(tmp_path: Path) -> Path:
   """Provides a mock specs for testing.
 
   Args:
       tmp_path (Path): Tmp path pytest fixture.
 
-  Yields:
+  Returns:
       Path: Tmp path.
   """
-  spec = {
+  spec: dict[str, dict[str, JsonValue]] = {
     "CustomLoader": {"std_args": []},
     "MagicContext": {"std_args": []},
     "DataLoader": {"std_args": ["dataset"]},
@@ -38,9 +37,7 @@ def mock_specs(tmp_path: Path) -> typing.Generator[Path, None, None]:
   odl_dir: Path = tmp_path / "semantics" / "odl"
   odl_dir.mkdir()
   for k, v in spec.items():
-    _test_getattr(_test_getattr({"v": v}, "__getitem__")("v"), "__setitem__")(
-      "operation", _test_getattr({"v": k}, "__getitem__")("v")
-    )
+    v["operation"] = k
     (odl_dir / f"{k}.yaml").write_text(yaml.dump(v))
   (tmp_path / "snapshots").mkdir()
   torch_map = {
@@ -61,7 +58,7 @@ def mock_specs(tmp_path: Path) -> typing.Generator[Path, None, None]:
     },
   }
   (tmp_path / "snapshots" / "jax_vlatest_map.json").write_text(json.dumps(jax_map))
-  yield tmp_path
+  return tmp_path
 
 
 @pytest.fixture
@@ -76,10 +73,12 @@ def isolated_manager(mock_specs: Path) -> typing.Generator[SemanticsManager, Non
   """
   sem: Path = mock_specs / "semantics"
   snap: Path = mock_specs / "snapshots"
-  with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=sem):
-    with patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir", return_value=snap):
-      with patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]):
-        yield SemanticsManager()
+  with (
+    patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=sem),
+    patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir", return_value=snap),
+    patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]),
+  ):
+    yield SemanticsManager()
 
 
 def test_load_structure_from_extras(isolated_manager: SemanticsManager) -> None:
@@ -96,41 +95,25 @@ def test_load_structure_from_extras(isolated_manager: SemanticsManager) -> None:
 
 
 def test_rewriter_integration_null_variant(isolated_manager: SemanticsManager) -> None:
-  """Verifies the behavior of rewriter integration null variant.
+  """Verify `RuntimeConfig` handles rewriter integration null variant as expected.
 
   Args:
       isolated_manager (SemanticsManager): Manager fixture.
   """
   cfg: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   rw: PivotRewriter = PivotRewriter(isolated_manager, cfg)
-  _test_getattr(
-    _test_getattr(
-      {
-        "v": _test_getattr(
-          {
-            "v": _test_getattr(
-              {
-                "v": _test_getattr({"v": _test_getattr({"v": isolated_manager}, "__getitem__")("v").data}, "__getitem__")(
-                  "v"
-                )["CustomLoader"]
-              },
-              "__getitem__",
-            )("v")["variants"]
-          },
-          "__getitem__",
-        )("v")["torch"]
-      },
-      "__getitem__",
-    )("v"),
-    "__setitem__",
-  )("api", _test_getattr({"v": "torch.custom.loader"}, "__getitem__")("v"))
+  custom_variants = isolated_manager.data["CustomLoader"]["variants"]
+  assert isinstance(custom_variants, dict)
+  torch_var = custom_variants["torch"]
+  assert isinstance(torch_var, dict)
+  torch_var["api"] = "torch.custom.loader"
   isolated_manager._reverse_index["torch.custom.loader"] = ("CustomLoader", isolated_manager.data["CustomLoader"])
   res: str = rw.convert(cst.parse_module("y = torch.custom.loader(x)")).code
   assert "# <SWITCHEROO_FAILED_TO_TRANS>" in res
 
 
 def test_rewriter_integration_plugin_only(isolated_manager: SemanticsManager) -> None:
-  """Verifies the behavior of rewriter integration plugin only.
+  """Verify `RuntimeConfig` emits `Missing required plugin` for rewriter integration plugin only.
 
   Args:
       isolated_manager (SemanticsManager): Manager fixture.
@@ -143,33 +126,18 @@ def test_rewriter_integration_plugin_only(isolated_manager: SemanticsManager) ->
 
 
 def test_rewriter_integration_dataloader_shim(isolated_manager: SemanticsManager) -> None:
-  """Verifies the behavior of rewriter integration dataloader shim.
+  """Verify `RuntimeConfig` handles rewriter integration dataloader shim as expected.
 
   Args:
       isolated_manager (SemanticsManager): Manager fixture.
   """
-  _test_getattr(_test_getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "convert_dataloader", _test_getattr({"v": transform_dataloader}, "__getitem__")("v")
-  )
+  register_hook("convert_dataloader")(transform_dataloader)
   cfg: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   rw: PivotRewriter = PivotRewriter(isolated_manager, cfg)
   isolated_manager._build_index()
-  _test_getattr(
-    _test_getattr(
-      {
-        "v": _test_getattr(
-          {
-            "v": _test_getattr({"v": _test_getattr({"v": isolated_manager}, "__getitem__")("v").data}, "__getitem__")(
-              "v"
-            )["CustomLoader"]
-          },
-          "__getitem__",
-        )("v")["variants"]
-      },
-      "__getitem__",
-    )("v"),
-    "__delitem__",
-  )("torch")
+  custom_variants = isolated_manager.data["CustomLoader"]["variants"]
+  assert isinstance(custom_variants, dict)
+  del custom_variants["torch"]
   isolated_manager._build_index()
   code: str = "import torch\ndl = torch.utils.data.DataLoader(x)"
   res: str = rw.convert(cst.parse_module(code)).code

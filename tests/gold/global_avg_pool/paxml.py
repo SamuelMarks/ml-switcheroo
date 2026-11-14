@@ -1,12 +1,11 @@
 """Test suite for the Paxml module."""
 
-from praxis import base_layer
-
 import jax.numpy as jnp
+from praxis import base_layer
 
 
 class GAPModel(base_layer.BaseLayer):
-  """Test helper class GAPModel."""
+  """Minimal `base_layer.BaseLayer` test double used in PaxML tests."""
 
   def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
     """Executes the callable instance.

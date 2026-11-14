@@ -1,330 +1,409 @@
-"""Unit tests for the plugin binding infrastructure and hook context.
+"""Unit tests for `HookContext`, `HookRegistry`, `AutoWireSpec`, and plugin loading (`ml_switcheroo.core.hooks`)."""
 
-This module contains test cases to verify the correctness of the HookContext,
-AutoWireSpec, and related plugin registration mechanisms within the ml-switcheroo
-core framework.
-"""
+import sys
+import textwrap
+from pathlib import Path
+from unittest.mock import MagicMock, patch
 
-from tests.conftest import _test_hasattr
+import libcst as cst
+import pytest
+from pydantic import BaseModel, JsonValue, ValidationError
 
-from unittest.mock import MagicMock
-
+from ml_switcheroo.analysis.symbol_table import SymbolTable
+from ml_switcheroo.analysis.symbol_types import SymbolType
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.core.hooks import AutoWireSpec, HookContext
+from ml_switcheroo.core.dsl import FrameworkVariant, OperationDef
+from ml_switcheroo.core.engine import ASTEngine
+from ml_switcheroo.core.hooks import (
+  AutoWireSpec,
+  HookContext,
+  HookRegistry,
+  clear_hooks,
+  get_default_hook_registry,
+  get_hook,
+  load_plugins,
+  register_hook,
+  set_plugins_loaded,
+)
+from ml_switcheroo.core.hooks_registry import _import_from_dir, bind_hook_registry, get_all_hook_metadata
+from ml_switcheroo.exceptions import PluginLoadError
+from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.semantics.schema import PluginTraits
 
 
-def test_autowirespec() -> None:
-  """Verifies that AutoWireSpec initializes and stores operation mappings correctly.
-
-  This test instantiates AutoWireSpec with a mock operation mapping and asserts
-  that the underlying dictionary behaves as expected.
-
-  Args:
-      None
+def _build_semantics_fixture() -> SemanticsManager:
+  """Construct an in-memory `SemanticsManager` with `add`, `abs`, and `complex` ops.
 
   Returns:
-      None
+      Populated `SemanticsManager` instance.
   """
+  sem = SemanticsManager(load_defaults=False)
+  defs: dict[str, dict[str, JsonValue]] = {
+    "add": {
+      "operation": "add",
+      "std_args": ["x1", "x2"],
+      "variants": {"jax": {"api": "jax.numpy.add", "pack_to_tuple": "axes"}, "numpy": {"api": "numpy.add"}},
+    },
+    "abs": {
+      "operation": "abs",
+      "std_args": [["x", "Array"], {"name": "out", "type": "Array"}, {"type": "NoName"}, "plain_arg"],
+      "variants": {},
+    },
+    "bad_sig": {
+      "operation": "bad_sig",
+      "std_args": "not_a_list",
+      "variants": {},
+    },
+    "complex": {
+      "operation": "complex",
+      "std_args": [],
+      "variants": {"jax": {"requires_plugin": "magic"}},
+    },
+  }
+  for op_id, raw in defs.items():
+    sem.data[op_id] = raw
+    if op_id not in ("abs", "bad_sig"):
+      sem.operations[op_id] = OperationDef.model_validate(raw)
+  return sem
+
+
+def test_autowire_spec_and_metadata_isolation() -> None:
+  """Verify `AutoWireSpec` storage and `HookContext.metadata` per-instance isolation."""
   spec = AutoWireSpec(ops={"test_op": {"api": "test_api"}})
   assert spec.ops is not None
-  assert "test_op" in spec.ops
   op_entry = spec.ops["test_op"]
   assert isinstance(op_entry, dict)
   assert op_entry["api"] == "test_api"
 
+  sem = _build_semantics_fixture()
+  cfg = RuntimeConfig(source_framework="torch", target_framework="jax", plugin_settings={"any_key": 123})
+  ctx1 = HookContext(sem, cfg)
+  ctx2 = HookContext(sem, cfg)
+  ctx1.metadata["scope_id"] = 1
+  nested: dict[str, JsonValue] = {"flag": True}
+  ctx1.metadata["plugin_data"] = nested
 
-def test_hookcontext_init() -> None:
-  """Verifies the proper initialization of the HookContext object.
-
-  Ensures that HookContext correctly receives, stores, and exposes dependencies
-  such as SemanticsManager, RuntimeConfig, injectors, and the symbol table,
-  along with proper default values for metadata and operation status.
-
-  Args:
-      None
-
-  Returns:
-      None
-  """
-  semantics = MagicMock()
-  config = RuntimeConfig(source_framework="torch", target_framework="jax")
-  arg_injector = MagicMock()
-  preamble_injector = MagicMock()
-  symbol_table = MagicMock()
-
-  ctx = HookContext(semantics, config, arg_injector, preamble_injector, symbol_table)
-  assert ctx.semantics == semantics
-  assert ctx._runtime_config == config
-  assert ctx._arg_injector == arg_injector
-  assert ctx._preamble_injector == preamble_injector
-  assert ctx._symbol_table == symbol_table
-  assert ctx.source_framework == "torch"
-  assert ctx.target_framework == "jax"
-  assert ctx.metadata == {}
-  assert ctx.current_op_id is None
+  assert "scope_id" not in ctx2.metadata
+  assert "plugin_data" not in ctx2.metadata
+  assert ctx1.raw_config("any_key", default=999) == 123
+  assert ctx1.raw_config("missing_key", default="fallback") == "fallback"
 
 
-def test_hookcontext_resolve_type() -> None:
-  """Verifies that HookContext.resolve_type resolves node types correctly.
+def test_hook_context_symbol_table_traits_variants_and_settings() -> None:
+  """Verify `resolve_type`, `plugin_traits`, `current_variant`, `lookup_api`, `lookup_signature`, and settings."""
+  sem = _build_semantics_fixture()
+  sym_table = SymbolTable()
+  t_node = cst.Name("t")
+  m_node = cst.Name("m")
+  i_node = cst.Name("i")
+  u_node = cst.Name("u")
+  sym_table.record_type(t_node, SymbolType("torch.Tensor"))
+  sym_table.record_type(m_node, SymbolType("torch.nn.Module"))
+  sym_table.record_type(i_node, SymbolType("int"))
 
-  Tests different return cases of the symbol table type-resolution, including
-  mapping to Tensor, Module, other types, and handling of None outcomes.
+  injected_args: list[tuple[str, str | None]] = []
+  injected_preambles: list[str] = []
+  ctx = HookContext(
+    semantics=sem,
+    config=RuntimeConfig(
+      source_framework="torch",
+      target_framework="jax",
+      plugin_settings={"epsilon": 0.001, "extra_ignored": True},
+    ),
+    arg_injector=lambda name, ann: injected_args.append((name, ann)),
+    preamble_injector=injected_preambles.append,
+    symbol_table=sym_table,
+  )
 
-  Args:
-      None
+  # Symbol table resolution and missing symbol table fallback
+  assert ctx.resolve_type(t_node) == "Tensor"
+  assert ctx.resolve_type(m_node) == "Module"
+  assert ctx.resolve_type(i_node) == "int"
+  assert ctx.resolve_type(u_node) is None
 
-  Returns:
-      None
-  """
-  symbol_table = MagicMock()
-  mock_sym = MagicMock()
-  mock_sym.name = "Tensor"
-  symbol_table.get_type.return_value = mock_sym
+  no_sym_ctx = HookContext(semantics=None, config=RuntimeConfig(target_framework="jax"))
+  assert no_sym_ctx.resolve_type(t_node) is None
 
-  import libcst as cst
+  # Injectors present vs None
+  ctx.inject_signature_arg("rng", "jax.Array")
+  ctx.inject_preamble("import math")
+  assert injected_args == [("rng", "jax.Array")]
+  assert injected_preambles == ["import math"]
+  no_sym_ctx.inject_signature_arg("x", "int")
+  no_sym_ctx.inject_preamble("import os")
 
-  ctx = HookContext(semantics=MagicMock(), config=RuntimeConfig(), symbol_table=symbol_table)
-  node = cst.Name("node")
+  # Settings validation success and failure
+  class _PluginSchema(BaseModel):
+    """Pydantic plugin settings schema."""
 
-  # Tensor
-  assert ctx.resolve_type(node) == "Tensor"
+    epsilon: float = 1e-5
 
-  # Module
-  mock_sym.name = "torch.nn.Module"
-  assert ctx.resolve_type(node) == "Module"
+  validated = ctx.validate_settings(_PluginSchema)
+  assert validated.epsilon == 0.001
+  assert "extra_ignored" not in type(validated).model_fields
 
-  # Other
-  mock_sym.name = "int"
-  assert ctx.resolve_type(node) == "int"
+  bad_ctx = HookContext(sem, RuntimeConfig(plugin_settings={"epsilon": "not_a_float"}))
+  with pytest.raises(ValidationError):
+    bad_ctx.validate_settings(_PluginSchema)
 
-  # None cases
-  symbol_table.get_type.return_value = None
-  assert ctx.resolve_type(node) is None
+  # `plugin_traits` across dict, PluginTraits instance, unsupported value, empty dict, None config, None semantics
+  assert no_sym_ctx.plugin_traits.requires_explicit_rng is False
+  sem.framework_configs["jax"] = {"plugin_traits": {"requires_explicit_rng": True, "has_numpy_compatible_arrays": True}}
+  assert ctx.plugin_traits.requires_explicit_rng is True
+  assert ctx.plugin_traits.has_numpy_compatible_arrays is True
 
-  ctx._symbol_table = None
-  assert ctx.resolve_type(node) is None
+  explicit_traits = PluginTraits(requires_explicit_rng=True)
+  mock_sem = MagicMock(spec=SemanticsManager)
+  mock_sem.get_framework_config.return_value = {"plugin_traits": explicit_traits}
+  assert HookContext(mock_sem, RuntimeConfig(target_framework="jax")).plugin_traits is explicit_traits
 
+  raw_cfgs: list[dict[str, JsonValue] | None] = [{"plugin_traits": "unsupported"}, {"plugin_traits": {}}, {}, None]
+  for raw_cfg in raw_cfgs:
+    mock_sem.get_framework_config.return_value = raw_cfg
+    assert isinstance(HookContext(mock_sem, RuntimeConfig(target_framework="jax")).plugin_traits, PluginTraits)
 
-def test_hookcontext_plugin_traits() -> None:
-  """Verifies retrieval of custom plugin traits within the HookContext.
-
-  Ensures that framework-specific plugin traits can be correctly read
-  and parsed from the semantics manager, whether provided as dictionaries,
-  PluginTraits objects, or when configurations/semantics are missing.
-
-  Args:
-      None
-
-  Returns:
-      None
-  """
-  semantics = MagicMock()
-
-  # Dict traits
-  semantics.get_framework_config.return_value = {"plugin_traits": {"has_numpy_compatible_arrays": True}}
-  ctx = HookContext(semantics=semantics, config=RuntimeConfig(target_framework="jax"))
-  traits = ctx.plugin_traits
-  assert traits.has_numpy_compatible_arrays is True
-
-  # No traits in config
-  semantics.get_framework_config.return_value = {}
-  traits = ctx.plugin_traits
-  assert traits.has_numpy_compatible_arrays is False
-
-  # Object traits
-  from ml_switcheroo.semantics.schema import PluginTraits
-
-  semantics.get_framework_config.return_value = {"plugin_traits": PluginTraits(has_numpy_compatible_arrays=True)}
-  traits = ctx.plugin_traits
-  assert traits.has_numpy_compatible_arrays is True
-
-  # None config
-  semantics.get_framework_config.return_value = None
-  traits = ctx.plugin_traits
-  assert traits.has_numpy_compatible_arrays is False
-
-  # None semantics
-  ctx2 = HookContext(semantics=None, config=RuntimeConfig(target_framework="jax"))
-  traits2 = ctx2.plugin_traits
-  assert traits2.has_numpy_compatible_arrays is False
-
-
-def test_hookcontext_current_variant() -> None:
-  """Verifies HookContext.current_variant correctly resolves the current framework variant.
-
-  Tests the integration with the semantics manager's variant resolution
-  to fetch the correct FrameworkVariant based on the current operation ID,
-  and confirms graceful handling when no variant, operation, or semantics
-  manager is set.
-
-  Args:
-      None
-
-  Returns:
-      None
-  """
-  semantics = MagicMock()
-  semantics.resolve_variant.return_value = {"api": "jax.numpy.add", "pack_to_tuple": "True"}
-
-  ctx = HookContext(semantics=semantics, config=RuntimeConfig(target_framework="jax"))
-  ctx.current_op_id = "Add"
-
-  variant = ctx.current_variant
-  assert variant is not None
-  assert variant.api == "jax.numpy.add"
-  assert variant.pack_to_tuple == "True"
-
-  # No target variant
-  semantics.resolve_variant.return_value = None
+  # `current_variant`, `lookup_api`, and `lookup_signature`
   assert ctx.current_variant is None
+  ctx_with_op = HookContext(sem, RuntimeConfig(target_framework="jax"))
+  ctx_with_op.current_op_id = "add"
+  resolved_var = ctx_with_op.current_variant
+  assert resolved_var is not None
+  assert resolved_var.api == "jax.numpy.add"
+  assert resolved_var.pack_to_tuple == "axes"
 
-  # No semantics/current_op
-  ctx.current_op_id = None
-  assert ctx.current_variant is None
-  ctx.current_op_id = "Add"
-  ctx.semantics = None
-  assert ctx.current_variant is None
+  ctx_missing_op = HookContext(sem, RuntimeConfig(target_framework="jax"))
+  ctx_missing_op.current_op_id = "missing"
+  assert ctx_missing_op.current_variant is None
+  assert no_sym_ctx.current_variant is None
 
+  direct_variant = FrameworkVariant(api="jax.numpy.subtract")
+  mock_sem.resolve_variant.return_value = direct_variant
+  direct_ctx = HookContext(mock_sem, RuntimeConfig(target_framework="jax"))
+  direct_ctx.current_op_id = "sub"
+  assert direct_ctx.current_variant is direct_variant
 
-def test_hookcontext_injectors() -> None:
-  """Verifies the behavior of argument and preamble injectors in HookContext.
+  mock_sem.resolve_variant.return_value = 123
+  invalid_ctx = HookContext(mock_sem, RuntimeConfig(target_framework="jax"))
+  invalid_ctx.current_op_id = "sub"
+  assert invalid_ctx.current_variant is None
+  assert invalid_ctx.lookup_api("sub") is None
 
-  Ensures that calling inject_signature_arg or inject_preamble properly
-  delegates to their respective callback handlers when configured, and
-  does not raise errors when no injector callbacks are registered.
+  mock_sem.resolve_variant.return_value = {"api": 999}
+  assert invalid_ctx.lookup_api("sub") is None
 
-  Args:
-      None
+  assert ctx.lookup_api("add") == "jax.numpy.add"
+  assert HookContext(sem, RuntimeConfig(target_framework="numpy")).lookup_api("add") == "numpy.add"
+  assert HookContext(sem, RuntimeConfig(target_framework="tensorflow")).lookup_api("add") is None
+  assert ctx.lookup_api("unknown_op") is None
+  assert ctx.lookup_api("complex") is None
+  assert no_sym_ctx.lookup_api("add") is None
 
-  Returns:
-      None
-  """
-  arg_inj = MagicMock()
-  preamble_inj = MagicMock()
-  ctx = HookContext(semantics=MagicMock(), config=RuntimeConfig(), arg_injector=arg_inj, preamble_injector=preamble_inj)
-
-  ctx.inject_signature_arg("x", "int")
-  arg_inj.assert_called_with("x", "int")
-
-  ctx.inject_preamble("print('test')")
-  preamble_inj.assert_called_with("print('test')")
-
-  # Should not crash if injectors are None
-  ctx2 = HookContext(semantics=MagicMock(), config=RuntimeConfig(), arg_injector=None, preamble_injector=None)
-  ctx2.inject_signature_arg("x", "int")
-  ctx2.inject_preamble("print('test')")
-
-
-def test_hookcontext_config() -> None:
-  """Verifies that raw configuration values can be retrieved via HookContext.
-
-  Validates that custom plugin configuration settings can be read by key
-  from the underlying runtime configuration, and that requested missing
-  keys fall back to their specified default values.
-
-  Args:
-      None
-
-  Returns:
-      None
-  """
-  config = RuntimeConfig(plugin_settings={"test_key": "test_val"})
-  ctx = HookContext(semantics=MagicMock(), config=config)
-
-  assert ctx.raw_config("test_key") == "test_val"
-  assert ctx.raw_config("missing_key", "default") == "default"
+  assert ctx.lookup_signature("add") == ["x1", "x2"]
+  assert ctx.lookup_signature("abs") == ["x", "out", "plain_arg"]
+  assert ctx.lookup_signature("bad_sig") == []
+  assert ctx.lookup_signature("unknown_op") == []
+  assert no_sym_ctx.lookup_signature("add") == []
 
 
-def test_hookcontext_validate_settings() -> None:
-  """Verifies HookContext.validate_settings correctly parses and validates Pydantic schemas.
-
-  Tests the parsing mechanism of custom configuration dictionaries using a Pydantic
-  model, confirming that input values are properly typed and extra fields are filtered out.
+def test_hook_registry_lifecycle_autowire_and_loader(tmp_path: Path) -> None:
+  """Verify `HookRegistry`, `register_hook`, `bind_hook_registry`, and `_import_from_dir` discovery.
 
   Args:
-      None
-
-  Returns:
-      None
+      tmp_path: Pytest temporary directory fixture.
   """
-  from pydantic import BaseModel
+  reg = get_default_hook_registry()
+  clear_hooks(mark_loaded=True)
+  assert len(reg.hooks) == 0
+  assert get_hook("unknown_magic") is None
 
-  class TestSettings(BaseModel):
-    """Pydantic model representing mock plugin configuration settings for testing.
+  @register_hook("sig_test")
+  def _rename_call(node: cst.Call, _ctx: HookContext) -> cst.Call:
+    """Rewrite call callee to `visited`.
 
-    Attributes:
-        val1 (str): A required string parameter.
-        val2 (int): An optional integer parameter, defaulting to 0.
+    Args:
+        node: Input `cst.Call`.
+        _ctx: Active `HookContext`.
+
+    Returns:
+        Updated `cst.Call`.
     """
+    return node.with_changes(func=cst.Name("visited"))
 
-    val1: str
-    val2: int = 0
+  hook = get_hook("sig_test")
+  assert hook is not None
+  res_node = hook(cst.Call(func=cst.Name("orig")), HookContext(None, RuntimeConfig()))
+  assert isinstance(res_node, cst.Call)
+  assert cst.ensure_type(res_node.func, cst.Name).value == "visited"
 
-  config = RuntimeConfig(plugin_settings={"val1": "test", "val2": 1, "extra": True})
-  ctx = HookContext(semantics=MagicMock(), config=config)
+  # Overwriting an existing hook trigger replaces the handler
+  @register_hook("conflict")
+  def _hook_a(node: cst.CSTNode, _ctx: HookContext) -> cst.CSTNode:
+    """First conflict handler.
 
-  validated = ctx.validate_settings(TestSettings)
-  assert validated.val1 == "test"
-  assert validated.val2 == 1
-  assert not _test_hasattr(validated, "extra")
+    Args:
+        node: Input CST node.
+        _ctx: Active `HookContext`.
 
+    Returns:
+        `cst.Name('A')`.
+    """
+    _ = node
+    return cst.Name("A")
 
-def test_hookcontext_lookup_api() -> None:
-  """Verifies HookContext.lookup_api retrieves the mapped target API name for an operation.
+  @register_hook("conflict")
+  def _hook_b(node: cst.CSTNode, _ctx: HookContext) -> cst.CSTNode:
+    """Replacement conflict handler.
 
-  Tests that the context queries the semantics manager for the correct variant API
-  mapping associated with a given operation identifier, handling cases of missing
-  variants or missing semantics.
+    Args:
+        node: Input CST node.
+        _ctx: Active `HookContext`.
 
-  Args:
-      None
+    Returns:
+        `cst.Name('B')`.
+    """
+    _ = node
+    return cst.Name("B")
 
-  Returns:
-      None
-  """
-  semantics = MagicMock()
-  semantics.resolve_variant.return_value = {"api": "jax.numpy.add"}
-  ctx = HookContext(semantics=semantics, config=RuntimeConfig(target_framework="jax"))
+  conflict_fn = get_hook("conflict")
+  assert conflict_fn is not None
+  assert cst.ensure_type(conflict_fn(cst.Name("x"), HookContext(None, RuntimeConfig())), cst.Name).value == "B"
 
-  assert ctx.lookup_api("Add") == "jax.numpy.add"
+  # Non-callable guard
+  with pytest.raises(PluginLoadError, match="must be callable"):
+    register_hook("bad_trigger")(123)
 
-  semantics.resolve_variant.return_value = None
-  assert ctx.lookup_api("Add") is None
+  isolated = HookRegistry(plugins_loaded=True)
+  with pytest.raises(PluginLoadError, match="must be callable"):
+    isolated.register("bad_isolated")(None)
 
-  ctx.semantics = None
-  assert ctx.lookup_api("Add") is None
+  set_plugins_loaded(True)
+  assert get_default_hook_registry().plugins_loaded is True
+  set_plugins_loaded(False)
+  assert get_default_hook_registry().plugins_loaded is False
 
+  # Auto-wire metadata and isolated registry execution via ASTEngine
+  clear_hooks(mark_loaded=True)
 
-def test_hookcontext_lookup_signature() -> None:
-  """Verifies HookContext.lookup_signature parses and builds an operation's argument list.
+  @register_hook("auto_hook", auto_wire={"operation": "Op", "description": "doc", "variants": {}})
+  def _auto(node: cst.CSTNode, _ctx: HookContext) -> cst.CSTNode:
+    """Auto-wired hook stub.
 
-  Tests that the signature parser correctly handles standard argument definitions
-  in various configurations (such as standard strings, nested lists, and dictionary
-  records), safely returning an empty list if definitions or semantics are missing.
+    Args:
+        node: Input CST node.
+        _ctx: Active `HookContext`.
 
-  Args:
-      None
+    Returns:
+        Unchanged `node`.
+    """
+    return node
 
-  Returns:
-      None
-  """
-  semantics = MagicMock()
+  assert "auto_hook" in get_all_hook_metadata()
 
-  # Test different list types in std_args
-  semantics.get_definition_by_id.return_value = {
-    "std_args": [
-      "arg1",
-      ["arg2", "type2"],
-      {"name": "arg3", "type": "type3"},
-      {"type": "type4"},  # Missing name
-    ]
+  @isolated.register("isolated_op", auto_wire={"ops": {"CustomOp": {}}})
+  def _isolated_hook(_node: cst.Call, _ctx: HookContext) -> cst.CSTNode:
+    """Replace calls with `isolated_ok`.
+
+    Args:
+        _node: Input `cst.Call`.
+        _ctx: Active `HookContext`.
+
+    Returns:
+        `cst.Name('isolated_ok')`.
+    """
+    return cst.Name("isolated_ok")
+
+  assert HookContext(None, RuntimeConfig(), hook_registry=isolated).hook_registry is isolated
+  with bind_hook_registry(isolated):
+    assert get_hook("isolated_op") is _isolated_hook
+
+  sem = SemanticsManager(load_defaults=False)
+  raw_custom: dict[str, JsonValue] = {
+    "operation": "CustomOp",
+    "std_args": ["x"],
+    "variants": {
+      "torch": {"api": "torch.custom_fn"},
+      "jax": {"api": "jax.custom_fn", "requires_plugin": "isolated_op"},
+    },
   }
+  sem.data["CustomOp"] = raw_custom
+  sem.operations["CustomOp"] = OperationDef.model_validate(raw_custom)
+  sem._build_index()
 
-  ctx = HookContext(semantics=semantics, config=RuntimeConfig())
-  assert ctx.lookup_signature("Add") == ["arg1", "arg2", "arg3"]
+  engine_res = ASTEngine(
+    semantics=sem,
+    config=RuntimeConfig(source_framework="torch", target_framework="jax"),
+    hook_registry=isolated,
+  ).run(
+    textwrap.dedent(
+      """
+      import torch
+      y = torch.custom_fn(x)
+      """
+    )
+  )
+  assert engine_res.success is True
+  assert "isolated_ok" in engine_res.code
 
-  semantics.get_definition_by_id.return_value = None
-  assert ctx.lookup_signature("Add") == []
+  # Lazy load, custom plugin directory, missing directories, syntax errors, null spec, and reload
+  clear_hooks(mark_loaded=False)
+  with patch.object(reg, "load_plugins", return_value=0) as mock_load:
+    assert get_hook("nonexistent") is None
+    mock_load.assert_called_once()
 
-  ctx.semantics = None
-  assert ctx.lookup_signature("Add") == []
+  plugin_dir = tmp_path / "custom_plugins"
+  plugin_dir.mkdir()
+  (plugin_dir / "my_plugin.py").write_text(
+    textwrap.dedent(
+      """
+      from ml_switcheroo.core.hooks import register_hook
+
+      @register_hook('custom_trigger')
+      def my_hook(node, ctx):
+        return node
+      """
+    ),
+    encoding="utf-8",
+  )
+  clear_hooks(mark_loaded=False)
+  assert load_plugins(extra_dirs=[plugin_dir]) > 0
+  assert "custom_trigger" in reg.hooks
+  assert get_hook("inject_prng") is not None
+
+  assert load_plugins(plugins_dir=tmp_path / "missing", extra_dirs=[tmp_path / "missing2"]) == 0
+
+  bad_dir = tmp_path / "bad"
+  bad_dir.mkdir()
+  (bad_dir / "bad_mod.py").write_text("invalid python [", encoding="utf-8")
+  with patch("logging.Logger.warning") as mock_warn:
+    assert _import_from_dir(bad_dir, base_package=None) == 0
+    mock_warn.assert_called_once()
+
+  spec_dir = tmp_path / "null_spec"
+  spec_dir.mkdir()
+  (spec_dir / "plugin_mod.py").write_text("x = 1", encoding="utf-8")
+  with (
+    patch("importlib.util.spec_from_file_location", return_value=None),
+    patch("logging.Logger.warning") as mock_warn_spec,
+  ):
+    assert _import_from_dir(spec_dir, base_package=None) == 0
+    mock_warn_spec.assert_called_once()
+
+  mod_dir = tmp_path / "mods"
+  mod_dir.mkdir()
+  (mod_dir / "good_mod.py").write_text("x = 1", encoding="utf-8")
+  assert _import_from_dir(mod_dir, base_package=None) == 1
+  assert _import_from_dir(mod_dir, base_package=None) == 1
+
+  pkg_parent = tmp_path / "pkg_root"
+  pkg_dir = pkg_parent / "temp_hook_pkg"
+  pkg_dir.mkdir(parents=True)
+  (pkg_dir / "__init__.py").write_text("", encoding="utf-8")
+  (pkg_dir / "sample_hook_mod.py").write_text("VALUE = 1", encoding="utf-8")
+  sys.path.insert(0, str(pkg_parent))
+  try:
+    assert _import_from_dir(pkg_dir, base_package="temp_hook_pkg") == 1
+    assert _import_from_dir(pkg_dir, base_package="temp_hook_pkg") == 1
+  finally:
+    sys.path.remove(str(pkg_parent))
+    sys.modules.pop("temp_hook_pkg.sample_hook_mod", None)
+    sys.modules.pop("temp_hook_pkg", None)

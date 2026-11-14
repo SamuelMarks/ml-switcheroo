@@ -1,9 +1,8 @@
 """Unit tests for the Intermediate Representation (IR) Framework Adapter."""
 
-from tests.conftest import _test_getattr, _test_hasattr
-
 import json
 
+from ml_switcheroo_ir import LogicalGraph
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 from ml_switcheroo.frameworks import available_frameworks, get_adapter
@@ -26,11 +25,13 @@ def test_ir_adapter_registration() -> None:
 def test_ir_adapter_basic_properties() -> None:
   """Verify metadata properties on the IrAdapter and IrPythonAdapter."""
   adapter = IrAdapter()
+  from ml_switcheroo.frameworks.base import FrameworkSnapshot
+
   assert adapter.display_name == "ML-Switcheroo IR (JSON)"
   assert adapter.inherits_from is None
   assert adapter.ui_priority == 85
   assert adapter._mode.value == "live"
-  assert adapter._snapshot_data == {}
+  assert adapter._snapshot_data == FrameworkSnapshot()
 
   py_adapter = IrPythonAdapter()
   assert py_adapter.display_name == "ML-Switcheroo IR (Python)"
@@ -102,7 +103,7 @@ def test_ir_adapter_traits_and_specs() -> None:
   assert not structural.requires_super_init
 
   plugin = adapter.plugin_traits
-  assert plugin.model_extra is not None or _test_hasattr(plugin, "supports_dynamic_shapes")
+  assert plugin.supports_dynamic_shapes is True
 
 
 def test_ir_adapter_device_and_rng() -> None:
@@ -117,7 +118,7 @@ def test_ir_adapter_device_and_rng() -> None:
   assert adapter.get_device_check_syntax() == "True"
 
   rng_split = adapter.get_rng_split_syntax("rng_in", "key_out")
-  assert "key_out = sw_ir.split_prng(rng_in)" == rng_split
+  assert rng_split == "key_out = sw_ir.split_prng(rng_in)"
 
 
 def test_ir_adapter_serialization_and_weights() -> None:
@@ -161,8 +162,8 @@ def test_ir_adapter_convert() -> None:
   json_str = json.dumps(graph_dict)
 
   converted = adapter.convert(json_str)
-  assert _test_hasattr(converted, "name")
-  assert _test_getattr(converted, "name") == "LinearNet"
+  assert isinstance(converted, LogicalGraph)
+  assert converted.name == "LinearNet"
 
   invalid_str = "not a valid json {{"
   assert adapter.convert(invalid_str) == invalid_str
@@ -201,3 +202,4 @@ def test_ir_adapter_definitions() -> None:
   adapter = IrAdapter()
   defs = adapter.definitions
   assert isinstance(defs, dict)
+  assert defs == {}

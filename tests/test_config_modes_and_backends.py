@@ -12,6 +12,7 @@ from ml_switcheroo.config import (
   ExecutionBackend,
   OptimizationLevel,
   RuntimeConfig,
+  RuntimeConfigOverrides,
 )
 from ml_switcheroo.core.engine import ASTEngine
 
@@ -110,12 +111,14 @@ emit_backward_code = true
 
   # Override TOML via explicit arguments
   cfg_override = RuntimeConfig.load(
-    search_path=tmp_path,
-    mode=ConversionMode.PRESERVE_TRIVIA,
-    opt_level=OptimizationLevel.O1,
-    execution_backend=ExecutionBackend.WASM_SIMD,
-    enable_on_device_execution=False,
-    emit_backward_code=False,
+    RuntimeConfigOverrides(
+      search_path=tmp_path,
+      mode=ConversionMode.PRESERVE_TRIVIA,
+      opt_level=OptimizationLevel.O1,
+      execution_backend=ExecutionBackend.WASM_SIMD,
+      enable_on_device_execution=False,
+      emit_backward_code=False,
+    )
   )
   assert cfg_override.mode == ConversionMode.PRESERVE_TRIVIA
   assert cfg_override.enable_graph_optimization is False
@@ -126,9 +129,11 @@ emit_backward_code = true
 
   # Explicit mode + explicit enable_graph_optimization
   cfg_both = RuntimeConfig.load(
-    search_path=tmp_path,
-    mode="preserve_trivia",
-    enable_graph_optimization=False,
+    RuntimeConfigOverrides(
+      search_path=tmp_path,
+      mode="preserve_trivia",
+      enable_graph_optimization=False,
+    )
   )
   assert cfg_both.mode == ConversionMode.PRESERVE_TRIVIA
   assert cfg_both.enable_graph_optimization is False
@@ -136,24 +141,27 @@ emit_backward_code = true
 
 def test_ast_engine_and_sdk_convert_with_mode_and_backend() -> None:
   """Verify ASTEngine and ml_switcheroo.convert accept mode, opt_level, and backend."""
-  base_cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
-  eng = ASTEngine(
-    config=base_cfg,
+  base_cfg = RuntimeConfig(
+    source_framework="torch",
+    target_framework="jax",
     mode=ConversionMode.OPTIMIZED,
     opt_level=OptimizationLevel.O3,
     execution_backend=ExecutionBackend.METAL,
   )
+  eng = ASTEngine(config=base_cfg)
   assert eng.config.mode == ConversionMode.OPTIMIZED
   assert eng.config.enable_graph_optimization is True
   assert eng.config.opt_level == OptimizationLevel.O3
   assert eng.config.execution_backend == ExecutionBackend.METAL
 
-  eng2 = ASTEngine(
-    source="torch",
-    target="jax",
-    mode="preserve_trivia",
-    opt_level="O1",
-    execution_backend="webgpu",
+  eng2 = ASTEngine.from_options(
+    RuntimeConfigOverrides(
+      source="torch",
+      target="jax",
+      mode="preserve_trivia",
+      opt_level="O1",
+      execution_backend="webgpu",
+    )
   )
   assert eng2.config.mode == ConversionMode.PRESERVE_TRIVIA
   assert eng2.config.opt_level == OptimizationLevel.O1
@@ -171,9 +179,11 @@ def fn(x):
     code,
     source="torch",
     target="jax",
-    mode="preserve_trivia",
-    opt_level="O2",
-    backend="webgpu",
+    options=mls.ConvertOptions(
+      mode="preserve_trivia",
+      opt_level="O2",
+      backend="webgpu",
+    ),
   )
   assert "# Header trivia comment" in out
   assert "# Inline trivia comment" in out
@@ -215,8 +225,8 @@ def f(x):
       ]
     )
     assert rc == 0
-    kwargs = mock_conv.call_args.kwargs
-    assert kwargs["mode"] == "optimized"
-    assert kwargs["opt_level"] == "O3"
-    assert kwargs["execution_backend"] == "webgpu"
-    assert kwargs["enable_on_device_execution"] is True
+    opts = mock_conv.call_args[0][0]
+    assert opts.mode == "optimized"
+    assert opts.opt_level == "O3"
+    assert opts.execution_backend == "webgpu"
+    assert opts.enable_on_device_execution is True

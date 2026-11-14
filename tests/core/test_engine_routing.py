@@ -1,6 +1,4 @@
-"""Test suite for the Engine Routing module."""
-
-from tests.conftest import _test_getattr, _test_setattr
+"""Test suite for ASTEngine compiler vs AST rewriter pipeline routing."""
 
 from unittest.mock import MagicMock, patch
 
@@ -12,116 +10,89 @@ from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-@pytest.fixture
-def mock_managers() -> MagicMock:
-  """Execute mock managers helper logic.
+@pytest.fixture(scope="module")
+def real_semantics() -> SemanticsManager:
+  """Provide a real ``SemanticsManager`` instance for pipeline routing verification.
 
   Returns:
-      Configured `mock_managers` fixture value (MagicMock).
+      Initialized ``SemanticsManager``.
   """
-  sem = MagicMock(spec=SemanticsManager)
-  sem.get_framework_config.return_value = {}
-  return sem
+  return SemanticsManager()
 
 
-def test_routing_to_compiler_pipeline_target_isa(mock_managers: MagicMock) -> None:
-  """Verifies the behavior of routing to compiler pipeline target isa.
+def test_routing_to_compiler_pipeline_target_isa(real_semantics: SemanticsManager) -> None:
+  """Verify targeting ``nvidia_sass`` routes through the compiler pipeline and emits SASS.
 
   Args:
-      mock_managers: The mock managers (MagicMock) for test routing to compiler pipeline target isa.
+      real_semantics: Shared ``SemanticsManager`` instance.
   """
   config = RuntimeConfig(source_framework="torch", target_framework="nvidia_sass")
-  engine = ASTEngine(mock_managers, config)
-  _test_setattr(engine, "_run_compiler_pipeline", MagicMock())
-  _test_setattr(engine, "_run_rewriter_pipeline", MagicMock())
-  engine.run("code")
-  _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": engine}, "__getitem__")("v")._run_compiler_pipeline}, "__getitem__")(
-        "v"
-      ).assert_called_once
-    },
-    "__getitem__",
-  )("v")()
-  _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": engine}, "__getitem__")("v")._run_rewriter_pipeline}, "__getitem__")(
-        "v"
-      ).assert_not_called
-    },
-    "__getitem__",
-  )("v")()
+  engine = ASTEngine(real_semantics, config)
+  src = """def f(x):
+  return x
+"""
+  with (
+    patch.object(engine, "_run_compiler_pipeline", wraps=engine._run_compiler_pipeline) as spy_compiler,
+    patch.object(engine, "_run_rewriter_pipeline", wraps=engine._run_rewriter_pipeline) as spy_rewriter,
+  ):
+    res = engine.run(src)
+  assert spy_compiler.call_count == 1
+  assert spy_rewriter.call_count == 0
+  assert res.success is True
 
 
-def test_routing_to_compiler_pipeline_source_isa(mock_managers: MagicMock) -> None:
-  """Verifies the behavior of routing to compiler pipeline source isa.
+def test_routing_to_compiler_pipeline_source_isa(real_semantics: SemanticsManager) -> None:
+  """Verify sourcing from ``rdna`` routes through the compiler pipeline to emit Python.
 
   Args:
-      mock_managers: The mock managers (MagicMock) for test routing to compiler pipeline source isa.
+      real_semantics: Shared ``SemanticsManager`` instance.
   """
   config = RuntimeConfig(source_framework="rdna", target_framework="torch")
-  engine = ASTEngine(mock_managers, config)
-  _test_setattr(engine, "_run_compiler_pipeline", MagicMock())
-  _test_setattr(engine, "_run_rewriter_pipeline", MagicMock())
-  engine.run("code")
-  _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": engine}, "__getitem__")("v")._run_compiler_pipeline}, "__getitem__")(
-        "v"
-      ).assert_called_once
-    },
-    "__getitem__",
-  )("v")()
-  _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": engine}, "__getitem__")("v")._run_rewriter_pipeline}, "__getitem__")(
-        "v"
-      ).assert_not_called
-    },
-    "__getitem__",
-  )("v")()
+  engine = ASTEngine(real_semantics, config)
+  with (
+    patch.object(engine, "_run_compiler_pipeline", wraps=engine._run_compiler_pipeline) as spy_compiler,
+    patch.object(engine, "_run_rewriter_pipeline", wraps=engine._run_rewriter_pipeline) as spy_rewriter,
+  ):
+    res = engine.run("v_add_f32 v0, v1, v2")
+  assert spy_compiler.call_count == 1
+  assert spy_rewriter.call_count == 0
+  assert res.success is True
+  assert "def " in res.code or "v0" in res.code or res.code != ""
 
 
-def test_routing_to_rewriter_pipeline_high_level(mock_managers: MagicMock) -> None:
-  """Verifies the behavior of routing to rewriter pipeline high level.
+def test_routing_to_rewriter_pipeline_high_level(real_semantics: SemanticsManager) -> None:
+  """Verify high-level ``torch -> jax`` conversion routes through the AST rewriter pipeline.
 
   Args:
-      mock_managers: The mock managers (MagicMock) for test routing to rewriter pipeline high level.
+      real_semantics: Shared ``SemanticsManager`` instance.
   """
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
-  engine = ASTEngine(mock_managers, config)
-  _test_setattr(engine, "_run_compiler_pipeline", MagicMock())
-  _test_setattr(engine, "_run_rewriter_pipeline", MagicMock())
-  engine.run("code")
-  _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": engine}, "__getitem__")("v")._run_rewriter_pipeline}, "__getitem__")(
-        "v"
-      ).assert_called_once
-    },
-    "__getitem__",
-  )("v")()
-  _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": engine}, "__getitem__")("v")._run_compiler_pipeline}, "__getitem__")(
-        "v"
-      ).assert_not_called
-    },
-    "__getitem__",
-  )("v")()
+  engine = ASTEngine(real_semantics, config)
+  src = """import torch
+def f(x):
+  return torch.abs(x)
+"""
+  with (
+    patch.object(engine, "_run_rewriter_pipeline", wraps=engine._run_rewriter_pipeline) as spy_rewriter,
+    patch.object(engine, "_run_compiler_pipeline", wraps=engine._run_compiler_pipeline) as spy_compiler,
+  ):
+    res = engine.run(src)
+  assert spy_rewriter.call_count == 1
+  assert spy_compiler.call_count == 0
+  assert res.success is True
+  assert "jnp.abs" in res.code or "jax.numpy.abs" in res.code
 
 
-def test_python_frontend_invoked_in_compiler_pipeline(mock_managers: MagicMock) -> None:
-  """Verifies the behavior of python frontend invoked in compiler pipeline.
-
-  Args:
-      mock_managers: The mock managers (MagicMock) for test python frontend invoked in compiler pipeline.
-  """
+def test_python_frontend_invoked_in_compiler_pipeline() -> None:
+  """Verify ``PythonFrontend`` is instantiated with input source in compiler pipeline."""
+  sem = MagicMock(spec=SemanticsManager)
+  sem.get_framework_config.return_value = {}
   config = RuntimeConfig(source_framework="torch", target_framework="nvidia_sass")
-  engine = ASTEngine(mock_managers, config)
-  with patch("ml_switcheroo.core.engine.PythonFrontend") as MockFront:
-    MockFront.return_value.parse_to_graph.return_value = LogicalGraph()
+  engine = ASTEngine(sem, config)
+  with patch("ml_switcheroo.core.engine.PythonFrontend") as mock_front:
+    mock_front.return_value.parse_to_graph.return_value = LogicalGraph()
     with patch("ml_switcheroo.core.engine.get_backend_class") as mock_get_backend:
       mock_get_backend.return_value = MagicMock()
-      engine.run("x=1")
-      MockFront.assert_called_with("x=1")
+      res = engine.run("x=1")
+      assert mock_front.call_args == (("x=1",),)
+      assert res is not None

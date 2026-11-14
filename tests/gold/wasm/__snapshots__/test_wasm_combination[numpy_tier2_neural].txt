@@ -1,0 +1,14 @@
+--- Forward ---
+import numpy as np
+
+# Tier 2: Neural Networks (Out of Scope for NumPy)
+# NumPy does not offer a built-in neural layer API.
+# While possible to write one from scratch, it is not
+# supported by the ml-switcheroo transpiler out-of-the-box.
+
+--- Backward ---
+
+# Tier 2: Neural Networks (Out of Scope for NumPy)
+# NumPy does not offer a built-in neural layer API.
+# While possible to write one from scratch, it is not
+# supported by the ml-switcheroo transpiler out-of-the-box.

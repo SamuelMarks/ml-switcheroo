@@ -5,14 +5,14 @@ import numpy.typing
 
 
 class LayerNormModel:
-  """Test helper class LayerNormModel."""
+  """Sentinel `LayerNormModel` fixture class used in numpy tests."""
 
   def __init__(self, normalized_shape: int, eps: float = 1e-05):
     """Initializes the LayerNormModel instance.
 
     Args:
-        normalized_shape: The normalized shape (int) for   init  .
-        eps: The eps (float) for   init  .
+        normalized_shape: Input `normalized_shape` parameter value (`int`).
+        eps: Input `eps` parameter value (`float`).
     """
     self.eps = eps
     self.gamma = np.ones(normalized_shape)

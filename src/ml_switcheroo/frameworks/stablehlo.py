@@ -5,14 +5,20 @@ This adapter acts as a metadata container for the Compiler Registry,
 identifying StableHLO as a target language and providing static definitions.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
-
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
 
 from ml_switcheroo.core.dsl import OperationDef
-from ml_switcheroo.frameworks.base import FrameworkAdapter, ImportConfig, InitMode, StandardMap, register_framework
+from ml_switcheroo.enums import RuntimeTensorOrValue
+from ml_switcheroo.frameworks.base import (
+  FrameworkAdapter,
+  FrameworkSnapshot,
+  ImportConfig,
+  InitMode,
+  SnapshotBackedAdapter,
+  StandardMap,
+  register_framework,
+)
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.semantics.schema import PluginTraits, StructuralTraits
 
@@ -24,6 +30,11 @@ class StableHloAdapter(FrameworkAdapter):
   This adapter implements the FrameworkAdapter interface to provide metadata,
   hooks, and configuration for compiling and executing StableHLO code,
   especially for targets like MLIR and PJRT/XLA.
+
+  Attributes:
+      display_name: The display name (`str`).
+      inherits_from: The inherits from (`str | None`).
+      ui_priority: The ui priority (`int`).
   """
 
   display_name: str = "StableHLO (MLIR)"
@@ -32,11 +43,10 @@ class StableHloAdapter(FrameworkAdapter):
   _mode: InitMode = InitMode.LIVE
 
   def __init__(self) -> None:
-    """Initialize the StableHLO adapter.
-
-    Does not require any custom state initialization.
-    """
-    pass
+    """Initialize the StableHLO adapter with typed ``FrameworkSnapshot`` storage."""
+    self._snapshot = SnapshotBackedAdapter("stablehlo", is_live_available=True)
+    self._mode: InitMode = self._snapshot.mode
+    self._snapshot_data: FrameworkSnapshot | None = self._snapshot.snapshot
 
   @property
   def import_alias(self) -> tuple[str, str]:
@@ -277,7 +287,6 @@ def _execute_mlir(mlir_code: str, *args: int | float | str | list | dict) -> int
     Args:
         snapshot: A dictionary containing the snapshot mappings and traits.
     """
-    pass
 
   def get_doc_url(self, api_name: str) -> str | None:
     """Get the official documentation URL for a given StableHLO operation or API name.

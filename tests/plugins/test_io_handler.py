@@ -1,7 +1,5 @@
 """Test suite for the Io Handler module."""
 
-from tests.conftest import _test_getattr
-
 import typing
 from unittest.mock import MagicMock, patch
 
@@ -36,8 +34,8 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   Yields:
       PivotRewriter: The testing rewriter instance.
   """
-  _test_getattr(hooks._HOOKS, "__setitem__")("io_handler", transform_io_calls)
-  hooks._PLUGINS_LOADED = True
+  hooks.register_hook("io_handler")(transform_io_calls)
+  hooks.set_plugins_loaded(True)
   mgr: MagicMock = MagicMock()
   io_def: dict[str, dict[str, dict[str, str]]] = {"variants": {"jax": {"requires_plugin": "io_handler"}}}
   mgr.get_definition.side_effect = lambda n: ("io", io_def) if n in ["torch.save", "torch.load"] else None
@@ -50,7 +48,7 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
 
 
 def test_save_transform_positional(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of save transform positional.
+  """Verify `rewrite_code` emits `import orbax.checkpoint` for save transform positional.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
@@ -65,7 +63,7 @@ def test_save_transform_positional(rewriter: PivotRewriter) -> None:
 
 
 def test_save_transform_keywords(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of save transform keywords.
+  """Verify `rewrite_code` emits `directory='p'` for save transform keywords.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
@@ -89,7 +87,7 @@ def test_load_transform(rewriter: PivotRewriter) -> None:
 
 
 def test_ignored_if_wrong_target(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of ignored if wrong target.
+  """Verify `rewrite_code` emits `torch.save` for ignored if wrong target.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
@@ -166,7 +164,7 @@ def test_transform_io_calls_misses() -> None:
     assert transform_io_calls(node_save, ctx) == node_save
 
   class BadAdapter:
-    """Test helper class BadAdapter."""
+    """Test double `BadAdapter` implementing `get_serialization_imports` for I/O handler tests."""
 
     def get_serialization_imports(self) -> list[str]:
       """Gets serialization imports.
@@ -176,13 +174,11 @@ def test_transform_io_calls_misses() -> None:
       """
       return []
 
-    pass
-
   with patch("ml_switcheroo.plugins.io_handler.get_adapter", return_value=BadAdapter()):
     assert transform_io_calls(node_save, ctx) == node_save
 
   class GoodAdapter:
-    """Test helper class GoodAdapter."""
+    """Test double `GoodAdapter` used in I/O handler tests."""
 
     def get_serialization_imports(self) -> list[str]:
       """Gets serialization imports.
@@ -224,7 +220,7 @@ def test_transform_io_calls_misses() -> None:
     assert transform_io_calls(node_bad_load, ctx) == node_bad_load
 
     class RaiseAdapter:
-      """Test helper class RaiseAdapter."""
+      """Test double `RaiseAdapter` used in I/O handler tests."""
 
       def get_serialization_imports(self) -> list[str]:
         """Gets serialization imports.

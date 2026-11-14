@@ -170,12 +170,11 @@ def handle_completion(shell: str) -> int:
   if clean_shell == "bash":
     sys.stdout.write(generate_bash_completion())
     return 0
-  elif clean_shell == "zsh":
+  if clean_shell == "zsh":
     sys.stdout.write(generate_zsh_completion())
     return 0
-  elif clean_shell == "fish":
+  if clean_shell == "fish":
     sys.stdout.write(generate_fish_completion())
     return 0
-  else:
-    sys.stderr.write(f"Unsupported shell '{shell}'. Supported shells: bash, zsh, fish" + chr(10))
-    return 1
+  sys.stderr.write(f"Unsupported shell '{shell}'. Supported shells: bash, zsh, fish" + chr(10))
+  return 1

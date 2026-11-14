@@ -1,120 +1,53 @@
-"""Test suite for analysis."""
+"""Unit tests for `NvidiaSassAnalyzer` (`ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis`)."""
 
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassImmediate,
   NvidiaSassInstruction,
+  NvidiaSassLabel,
+  NvidiaSassMemory,
+  NvidiaSassPredicate,
   NvidiaSassRegister,
 )
 
 
-def test_nvidia_sass_analyzer_empty() -> None:
-  """Verifies the behavior of nvidia_sass analyzer empty."""
+def test_nvidia_sass_analyzer_loop_bounds_and_op_kinds() -> None:
+  """Verify `NvidiaSassAnalyzer.analyze_block` across empty, loop-free, and loop-bounded operation blocks."""
   assert NvidiaSassAnalyzer.analyze_block("Conv2d", []) == {}
-
-
-def test_nvidia_sass_analyzer_no_loop_limits() -> None:
-  """Verifies the behavior of nvidia_sass analyzer no loop limits."""
-  inst = NvidiaSassInstruction(opcode="MOV", operands=[NvidiaSassRegister(name="R0"), NvidiaSassRegister(name="R1")])
-  assert NvidiaSassAnalyzer.analyze_block("Conv2d", [inst]) == {}
-
-
-def test_nvidia_sass_analyzer_conv2d() -> None:
-  """Verifies the behavior of nvidia_sass analyzer conv2d."""
-  inst = NvidiaSassInstruction(
-    opcode="ISETP.LT.AND",
-    operands=[
-      NvidiaSassRegister(name="P0"),
-      NvidiaSassRegister(name="PT"),
-      NvidiaSassRegister(name="R1"),
-      NvidiaSassImmediate(value=3),
-      NvidiaSassRegister(name="PT"),
-    ],
-  )
-  res = NvidiaSassAnalyzer.analyze_block("Conv2d", [inst])
-  assert res == {"kernel_size": 3, "arg_2": 3}
-
-
-def test_nvidia_sass_analyzer_linear() -> None:
-  """Verifies the behavior of nvidia_sass analyzer linear."""
-  inst = NvidiaSassInstruction(
-    opcode="ISETP.LT.AND",
-    operands=[
-      NvidiaSassRegister(name="P0"),
-      NvidiaSassRegister(name="PT"),
-      NvidiaSassRegister(name="R1"),
-      NvidiaSassImmediate(value=128),
-      NvidiaSassRegister(name="PT"),
-    ],
-  )
-  res = NvidiaSassAnalyzer.analyze_block("Linear", [inst])
-  assert res == {"in_features": 128, "arg_0": 128}
-
-
-def test_nvidia_sass_analyzer_conv3d() -> None:
-  """Verifies the behavior of nvidia_sass analyzer conv3d."""
-  inst = NvidiaSassInstruction(
-    opcode="ISETP.LT.AND",
-    operands=[
-      NvidiaSassRegister(name="P0"),
-      NvidiaSassRegister(name="PT"),
-      NvidiaSassRegister(name="R1"),
-      NvidiaSassImmediate(value=5),
-      NvidiaSassRegister(name="PT"),
-    ],
-  )
-  res = NvidiaSassAnalyzer.analyze_block("Conv3d", [inst])
-  assert res == {"kernel_size": 5, "arg_2": 5}
-
-
-def test_nvidia_sass_analyzer_mean() -> None:
-  """Verifies the behavior of nvidia_sass analyzer mean."""
-  inst = NvidiaSassInstruction(
-    opcode="ISETP.LT.AND",
-    operands=[
-      NvidiaSassRegister(name="P0"),
-      NvidiaSassRegister(name="PT"),
-      NvidiaSassRegister(name="R1"),
-      NvidiaSassImmediate(value=64),
-      NvidiaSassRegister(name="PT"),
-    ],
-  )
-  res = NvidiaSassAnalyzer.analyze_block("Mean", [inst])
-  assert res == {"elements": 64, "arg_0": 64}
-
-
-def test_nvidia_sass_analyzer_unknown() -> None:
-  """Verifies the behavior of nvidia_sass analyzer unknown."""
-  inst = NvidiaSassInstruction(
-    opcode="ISETP.LT.AND",
-    operands=[
-      NvidiaSassRegister(name="P0"),
-      NvidiaSassRegister(name="PT"),
-      NvidiaSassRegister(name="R1"),
-      NvidiaSassImmediate(value=64),
-      NvidiaSassRegister(name="PT"),
-    ],
-  )
-  res = NvidiaSassAnalyzer.analyze_block("Unknown", [inst])
-  assert res == {}
-
-
-def test_analyze_block_empty_elifs() -> None:
-  """Verifies the behavior of analyze block empty elifs."""
-  inst = NvidiaSassInstruction(
-    opcode="ISETP.LT.AND",
-    operands=[
-      NvidiaSassRegister(name="P0"),
-      NvidiaSassRegister(name="PT"),
-      NvidiaSassRegister(name="R1"),
-      NvidiaSassImmediate(value=10),
-      NvidiaSassRegister(name="PT"),
-    ],
+  assert (
+    NvidiaSassAnalyzer.analyze_block(
+      "Conv2d",
+      [NvidiaSassInstruction(opcode="MOV", operands=[NvidiaSassRegister(name="R0"), NvidiaSassRegister(name="R1")])],
+    )
+    == {}
   )
 
-  kinds: list[str] = [
-    "AvgPool2d",
-    "MaxPool2d",
+  p0 = NvidiaSassPredicate(name="P0")
+  pt = NvidiaSassRegister(name="PT")
+  r3 = NvidiaSassRegister(name="R3")
+
+  conv_insts = [
+    NvidiaSassInstruction(opcode="MOV", operands=[NvidiaSassRegister(name="R1"), NvidiaSassRegister(name="RZ")]),
+    NvidiaSassInstruction(opcode="ISETP.LT.AND", operands=[p0, pt, r3, NvidiaSassImmediate(value=3), pt]),
+    NvidiaSassInstruction(opcode="BRA", operands=[NvidiaSassLabel(name="L_LOOP")]),
+  ]
+  assert NvidiaSassAnalyzer.analyze_block("Conv2d", conv_insts) == {"kernel_size": 3, "arg_2": 3}
+
+  lin_insts = [
+    NvidiaSassInstruction(opcode="LDG.E.F32", operands=[NvidiaSassRegister(name="R9"), NvidiaSassMemory(base="addr")]),
+    NvidiaSassInstruction(opcode="ISETP.LT.AND", operands=[p0, pt, r3, NvidiaSassImmediate(value=128), pt]),
+  ]
+  assert NvidiaSassAnalyzer.analyze_block("Linear", lin_insts) == {"in_features": 128, "arg_0": 128}
+
+  bound_5 = [NvidiaSassInstruction(opcode="ISETP.LT.AND", operands=[p0, pt, r3, NvidiaSassImmediate(value=5), pt])]
+  assert NvidiaSassAnalyzer.analyze_block("Conv3d", bound_5) == {"kernel_size": 5, "arg_2": 5}
+  assert NvidiaSassAnalyzer.analyze_block("AvgPool2d", bound_5)["kernel_size"] == 5
+  assert NvidiaSassAnalyzer.analyze_block("MaxPool2d", bound_5)["kernel_size"] == 5
+  assert NvidiaSassAnalyzer.analyze_block("Mean", bound_5) == {"elements": 5, "arg_0": 5}
+  assert NvidiaSassAnalyzer.analyze_block("MSELoss", bound_5)["elements"] == 5
+  assert NvidiaSassAnalyzer.analyze_block("Unknown", bound_5) == {}
+
+  other_kinds = (
     "BatchNorm2d",
     "Conv1d",
     "DepthwiseConv2d",
@@ -166,62 +99,12 @@ def test_analyze_block_empty_elifs() -> None:
     "GRU",
     "LSTMCell",
     "GRUCell",
-    "MSELoss",
     "CrossEntropyLoss",
     "Sigmoid",
     "Tanh",
     "GELU",
     "Dropout",
     "MatMul",
-  ]
-  for k in kinds:
-    res = NvidiaSassAnalyzer.analyze_block(k, [inst])
-    assert isinstance(res, dict)
-
-
-def test_nvidia_sass_analyzer_avgpool2d() -> None:
-  """Verifies analyzer handles AvgPool2d limits."""
-  instructions = [
-    NvidiaSassInstruction(
-      opcode="ISETP.LT.AND",
-      operands=[
-        NvidiaSassRegister(name="P0"),
-        NvidiaSassRegister(name="PT"),
-        NvidiaSassRegister(name="R0"),
-        NvidiaSassImmediate(value=5),
-        NvidiaSassRegister(name="PT"),
-      ],
-    )
-  ]
-  metadata = NvidiaSassAnalyzer.analyze_block("AvgPool2d", instructions)
-  assert metadata["kernel_size"] == 5
-
-
-def test_nvidia_sass_analyzer_maxpool2d() -> None:
-  """Verifies analyzer handles MaxPool2d limits."""
-  instructions = [
-    NvidiaSassInstruction(
-      opcode="ISETP.LT.AND",
-      operands=[
-        NvidiaSassRegister(name="P0"),
-        NvidiaSassRegister(name="PT"),
-        NvidiaSassRegister(name="R0"),
-        NvidiaSassImmediate(value=7),
-        NvidiaSassRegister(name="PT"),
-      ],
-    )
-  ]
-  metadata = NvidiaSassAnalyzer.analyze_block("MaxPool2d", instructions)
-  assert metadata["kernel_size"] == 7
-
-
-def test_nvidia_sass_analyzer_batchnorm2d() -> None:
-  """Verifies analyzer handles BatchNorm2d safely."""
-  instructions = [
-    NvidiaSassInstruction(
-      opcode="FADD",
-      operands=[NvidiaSassRegister(name="R1"), NvidiaSassRegister(name="R2"), NvidiaSassImmediate(value=0.001)],
-    )
-  ]
-  metadata = NvidiaSassAnalyzer.analyze_block("BatchNorm2d", instructions)
-  assert len(metadata) == 0
+  )
+  for kind in other_kinds:
+    assert isinstance(NvidiaSassAnalyzer.analyze_block(kind, bound_5), dict)

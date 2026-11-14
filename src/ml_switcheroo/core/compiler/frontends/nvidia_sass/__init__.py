@@ -21,20 +21,20 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.lifter import NvidiaSassL
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.parser import NvidiaSassParser
 
 __all__ = [
+  "NvidiaSassAnalyzer",
   "NvidiaSassComment",
   "NvidiaSassDirective",
   "NvidiaSassImmediate",
   "NvidiaSassInstruction",
   "NvidiaSassLabel",
+  "NvidiaSassLexer",
+  "NvidiaSassLifter",
   "NvidiaSassMemory",
+  "NvidiaSassNode",
   "NvidiaSassOperand",
+  "NvidiaSassParser",
   "NvidiaSassPredicate",
   "NvidiaSassRegister",
-  "NvidiaSassNode",
-  "NvidiaSassParser",
-  "NvidiaSassLexer",
   "Token",
   "TokenType",
-  "NvidiaSassLifter",
-  "NvidiaSassAnalyzer",
 ]

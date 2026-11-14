@@ -12,8 +12,8 @@ Capabilities:
 
 import logging
 import textwrap
-from types import ModuleType
 import typing
+from types import ModuleType
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
@@ -24,7 +24,17 @@ from ml_switcheroo.enums import (
   NumpyConvertibleProtocol,
   RuntimeTensorOrValue,
 )
-from ml_switcheroo.frameworks.base import ImportConfig, PluginTraits, StandardMap, StructuralTraits, register_framework
+from ml_switcheroo.frameworks.base import (
+  FrameworkSnapshot,
+  ImportConfig,
+  InitMode,
+  PluginTraits,
+  SnapshotBackedAdapter,
+  StandardMap,
+  StructuralTraits,
+  load_snapshot_for_adapter,
+  register_framework,
+)
 from ml_switcheroo.frameworks.loader import load_definitions
 
 
@@ -39,9 +49,7 @@ def _is_detachable(obj: RuntimeTensorOrValue) -> typing.TypeGuard[DetachableProt
   """
   if obj is None or isinstance(obj, (list, tuple, dict, str, bytes, int, float, bool)):
     return False
-  from ml_switcheroo.core.rewriter.calls.pre import _resolve_attr
-
-  return callable(_resolve_attr(obj, "detach"))
+  return isinstance(obj, DetachableProtocol)
 
 
 def _is_numpy_convertible(obj: RuntimeTensorOrValue) -> typing.TypeGuard[NumpyConvertibleProtocol]:
@@ -55,9 +63,7 @@ def _is_numpy_convertible(obj: RuntimeTensorOrValue) -> typing.TypeGuard[NumpyCo
   """
   if obj is None or isinstance(obj, (list, tuple, dict, str, bytes, int, float, bool)):
     return False
-  from ml_switcheroo.core.rewriter.calls.pre import _resolve_attr
-
-  return callable(_resolve_attr(obj, "numpy"))
+  return isinstance(obj, NumpyConvertibleProtocol)
 
 
 np: ModuleType | None = None
@@ -78,11 +84,26 @@ class NumpyAdapter:
   1.  **Math Tiers**: Basic array operations (abs, mean, sum).
   2.  **Type Mapping**: Abstract Dtypes to ``numpy.float32``, etc.
   3.  **IO**: Save/Load operations.
+
+  Attributes:
+      display_name: The display name (`str`).
+      inherits_from: The inherits from (`str | None`).
+      ui_priority: The ui priority (`int`).
   """
 
   display_name: str = "numpy"
   inherits_from: str | None = None
   ui_priority: int = 20
+
+  def __init__(self) -> None:
+    """Initialize NumPy adapter with typed ``FrameworkSnapshot`` storage."""
+    self._snapshot = SnapshotBackedAdapter(
+      "numpy",
+      is_live_available=np is not None,
+      loader=load_snapshot_for_adapter,
+    )
+    self._mode: InitMode = self._snapshot.mode
+    self._snapshot_data: FrameworkSnapshot | None = self._snapshot.snapshot
 
   @property
   def import_alias(self) -> tuple[str, str]:
@@ -269,7 +290,7 @@ class NumpyAdapter:
     """
     if op == "save" and object_arg:
       return f"np.save(file={file_arg}, arr={object_arg})"
-    elif op == "load":
+    if op == "load":
       return f"np.load(file={file_arg})"
     return ""
 
@@ -338,7 +359,6 @@ class NumpyAdapter:
         snapshot: Snapshot dictionary containing state.
 
     """
-    pass
 
   def get_doc_url(self, api_name: str) -> str | None:
     """Generate NumPy documentation URL.

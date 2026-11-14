@@ -4,9 +4,9 @@ Scans the baseline operator list and generates missing ODL YAML definition files
 when they are not yet present in the target directory.
 """
 
-import typing
 import argparse
 import sys
+import typing
 from pathlib import Path
 
 import yaml

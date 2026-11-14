@@ -1,15 +1,20 @@
-"""Test suite for harvest."""
+"""Unit tests for `handle_harvest` (`ml_switcheroo.cli.handlers.harvest`)."""
 
-from unittest.mock import MagicMock
+from argparse import Namespace
+from pathlib import Path
+
+import pytest
 
 from ml_switcheroo.cli.handlers.harvest import handle_harvest
 
 
-def test_handle_harvest() -> None:
-  """Verify handle harvest behavior."""
-  args: MagicMock = MagicMock()
-  args.path = "test"
-  # Should not raise exception
-  handle_harvest(args)
-  _res = None
-  assert _res is None
+def test_handle_harvest_prints_status(capsys: pytest.CaptureFixture[str]) -> None:
+  """Verify `handle_harvest` reports target manual-test path and completion status.
+
+  Args:
+      capsys: Pytest stdout/stderr capture fixture.
+  """
+  handle_harvest(Namespace(path=Path("tests/manual")))
+  captured = capsys.readouterr()
+  assert "Harvesting mappings from manual tests at:" in captured.out
+  assert "Harvest complete." in captured.out

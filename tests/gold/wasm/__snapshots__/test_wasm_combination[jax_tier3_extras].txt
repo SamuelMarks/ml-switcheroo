@@ -1,0 +1,8 @@
+--- Forward ---
+# Use Optax for optimization:
+import optax
+optimizer = optax.adam(learning_rate=0.01)
+--- Backward ---
+# Use Optax for optimization:
+import optax
+optimizer = optax.adam(learning_rate=0.01)

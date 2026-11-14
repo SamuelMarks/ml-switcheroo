@@ -5,22 +5,23 @@ migrating convertible operators into discrete ODL definitions and cleansing
 the quarantine file to contain only non-convertible or deprecated symbols.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
 import argparse
 import sys
 import typing
 from pathlib import Path
 
-from pydantic import JsonValue
 import yaml
+from pydantic import JsonValue
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from ml_switcheroo.enums import RuntimeTensorOrValue
+from ml_switcheroo.semantics.schema import SemanticsFile
+from scripts.hydrate_odl_signatures import extract_std_args_from_params
+from scripts.snapshots.loader import load_snapshots_multi
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-if str(REPO_ROOT) not in sys.path:
-  sys.path.insert(0, str(REPO_ROOT))
-
-from ml_switcheroo.semantics.schema import SemanticsFile  # noqa: E402
-from scripts.hydrate_odl_signatures import extract_std_args_from_params  # noqa: E402
-from scripts.snapshots.loader import load_snapshots_multi  # noqa: E402
 
 
 def find_snapshot_api_match(
@@ -58,7 +59,7 @@ def find_snapshot_api_match(
     name = str(entry.get("name", ""))
     if name in (op_name, lower_op):
       return str(entry.get("api_path", api_path)), entry
-    if api_path.endswith("." + op_name) or api_path.endswith("." + lower_op):
+    if api_path.endswith(("." + op_name, "." + lower_op)):
       return str(entry.get("api_path", api_path)), entry
 
   return None

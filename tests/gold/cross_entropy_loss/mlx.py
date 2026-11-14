@@ -8,8 +8,8 @@ def compute_loss(logits: mx.array, targets: mx.array) -> mx.array:
   """Computes loss.
 
   Args:
-      logits: The logits (mx.array) for compute loss.
-      targets: The targets (mx.array) for compute loss.
+      logits: Input `logits` parameter value (`mx.array`).
+      targets: Input `targets` parameter value (`mx.array`).
 
   Returns:
       Resulting `mx.array` from compute loss.

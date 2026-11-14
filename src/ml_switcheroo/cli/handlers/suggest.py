@@ -10,11 +10,13 @@ This output is designed to be piped directly to an LLM to generate valid
 Operation Definition Language (YAML) for missing operations.
 """
 
+import contextlib
 import importlib
 import inspect
 import json
-from pathlib import Path
+import logging
 import typing
+from pathlib import Path
 
 from ml_switcheroo.core.dsl import OperationDef
 from ml_switcheroo.discovery.inspector import InspectionObject
@@ -62,7 +64,8 @@ def handle_suggest(api_path: str, out_dir: Path | None = None, batch_size: int =
             continue
           info = _extract_metadata(obj)
           targets.append((full_path, info))
-        except Exception:
+        except (ValueError, TypeError, AttributeError, OSError, RuntimeError) as exc:
+          logging.getLogger(__name__).debug("Skipping unreadable member %s: %s", full_path, exc)
           continue
     except ImportError as e:
       log_error(f"Could not import module '{module_name}': {e}")
@@ -141,18 +144,10 @@ def _extract_metadata(
   kind = "class" if isinstance(obj, type) else "function"
   sig = "Unknown Signature"
 
-  try:
-    # signature() returns the parameter list e.g. "(x, y=1)"
-    class _SigBox:
-      """Box holding inspect.signature."""
-
-      f = staticmethod(inspect.signature)
-
-    sig_fn = inspect.getattr_static(_SigBox, "f").__func__
-    sig = str(sig_fn(obj))
-  except (ValueError, TypeError, AssertionError):
+  if not inspect.ismodule(obj) and callable(obj):
     # Fallback for C-extensions
-    pass
+    with contextlib.suppress(ValueError, TypeError):
+      sig = str(inspect.signature(obj))
 
   return {
     "signature": sig,
@@ -172,6 +167,7 @@ def _inspect_live_object(api_path: str) -> dict[str, str] | None:
 
   Raises:
       ImportError: If module cannot be loaded or path format is invalid.
+      AttributeError: If the requested symbol is not found on the module.
 
   """
   if "." not in api_path:
@@ -179,9 +175,11 @@ def _inspect_live_object(api_path: str) -> dict[str, str] | None:
 
   module_name, obj_name = api_path.rsplit(".", 1)
   module = importlib.import_module(module_name)
-  obj = inspect.getattr_static(module, obj_name)
+  matches = [member for name, member in inspect.getmembers(module) if name == obj_name]
+  if not matches:
+    raise AttributeError(f"Module '{module_name}' has no attribute '{obj_name}'")
 
-  return _extract_metadata(obj)
+  return _extract_metadata(matches[0])
 
 
 def _build_header(schema_json: str) -> str:

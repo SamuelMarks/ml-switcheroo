@@ -1,0 +1,46 @@
+--- Forward ---
+{
+  "edges": [],
+  "name": "GeneratedNet",
+  "nodes": [
+    {
+      "attributes": {
+        "name": "x"
+      },
+      "domain": "ai.onnx",
+      "id": "Input_x",
+      "inputs": [],
+      "kind": "Input",
+      "metadata": {
+        "name": "x"
+      },
+      "op_type": "Input",
+      "version": 1
+    },
+    {
+      "attributes": {
+        "arg_0": "y"
+      },
+      "domain": "ai.onnx",
+      "id": "func_eval",
+      "inputs": [],
+      "kind": "mx.eval",
+      "metadata": {
+        "arg_0": "y"
+      },
+      "op_type": "mx.eval",
+      "version": 1
+    }
+  ]
+}
+--- Backward ---
+import mlx.core as mx
+import mlx.nn as nn
+
+class GeneratedNet(mlx.nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def __call__(self, x):
+        x = mlx.core.eval(x, y)
+        return x

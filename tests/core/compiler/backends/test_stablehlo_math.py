@@ -1,0 +1,96 @@
+"""Test suite for Phase 2: Core Math Operations in StableHLO.
+
+Provides comprehensive coverage of exact semantics, type enforcement,
+and generation correctness for math operations defined in the plan.
+"""
+
+import pytest
+
+from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
+from ml_switcheroo.semantics.manager import SemanticsManager
+
+
+@pytest.fixture
+def backend() -> StableHloBackend:
+  """Provides a StableHLO Backend with a loaded SemanticsManager.
+
+  Returns:
+      Configured `backend` fixture value (StableHloBackend).
+  """
+  return StableHloBackend(SemanticsManager())
+
+
+MATH_OPS: list[tuple[str, str]] = [
+  ("Abs", "stablehlo.abs"),
+  ("Add", "stablehlo.add"),
+  ("Atan2", "stablehlo.atan2"),
+  ("Cbrt", "stablehlo.cbrt"),
+  ("Ceil", "stablehlo.ceil"),
+  ("Cholesky", "stablehlo.cholesky"),
+  ("Clamp", "stablehlo.clamp"),
+  ("Complex", "stablehlo.complex"),
+  ("Cosine", "stablehlo.cosine"),
+  ("Div", "stablehlo.divide"),
+  ("Floor", "stablehlo.floor"),
+  ("Imag", "stablehlo.imag"),
+  ("IsFinite", "stablehlo.is_finite"),
+  ("Log", "stablehlo.log"),
+  ("LogPlusOne", "stablehlo.log_plus_one"),
+  ("Logistic", "stablehlo.logistic"),
+  ("Maximum", "stablehlo.maximum"),
+  ("Minimum", "stablehlo.minimum"),
+  ("Mul", "stablehlo.multiply"),
+  ("Neg", "stablehlo.negate"),
+  ("Pow", "stablehlo.power"),
+  ("Real", "stablehlo.real"),
+  ("Remainder", "stablehlo.remainder"),
+  ("RoundNearestAfz", "stablehlo.round_nearest_afz"),
+  ("RoundNearestEven", "stablehlo.round_nearest_even"),
+  ("Rsqrt", "stablehlo.rsqrt"),
+  ("ShiftRightLogical", "stablehlo.shift_right_logical"),
+  ("Sign", "stablehlo.sign"),
+  ("Sine", "stablehlo.sine"),
+  ("Sqrt", "stablehlo.sqrt"),
+  ("Sub", "stablehlo.subtract"),
+  ("Tanh", "stablehlo.tanh"),
+]
+
+
+@pytest.mark.parametrize(("logical_op", "expected_mlir_op"), MATH_OPS)
+def test_math_operations(backend: StableHloBackend, logical_op: str, expected_mlir_op: str) -> None:
+  """Verifies that mathematical operations are correctly mapped to StableHLO syntax.
+
+  This ensures both mapping resolution and operand generation are correct.
+
+  Args:
+      backend: CompilerBackend instance under test.
+      logical_op: Logical operation name in the IR.
+      expected_mlir_op: Expected StableHLO or MLIR dialect operation name.
+  """
+  in_n = LogicalNode(id="in_node", op_type="Input")
+  op_n = LogicalNode(id="op_node", op_type=logical_op, inputs=["in_node"])
+  out_n = LogicalNode(id="out_node", op_type="Output", inputs=["op_node"])
+  g = LogicalGraph(nodes={"in_node": in_n, "op_node": op_n, "out_node": out_n})
+
+  mlir_code: str = backend.compile(g)
+
+  # 1. Operation exists in MLIR output
+  assert expected_mlir_op in mlir_code
+
+  # 2. Input/Output structure
+  assert "stablehlo.constant" in mlir_code
+  assert "return" in mlir_code
+  assert "%op_node =" in mlir_code
+
+
+def test_stablehlo_custom_call_fallback(backend: StableHloBackend) -> None:
+  """Verifies that unknown operations fall back to a custom_call.
+
+  Args:
+      backend: CompilerBackend instance under test.
+  """
+  g = LogicalGraph(nodes={"my_op": LogicalNode("my_op", "UnknownMagicOp")})
+  mlir_code: str = backend.compile(g)
+  assert "stablehlo.custom_call" in mlir_code
+  assert "@unknownmagicop" in mlir_code

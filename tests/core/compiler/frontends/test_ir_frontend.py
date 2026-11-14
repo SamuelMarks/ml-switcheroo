@@ -1,7 +1,5 @@
 """Unit tests for the IR Compiler Frontend."""
 
-from tests.conftest import _test_getattr, _test_setattr
-
 import json
 
 import libcst as cst
@@ -126,8 +124,12 @@ def test_ir_frontend_parse_node_missing_kind() -> None:
     parser.parse(json.dumps({"nodes": [{"id": "n1"}]}))
 
 
-def test_ir_frontend_dangling_edges() -> None:
-  """Test lifting error when edge points to nonexistent node."""
+def test_ir_frontend_dangling_edges(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Test lifting error when edge points to nonexistent node.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   lifter = IrLifter()
   bad_src_graph = LogicalGraph(
     name="BadSrc",
@@ -142,17 +144,17 @@ def test_ir_frontend_dangling_edges() -> None:
     nodes={"n1": LogicalNode(id="n1", op_type="Input")},
     edges=[LogicalEdge(source="n1", target="n2")],
   )
-  _test_setattr(
-    bad_tgt_graph,
-    "_pending_edges",
-    [LogicalEdge(source="n1", target="n2")],
-  )
+  monkeypatch.setattr(bad_tgt_graph, "_pending_edges", [LogicalEdge(source="n1", target="n2")], raising=False)
   with pytest.raises(IrParseError, match="Dangling edge target"):
     lifter.lift(bad_tgt_graph)
 
 
-def test_ir_lifter_duplicate_edges() -> None:
-  """Test lifting graph with duplicate edges deduplicates inputs."""
+def test_ir_lifter_duplicate_edges(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Test lifting graph with duplicate edges deduplicates inputs.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   lifter = IrLifter()
   nodes = {
     "a": LogicalNode(id="a", op_type="Input"),
@@ -162,11 +164,7 @@ def test_ir_lifter_duplicate_edges() -> None:
     LogicalEdge(source="a", target="b"),
   ]
   graph = LogicalGraph(name="DupEdges", nodes=nodes, edges=edges)
-  _test_setattr(
-    graph,
-    "_pending_edges",
-    [LogicalEdge(source="a", target="b")],
-  )
+  monkeypatch.setattr(graph, "_pending_edges", [LogicalEdge(source="a", target="b")], raising=False)
   lifted = lifter.lift(graph)
   assert len(lifted.nodes) == 2
   assert lifted.nodes["b"].inputs == ["a"]
@@ -189,7 +187,7 @@ class MyModel(nn.Module):
   graph = frontend.parse_to_graph()
   assert graph.name == "MyModel"
   assert len(graph.nodes) >= 1
-  assert any(_test_getattr(n, "op_type", None) == "Conv2d" for n in graph.nodes.values())
+  assert any(n.op_type == "Conv2d" for n in graph.nodes.values())
 
 
 def test_ir_frontend_parse_python_empty_fallback() -> None:

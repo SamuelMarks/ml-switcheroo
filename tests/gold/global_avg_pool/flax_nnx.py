@@ -5,7 +5,7 @@ from flax import nnx
 
 
 class GAPModel(nnx.Module):
-  """Test helper class GAPModel."""
+  """Minimal `nnx.Module` test double used in flax NNX tests."""
 
   def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
     """Executes the callable instance.

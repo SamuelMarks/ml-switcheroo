@@ -1,10 +1,9 @@
 """Test suite for the Alias Config module."""
 
-from tests.conftest import _test_hasattr, _test_setattr
-
 from unittest.mock import MagicMock
 
 import libcst as cst
+import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
 
@@ -15,7 +14,7 @@ from ml_switcheroo.semantics.merging import merge_tier_data
 
 
 def test_manager_uses_registry_defaults() -> None:
-  """Verifies the behavior of manager uses registry defaults."""
+  """Verify `SemanticsManager` emits `jax` for manager uses registry defaults."""
   mgr = SemanticsManager()
   mgr._reverse_index = {}
   aliases = mgr.get_framework_aliases()
@@ -24,15 +23,15 @@ def test_manager_uses_registry_defaults() -> None:
 
 
 def test_manager_picks_up_new_framework() -> None:
-  """Verifies the behavior of manager picks up new framework."""
+  """Verify `SemanticsManager` emits `fastai_test` for manager picks up new framework."""
 
   class FastAIAdapter:
-    """Test helper class FastAIAdapter."""
+    """Test double `FastAIAdapter` implementing `convert` for alias config tests."""
 
     import_alias = ("fastai.vision", "fv")
 
     def convert(self, x: JsonValue) -> JsonValue:
-      """Converts .
+      """Convert input payload in test stub.
 
       Args:
           x: Item.
@@ -49,12 +48,15 @@ def test_manager_picks_up_new_framework() -> None:
   assert aliases["fastai_test"] == ("fastai.vision", "fv")
 
 
-def test_manager_parses_json_alias_override() -> None:
-  """Verifies the behavior of manager parses JSON alias override."""
+def test_manager_parses_json_alias_override(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `SemanticsManager` handles manager parses JSON alias override as expected.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   mgr = SemanticsManager()
   mgr._reverse_index = {}
-  if not _test_hasattr(mgr, "import_data"):
-    _test_setattr(mgr, "import_data", {})
+  monkeypatch.setattr(mgr, "import_data", {}, raising=False)
   mock_data = {"__frameworks__": {"jax": {"alias": {"module": "jax.custom", "name": "jc"}}}}
   merge_tier_data(
     data=mgr.data,
@@ -68,7 +70,7 @@ def test_manager_parses_json_alias_override() -> None:
 
 
 def test_import_fixer_uses_injected_aliases() -> None:
-  """Verifies the behavior of import fixer uses injected aliases."""
+  """Verify `ImportResolver` handles import fixer uses injected aliases as expected."""
   alias_map = {"jax": ("jaxoid", "jXd")}
   mgr = MagicMock(spec=SemanticsManager)
   mgr.get_framework_aliases.return_value = alias_map

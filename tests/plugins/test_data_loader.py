@@ -1,7 +1,5 @@
 """Test suite for the Data Loader module."""
 
-from tests.conftest import _test_getattr
-
 import typing
 from unittest.mock import MagicMock
 
@@ -32,13 +30,13 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
-  """Execute rewriter factory helper logic.
+  """Create a configured `rewriter_factory` fixture for data loader tests.
 
   Returns:
       Configured `rewriter_factory` fixture value (typing.Callable[[str], PivotRewriter]).
   """
-  _test_getattr(hooks._HOOKS, "__setitem__")("convert_dataloader", transform_dataloader)
-  hooks._PLUGINS_LOADED = True
+  hooks.register_hook("convert_dataloader")(transform_dataloader)
+  hooks.set_plugins_loaded(True)
   mgr = MagicMock()
   dl_def = {
     "variants": {
@@ -54,12 +52,10 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
 
   @register_framework("custom")
   class CustomAdapter:
-    """Test helper class CustomAdapter."""
-
-    pass
+    """Sentinel `CustomAdapter` fixture class used in data loader tests."""
 
   def create(target: str) -> PivotRewriter:
-    """Creates .
+    """Execute `RuntimeConfig` to support create in data loader tests.
 
     Args:
         target: Target framework or dialect identifier string.
@@ -74,7 +70,7 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
 
 
 def test_blind_execution(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of blind execution.
+  """Verify `rewriter_factory` emits `GenericDataLoader` for blind execution.
 
   Args:
       rewriter_factory: Factory callable producing configured rewriter instances.
@@ -87,7 +83,7 @@ def test_blind_execution(rewriter_factory: typing.Callable[[str], PivotRewriter]
 
 
 def test_jax_shim_injection(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of JAX shim injection.
+  """Verify `rewriter_factory` emits `class GenericDataLoader` for JAX shim injection.
 
   Args:
       rewriter_factory: Factory callable producing configured rewriter instances.
@@ -103,7 +99,7 @@ def test_jax_shim_injection(rewriter_factory: typing.Callable[[str], PivotRewrit
 
 
 def test_dataloader_arg_extraction(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verify dataloader arg extraction behavior.
+  """Verify `rewriter_factory` emits `GenericDataLoader(my_ds` for dataloader arg extraction.
 
   Args:
       rewriter_factory: Factory callable producing configured rewriter instances.
@@ -118,7 +114,7 @@ def test_dataloader_arg_extraction(rewriter_factory: typing.Callable[[str], Pivo
 
 
 def test_dataloader_idempotent_injection(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of dataloader idempotent injection.
+  """Verify `rewriter_factory` returns `1` for dataloader idempotent injection.
 
   Args:
       rewriter_factory: Factory callable producing configured rewriter instances.
@@ -131,7 +127,7 @@ def test_dataloader_idempotent_injection(rewriter_factory: typing.Callable[[str]
 
 
 def test_custom_target_execution(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of custom target execution.
+  """Verify `rewriter_factory` emits `GenericDataLoader` for custom target execution.
 
   Args:
       rewriter_factory: Factory callable producing configured rewriter instances.
@@ -140,3 +136,26 @@ def test_custom_target_execution(rewriter_factory: typing.Callable[[str], PivotR
   code: str = "dl = DataLoader(ds)"
   res: str = rewrite_code(rw, code)
   assert "GenericDataLoader" in res
+
+
+def test_dataloader_workers_pin_memory_collate_and_positional_args(
+  rewriter_factory: typing.Callable[[str], PivotRewriter],
+) -> None:
+  """Verify `GenericDataLoader` preserves `num_workers`, `pin_memory`, `collate_fn`, and positional args.
+
+  Args:
+      rewriter_factory: Factory callable producing configured rewriter instances.
+  """
+  rw = rewriter_factory("jax")
+  res_kw = rewrite_code(rw, "dl = DataLoader(ds, batch_size=32, num_workers=4, pin_memory=True, collate_fn=my_col)")
+  clean_kw = res_kw.replace(" ", "")
+  assert "GenericDataLoader(ds" in clean_kw
+  assert "num_workers=4" in clean_kw
+  assert "pin_memory=True" in clean_kw
+  assert "collate_fn=my_col" in clean_kw
+  assert "self.num_workers=num_workers" in clean_kw
+  assert "self.collate_fn=collate_fn" in clean_kw
+
+  res_pos = rewrite_code(rw, "dl = DataLoader(ds, 64, shuffle=True)")
+  clean_pos = res_pos.replace(" ", "")
+  assert "GenericDataLoader(ds,64,shuffle=True)" in clean_pos

@@ -3,12 +3,10 @@
 Simplified to only provide Metadata.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
-
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.frameworks.base import (
   FrameworkAdapter,
   ImportConfig,
@@ -27,6 +25,11 @@ class MlirAdapter(FrameworkAdapter):
 
   This adapter handles metadata configurations and standard properties
   for the MLIR framework.
+
+  Attributes:
+      display_name: The display name (`str`).
+      inherits_from: The inherits from (`str | None`).
+      ui_priority: The ui priority (`int`).
   """
 
   display_name: str = "MLIR (Intermediate)"
@@ -40,7 +43,6 @@ class MlirAdapter(FrameworkAdapter):
     Since MLIR is metadata-only in this adapter, this constructor performs
     no operations.
     """
-    pass
 
   @property
   def import_alias(self) -> tuple[str, str]:
@@ -267,7 +269,6 @@ class MlirAdapter(FrameworkAdapter):
     Args:
         snapshot: A dict containing metadata/snapshots to wire.
     """
-    pass
 
   def get_doc_url(self, api_name: str) -> str | None:
     """Retrieve documentation URL for a specific MLIR API call.

@@ -17,7 +17,29 @@ from ml_switcheroo.core.dsl import PatternDef as PatternDef
 
 
 class VariantMappingModel(BaseModel):
-  """Pydantic model representing a raw framework variant mapping in the Semantic Knowledge Base."""
+  """Pydantic model representing a raw framework variant mapping in the Semantic Knowledge Base.
+
+  Attributes:
+      api: The api (`str | None`).
+      args: The args (`dict[str, str | None] | None`).
+      kwargs_map: The kwargs map (`dict[str, str | None] | None`).
+      arg_values: The arg values (`dict[str, dict[str, JsonValue]] | None`).
+      requires_plugin: The requires plugin (`str | None`).
+      macro_template: The macro template (`str | None`).
+      transformation_type: The transformation type (`str | None`).
+      operator: The operator (`str | None`).
+      pack_to_tuple: The pack to tuple (`str | None`).
+      pack_as: The pack as (`str | None`).
+      imports: The imports (`list[str | dict[str, str | None]] | None`).
+      min_version: The min version (`str | None`).
+      max_version: The max version (`str | None`).
+      replace_With_graph: The replace with graph (`list[dict[str, JsonValue]] | None`).
+      output_select: The output select (`int | None`).
+      output_cast: The output cast (`str | None`).
+      inject_args: The inject args (`dict[str, JsonValue] | None`).
+      layout_map: The layout map (`dict[str, str] | None`).
+      rule: The rule (`list[dict[str, JsonValue]] | None`).
+  """
 
   model_config = ConfigDict(extra="forbid")
 
@@ -43,7 +65,22 @@ class VariantMappingModel(BaseModel):
 
 
 class ParameterDefModel(BaseModel):
-  """Pydantic model representing a raw parameter definition in std_args."""
+  """Pydantic model representing a raw parameter definition in std_args.
+
+  Attributes:
+      name: The name (`str`).
+      type: The type (`str | None`).
+      doc: The doc (`str | None`).
+      default: The default (`JsonValue`).
+      min: The min (`float | None`).
+      max: The max (`float | None`).
+      options: The options (`list[str | int | float | bool] | None`).
+      rank: The rank (`int | None`).
+      dtype: The dtype (`str | None`).
+      shape_spec: The shape spec (`str | None`).
+      is_variadic: The is variadic (`bool`).
+      kind: The kind (`str`).
+  """
 
   model_config = ConfigDict(extra="forbid")
 
@@ -62,7 +99,24 @@ class ParameterDefModel(BaseModel):
 
 
 class OperationDataModel(BaseModel):
-  """Pydantic model representing a raw ODL operation entry in the Semantic Knowledge Base."""
+  """Pydantic model representing a raw ODL operation entry in the Semantic Knowledge Base.
+
+  Attributes:
+      operation: The operation (`str`).
+      description: The description (`str`).
+      op_type: The op type (`str`).
+      std_args: The std args (`list[str | tuple[str, str] | ParameterDefModel]`).
+      variants: The variants (`dict[str, VariantMappingModel | None]`).
+      return_type: The return type (`str`).
+      is_inplace: The is inplace (`bool`).
+      output_shape_calc: The output shape calc (`str | None`).
+      sharding_supported: The sharding supported (`bool`).
+      tensor_rank_Supported: The tensor rank supported (`list[int] | None`).
+      doc_url: The doc url (`str | None`).
+      scaffold_plugins: The scaffold plugins (`list[dict[str, JsonValue]]`).
+      extras: The extras (`dict[str, JsonValue]`).
+      is_internal: The is internal (`bool`).
+  """
 
   model_config = ConfigDict(extra="forbid")
 
@@ -83,7 +137,16 @@ class OperationDataModel(BaseModel):
 
 
 class FrameworkConfigModel(BaseModel):
-  """Pydantic model representing a raw framework configuration dictionary in SemanticsManager."""
+  """Pydantic model representing a raw framework configuration dictionary in SemanticsManager.
+
+  Attributes:
+      extends: The extends (`str | None`).
+      alias: The alias (`dict[str, str]`).
+      stateful_call: The stateful call (`dict[str, str]`).
+      tiers: The tiers (`list[str]`).
+      traits: The traits (`dict[str, JsonValue]`).
+      plugin_traits: The plugin traits (`dict[str, JsonValue]`).
+  """
 
   model_config = ConfigDict(extra="forbid")
 
@@ -96,7 +159,13 @@ class FrameworkConfigModel(BaseModel):
 
 
 class ProviderConfigModel(BaseModel):
-  """Pydantic model representing a provider namespace configuration in SemanticsManager."""
+  """Pydantic model representing a provider namespace configuration in SemanticsManager.
+
+  Attributes:
+      root: The root (`str`).
+      sub: The sub (`str | None`).
+      alias: The alias (`str | None`).
+  """
 
   model_config = ConfigDict(extra="forbid")
 
@@ -234,6 +303,14 @@ class StructuralTraits(BaseModel):
     default=None,
     description="Dotted path tuple for setting eager PRNG seed (e.g. ('torch', 'manual_seed')).",
   )
+  prng_key_function: tuple[str, ...] = Field(
+    default=("jax", "random", "PRNGKey"),
+    description="Dotted path tuple for constructing an explicit functional PRNG key when required.",
+  )
+  autodiff_module_key: str | None = Field(
+    default=None,
+    description="Optional sandbox module key providing value_and_grad or GradientTape during runtime tracing.",
+  )
   package_name: str | None = Field(
     default=None,
     description="Distribution package name for importlib.metadata version lookup when different from framework key.",
@@ -275,7 +352,12 @@ class StructuralTraits(BaseModel):
 
 
 class FrameworkAlias(BaseModel):
-  """Configuration for global module aliasing."""
+  """Configuration for global module aliasing.
+
+  Attributes:
+      module: The module (`str`).
+      name: The name (`str`).
+  """
 
   module: str
   name: str
@@ -303,12 +385,18 @@ class FrameworkTraits(BaseModel):
 
 
 class SemanticsFile(BaseModel):
-  """Schema representing an entire semantics JSON file."""
+  """Schema representing an entire semantics JSON file.
+
+  Attributes:
+      frameworks: The frameworks (`dict[str, FrameworkTraits] | None`).
+      imports: The imports (`dict[str, JsonValue] | None`).
+      patterns: The patterns (`list[PatternDef] | None`).
+  """
 
   model_config = ConfigDict(extra="allow")
   frameworks: dict[str, FrameworkTraits] | None = Field(None, alias="__frameworks__")
   imports: dict[str, JsonValue] | None = Field(None, alias="__imports__")
-  patterns: list[PatternDef] | None = Field(default_factory=lambda: [], alias="__patterns__")
+  patterns: list[PatternDef] | None = Field(default_factory=list, alias="__patterns__")
 
 
 def validate_yaml_schema(yaml_content: str) -> SemanticsFile:
@@ -329,7 +417,7 @@ def validate_yaml_schema(yaml_content: str) -> SemanticsFile:
   try:
     data = yaml.safe_load(yaml_content)
   except yaml.YAMLError as e:
-    raise ValueError(f"Invalid YAML content: {e}")
+    raise ValueError(f"Invalid YAML content: {e}") from e
 
   if data is None:
     data = {}
@@ -337,4 +425,4 @@ def validate_yaml_schema(yaml_content: str) -> SemanticsFile:
   try:
     return SemanticsFile.model_validate(data)
   except ValidationError as e:
-    raise ValueError(f"Schema validation failed: {e}")
+    raise ValueError(f"Schema validation failed: {e}") from e

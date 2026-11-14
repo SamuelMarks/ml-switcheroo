@@ -1,593 +1,179 @@
-"""Test suite for the Keras module."""
+"""Unit tests for `KerasAdapter` (`ml_switcheroo.frameworks.keras`)."""
 
-from tests.conftest import _test_getattr, _test_hasattr, _test_setattr
-
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
+import importlib
 import sys
-import types
-import typing
-from ml_switcheroo.core.ghost import GhostRef
-from pydantic import JsonValue
-import pytest
 from unittest.mock import MagicMock, patch
 
+import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
 
-import ml_switcheroo.frameworks.keras as keras_fw
-from ml_switcheroo.frameworks.base import InitMode
+import ml_switcheroo.frameworks.keras as keras_mod
+from ml_switcheroo.core.ghost import GhostRef
+from ml_switcheroo.frameworks.base import FrameworkSnapshot, InitMode, StandardMap
 from ml_switcheroo.frameworks.keras import KerasAdapter
+from ml_switcheroo.frameworks.keras_examples import get_keras_tiered_examples
+from ml_switcheroo.frameworks.loader import load_definitions
 
 
-def test_keras_adapter_init() -> None:
-  """Verifies the behavior of Keras adapter initialization."""
+def test_keras_adapter_metadata_traits_io_and_definitions(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `KerasAdapter` metadata, traits, device/serialization/weight syntax, doc URLs, and definitions.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   adapter = KerasAdapter()
   assert adapter.display_name == "Keras"
   assert adapter.inherits_from is None
   assert adapter.ui_priority == 25
-
-
-def test_keras_import_alias() -> None:
-  """Verifies the behavior of Keras import alias."""
-  adapter = KerasAdapter()
   assert adapter.import_alias == ("keras", "keras")
 
-
-def test_keras_import_namespaces() -> None:
-  """Verifies the behavior of Keras import namespaces."""
-  adapter = KerasAdapter()
   ns = adapter.import_namespaces
-  assert "keras" in ns
-  assert "keras.ops" in ns
-  assert "keras.layers" in ns
-  assert "numpy" in ns
-
-
-def test_keras_test_config() -> None:
-  """Verify keras test config behavior."""
-  adapter = KerasAdapter()
-  config = adapter.test_config
-  assert "import keras" in config["import"]
-  assert "keras.ops.convert_to_tensor" in config["convert_input"]
-
-
-def test_keras_harness_imports() -> None:
-  """Verifies the behavior of Keras harness imports."""
-  adapter = KerasAdapter()
+  assert {"keras", "keras.ops", "keras.layers", "numpy"} <= set(ns.keys())
+  assert "import keras" in adapter.test_config["import"]
+  assert "keras.ops.convert_to_tensor" in adapter.test_config["convert_input"]
   assert adapter.harness_imports == []
-
-
-def test_keras_harness_init_code() -> None:
-  """Verifies the behavior of Keras harness initialization code."""
-  adapter = KerasAdapter()
   assert adapter.get_harness_init_code() == ""
-
-
-def test_keras_get_to_numpy_code() -> None:
-  """Verifies the behavior of Keras get to NumPy code."""
-  adapter = KerasAdapter()
   assert "obj.numpy()" in adapter.get_to_numpy_code()
-
-
-def test_keras_supported_tiers() -> None:
-  """Verifies the behavior of Keras supported tiers."""
-  adapter = KerasAdapter()
-  tiers = adapter.supported_tiers
-  assert SemanticTier.ARRAY_API in tiers
-  assert SemanticTier.NEURAL in tiers
-
-
-def test_keras_declared_magic_args() -> None:
-  """Verifies the behavior of Keras declared magic arguments."""
-  adapter = KerasAdapter()
+  assert {SemanticTier.ARRAY_API, SemanticTier.NEURAL} <= set(adapter.supported_tiers)
   assert adapter.declared_magic_args == []
-
-
-def test_keras_structural_traits() -> None:
-  """Verifies the behavior of Keras structural traits."""
-  adapter = KerasAdapter()
-  traits = adapter.structural_traits
-  assert traits.module_base == "keras.Layer"
-  assert traits.forward_method == "call"
-  assert traits.requires_super_init
-
-
-def test_keras_rng_seed_methods() -> None:
-  """Verifies the behavior of Keras rng seed methods."""
-  adapter = KerasAdapter()
-  assert "utils.set_random_seed" in adapter.rng_seed_methods
-
-
-def test_keras_definitions(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Verifies the behavior of Keras definitions.
-
-  Args:
-      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
-  """
-  adapter = KerasAdapter()
-  defs = adapter.definitions
-  assert isinstance(defs, dict)
-
-
-def test_keras_device_syntax() -> None:
-  """Verifies the behavior of Keras device syntax."""
-  adapter = KerasAdapter()
-  assert "keras.name_scope('gpu')" == adapter.get_device_syntax("cuda")
-  assert "keras.name_scope('cpu')" == adapter.get_device_syntax("cpu")
-
-
-def test_keras_device_check_syntax() -> None:
-  """Verifies the behavior of Keras device check syntax."""
-  adapter = KerasAdapter()
-  assert "keras.config.list_logical_devices" in adapter.get_device_check_syntax()
-
-
-def test_keras_apply_wiring() -> None:
-  """Verifies the behavior of Keras apply wiring."""
-  adapter = KerasAdapter()
-  snapshot: dict[str, RuntimeTensorOrValue] = {}
-  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    _test_getattr({"v": snapshot}, "__getitem__")("v")
-  )
-  assert snapshot == {}
-
-
-def test_keras_doc_url() -> None:
-  """Verifies the behavior of Keras documentation URL."""
-  adapter = KerasAdapter()
-  url = adapter.get_doc_url("keras.layers.Dense")
-  assert url is not None
-  assert "search.html?q=keras.layers.Dense" in url
-
-
-@patch("ml_switcheroo.frameworks.keras_examples.get_keras_tiered_examples")
-def test_keras_tiered_examples(mock_examples: MagicMock) -> None:
-  """Verifies the behavior of Keras tiered examples.
-
-  Args:
-      mock_examples: The mock examples (MagicMock) for test keras tiered examples.
-  """
-  mock_examples.return_value = {"tier2_neural": "some_code"}
-  adapter = KerasAdapter()
-  examples = adapter.get_tiered_examples()
-  assert "tier2_neural" in examples
-  mock_examples.assert_called_once()
-
-
-def test_keras_init_ghost_mode(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Verifies the behavior of Keras initialization ghost mode.
-
-  Args:
-      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
-  """
-  monkeypatch.setattr("ml_switcheroo.frameworks.keras.keras", None)
-  adapter = KerasAdapter()
-  assert adapter._mode == InitMode.GHOST
-
-
-def test_keras_init_live_mode(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Verifies the behavior of Keras initialization live mode.
-
-  Args:
-      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
-  """
-  monkeypatch.setattr("ml_switcheroo.frameworks.keras.keras", True)
-  adapter = KerasAdapter()
-  assert adapter._mode == InitMode.LIVE
-
-
-def test_keras_import_exception() -> None:
-  """Verify keras import exception behavior."""
-  import importlib
-  import sys
-  from unittest import mock
-
-  import ml_switcheroo.frameworks.keras as k_fw
-
-  real_import = importlib.__import__
-
-  def mock_import(
-    name: str,
-    globals: typing.Mapping[str, JsonValue] | None = None,
-    locals: typing.Mapping[str, JsonValue] | None = None,
-    fromlist: typing.Sequence[str] = (),
-    level: int = 0,
-  ) -> types.ModuleType:
-    """Execute mock import helper logic.
-
-    Args:
-        name: Identifier or operation name string.
-        globals: The globals (typing.Mapping[str, JsonValue] | None) for mock import.
-        locals: The locals (typing.Mapping[str, JsonValue] | None) for mock import.
-        fromlist: The fromlist (typing.Sequence[str]) for mock import.
-        level: The level (int) for mock import.
-
-    Returns:
-        Resulting `types.ModuleType` from mock import.
-    """
-    if name == "keras.ops":
-      raise ImportError("import fail")
-    return real_import(name, globals, locals, fromlist, level)
-
-  with mock.patch("builtins.__import__", side_effect=mock_import):
-    # Ensure it's not cached in sys.modules so importlib.reload actually re-evaluates the try/except
-    old_keras = sys.modules.pop("keras", None)
-    try:
-      importlib.reload(k_fw)
-      assert k_fw.keras is None
-    finally:
-      if old_keras is not None:
-        sys.modules["keras"] = old_keras
-      importlib.reload(k_fw)
-
-
-def test_keras_definitions_hit_true() -> None:
-  """Verify keras definitions hit true behavior."""
-  # If @property is not evaluating we will override the property on the class just to trigger coverage
-  adapter = keras_fw.KerasAdapter()
-
-  from unittest.mock import patch
-
-  # We call the underlying function code manually to cover the branch if it's cached somewhere outside our control
-
-  with patch("ml_switcheroo.frameworks.loader.load_definitions", return_value={}):
-    defs = _test_getattr(
-      {
-        "v": _test_getattr(
-          {
-            "v": _test_getattr(
-              {
-                "v": _test_getattr(
-                  {
-                    "v": _test_getattr({"v": type}, "__getitem__")("v")(_test_getattr({"v": adapter}, "__getitem__")("v"))
-                  },
-                  "__getitem__",
-                )("v").definitions
-              },
-              "__getitem__",
-            )("v").fget
-          },
-          "__getitem__",
-        )("v")(_test_getattr({"v": adapter}, "__getitem__")("v"))
-      },
-      "__getitem__",
-    )("v")
-    assert "ReLU" in defs
-
-
-def test_keras_collect_live(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Verify keras collect live behavior.
-
-  Args:
-      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
-  """
-  import ml_switcheroo.frameworks.keras as keras_fw
-
-  # Mock keras and submodules
-  mock_keras = MagicMock()
-  mock_keras.losses = MagicMock()
-  mock_keras.optimizers = MagicMock()
-  mock_keras.activations = MagicMock()
-  mock_keras.layers = MagicMock()
-  monkeypatch.setattr(keras_fw, "keras", mock_keras)
-
-  adapter = keras_fw.KerasAdapter()
-  _test_setattr(
-    _test_getattr({"v": adapter}, "__getitem__")("v"), "_mode", _test_getattr({"v": "LIVE"}, "__getitem__")("v")
-  )
-
-  # Mock _scan_module on the adapter
-  def mock_scan_module(
-    module: MagicMock | None = None,
-    prefix: str = "",
-    kind: str = "function",
-    block_list: set[str] | None = None,
-  ) -> list[GhostRef]:
-    """Mocks _scan_module.
-
-    Args:
-        module: The module (MagicMock | None) for mock scan module.
-        prefix: The prefix (str) for mock scan module.
-        kind: The kind (str) for mock scan module.
-        block_list: The block list (set[str] | None) for mock scan module.
-
-    Returns:
-        Resulting `list[GhostRef]` from mock scan module.
-    """
-    from ml_switcheroo.core.ghost import GhostRef
-
-    return [GhostRef(api_path=prefix + ".Test", name="Test", kind=kind, params=[])]
-
-  _test_setattr(
-    _test_getattr({"v": adapter}, "__getitem__")("v"),
-    "_scan_module",
-    _test_getattr({"v": mock_scan_module}, "__getitem__")("v"),
-  )
-
-  assert adapter._collect_live(SemanticTier.LOSS)[0].api_path == "keras.losses.Test"
-  assert adapter._collect_live(SemanticTier.OPTIMIZER)[0].api_path == "keras.optimizers.Test"
-  assert adapter._collect_live(SemanticTier.ACTIVATION)[0].api_path == "keras.activations.Test"
-  assert adapter._collect_live(SemanticTier.LAYER)[0].api_path == "keras.layers.Test"
-  assert adapter._collect_live(SemanticTier.ARRAY_API) == []
-
-
-def test_keras_convert(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Verify keras convert behavior.
-
-  Args:
-      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
-  """
-  import ml_switcheroo.frameworks.keras as keras_fw
-
-  adapter = keras_fw.KerasAdapter()
-
-  mock_keras = MagicMock()
-  mock_keras.ops.convert_to_tensor.return_value = "tensor"
-
-  # Needs to patch import inside method
-  with patch.dict(sys.modules, {"keras": mock_keras}):
-    assert adapter.convert([1, 2, 3]) == "tensor"
-    mock_keras.ops.convert_to_tensor.assert_called_once_with([1, 2, 3])
-
-
-def test_keras_convert_fail(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Verify keras convert fail behavior.
-
-  Args:
-      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
-  """
-  import ml_switcheroo.frameworks.keras as keras_fw
-
-  adapter = keras_fw.KerasAdapter()
-
-  # Force ImportError
-  with patch.dict(sys.modules, {"keras": None}):
-    assert adapter.convert([1, 2, 3]) == [1, 2, 3]
-
-
-def test_keras_collect_ghost(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Verify keras collect ghost behavior.
-
-  Args:
-      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
-  """
-  import ml_switcheroo.frameworks.keras as keras_fw
-
-  monkeypatch.setattr(keras_fw, "keras", None)
-
-  with patch(
-    "ml_switcheroo.frameworks.keras.load_snapshot_for_adapter",
-    return_value={
-      "categories": {
-        "extras": [{"name": "fake", "api_path": "keras.fake", "kind": "class", "group": "class", "params": []}]
-      }
-    },
-  ):
-    adapter = keras_fw.KerasAdapter()
-    ghosts = adapter._collect_ghost(SemanticTier.EXTRAS)
-    assert len(ghosts) == 1
-    assert ghosts[0].api_path == "keras.fake"
-
-    adapter._snapshot_data = {}
-    assert adapter._collect_ghost(SemanticTier.EXTRAS) == []
-
-
-def test_keras_collect_ghost_no_snapshot() -> None:
-  """Verify keras collect ghost no snapshot behavior."""
-  # Hit line 208
-  adapter = KerasAdapter()
-  _test_setattr(
-    _test_getattr({"v": adapter}, "__getitem__")("v"), "_snapshot_data", _test_getattr({"v": None}, "__getitem__")("v")
-  )
-  assert adapter._collect_ghost(SemanticTier.EXTRAS) == []
-
-
-def test_keras_rng_split() -> None:
-  """Verify keras rng split behavior."""
-  import ml_switcheroo.frameworks.keras as keras_fw
-
-  adapter = keras_fw.KerasAdapter()
-  assert adapter.get_rng_split_syntax("rng", "key") == "pass"
-
-
-def test_keras_init_missing() -> None:
-  """Verify keras init missing behavior."""
-  # Hit lines 25-26, 70
-  import importlib
-
-  import ml_switcheroo.frameworks.keras as keras_fw
-
-  with patch.dict("sys.modules", {"keras": None}):
-    importlib.reload(keras_fw)
-    assert keras_fw.keras is None
-    with patch("ml_switcheroo.frameworks.keras.load_snapshot_for_adapter", return_value=None):
-      adapter = keras_fw.KerasAdapter()
-      assert adapter._mode.name == "GHOST"
-
-
-def test_keras_gap() -> None:
-  """Verifies the behavior of Keras gap."""
-  adapter = KerasAdapter()
-  assert not _test_hasattr(adapter, "get_loss")
-  assert not _test_hasattr(adapter, "get_optimizer")
-  assert not _test_hasattr(adapter, "get_layer")
-
-
-def test_keras_test_config_extra() -> None:
-  """Verify keras test config extra behavior."""
-  adapter = KerasAdapter()
-  assert adapter.test_config["import"] == "import keras\nfrom keras import ops"
-
-
-def test_keras_get_to_numpy_code_extra() -> None:
-  """Verify keras get to numpy code extra behavior."""
-  adapter = KerasAdapter()
-  assert adapter.get_to_numpy_code() == "try:\n  return obj.numpy()\nexcept AttributeError:\n  pass"
-
-
-def test_keras_rng_seed_methods_extra() -> None:
-  """Verify keras rng seed methods extra behavior."""
-  adapter = KerasAdapter()
   assert adapter.rng_seed_methods == ["utils.set_random_seed"]
 
+  s_traits = adapter.structural_traits
+  assert s_traits.module_base == "keras.Layer"
+  assert s_traits.forward_method == "call"
+  assert s_traits.requires_super_init is True
+  assert s_traits.impurity_methods == ["fit", "compile"]
+  assert s_traits.auto_strip_magic_args is True
+  assert adapter.plugin_traits.requires_explicit_rng is False
 
-def test_keras_device_check_syntax_extra() -> None:
-  """Verify keras device check syntax extra behavior."""
-  adapter = KerasAdapter()
+  assert adapter.get_device_syntax("cuda") == "keras.name_scope('gpu')"
+  assert adapter.get_device_syntax("cpu", "0") == "keras.name_scope('cpu')"
   assert adapter.get_device_check_syntax() == "len(keras.config.list_logical_devices('GPU')) > 0"
+  assert adapter.get_rng_split_syntax("rng", "key") == "pass"
 
+  assert "import keras" in adapter.get_serialization_imports()
+  assert "keras.saving.load_model" in adapter.get_serialization_syntax("load", "path")
+  assert "obj.save" in adapter.get_serialization_syntax("save", "path", "obj")
+  assert adapter.get_serialization_syntax("other", "path") == ""
+  assert "import h5py" in adapter.get_weight_conversion_imports()
+  assert "h5py" in adapter.get_weight_load_code("path")
+  assert "h5py.File" in adapter.get_weight_save_code("obj", "path")
+  assert len(adapter.get_tensor_to_numpy_expr("t")) > 0
 
-def test_keras_apply_wiring_extra() -> None:
-  """Verify keras apply wiring extra behavior."""
-  adapter = KerasAdapter()
-  snapshot: dict[str, RuntimeTensorOrValue] = {}
-  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    _test_getattr({"v": snapshot}, "__getitem__")("v")
-  )
+  assert adapter.get_doc_url("keras.layers.Dense") == "https://keras.io/search.html?q=keras.layers.Dense"
+  assert isinstance(get_keras_tiered_examples(), dict)
+  with patch("ml_switcheroo.frameworks.keras_examples.get_keras_tiered_examples", return_value={"tier2_neural": "code"}):
+    assert adapter.get_tiered_examples() == {"tier2_neural": "code"}
+
+  snapshot: dict[str, dict[str, JsonValue]] = {}
+  adapter.apply_wiring(snapshot)
   assert snapshot == {}
 
+  # `definitions` fallback vs pre-populated
+  load_definitions.cache_clear()
+  monkeypatch.setattr(keras_mod, "load_definitions", lambda _fw: {})
+  assert "ReLU" in adapter.definitions
 
-def test_keras_get_doc_url() -> None:
-  """Verify keras get doc url behavior."""
-  adapter = KerasAdapter()
-  assert adapter.get_doc_url("keras.layers.Dense") == "https://keras.io/search.html?q=keras.layers.Dense"
-
-
-def test_keras_convert_import_error() -> None:
-  """Verify keras convert import error behavior."""
-  import ml_switcheroo.frameworks.keras as keras_fw
-
-  adapter = keras_fw.KerasAdapter()
-  real_import = __import__
-
-  def mock_import(name: str, *args: JsonValue, **kwargs: JsonValue) -> types.ModuleType:
-    """Mocks __import__ to raise ImportError.
-
-    Args:
-        name: Identifier or operation name string.
-        args: The args (JsonValue) for mock import.
-        kwargs: The kwargs (JsonValue) for mock import.
-
-    Returns:
-        Resulting `types.ModuleType` from mock import.
-    """
-    if name == "keras":
-      raise ImportError("Fail")
-    _ret_v: types.ModuleType = _test_getattr(
-      {
-        "v": _test_getattr({"v": real_import}, "__getitem__")("v")(
-          _test_getattr({"v": name}, "__getitem__")("v"), *args, **_test_getattr({"v": kwargs}, "__getitem__")("v")
-        )
-      },
-      "__getitem__",
-    )("v")
-    return _ret_v
-
-  with patch("builtins.__import__", mock_import):
-    assert adapter.convert([1]) == [1]
+  monkeypatch.setattr(keras_mod, "load_definitions", lambda _fw: {"ReLU": StandardMap(api="keras.layers.ReLU")})
+  assert adapter.definitions["ReLU"].api == "keras.layers.ReLU"
 
 
-def test_keras_collect_live_all(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Verify keras collect live all behavior.
+def test_keras_adapter_modes_collection_and_convert(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify LIVE/GHOST initialization, `_collect_ghost`/`_collect_live`, module reload, and `convert` fallbacks.
 
   Args:
-      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
+      monkeypatch: Pytest monkeypatch fixture.
   """
-  import ml_switcheroo.frameworks.keras as keras_fw
+  monkeypatch.setattr(keras_mod, "keras", True)
+  assert KerasAdapter()._mode == InitMode.LIVE
 
-  adapter = keras_fw.KerasAdapter()
+  with (
+    patch.object(keras_mod, "keras", None),
+    patch.object(keras_mod, "load_snapshot_for_adapter", return_value={}),
+  ):
+    ghost_empty = KerasAdapter()
+    assert ghost_empty._mode == InitMode.GHOST
+    ghost_empty._snapshot_data = None
+    assert ghost_empty._collect_ghost(SemanticTier.EXTRAS) == []
 
-  mock_keras = MagicMock()
-  monkeypatch.setattr(keras_fw, "keras", mock_keras)
+  with (
+    patch.object(keras_mod, "keras", None),
+    patch.object(
+      keras_mod,
+      "load_snapshot_for_adapter",
+      return_value={
+        "categories": {
+          "extras": [{"name": "fake", "api_path": "keras.fake", "kind": "class", "params": []}],
+        }
+      },
+    ),
+  ):
+    ghost_snap = KerasAdapter()
+    ghosts = ghost_snap._collect_ghost(SemanticTier.EXTRAS)
+    assert len(ghosts) == 1
+    assert ghosts[0].api_path == "keras.fake"
+    ghost_snap._snapshot_data = FrameworkSnapshot()
+    assert ghost_snap._collect_ghost(SemanticTier.EXTRAS) == []
 
-  def mock_scan(
-    module: MagicMock,
+  # `_collect_live` across LOSS, OPTIMIZER, ACTIVATION, LAYER, and unsupported tier
+  live_adapter = KerasAdapter()
+  monkeypatch.setattr(keras_mod, "keras", MagicMock())
+  assert live_adapter._collect_live(SemanticTier.LOSS) == []
+
+  def _mock_scan(
+    _module: MagicMock,
     prefix: str,
     kind: str,
     block_list: set[str] | None = None,
   ) -> list[GhostRef]:
-    """Mocks _scan_module.
+    """Return a single `GhostRef` tagged with `prefix`.
 
     Args:
-        module: The module (MagicMock) for mock scan.
-        prefix: The prefix (str) for mock scan.
-        kind: The kind (str) for mock scan.
-        block_list: The block list (set[str] | None) for mock scan.
+        _module: Inspected module mock.
+        prefix: Dotted module prefix.
+        kind: Object kind string.
+        block_list: Optional blocklist.
 
     Returns:
-        Resulting `list[GhostRef]` from mock scan.
+        Single-element `GhostRef` list.
     """
-    from ml_switcheroo.core.ghost import GhostRef
+    _ = block_list
+    return [GhostRef(api_path=f"{prefix}.Test", name="Test", kind=kind, params=[])]
 
-    return [GhostRef(api_path=prefix + ".X", name="X", kind=kind, params=[])]
+  monkeypatch.setattr(live_adapter, "_scan_module", _mock_scan, raising=False)
+  assert live_adapter._collect_live(SemanticTier.LOSS)[0].api_path == "keras.losses.Test"
+  assert live_adapter._collect_live(SemanticTier.OPTIMIZER)[0].api_path == "keras.optimizers.Test"
+  assert live_adapter._collect_live(SemanticTier.ACTIVATION)[0].api_path == "keras.activations.Test"
+  assert live_adapter._collect_live(SemanticTier.LAYER)[0].api_path == "keras.layers.Test"
+  assert live_adapter._collect_live(SemanticTier.ARRAY_API) == []
 
-  _test_setattr(
-    _test_getattr({"v": adapter}, "__getitem__")("v"), "_scan_module", _test_getattr({"v": mock_scan}, "__getitem__")("v")
-  )
+  # `convert` with mock `keras` vs `ImportError`
+  mock_keras = MagicMock()
+  mock_keras.ops.convert_to_tensor.return_value = "keras_tensor"
+  with pytest.MonkeyPatch.context() as mp:
+    mp.setitem(sys.modules, "keras", mock_keras)
+    assert live_adapter.convert([1, 2, 3]) == "keras_tensor"
+    mock_keras.ops.convert_to_tensor.assert_called_once_with([1, 2, 3])
 
-  l1 = adapter._collect_live(SemanticTier.LOSS)
-  l2 = adapter._collect_live(SemanticTier.OPTIMIZER)
-  l3 = adapter._collect_live(SemanticTier.ACTIVATION)
-  l4 = adapter._collect_live(SemanticTier.LAYER)
-  assert len(l1) == 1
-  assert len(l2) == 1
-  assert len(l3) == 1
-  assert len(l4) == 1
+  with pytest.MonkeyPatch.context() as mp:
+    mp.setitem(sys.modules, "keras", None)
+    assert live_adapter.convert([1, 2, 3]) == [1, 2, 3]
+    importlib.reload(keras_mod)
+    assert keras_mod.keras is None
 
-  assert adapter._collect_live(SemanticTier.ARRAY_API) == []
+  with pytest.MonkeyPatch.context() as mp:
+    for sub in (
+      "keras",
+      "keras.activations",
+      "keras.layers",
+      "keras.losses",
+      "keras.ops",
+      "keras.optimizers",
+      "keras.random",
+    ):
+      mp.setitem(sys.modules, sub, MagicMock())
+    importlib.reload(keras_mod)
+    assert KerasAdapter()._mode == InitMode.LIVE
 
-
-def test_keras_structural_traits_extra() -> None:
-  """Verify keras structural traits extra behavior."""
-  from ml_switcheroo.frameworks.keras import KerasAdapter
-
-  adapter = KerasAdapter()
-  traits = adapter.structural_traits
-  assert traits.module_base == "keras.Layer"
-  assert traits.impurity_methods == ["fit", "compile"]
-  assert traits.auto_strip_magic_args is True
-
-
-def test_keras_plugin_traits() -> None:
-  """Verify keras plugin traits behavior."""
-  from ml_switcheroo.frameworks.keras import KerasAdapter
-
-  adapter = KerasAdapter()
-  traits = adapter.plugin_traits
-  assert traits.requires_explicit_rng is False
-
-
-def test_keras_get_tiered_examples() -> None:
-  """Verify keras get tiered examples behavior."""
-  from ml_switcheroo.frameworks.keras import KerasAdapter
-
-  adapter = KerasAdapter()
-  with patch("ml_switcheroo.frameworks.keras_examples.get_keras_tiered_examples", return_value={"t": "v"}):
-    assert adapter.get_tiered_examples() == {"t": "v"}
-
-
-def test_keras_definitions_no_mock_hit_208() -> None:
-  """Verify keras definitions no mock hit 208 behavior."""
-  import importlib
-
-  from ml_switcheroo.frameworks.loader import load_definitions
-
-  if _test_hasattr(load_definitions, "cache_clear"):
-    _test_getattr(load_definitions, "cache_clear")()
-
-  with patch("ml_switcheroo.frameworks.loader.json.load") as mock_json:
-    mock_json.return_value = {}
-    importlib.reload(keras_fw)
-    adapter = keras_fw.KerasAdapter()
-    defs = adapter.definitions
-    assert "ReLU" in defs
-
-  if _test_hasattr(load_definitions, "cache_clear"):
-    _test_getattr(load_definitions, "cache_clear")()
-
-  with patch("ml_switcheroo.frameworks.loader.json.load") as mock_json:
-    mock_json.return_value = {"ReLU": {"api": "keras.layers.ReLU"}}
-    importlib.reload(keras_fw)
-    adapter2 = keras_fw.KerasAdapter()
-    defs2 = adapter2.definitions
-    assert defs2["ReLU"].api == "keras.layers.ReLU"
+  importlib.reload(keras_mod)

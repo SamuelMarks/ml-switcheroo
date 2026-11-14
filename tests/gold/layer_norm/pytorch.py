@@ -5,19 +5,19 @@ import torch.nn as nn
 
 
 class LayerNormModel(nn.Module):
-  """Test helper class LayerNormModel."""
+  """Stub `nn.Module` subclass implementing `forward` for pytorch tests."""
 
   def __init__(self, normalized_shape: int):
     """Initializes the LayerNormModel instance.
 
     Args:
-        normalized_shape: The normalized shape (int) for   init  .
+        normalized_shape: Input `normalized_shape` parameter value (`int`).
     """
     super().__init__()
     self.ln = nn.LayerNorm(normalized_shape)
 
   def forward(self, x: torch.Tensor) -> torch.Tensor:
-    """Helper to forward.
+    """Compute the forward pass of `LayerNormModel` on input tensors.
 
     Args:
         x: Primary input tensor or array operand.

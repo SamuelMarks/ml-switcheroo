@@ -5,8 +5,8 @@ TikZ LaTeX diagrams, calculating a rank-based layout for node positioning
 and generating a compileable TikZ abstract syntax tree.
 """
 
-from collections import defaultdict, deque
 import typing
+from collections import defaultdict, deque
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.backends.python_strategies.init import _INTERNAL_TRIVIA_KEYS

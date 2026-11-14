@@ -1,18 +1,15 @@
-"""Test suite for guards.py"""
-
-from tests.conftest import _test_getattr
-
-from ml_switcheroo.enums import RuntimeTensorOrValue
+"""Test suite for guards.py."""
 
 from unittest.mock import MagicMock
 
 import libcst as cst
 
 from ml_switcheroo.core.rewriter.calls.guards import apply_strict_guards
+from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
 class MockContext:
-  """Test helper class MockContext."""
+  """Sentinel `MockContext` fixture class used in guards tests."""
 
   def __init__(self) -> None:
     """Initialize test helper instance."""
@@ -21,7 +18,7 @@ class MockContext:
 
 
 class MockRewriter:
-  """Test helper class MockRewriter."""
+  """Sentinel `MockRewriter` fixture class used in guards tests."""
 
   def __init__(self) -> None:
     """Initialize test helper instance."""
@@ -29,7 +26,7 @@ class MockRewriter:
 
 
 def parse_arg(code: str) -> cst.Arg:
-  """Execute parse arg helper logic.
+  """Execute `ensure_type` to support parse arg in guards tests.
 
   Args:
       code: Python or DSL source code string to parse or transpile.
@@ -39,12 +36,13 @@ def parse_arg(code: str) -> cst.Arg:
   """
   module = cst.parse_module(code)
   # Extract arg from "foo(a=1)" -> `a=1`
-  expr = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
+  stmt = cst.ensure_type(module.body[0], cst.SimpleStatementLine)
+  expr = cst.ensure_type(stmt.body[0], cst.Expr).value
   return cst.ensure_type(expr, cst.Call).args[0]
 
 
 def test_apply_strict_guards_no_guards() -> None:
-  """Verify apply strict guards no guards behavior."""
+  """Verify `apply_strict_guards` handles no guards as expected."""
   rewriter = MockRewriter()
   args: list[cst.Arg] = [parse_arg("foo(x=1)")]
   details: dict[str, RuntimeTensorOrValue] = {}
@@ -55,7 +53,7 @@ def test_apply_strict_guards_no_guards() -> None:
 
 
 def test_apply_strict_guards_match() -> None:
-  """Verify apply strict guards match behavior."""
+  """Verify `apply_strict_guards` returns `1` for match."""
   rewriter = MockRewriter()
   args = [parse_arg("foo(x=1)")]
 
@@ -76,7 +74,7 @@ def test_apply_strict_guards_match() -> None:
 
 
 def test_apply_strict_guards_match_different_name() -> None:
-  """Verify apply strict guards match different name behavior."""
+  """Verify `apply_strict_guards` returns `1` for match different name."""
   rewriter = MockRewriter()
   args = [parse_arg("foo(input_tensor=1)")]
 
@@ -91,7 +89,7 @@ def test_apply_strict_guards_match_different_name() -> None:
 
 
 def test_apply_strict_guards_no_match() -> None:
-  """Verify apply strict guards no match behavior."""
+  """Verify `apply_strict_guards` handles no match as expected."""
   rewriter = MockRewriter()
   args = [parse_arg("foo(y=1)")]
 
@@ -103,7 +101,7 @@ def test_apply_strict_guards_no_match() -> None:
 
 
 def test_apply_strict_guards_already_injected() -> None:
-  """Verify apply strict guards already injected behavior."""
+  """Verify `apply_strict_guards` handles already injected as expected."""
   rewriter = MockRewriter()
   rewriter.context.hook_context.metadata["strict_helper_injected"] = True
 
@@ -116,7 +114,7 @@ def test_apply_strict_guards_already_injected() -> None:
 
 
 def test_apply_strict_guards_no_context() -> None:
-  """Verify apply strict guards no context behavior."""
+  """Verify `apply_strict_guards` returns `1` for no context."""
   rewriter = MockRewriter()
   del rewriter.context
   args = [parse_arg("foo(x=1)")]
@@ -127,7 +125,7 @@ def test_apply_strict_guards_no_context() -> None:
 
 
 def test_apply_strict_guards_fallback_name() -> None:
-  """Verify apply strict guards fallback name behavior."""
+  """Verify `apply_strict_guards` returns `1` for fallback name."""
   rewriter = MockRewriter()
   args = [parse_arg("foo(x=1)")]
   details = {"std_args": [{"name": "x", "rank": 2}]}

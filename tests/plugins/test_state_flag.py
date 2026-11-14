@@ -1,13 +1,11 @@
 """Test suite for the State Flag module."""
 
-from tests.conftest import _test_getattr
-
 import typing
-from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
 import pytest
+from pydantic import JsonValue
 
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.config import RuntimeConfig
@@ -38,16 +36,14 @@ def rewriter_factory() -> typing.Callable[[], PivotRewriter]:
   Returns:
       Callable[[], PivotRewriter]: Factory function.
   """
-  _test_getattr(
-    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
-  )("inject_training_flag", _test_getattr({"v": inject_training_flag_call}, "__getitem__")("v"))
-  _test_getattr(
-    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
-  )("capture_eval_state", _test_getattr({"v": capture_eval_state}, "__getitem__")("v"))
-  hooks._PLUGINS_LOADED = True
+  hooks.register_hook("inject_training_flag")(inject_training_flag_call)
+  hooks.register_hook("capture_eval_state")(capture_eval_state)
+  hooks.set_plugins_loaded(True)
   mgr: MagicMock = MagicMock()
-  eval_def = {"variants": {"jax": {"requires_plugin": "capture_eval_state"}}}
-  call_def = {"variants": {"jax": {"requires_plugin": "inject_training_flag"}}}
+  eval_jax: dict[str, JsonValue] = {"requires_plugin": "capture_eval_state"}
+  call_jax: dict[str, JsonValue] = {"requires_plugin": "inject_training_flag"}
+  eval_def = {"variants": {"jax": eval_jax}}
+  call_def = {"variants": {"jax": call_jax}}
 
   def resolve(aid: str, fw: str) -> dict[str, JsonValue] | None:
     """Resolves variant.
@@ -57,27 +53,13 @@ def rewriter_factory() -> typing.Callable[[], PivotRewriter]:
         fw (str): Target framework string.
 
     Returns:
-        Any: Variant definition.
+        dict[str, JsonValue] | None: Variant definition.
     """
     if aid == "eval":
-      _ret_v_1: dict[str, JsonValue] | None = _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": eval_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
-            "jax"
-          ]
-        },
-        "__getitem__",
-      )("v")
+      _ret_v_1: dict[str, JsonValue] | None = eval_def["variants"]["jax"]
       return _ret_v_1
     if aid == "call":
-      _ret_v_2: dict[str, JsonValue] | None = _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": call_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
-            "jax"
-          ]
-        },
-        "__getitem__",
-      )("v")
+      _ret_v_2: dict[str, JsonValue] | None = call_def["variants"]["jax"]
       return _ret_v_2
     return None
 
@@ -98,7 +80,7 @@ def rewriter_factory() -> typing.Callable[[], PivotRewriter]:
 
 
 def test_state_isolation(rewriter_factory: typing.Callable[[], PivotRewriter]) -> None:
-  """Verifies the behavior of state isolation.
+  """Verify `rewriter_factory` emits `training=False` for state isolation.
 
   Args:
       rewriter_factory (Callable[[], PivotRewriter]): Factory instance.
@@ -113,7 +95,7 @@ def test_state_isolation(rewriter_factory: typing.Callable[[], PivotRewriter]) -
 
 
 def test_eval_stripping(rewriter_factory: typing.Callable[[], PivotRewriter]) -> None:
-  """Verifies the behavior of eval stripping.
+  """Verify `rewriter_factory` handles eval stripping as expected.
 
   Args:
       rewriter_factory (Callable[[], PivotRewriter]): Factory instance.
@@ -124,7 +106,7 @@ def test_eval_stripping(rewriter_factory: typing.Callable[[], PivotRewriter]) ->
 
 
 def test_state_injection_eval(rewriter_factory: typing.Callable[[], PivotRewriter]) -> None:
-  """Verifies the behavior of state injection eval.
+  """Verify `rewriter_factory` emits `training=False` for state injection eval.
 
   Args:
       rewriter_factory (Callable[[], PivotRewriter]): Factory instance.
@@ -135,7 +117,7 @@ def test_state_injection_eval(rewriter_factory: typing.Callable[[], PivotRewrite
 
 
 def test_state_injection_train(rewriter_factory: typing.Callable[[], PivotRewriter]) -> None:
-  """Verifies the behavior of state injection train.
+  """Verify `rewriter_factory` emits `training=True` for state injection train.
 
   Args:
       rewriter_factory (Callable[[], PivotRewriter]): Factory instance.
@@ -146,7 +128,7 @@ def test_state_injection_train(rewriter_factory: typing.Callable[[], PivotRewrit
 
 
 def test_scope_isolation(rewriter_factory: typing.Callable[[], PivotRewriter]) -> None:
-  """Verifies the behavior of scope isolation.
+  """Verify `rewriter_factory` emits `m1(x, training=False)` for scope isolation.
 
   Args:
       rewriter_factory (Callable[[], PivotRewriter]): Factory instance.
@@ -158,7 +140,7 @@ def test_scope_isolation(rewriter_factory: typing.Callable[[], PivotRewriter]) -
 
 
 def test_attribute_resolution(rewriter_factory: typing.Callable[[], PivotRewriter]) -> None:
-  """Verifies the behavior of attribute resolution.
+  """Verify `rewriter_factory` emits `training=False` for attribute resolution.
 
   Args:
       rewriter_factory (Callable[[], PivotRewriter]): Factory instance.
@@ -203,7 +185,7 @@ def test_unsupported_node_type_in_capture() -> None:
 
 
 def test_unsupported_receiver_name() -> None:
-  """Verify unsupported receiver name behavior."""
+  """Verify `Call` handles unsupported receiver name as expected."""
   # e.g., func_list[0].eval()
   node: cst.Call = cst.Call(
     func=cst.Attribute(
@@ -220,7 +202,7 @@ def test_unsupported_receiver_name() -> None:
 
 
 def test_train_with_args(rewriter_factory: typing.Callable[[], PivotRewriter]) -> None:
-  """Verifies the behavior of train() with arguments.
+  """Verify `rewriter_factory` emits `training=mode_var` for train with args.
 
   Args:
       rewriter_factory (Callable[[], PivotRewriter]): Factory instance.
@@ -250,7 +232,7 @@ def test_inject_training_flag_call() -> None:
 
 
 def test_capture_eval_state() -> None:
-  """Verifies the behavior of capture eval state."""
+  """Verify `Call` handles capture eval state as expected."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.metadata = {}
   node1: cst.Call = cst.Call(func=cst.Name("foo"))

@@ -1,13 +1,11 @@
 """Test suite for the Topk Plugin module."""
 
-from tests.conftest import _test_getattr
-
 import typing
-from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
 import pytest
+from pydantic import JsonValue
 
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.config import RuntimeConfig
@@ -37,18 +35,15 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   Returns:
       Callable[[str], PivotRewriter]: Factory instance.
   """
-  _test_getattr(
-    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
-  )("topk_adapter", _test_getattr({"v": transform_topk}, "__getitem__")("v"))
-  hooks._PLUGINS_LOADED = True
+  hooks.register_hook("topk_adapter")(transform_topk)
+  hooks.set_plugins_loaded(True)
   mgr: MagicMock = MagicMock()
-  topk_def = {
-    "variants": {
-      "torch": {"api": "torch.topk"},
-      "jax": {"api": "jax.lax.top_k", "requires_plugin": "topk_adapter"},
-      "tensorflow": {"api": "tf.math.top_k", "requires_plugin": "topk_adapter"},
-    }
+  variants_map: dict[str, dict[str, JsonValue]] = {
+    "torch": {"api": "torch.topk"},
+    "jax": {"api": "jax.lax.top_k", "requires_plugin": "topk_adapter"},
+    "tensorflow": {"api": "tf.math.top_k", "requires_plugin": "topk_adapter"},
   }
+  topk_def = {"variants": variants_map}
   mgr.get_definition.side_effect = lambda n: ("TopK", topk_def) if "topk" in n else None
 
   def resolve(aid: str, fw: str) -> dict[str, JsonValue] | None:
@@ -59,17 +54,10 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
         fw (str): Framework string.
 
     Returns:
-        Any: Variant definition.
+        dict[str, JsonValue] | None: Variant definition.
     """
-    if aid == "TopK" and fw in topk_def["variants"]:
-      _ret_v: dict[str, JsonValue] | None = _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": topk_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
-            fw
-          ]
-        },
-        "__getitem__",
-      )("v")
+    if aid == "TopK" and fw in variants_map:
+      _ret_v: dict[str, JsonValue] | None = variants_map[fw]
       return _ret_v
     return None
 
@@ -93,7 +81,7 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
 
 
 def test_topk_rewrapping_jax(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of topk rewrapping JAX.
+  """Verify `rewriter_factory` emits `jax.lax.top_k` for topk rewrapping JAX.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): Factory instance.
@@ -106,7 +94,7 @@ def test_topk_rewrapping_jax(rewriter_factory: typing.Callable[[str], PivotRewri
 
 
 def test_topk_passthrough_missing_target(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of topk passthrough missing target.
+  """Verify `rewriter_factory` emits `torch.topk` for topk passthrough missing target.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): Factory instance.

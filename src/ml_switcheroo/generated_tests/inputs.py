@@ -13,10 +13,11 @@ Features:
 - **Constraint Inference**: Uses `min`/`max` to govern random ranges.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 
 from pydantic import JsonValue
+
+from ml_switcheroo.enums import RuntimeTensorOrValue
 
 ArgDefInput: typing.TypeAlias = (
   str | tuple[JsonValue, ...] | typing.Sequence[JsonValue] | typing.Mapping[str, RuntimeTensorOrValue] | JsonValue
@@ -41,9 +42,9 @@ def parse_arg_def(arg: ArgDefInput) -> dict[str, JsonValue]:
   if isinstance(arg, str):
     # Default string args to Array (Tensor)
     return {"name": arg, "type": "Array"}
-  elif isinstance(arg, (tuple, list)) and len(arg) == 2:
+  if isinstance(arg, (tuple, list)) and len(arg) == 2:
     return {"name": str(arg[0]), "type": str(arg[1])}
-  elif isinstance(arg, dict):
+  if isinstance(arg, dict):
     # Shallow copy to avoid mutation
     normalized: dict[str, JsonValue] = dict(arg)
     # Default missing types to Array (Tensor)
@@ -93,6 +94,67 @@ def _infer_type_from_default(
   return "Any"
 
 
+def _refine_any_arg_type(
+  arg_def: typing.Mapping[str, JsonValue | tuple[JsonValue, ...]],
+  default_val: JsonValue | tuple[JsonValue, ...] | None,
+) -> str:
+  """Refine an ``'Any'`` argument type using ``default`` or ``min``/``max`` constraints.
+
+  Args:
+      arg_def: Normalized argument definition mapping.
+      default_val: Optional default value associated with the argument.
+
+  Returns:
+      Refined type string, or ``'Any'`` when unconstrained.
+  """
+  arg_type = _infer_type_from_default(default_val) if default_val is not None else "Any"
+  if arg_type == "Any" and ("min" in arg_def or "max" in arg_def):
+    mn = arg_def.get("min")
+    mx = arg_def.get("max")
+    arg_type = "float" if isinstance(mn, float) or isinstance(mx, float) else "int"
+  return arg_type
+
+
+def _generate_int_code(arg_def: typing.Mapping[str, JsonValue | tuple[JsonValue, ...]]) -> str:
+  """Generate ``random.randint`` source code honoring optional ``min``/``max`` bounds.
+
+  Args:
+      arg_def: Normalized argument definition mapping.
+
+  Returns:
+      Python expression string producing a bounded random integer.
+  """
+  raw_mn = arg_def.get("min", 1)
+  raw_mx = arg_def.get("max", 5)
+  mn_int = int(raw_mn) if isinstance(raw_mn, (int, float, str)) else 1
+  mx_int = int(raw_mx) if isinstance(raw_mx, (int, float, str)) else 5
+  if "min" in arg_def and "max" not in arg_def:
+    mx_int = mn_int + 5
+  if "max" in arg_def and "min" not in arg_def:
+    mn_int = mx_int - 5
+  return f"random.randint({mn_int}, {mx_int})"
+
+
+def _generate_container_code(
+  arg_type: str,
+  default_val: JsonValue | tuple[JsonValue, ...] | None,
+) -> str | None:
+  """Generate container literal code for ``List[int]`` or ``Tuple`` argument types.
+
+  Args:
+      arg_type: Resolved argument type string.
+      default_val: Optional default container value.
+
+  Returns:
+      Python container literal string if ``arg_type`` is a supported container, otherwise ``None``.
+  """
+  if arg_type == "List[int]":
+    return repr(default_val) if isinstance(default_val, list) else "[1, 2]"
+  if "Tuple" in arg_type:
+    return repr(default_val) if isinstance(default_val, tuple) else "(1, 2)"
+  return None
+
+
 def generate_input_value_code(
   name: str,
   arg_def: str | typing.Mapping[str, JsonValue | tuple[JsonValue, ...]],
@@ -115,80 +177,36 @@ def generate_input_value_code(
       Valid Python source code expression (e.g., "random.randint(0, 5)").
 
   """
-  # Normalize arg_def if simple string
-  if isinstance(arg_def, str):
-    arg_def = {"type": arg_def, "name": name}
+  norm_def: typing.Mapping[str, JsonValue | tuple[JsonValue, ...]] = (
+    {"type": arg_def, "name": name} if isinstance(arg_def, str) else arg_def
+  )
 
-  raw_type = arg_def.get("type", "Any")
+  if norm_def.get("options"):
+    return f"random.choice({norm_def['options']!r})"
+
+  raw_type = norm_def.get("type", "Any")
   arg_type = str(raw_type) if isinstance(raw_type, str) else "Any"
-  default_val = arg_def.get("default")
+  default_val = norm_def.get("default")
 
-  # 1. Options constraint (Highest Priority)
-  if "options" in arg_def and arg_def["options"]:
-    opts = arg_def["options"]
-    return f"random.choice({opts!r})"
-
-  # 2. Refine "Any" types using Default Value
-  if arg_type in [None, "Any"] and default_val is not None:
-    arg_type = _infer_type_from_default(default_val)
-
-  # 3. Refine "Any" types using Min/Max constraints
-  if arg_type in [None, "Any"]:
-    if "min" in arg_def or "max" in arg_def:
-      # If explicit bounds provided without type, assume int if bounds are int
-      mn = arg_def.get("min")
-      mx = arg_def.get("max")
-      if isinstance(mn, float) or isinstance(mx, float):
-        arg_type = "float"
-      else:
-        arg_type = "int"
-
-  # 4. Fallback Heuristics for Unknown Types
-  if arg_type in [None, "Any"]:
-    if name in ["axis", "dim", "keepdim", "keepdims"]:
+  if arg_type == "Any":
+    arg_type = _refine_any_arg_type(norm_def, default_val)
+  if arg_type == "Any":
+    if name in ("axis", "dim", "keepdim", "keepdims"):
       return _generate_dim_heuristic(name)
-    # Default fallback is Array
     arg_type = "Array"
 
-  # --- Generation Logic ---
-
-  # A. Int Generation
-  if arg_type in ["int", "integer"]:
-    raw_mn = arg_def.get("min", 1)
-    raw_mx = arg_def.get("max", 5)
-    mn_int = int(raw_mn) if isinstance(raw_mn, (int, float, str)) else 1
-    mx_int = int(raw_mx) if isinstance(raw_mx, (int, float, str)) else 5
-    # Handle case where user provided only one bound
-    if "min" in arg_def and "max" not in arg_def:
-      mx_int = mn_int + 5
-    if "max" in arg_def and "min" not in arg_def:
-      mn_int = mx_int - 5
-    return f"random.randint({mn_int}, {mx_int})"
-
-  # B. Bool Generation
-  if arg_type in ["bool", "boolean"]:
+  if arg_type in ("int", "integer"):
+    return _generate_int_code(norm_def)
+  if arg_type in ("bool", "boolean"):
     return "bool(random.getrandbits(1))"
+  if arg_type in ("float", "number", "double"):
+    return f"random.uniform({norm_def.get('min', 0.0)}, {norm_def.get('max', 1.0)})"
 
-  # C. Float Generation
-  if arg_type in ["float", "number", "double"]:
-    mn = arg_def.get("min", 0.0)
-    mx = arg_def.get("max", 1.0)
-    return f"random.uniform({mn}, {mx})"
-
-  # D. Complex Containers
-  if arg_type == "List[int]":
-    if default_val is not None and isinstance(default_val, list):
-      return repr(default_val)
-    return "[1, 2]"
-  if "Tuple" in arg_type:
-    if default_val is not None and isinstance(default_val, tuple):
-      return repr(default_val)
-    return "(1, 2)"
-
-  # E. Array/Tensor Generation
-  if arg_type in ["Array", "Tensor", "np.ndarray"]:
-    return _generate_array_code(arg_def)
-
+  container_code = _generate_container_code(arg_type, default_val)
+  if container_code is not None:
+    return container_code
+  if arg_type in ("Array", "Tensor", "np.ndarray"):
+    return _generate_array_code(norm_def)
   return "None"
 
 
@@ -226,14 +244,11 @@ def _generate_array_code(
   dtype = arg_def.get("dtype")
 
   cast_str = ""
-  if dtype:
-    cast_str = f".astype(np.{dtype})"
-  else:
-    cast_str = ".astype(np.float32)"
+  cast_str = f".astype(np.{dtype})" if dtype else ".astype(np.float32)"
 
   if mn is not None and mx is not None:
     return f"np.random.uniform({mn}, {mx}, size=(2, 2)){cast_str}"
-  elif mn is not None:
+  if mn is not None:
     return f"(np.abs(np.random.randn(2, 2)) + {mn}){cast_str}"
 
   return f"np.random.randn(2, 2, 2){cast_str}"

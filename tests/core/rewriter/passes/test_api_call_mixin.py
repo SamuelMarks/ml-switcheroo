@@ -1,86 +1,47 @@
 """Test suite for the Api Call Mixin module."""
 
-from tests.conftest import _test_getattr, _test_setattr
-
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
-import typing
-from pydantic import JsonValue
-
 import libcst as cst
 import pytest
+from pydantic import JsonValue
 
-from ml_switcheroo.core.rewriter.passes.api_call_mixin import ApiTransformerCallMixin
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.core.rewriter.context import RewriterContext
+from ml_switcheroo.core.rewriter.passes.api_call_mixin import CallRewriteHandler
+from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.semantics.schema import StructuralTraits
 
 
 class MockTracer:
-  """Test helper class MockTracer."""
+  """Test double `MockTracer` implementing `log_inspection`, `log_mutation` for API call mixin tests."""
 
   def log_inspection(self, *args: JsonValue, **kwargs: JsonValue) -> None:
-    """Mock implementation of log inspection.
+    """Record a mock inspection trace event.
 
     Args:
-        args: The args (JsonValue) for log inspection.
-        kwargs: The kwargs (JsonValue) for log inspection.
+        args: Positional argument specifications (`JsonValue`).
+        kwargs: Keyword argument bindings (`JsonValue`).
     """
-    pass
 
   def log_mutation(self, *args: JsonValue, **kwargs: JsonValue) -> None:
-    """Mock implementation of log mutation.
+    """Record a mock mutation trace event.
 
     Args:
-        args: The args (JsonValue) for log mutation.
-        kwargs: The kwargs (JsonValue) for log mutation.
+        args: Positional argument specifications (`JsonValue`).
+        kwargs: Keyword argument bindings (`JsonValue`).
     """
-    pass
 
 
-class MockHookContext:
-  """Test helper class MockHookContext."""
-
-  def __init__(self) -> None:
-    """Initializes the MockHookContext instance."""
-    self.current_op_id: str | None = None
-
-
-class MockContext:
-  """Test helper class MockContext."""
+class MockSemantics(SemanticsManager):
+  """Test double `MockSemantics` subclassing `SemanticsManager` for API call mixin tests."""
 
   def __init__(self) -> None:
-    """Initializes the MockContext instance."""
-    self.hook_context = MockHookContext()
-    self.symbol_table = None
-
-
-class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
-  """Test helper class MockTransformer."""
-
-  def __init__(self) -> None:
-    """Initializes the MockTransformer instance."""
-    _test_setattr(
-      _test_getattr({"v": self}, "__getitem__")("v"), "strict_mode", _test_getattr({"v": True}, "__getitem__")("v")
-    )
-    _test_setattr(
-      _test_getattr({"v": self}, "__getitem__")("v"),
-      "source_framework",
-      _test_getattr({"v": "torch"}, "__getitem__")("v"),
-    )
-    _test_setattr(
-      _test_getattr({"v": self}, "__getitem__")("v"), "target_framework", _test_getattr({"v": "jax"}, "__getitem__")("v")
-    )
-    self.warnings: list[str] = []
-    self.failures: list[str] = []
-    _test_setattr(
-      _test_getattr({"v": self}, "__getitem__")("v"), "semantics", _test_getattr({"v": self}, "__getitem__")("v")
-    )
-    _test_setattr(
-      _test_getattr({"v": self}, "__getitem__")("v"),
-      "context",
-      _test_getattr({"v": _test_getattr({"v": MockContext}, "__getitem__")("v")()}, "__getitem__")("v"),
-    )
+    """Initialize `MockSemantics` without loading disk defaults."""
+    super().__init__(load_defaults=False)
+    del self._key_origins
 
   def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
-    """Get.
+    """Look up mock abstract operation definitions by qualified API name.
 
     Args:
         name: Identifier or operation name string.
@@ -88,21 +49,132 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
     Returns:
         Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
-    """Mock implementation of get definition."""
     if name == "torch.known":
       return ("known_id", {})
     if name == "torch.nodep":
       return ("nodep_id", {})
     return None
 
-  def _get_qualified_name(self, node: cst.CSTNode) -> str | None:
-    """Get name.
 
-    Args:
-        node: CST or AST node under inspection or transformation.
+class MockTransformer(cst.CSTTransformer):
+  """Minimal `RewriterHost`-compliant CST transformer driving `CallRewriteHandler` in unit tests."""
+
+  def __init__(self) -> None:
+    """Initialize `MockTransformer` with `MockSemantics`, `RewriterContext`, and `CallRewriteHandler`."""
+    super().__init__()
+    self._semantics = MockSemantics()
+    self._config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
+    self.context = RewriterContext(semantics=self._semantics, config=self._config)
+    self._target_fw = "jax"
+    self.warnings: list[str] = []
+    self.failures: list[str] = []
+    self._handler = CallRewriteHandler(self)
+
+  @property
+  def semantics(self) -> MockSemantics:
+    """Return the bound `MockSemantics` instance.
 
     Returns:
-        Resulting `str | None` from get qualified name.
+        Bound `MockSemantics` instance.
+    """
+    return self._semantics
+
+  @property
+  def config(self) -> RuntimeConfig:
+    """Return the bound `RuntimeConfig` instance.
+
+    Returns:
+        Bound `RuntimeConfig` instance.
+    """
+    return self._config
+
+  @property
+  def ctx(self) -> HookContext:
+    """Return the `HookContext` bound to `self.context`.
+
+    Returns:
+        Bound `HookContext` instance.
+    """
+    return self.context.hook_context
+
+  @property
+  def source_framework(self) -> str:
+    """Return the source framework identifier.
+
+    Returns:
+        Source framework string.
+    """
+    return "torch"
+
+  @property
+  def target_framework(self) -> str:
+    """Return the target framework identifier.
+
+    Returns:
+        Target framework string.
+    """
+    return self._target_fw
+
+  @target_framework.setter
+  def target_framework(self, value: str) -> None:
+    """Update the target framework identifier.
+
+    Args:
+        value: Replacement target framework string.
+    """
+    self._target_fw = value
+
+  @property
+  def strict_mode(self) -> bool:
+    """Return whether strict mode is active.
+
+    Returns:
+        `True` for strict call checking.
+    """
+    return True
+
+  @property
+  def source_traits(self) -> StructuralTraits:
+    """Return default source `StructuralTraits`.
+
+    Returns:
+        Default `StructuralTraits` instance.
+    """
+    return StructuralTraits()
+
+  @property
+  def target_traits(self) -> StructuralTraits:
+    """Return default target `StructuralTraits`.
+
+    Returns:
+        Default `StructuralTraits` instance.
+    """
+    return StructuralTraits()
+
+  def _get_target_traits(self) -> StructuralTraits:
+    """Return default target `StructuralTraits`.
+
+    Returns:
+        Default `StructuralTraits` instance.
+    """
+    return StructuralTraits()
+
+  def _get_source_lifecycle_lists(self) -> tuple[set[str], set[str]]:
+    """Return empty lifecycle strip and warning sets.
+
+    Returns:
+        Tuple of empty sets.
+    """
+    return set(), set()
+
+  def _get_qualified_name(self, node: cst.BaseExpression) -> str | None:
+    """Resolve `cst.Name` or single-hop `cst.Attribute` to a qualified string.
+
+    Args:
+        node: CST expression node to inspect.
+
+    Returns:
+        Qualified API string or `None`.
     """
     if isinstance(node, cst.Name):
       return node.value
@@ -111,14 +183,14 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
     return None
 
   def _get_mapping(self, name: str, silent: bool = False) -> dict[str, JsonValue] | None:
-    """Map.
+    """Return stubbed target variant mappings for known test API names.
 
     Args:
-        name: Identifier or operation name string.
-        silent: The silent (bool) for get mapping.
+        name: Qualified API name string.
+        silent: Whether to suppress missing-mapping failure diagnostics.
 
     Returns:
-        Resulting `dict[str, JsonValue] | None` from get mapping.
+        Variant mapping dictionary or `None`.
     """
     if name == "torch.known":
       return {"api": "jnp.known"}
@@ -129,68 +201,122 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
     return None
 
   def check_version_constraints(self, min_v: str | None, max_v: str | None) -> str | None:
-    """Mock implementation of check version constraints.
+    """Simulate version constraint warning when `min_v == '1.0'`.
 
     Args:
-        min_v: The min v (str | None) for check version constraints.
-        max_v: The max v (str | None) for check version constraints.
+        min_v: Optional minimum version string.
+        max_v: Optional maximum version string.
 
     Returns:
-        Resulting `str | None` from check version constraints.
+        Warning message or `None`.
     """
     if min_v == "1.0":
       return "Version warning"
     return None
 
-  def _report_warning(self, msg: str) -> None:
-    """Warn.
+  def _report_warning(self, reason: str) -> None:
+    """Append `reason` to `self.warnings`.
 
     Args:
-        msg: The msg (str) for report warning.
+        reason: Warning message string.
     """
-    self.warnings.append(msg)
+    self.warnings.append(reason)
 
-  def _report_failure(self, msg: str) -> None:
-    """Fail.
+  def _report_failure(self, reason: str) -> None:
+    """Append `reason` to `self.failures`.
 
     Args:
-        msg: The msg (str) for report failure.
+        reason: Failure message string.
     """
-    self.failures.append(msg)
+    self.failures.append(reason)
 
   def _is_module_alias(self, node: cst.CSTNode) -> bool:
-    """Alias.
+    """Return `False` for module alias checks in isolated tests.
 
     Args:
-        node: CST or AST node under inspection or transformation.
+        node: CST node under inspection.
 
     Returns:
-        Resulting `bool` from is module alias.
+        Always `False`.
     """
     return False
 
-  def _handle_variant_imports(self, mapping: typing.Mapping[str, RuntimeTensorOrValue]) -> None:
-    """Imp.
+  def _handle_variant_imports(self, variant: dict[str, JsonValue]) -> None:
+    """No-op import handler for isolated call mixin tests.
 
     Args:
-        mapping: The mapping (typing.Mapping[str, RuntimeTensorOrValue]) for handle variant imports.
+        variant: Variant mapping dictionary.
     """
-    pass
 
-  def _create_name_node(self, name: str) -> cst.Name:
-    """Create.
+  def _create_name_node(self, api_path: str) -> cst.Name | cst.Attribute:
+    """Construct a `cst.Name` node for `api_path`.
 
     Args:
-        name: Identifier or operation name string.
+        api_path: API identifier string.
 
     Returns:
-        Resulting `cst.Name` from create name node.
+        Constructed `cst.Name` node.
     """
-    return cst.Name(name)
+    return cst.Name(api_path)
+
+  def _create_dotted_name(self, name_str: str) -> cst.Name | cst.Attribute:
+    """Construct a `cst.Name` node for `name_str`.
+
+    Args:
+        name_str: API identifier string.
+
+    Returns:
+        Constructed `cst.Name` node.
+    """
+    return cst.Name(name_str)
+
+  def _mark_stateful(self, var_name: str) -> None:
+    """No-op stateful variable marker.
+
+    Args:
+        var_name: Variable name string.
+    """
+
+  def _is_stateful(self, var_name: str) -> bool:
+    """Return `False` for stateful variable checks.
+
+    Args:
+        var_name: Candidate variable name.
+
+    Returns:
+        Always `False`.
+    """
+    return False
+
+  def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.BaseExpression:
+    """Delegate `leave_Call` to `self._handler.rewrite_call`.
+
+    Args:
+        original_node: Original `cst.Call` node.
+        updated_node: Updated `cst.Call` node.
+
+    Returns:
+        Rewritten `cst.BaseExpression`.
+    """
+    return self._handler.rewrite_call(original_node, updated_node)
+
+
+def _extract_first_call(tree: cst.Module) -> cst.Call:
+  """Extract the `cst.Call` expression from the first statement of `tree`.
+
+  Args:
+      tree: Rewritten LibCST module.
+
+  Returns:
+      Extracted `cst.Call` node.
+  """
+  stmt = cst.ensure_type(tree.body[0], cst.SimpleStatementLine)
+  expr = cst.ensure_type(stmt.body[0], cst.Expr)
+  return cst.ensure_type(expr.value, cst.Call)
 
 
 def test_leave_Call_pre_check() -> None:
-  """Verifies the behavior of leave Call pre check."""
+  """Verify `CallRewriteHandler` returns the pre-check replacement expression when handled."""
   transformer = MockTransformer()
   with pytest.MonkeyPatch().context() as m:
     import ml_switcheroo.core.rewriter.passes.api_call_mixin as mixin
@@ -198,87 +324,21 @@ def test_leave_Call_pre_check() -> None:
     m.setattr(mixin, "handle_pre_checks", lambda *args: (True, cst.Call(func=cst.Name("handled"), args=[])))
     tree = cst.parse_module("foo()")
     new_tree = tree.visit(transformer)
-    assert _test_getattr(
-      {
-        "v": _test_getattr(
-          _test_getattr(
-            {
-              "v": _test_getattr(
-                {
-                  "v": _test_getattr(
-                    {
-                      "v": _test_getattr(
-                        {
-                          "v": _test_getattr(
-                            {
-                              "v": _test_getattr(
-                                {"v": _test_getattr({"v": new_tree}, "__getitem__")("v").body}, "__getitem__"
-                              )("v")[0]
-                            },
-                            "__getitem__",
-                          )("v").body
-                        },
-                        "__getitem__",
-                      )("v")[0]
-                    },
-                    "__getitem__",
-                  )("v").value
-                },
-                "__getitem__",
-              )("v").func
-            },
-            "__getitem__",
-          )("v"),
-          _test_getattr({"v": "value"}, "__getitem__")("v"),
-          _test_getattr({"v": None}, "__getitem__")("v"),
-        )
-      },
-      "__getitem__",
-    )("v") == _test_getattr({"v": "handled"}, "__getitem__")("v")
+    call_node = _extract_first_call(new_tree)
+    assert cst.ensure_type(call_node.func, cst.Name).value == "handled"
 
 
 def test_leave_Call_no_mapping_super() -> None:
-  """Verifies the behavior of leave Call no mapping super."""
+  """Verify `super()` calls bypass strict unmapped-API failure reporting."""
   transformer = MockTransformer()
   tree = cst.parse_module("super()")
   new_tree = tree.visit(transformer)
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr(
-            {
-              "v": _test_getattr(
-                {
-                  "v": _test_getattr(
-                    {
-                      "v": _test_getattr(
-                        {
-                          "v": _test_getattr(
-                            {"v": _test_getattr({"v": new_tree}, "__getitem__")("v").body}, "__getitem__"
-                          )("v")[0]
-                        },
-                        "__getitem__",
-                      )("v").body
-                    },
-                    "__getitem__",
-                  )("v")[0]
-                },
-                "__getitem__",
-              )("v").value
-            },
-            "__getitem__",
-          )("v").func
-        },
-        "__getitem__",
-      )("v").value
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "super"}, "__getitem__")("v")
+  call_node = _extract_first_call(new_tree)
+  assert cst.ensure_type(call_node.func, cst.Name).value == "super"
 
 
 def test_leave_Call_no_mapping_strict() -> None:
-  """Verifies the behavior of leave Call no mapping strict."""
+  """Verify unmapped calls in strict mode record a missing-semantics failure."""
   transformer = MockTransformer()
   with pytest.MonkeyPatch().context() as m:
     import ml_switcheroo.core.rewriter.passes.api_call_mixin as mixin
@@ -291,14 +351,14 @@ def test_leave_Call_no_mapping_strict() -> None:
     assert "not found in semantics" in transformer.failures[0]
 
 
-def test_leave_Call_no_mapping_strict_neural() -> None:
-  """Verifies the neural error when mapping neural tier to numpy/jax."""
+def test_leave_Call_no_mapping_strict_neural(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify mapping a neural-tier abstraction to a math-only target reports a neural error.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   transformer = MockTransformer()
-  _test_setattr(
-    _test_getattr({"v": transformer}, "__getitem__")("v"),
-    "target_framework",
-    _test_getattr({"v": "NumPy"}, "__getitem__")("v"),
-  )
+  monkeypatch.setattr(transformer, "target_framework", "NumPy")
   transformer.semantics._key_origins = {"Linear": "neural"}
   with pytest.MonkeyPatch().context() as m:
     import ml_switcheroo.core.rewriter.passes.api_call_mixin as mixin
@@ -312,7 +372,7 @@ def test_leave_Call_no_mapping_strict_neural() -> None:
 
 
 def test_leave_Call_with_mapping() -> None:
-  """Verifies the behavior of leave Call with mapping."""
+  """Verify mapped calls invoke `execute_strategy` without emitting version warnings."""
   transformer = MockTransformer()
   with pytest.MonkeyPatch().context() as m:
     import ml_switcheroo.core.rewriter.passes.api_call_mixin as mixin
@@ -324,43 +384,12 @@ def test_leave_Call_with_mapping() -> None:
     tree = cst.parse_module("torch.known()")
     new_tree = tree.visit(transformer)
     assert len(transformer.warnings) == 0
-    assert _test_getattr(
-      {
-        "v": _test_getattr(
-          {
-            "v": _test_getattr(
-              {
-                "v": _test_getattr(
-                  {
-                    "v": _test_getattr(
-                      {
-                        "v": _test_getattr(
-                          {
-                            "v": _test_getattr(
-                              {"v": _test_getattr({"v": new_tree}, "__getitem__")("v").body}, "__getitem__"
-                            )("v")[0]
-                          },
-                          "__getitem__",
-                        )("v").body
-                      },
-                      "__getitem__",
-                    )("v")[0]
-                  },
-                  "__getitem__",
-                )("v").value
-              },
-              "__getitem__",
-            )("v").func
-          },
-          "__getitem__",
-        )("v").value
-      },
-      "__getitem__",
-    )("v") == _test_getattr({"v": "strategy_ok"}, "__getitem__")("v")
+    call_node = _extract_first_call(new_tree)
+    assert cst.ensure_type(call_node.func, cst.Name).value == "strategy_ok"
 
 
 def test_leave_Call_with_mapping_version_warn() -> None:
-  """Verifies the behavior of leave Call with mapping version warn."""
+  """Verify mapped calls with violated version constraints record a version warning."""
   transformer = MockTransformer()
   with pytest.MonkeyPatch().context() as m:
     import ml_switcheroo.core.rewriter.passes.api_call_mixin as mixin
@@ -373,43 +402,12 @@ def test_leave_Call_with_mapping_version_warn() -> None:
     new_tree = tree.visit(transformer)
     assert len(transformer.warnings) == 1
     assert transformer.warnings[0] == "Version warning"
-    assert _test_getattr(
-      {
-        "v": _test_getattr(
-          {
-            "v": _test_getattr(
-              {
-                "v": _test_getattr(
-                  {
-                    "v": _test_getattr(
-                      {
-                        "v": _test_getattr(
-                          {
-                            "v": _test_getattr(
-                              {"v": _test_getattr({"v": new_tree}, "__getitem__")("v").body}, "__getitem__"
-                            )("v")[0]
-                          },
-                          "__getitem__",
-                        )("v").body
-                      },
-                      "__getitem__",
-                    )("v")[0]
-                  },
-                  "__getitem__",
-                )("v").value
-              },
-              "__getitem__",
-            )("v").func
-          },
-          "__getitem__",
-        )("v").value
-      },
-      "__getitem__",
-    )("v") == _test_getattr({"v": "strategy_ok"}, "__getitem__")("v")
+    call_node = _extract_first_call(new_tree)
+    assert cst.ensure_type(call_node.func, cst.Name).value == "strategy_ok"
 
 
 def test_leave_Call_implicit_method() -> None:
-  """Verifies the behavior of leave Call implicit method."""
+  """Verify implicit tensor method calls resolve and rewrite via `resolve_implicit_method`."""
   transformer = MockTransformer()
   with pytest.MonkeyPatch().context() as m:
     import ml_switcheroo.core.rewriter.passes.api_call_mixin as mixin
@@ -421,43 +419,12 @@ def test_leave_Call_implicit_method() -> None:
     m.setattr(mixin, "log_diff", lambda *args: None)
     tree = cst.parse_module("x.nodep()")
     new_tree = tree.visit(transformer)
-    assert _test_getattr(
-      {
-        "v": _test_getattr(
-          {
-            "v": _test_getattr(
-              {
-                "v": _test_getattr(
-                  {
-                    "v": _test_getattr(
-                      {
-                        "v": _test_getattr(
-                          {
-                            "v": _test_getattr(
-                              {"v": _test_getattr({"v": new_tree}, "__getitem__")("v").body}, "__getitem__"
-                            )("v")[0]
-                          },
-                          "__getitem__",
-                        )("v").body
-                      },
-                      "__getitem__",
-                    )("v")[0]
-                  },
-                  "__getitem__",
-                )("v").value
-              },
-              "__getitem__",
-            )("v").func
-          },
-          "__getitem__",
-        )("v").value
-      },
-      "__getitem__",
-    )("v") == _test_getattr({"v": "implicit_ok"}, "__getitem__")("v")
+    call_node = _extract_first_call(new_tree)
+    assert cst.ensure_type(call_node.func, cst.Name).value == "implicit_ok"
 
 
 def test_leave_Call_missing_def() -> None:
-  """Verifies the behavior when definition lookup fails."""
+  """Verify mapped APIs lacking an abstract definition return the original call node unchanged."""
   transformer = MockTransformer()
   with pytest.MonkeyPatch().context() as m:
     import ml_switcheroo.core.rewriter.passes.api_call_mixin as mixin
@@ -465,64 +432,25 @@ def test_leave_Call_missing_def() -> None:
     m.setattr(mixin, "handle_pre_checks", lambda *args: (False, args[2]))
     tree = cst.parse_module("torch.missing_def()")
     new_tree = tree.visit(transformer)
-    assert _test_getattr(
-      {
-        "v": _test_getattr(
-          {
-            "v": _test_getattr(
-              {
-                "v": _test_getattr(
-                  {
-                    "v": _test_getattr(
-                      {
-                        "v": _test_getattr(
-                          {
-                            "v": _test_getattr(
-                              {
-                                "v": _test_getattr(
-                                  {"v": _test_getattr({"v": new_tree}, "__getitem__")("v").body}, "__getitem__"
-                                )("v")[0]
-                              },
-                              "__getitem__",
-                            )("v").body
-                          },
-                          "__getitem__",
-                        )("v")[0]
-                      },
-                      "__getitem__",
-                    )("v").value
-                  },
-                  "__getitem__",
-                )("v").func
-              },
-              "__getitem__",
-            )("v").attr
-          },
-          "__getitem__",
-        )("v").value
-      },
-      "__getitem__",
-    )("v") == _test_getattr({"v": "missing_def"}, "__getitem__")("v")
+    call_node = _extract_first_call(new_tree)
+    assert cst.ensure_type(call_node.func, cst.Attribute).attr.value == "missing_def"
 
 
 def test_docstrings_are_not_placeholders() -> None:
-  """Verify docstrings are not placeholders behavior."""
-  import ml_switcheroo.core.rewriter.passes.api_call_mixin as mixin
+  """Verify docstrings on ``api_call_mixin`` and ``CallRewriteHandler`` are substantive."""
+  import ml_switcheroo.core.rewriter.passes.api_call_mixin as call_mod
 
-  # Module docstring
-  assert mixin.__doc__ is not None
-  assert "Mixin for ApiTransformer Call rewriting" in mixin.__doc__
-  assert "Docstring" not in mixin.__doc__
+  assert call_mod.__doc__ is not None
+  assert "CallRewriteHandler" in call_mod.__doc__
+  assert "Docstring" not in call_mod.__doc__
 
-  # Class docstring
-  cls_doc = mixin.ApiTransformerCallMixin.__doc__
+  cls_doc = call_mod.CallRewriteHandler.__doc__
   assert cls_doc is not None
   assert "Docstring" not in cls_doc
-  assert "ApiTransformer" in cls_doc or "mixin" in cls_doc.lower()
+  assert "RewriterHost" in cls_doc or "handler" in cls_doc.lower()
 
-  # Method docstring
-  method_doc = mixin.ApiTransformerCallMixin.leave_Call.__doc__
+  method_doc = call_mod.CallRewriteHandler.rewrite_call.__doc__
   assert method_doc is not None
-  assert "leave_Call" in method_doc or "rewriting" in method_doc.lower() or "Intercepts" in method_doc
+  assert "cst.Call" in method_doc
   assert "Args:" in method_doc
   assert "Returns:" in method_doc

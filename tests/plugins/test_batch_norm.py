@@ -1,12 +1,10 @@
 """Test suite for the Batch Norm module."""
 
-from tests.conftest import _test_getattr
-
-from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
 import pytest
+from pydantic import JsonValue
 
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.config import RuntimeConfig
@@ -30,20 +28,19 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Execute rewriter helper logic.
+  """Create a configured `PivotRewriter` fixture for batch norm tests.
 
   Returns:
       Configured `rewriter` fixture value (PivotRewriter).
   """
-  _test_getattr(
-    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
-  )("batch_norm_unwrap", _test_getattr({"v": transform_batch_norm}, "__getitem__")("v"))
-  hooks._PLUGINS_LOADED = True
+  hooks.register_hook("batch_norm_unwrap")(transform_batch_norm)
+  hooks.set_plugins_loaded(True)
   mgr = MagicMock()
-  bn_def = {
+  jax_variant: dict[str, JsonValue] = {"api": "flax.nnx.BatchNorm", "requires_plugin": "batch_norm_unwrap"}
+  bn_def: dict[str, JsonValue] = {
     "variants": {
       "torch": {"api": "torch.nn.BatchNorm2d"},
-      "jax": {"api": "flax.nnx.BatchNorm", "requires_plugin": "batch_norm_unwrap"},
+      "jax": jax_variant,
     }
   }
 
@@ -56,50 +53,26 @@ def rewriter() -> PivotRewriter:
     Returns:
         Resulting `tuple[str, dict[str, JsonValue]] | None` from get def.
     """
-    _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
-      {
-        "v": (_test_getattr({"v": "BatchNorm"}, "__getitem__")("v"), _test_getattr({"v": bn_def}, "__getitem__")("v"))
-        if _test_getattr({"v": "BatchNorm"}, "__getitem__")("v") in _test_getattr({"v": name}, "__getitem__")("v")
-        or _test_getattr({"v": "bn"}, "__getitem__")("v") in _test_getattr({"v": name}, "__getitem__")("v")
-        else None
-      },
-      "__getitem__",
-    )("v")
-    return _ret_v
+    return ("BatchNorm", bn_def) if "BatchNorm" in name or "bn" in name else None
 
-  def get_fw_config(fw: str) -> dict[str, JsonValue]:
+  def get_fw_config(fw: str) -> dict[str, PluginTraits]:
     """Gets framework configuration.
 
     Args:
         fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Resulting `dict[str, JsonValue]` from get fw config.
+        Resulting `dict[str, PluginTraits]` from get fw config.
     """
     if fw == "jax":
-      _ret_v: dict[str, JsonValue] = _test_getattr(
-        {
-          "v": {
-            "plugin_traits": _test_getattr(
-              {
-                "v": _test_getattr({"v": PluginTraits}, "__getitem__")("v")(
-                  requires_functional_state=_test_getattr({"v": True}, "__getitem__")("v")
-                )
-              },
-              "__getitem__",
-            )("v")
-          }
-        },
-        "__getitem__",
-      )("v")
-      return _ret_v
+      return {"plugin_traits": PluginTraits(requires_functional_state=True)}
     return {}
 
   mgr.get_definition.side_effect = get_def
   mgr.get_framework_config.side_effect = get_fw_config
 
   def resolve(aid: str, fw: str) -> dict[str, JsonValue] | None:
-    """Resolves .
+    """Execute `resolve` helper in batch norm tests.
 
     Args:
         aid: Abstract operation identifier string.
@@ -108,29 +81,9 @@ def rewriter() -> PivotRewriter:
     Returns:
         Resulting `dict[str, JsonValue] | None` from resolve.
     """
-    _ret_v: dict[str, JsonValue] | None = _test_getattr(
-      {
-        "v": (
-          _test_getattr({"v": _test_getattr({"v": bn_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]
-          if isinstance(
-            _test_getattr(
-              {
-                "v": _test_getattr({"v": _test_getattr({"v": bn_def}, "__getitem__")("v")["variants"]}, "__getitem__")(
-                  "v"
-                )["jax"]
-              },
-              "__getitem__",
-            )("v"),
-            dict,
-          )
-          else {}
-        )
-        if fw == "jax" and aid == "BatchNorm"
-        else None
-      },
-      "__getitem__",
-    )("v")
-    return _ret_v
+    if fw == "jax" and aid == "BatchNorm":
+      return jax_variant
+    return None
 
   mgr.resolve_variant.side_effect = resolve
   mgr.get_known_apis.return_value = {"BatchNorm": bn_def}
@@ -140,7 +93,7 @@ def rewriter() -> PivotRewriter:
 
 
 def test_bn_injection_and_unwrap(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of bn injection and unwrap.
+  """Verify `rewrite_code` emits `mutable=['batch_stats']` for bn injection and unwrap.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -154,7 +107,7 @@ def test_bn_injection_and_unwrap(rewriter: PivotRewriter) -> None:
 
 
 def test_bn_nested_expression(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of bn nested expression.
+  """Verify `rewrite_code` emits `self.bn(x` for bn nested expression.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -166,7 +119,7 @@ def test_bn_nested_expression(rewriter: PivotRewriter) -> None:
 
 
 def test_bn_preserve_existing_args(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of bn preserve existing arguments.
+  """Verify `rewrite_code` emits `other=1` for bn preserve existing args.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -178,7 +131,7 @@ def test_bn_preserve_existing_args(rewriter: PivotRewriter) -> None:
 
 
 def test_bn_no_args(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of bn when called with no arguments.
+  """Verify `rewrite_code` emits `use_running_average` for bn no args.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.

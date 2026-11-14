@@ -1,18 +1,17 @@
 """Test suite for the Flax Nnx module."""
 
 import jax.numpy as jnp
-
 from flax import nnx
 
 
 class DropoutModel(nnx.Module):
-  """Test helper class DropoutModel."""
+  """Minimal `nnx.Module` test double used in flax NNX tests."""
 
   def __init__(self, p: float = 0.5, rngs: nnx.Rngs | None = None):
     """Initializes the DropoutModel instance.
 
     Args:
-        p: The p (float) for   init  .
+        p: Input `p` parameter value (`float`).
         rngs: Flax NNX Rngs container for stochastic parameter initialization.
     """
     self.dropout = nnx.Dropout(p, rngs=rngs)
@@ -22,7 +21,7 @@ class DropoutModel(nnx.Module):
 
     Args:
         x: Primary input tensor or array operand.
-        deterministic: The deterministic (bool) for   call  .
+        deterministic: Input `deterministic` parameter value (`bool`).
 
     Returns:
         Output tensor or value computed by the forward pass.

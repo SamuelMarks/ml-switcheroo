@@ -52,7 +52,7 @@ def transform_device_allocator(node: cst.Call, ctx: HookContext) -> cst.BaseExpr
   # 4. Generate Target Syntax
   try:
     new_code = adapter.get_device_syntax(s_type, s_index)
-  except Exception:
+  except (NotImplementedError, AttributeError, ValueError, TypeError, KeyError, RuntimeError):
     # If adapter doesn't implement or errors, return original
     return node
 

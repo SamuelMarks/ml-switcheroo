@@ -8,8 +8,8 @@ def split_tensor(x: jnp.ndarray, split_size: int, axis: int = -1) -> jnp.ndarray
 
   Args:
       x: Primary input tensor or array operand.
-      split_size: The split size (int) for split tensor.
-      axis: The axis (int) for split tensor.
+      split_size: Input `split_size` parameter value (`int`).
+      axis: Input `axis` parameter value (`int`).
 
   Returns:
       Resulting `jnp.ndarray` from split tensor.

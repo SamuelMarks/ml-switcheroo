@@ -166,15 +166,20 @@ class FunctionalMutationTransformer(cst.CSTTransformer):
         The updated CST FunctionDef node.
     """
     if self._requires_explicit_rng() and self._stochastic_call_count > 0 and not self._has_rng_param:
+      from ml_switcheroo.frameworks.base import get_adapter
+
+      tgt_adapter = get_adapter(self.context.target_framework)
+      prng_parts = tgt_adapter.structural_traits.prng_key_function if tgt_adapter else ("random", "PRNGKey")
+      prng_func: cst.BaseExpression = cst.Name(prng_parts[0])
+      for part in prng_parts[1:]:
+        prng_func = cst.Attribute(value=prng_func, attr=cst.Name(part))
+
       stmt = cst.SimpleStatementLine(
         body=[
           cst.Assign(
             targets=[cst.AssignTarget(target=cst.Name("rng"))],
             value=cst.Call(
-              func=cst.Attribute(
-                value=cst.Attribute(value=cst.Name("jax"), attr=cst.Name("random")),
-                attr=cst.Name("PRNGKey"),
-              ),
+              func=prng_func,
               args=[cst.Arg(value=cst.Integer("0"))],
             ),
           )
@@ -190,7 +195,7 @@ class FunctionalMutationTransformer(cst.CSTTransformer):
             first_expr.value, (cst.SimpleString, cst.ConcatenatedString)
           ):
             idx = 1
-        new_body = existing_stmts[:idx] + [stmt] + existing_stmts[idx:]
+        new_body = [*existing_stmts[:idx], stmt, *existing_stmts[idx:]]
         updated_node = updated_node.with_changes(body=updated_node.body.with_changes(body=new_body))
 
     return updated_node
@@ -256,48 +261,45 @@ class FunctionalMutationTransformer(cst.CSTTransformer):
         The desugared or resugared assignment node.
     """
     # 1. Target is Functional (JAX): x[indices] = values -> x = x.at[indices].set(values)
-    if self._is_functional_target():
-      if len(updated_node.targets) == 1:
-        target = updated_node.targets[0].target
-        if isinstance(target, cst.Subscript):
-          base_var = target.value
-          if isinstance(base_var, cst.BaseAssignTargetExpression):
-            slice_elements = list(target.slice)
-            call_node = cst.Call(
-              func=cst.Attribute(
-                value=cst.Subscript(
-                  value=cst.Attribute(value=base_var, attr=cst.Name("at")),
-                  slice=slice_elements,
-                ),
-                attr=cst.Name("set"),
+    if self._is_functional_target() and len(updated_node.targets) == 1:
+      target = updated_node.targets[0].target
+      if isinstance(target, cst.Subscript):
+        base_var = target.value
+        if isinstance(base_var, cst.BaseAssignTargetExpression):
+          slice_elements = list(target.slice)
+          call_node = cst.Call(
+            func=cst.Attribute(
+              value=cst.Subscript(
+                value=cst.Attribute(value=base_var, attr=cst.Name("at")),
+                slice=slice_elements,
               ),
-              args=[cst.Arg(value=updated_node.value)],
-            )
-            return updated_node.with_changes(
-              targets=[cst.AssignTarget(target=base_var)],
-              value=call_node,
-            )
+              attr=cst.Name("set"),
+            ),
+            args=[cst.Arg(value=updated_node.value)],
+          )
+          return updated_node.with_changes(
+            targets=[cst.AssignTarget(target=base_var)],
+            value=call_node,
+          )
 
     # 2. Target is Eager (PyTorch, MLX, Keras): Reverse desugaring
     # x = x.at[indices].set(values) -> x[indices] = values
-    if not self._is_functional_target():
-      if isinstance(updated_node.value, cst.Call):
-        match = self._match_at_call(updated_node.value)
-        if match:
-          base_expr, slice_elements, method_name, val_expr = match
-          if isinstance(base_expr, cst.BaseAssignTargetExpression):
-            subscript_target = cst.Subscript(value=base_expr, slice=slice_elements)
-            if method_name == "set":
-              return updated_node.with_changes(
-                targets=[cst.AssignTarget(target=subscript_target)],
-                value=val_expr,
-              )
-            else:
-              return cst.AugAssign(
-                target=subscript_target,
-                operator=cst.AddAssign(),
-                value=val_expr,
-              )
+    if not self._is_functional_target() and isinstance(updated_node.value, cst.Call):
+      match = self._match_at_call(updated_node.value)
+      if match:
+        base_expr, slice_elements, method_name, val_expr = match
+        if isinstance(base_expr, cst.BaseAssignTargetExpression):
+          subscript_target = cst.Subscript(value=base_expr, slice=slice_elements)
+          if method_name == "set":
+            return updated_node.with_changes(
+              targets=[cst.AssignTarget(target=subscript_target)],
+              value=val_expr,
+            )
+          return cst.AugAssign(
+            target=subscript_target,
+            operator=cst.AddAssign(),
+            value=val_expr,
+          )
 
     return updated_node
 
@@ -311,18 +313,81 @@ class FunctionalMutationTransformer(cst.CSTTransformer):
     Returns:
         The resugared assignment or the updated expression node.
     """
-    if not self._is_functional_target():
-      if isinstance(updated_node.value, cst.Call):
-        match = self._match_at_call(updated_node.value)
-        if match:
-          base_expr, slice_elements, method_name, val_expr = match
-          if isinstance(base_expr, cst.BaseAssignTargetExpression):
-            subscript_target = cst.Subscript(value=base_expr, slice=slice_elements)
-            return cst.Assign(
-              targets=[cst.AssignTarget(target=subscript_target)],
-              value=val_expr,
-            )
+    if not self._is_functional_target() and isinstance(updated_node.value, cst.Call):
+      match = self._match_at_call(updated_node.value)
+      if match:
+        base_expr, slice_elements, _method_name, val_expr = match
+        if isinstance(base_expr, cst.BaseAssignTargetExpression):
+          subscript_target = cst.Subscript(value=base_expr, slice=slice_elements)
+          return cst.Assign(
+            targets=[cst.AssignTarget(target=subscript_target)],
+            value=val_expr,
+          )
     return updated_node
+
+  @staticmethod
+  def _extract_call_dotted_name(func: cst.BaseExpression) -> str:
+    """Extract up to 3-part dotted callable name from ``func``.
+
+    Args:
+        func: Call target expression node.
+
+    Returns:
+        Dotted callable string or empty string if dynamic.
+    """
+    if isinstance(func, cst.Attribute):
+      if isinstance(func.value, cst.Name):
+        return f"{func.value.value}.{func.attr.value}"
+      if isinstance(func.value, cst.Attribute) and isinstance(func.value.value, cst.Name):
+        return f"{func.value.value.value}.{func.value.attr.value}.{func.attr.value}"
+    elif isinstance(func, cst.Name):
+      return func.value
+    return ""
+
+  def _rewrite_eager_rng_call(self, fn_name: str, updated_node: cst.Call) -> cst.BaseExpression:
+    """Convert ``PRNGKey``/``SeedGenerator`` calls or strip explicit RNG keys on eager targets.
+
+    Args:
+        fn_name: Extracted dotted callable name.
+        updated_node: Transformed ``cst.Call`` node.
+
+    Returns:
+        Rewritten eager RNG ``cst.Call`` node.
+    """
+    from ml_switcheroo.frameworks.base import get_adapter
+
+    tgt_adapter = get_adapter(self.context.target_framework)
+    try:
+      seed_fn = tgt_adapter.structural_traits.rng_seed_function if tgt_adapter else None
+    except AttributeError:
+      seed_fn = None
+
+    is_prng_key = fn_name.endswith(".random.PRNGKey") or fn_name == "PRNGKey"
+    fn_root = fn_name.split(".")[0] if "." in fn_name else self.context.source_framework
+    is_seed_gen = (fn_name.endswith(".random.SeedGenerator") or fn_name == "SeedGenerator") and bool(
+      seed_fn and seed_fn[0] != fn_root and seed_fn[0] != self.context.source_framework
+    )
+    if is_prng_key or is_seed_gen:
+      seed_arg = updated_node.args[0].value if updated_node.args else cst.Integer("0")
+      parts = seed_fn if seed_fn else (self.context.target_framework, "utils", "set_random_seed")
+      func_expr: cst.BaseExpression = cst.Name(parts[0])
+      for part in parts[1:]:
+        func_expr = cst.Attribute(value=func_expr, attr=cst.Name(part))
+      return cst.Call(func_expr, args=[cst.Arg(value=seed_arg)])
+
+    cleaned_args = [
+      arg for arg in updated_node.args if not (arg.keyword and arg.keyword.value in ("key", "rng", "subkey"))
+    ]
+    if (
+      cleaned_args
+      and ".random." in fn_name
+      and isinstance(cleaned_args[0].value, cst.Name)
+      and cleaned_args[0].value.value in ("key", "rng", "subkey")
+    ):
+      cleaned_args = cleaned_args[1:]
+    if cleaned_args and cleaned_args[-1].comma != cst.MaybeSentinel.DEFAULT:
+      cleaned_args[-1] = cleaned_args[-1].with_changes(comma=cst.MaybeSentinel.DEFAULT)
+    return updated_node.with_changes(args=cleaned_args)
 
   def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.BaseExpression:
     """Manage stochastic calls and seed generation across functional and eager targets.
@@ -334,64 +399,9 @@ class FunctionalMutationTransformer(cst.CSTTransformer):
     Returns:
         The transformed Call node.
     """
-    # Track stochastic calls
-    fn_name = ""
-    if isinstance(original_node.func, cst.Attribute):
-      if isinstance(original_node.func.value, cst.Name):
-        fn_name = f"{original_node.func.value.value}.{original_node.func.attr.value}"
-      elif isinstance(original_node.func.value, cst.Attribute) and isinstance(original_node.func.value.value, cst.Name):
-        fn_name = (
-          f"{original_node.func.value.value.value}.{original_node.func.value.attr.value}.{original_node.func.attr.value}"
-        )
-    elif isinstance(original_node.func, cst.Name):
-      fn_name = original_node.func.value
-
+    fn_name = self._extract_call_dotted_name(original_node.func)
     if any(fn_name.endswith(s.split(".")[-1]) for s in STOCHASTIC_CALL_NAMES):
       self._stochastic_call_count += 1
-
-    # 1. Target is Eager (PyTorch, MLX, Keras): Convert PRNGKey to framework seed
     if not self._requires_explicit_rng():
-      from ml_switcheroo.frameworks.base import get_adapter
-
-      tgt_adapter = get_adapter(self.context.target_framework)
-      try:
-        seed_fn = tgt_adapter.structural_traits.rng_seed_function if tgt_adapter else None
-      except AttributeError:
-        seed_fn = None
-      is_prng_key = fn_name in ("jax.random.PRNGKey", "PRNGKey")
-      is_keras_seed = fn_name in ("keras.random.SeedGenerator", "SeedGenerator") and bool(
-        seed_fn and seed_fn[0] != "keras"
-      )
-      if is_prng_key or is_keras_seed:
-        if updated_node.args:
-          seed_arg = updated_node.args[0].value
-        else:
-          seed_arg = cst.Integer("0")
-        parts = seed_fn if seed_fn else ("keras", "utils", "set_random_seed")
-        func_expr: cst.BaseExpression = cst.Name(parts[0])
-        for part in parts[1:]:
-          func_expr = cst.Attribute(value=func_expr, attr=cst.Name(part))
-        return cst.Call(
-          func=func_expr,
-          args=[cst.Arg(value=seed_arg)],
-        )
-
-      # Strip 'key' argument from calls when converting from JAX to eager
-      cleaned_args = [
-        arg for arg in updated_node.args if not (arg.keyword and arg.keyword.value in ("key", "rng", "subkey"))
-      ]
-      # If first argument is named 'key' or 'subkey' as positional in jax.random.*
-      if (
-        cleaned_args
-        and fn_name.startswith("jax.random.")
-        and isinstance(cleaned_args[0].value, cst.Name)
-        and cleaned_args[0].value.value in ("key", "rng", "subkey")
-      ):
-        cleaned_args = cleaned_args[1:]
-
-      if cleaned_args and cleaned_args[-1].comma != cst.MaybeSentinel.DEFAULT:
-        cleaned_args[-1] = cleaned_args[-1].with_changes(comma=cst.MaybeSentinel.DEFAULT)
-
-      updated_node = updated_node.with_changes(args=cleaned_args)
-
+      return self._rewrite_eager_rng_call(fn_name, updated_node)
     return updated_node

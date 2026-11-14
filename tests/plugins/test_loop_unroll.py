@@ -1,10 +1,6 @@
 """Test suite for the Loop Unroll module."""
 
-from tests.conftest import _test_getattr
-
 import typing
-from pydantic import JsonValue
-
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -40,63 +36,27 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   Returns:
       Callable[[str], PivotRewriter]: The factory function.
   """
-  from ml_switcheroo.core.hooks_registry import _HOOKS, clear_hooks
+  from ml_switcheroo.core.hooks_registry import clear_hooks, register_hook
 
-  clear_hooks()
-  _test_getattr(_test_getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "transform_for_loop", _test_getattr({"v": transform_loops}, "__getitem__")("v")
-  )
-
-  import ml_switcheroo.core.hooks_registry as hr
-
-  hr._PLUGINS_LOADED = True
+  clear_hooks(mark_loaded=True)
+  register_hook("transform_for_loop")(transform_loops)
 
   mgr = MagicMock(spec=SemanticsManager)
   mgr.get_definition.return_value = None
 
-  def get_config(fw: str) -> dict[str, JsonValue]:
+  def get_config(fw: str) -> dict[str, PluginTraits]:
     """Gets configuration.
 
     Args:
         fw (str): The framework name.
 
     Returns:
-        dict[str, JsonValue]: The configuration.
+        dict[str, PluginTraits]: The configuration.
     """
     if fw == "torch":
-      _ret_v_1: dict[str, JsonValue] = _test_getattr(
-        {
-          "v": {
-            "plugin_traits": _test_getattr(
-              {
-                "v": _test_getattr({"v": PluginTraits}, "__getitem__")("v")(
-                  requires_functional_control_flow=_test_getattr({"v": False}, "__getitem__")("v")
-                )
-              },
-              "__getitem__",
-            )("v")
-          }
-        },
-        "__getitem__",
-      )("v")
-      return _ret_v_1
+      return {"plugin_traits": PluginTraits(requires_functional_control_flow=False)}
     if fw == "jax":
-      _ret_v_2: dict[str, JsonValue] = _test_getattr(
-        {
-          "v": {
-            "plugin_traits": _test_getattr(
-              {
-                "v": _test_getattr({"v": PluginTraits}, "__getitem__")("v")(
-                  requires_functional_control_flow=_test_getattr({"v": True}, "__getitem__")("v")
-                )
-              },
-              "__getitem__",
-            )("v")
-          }
-        },
-        "__getitem__",
-      )("v")
-      return _ret_v_2
+      return {"plugin_traits": PluginTraits(requires_functional_control_flow=True)}
     return {}
 
   mgr.get_framework_config.side_effect = get_config
@@ -117,7 +77,7 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
 
 
 def test_imperative_passthrough(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of imperative passthrough.
+  """Verify `rewriter_factory` emits `for i in range(10):` for imperative passthrough.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): The factory function.
@@ -130,7 +90,7 @@ def test_imperative_passthrough(rewriter_factory: typing.Callable[[str], PivotRe
 
 
 def test_functional_range_warning(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of functional range warning.
+  """Verify `rewriter_factory` emits `for i in range(10):` for functional range warning.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): The factory function.
@@ -144,7 +104,7 @@ def test_functional_range_warning(rewriter_factory: typing.Callable[[str], Pivot
 
 
 def test_functional_iterator_warning(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of functional iterator warning.
+  """Verify `rewriter_factory` handles functional iterator warning as expected.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): The factory function.

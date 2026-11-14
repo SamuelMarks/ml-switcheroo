@@ -1,11 +1,19 @@
 """Common Concrete Syntax Tree (CST) Nodes for Hardware ISAs."""
 
+import typing
+
 import pydantic
 
 from ml_switcheroo.core.cst.base import (
-  CSTNode,
   CstFieldValue as CstFieldValue,
+)
+from ml_switcheroo.core.cst.base import (
+  CSTNode,
+)
+from ml_switcheroo.core.cst.base import (
   Trivia as Trivia,
+)
+from ml_switcheroo.core.cst.base import (
   TriviaInput as TriviaInput,
 )
 
@@ -68,7 +76,12 @@ class IsaRegister(IsaOperand):
 
 
 class IsaImmediate(IsaOperand):
-  """Represent an immediate value (literal number)."""
+  """Represent an immediate value (literal number).
+
+  Attributes:
+      value: The value (`int | float`).
+      is_hex: The is hex (`bool`).
+  """
 
   value: int | float = 0
   is_hex: bool = False
@@ -114,7 +127,12 @@ class IsaImmediate(IsaOperand):
 
 
 class IsaMemory(IsaOperand):
-  """Represent a memory reference (e.g., [R0 + 4], [v0])."""
+  """Represent a memory reference (e.g., [R0 + 4], [v0]).
+
+  Attributes:
+      base_reg: The base reg (`IsaRegister | None`).
+      offset: The offset (`int | IsaRegister | None`).
+  """
 
   base_reg: IsaRegister | None = None
   offset: int | IsaRegister | None = None
@@ -164,7 +182,11 @@ class IsaMemory(IsaOperand):
 
 
 class IsaLabel(IsaNode):
-  """Represent a label declaration (e.g., `LOOP_START:`)."""
+  """Represent a label declaration (e.g., `LOOP_START:`).
+
+  Attributes:
+      name: The name (`str`).
+  """
 
   name: str = ""
 
@@ -203,7 +225,12 @@ class IsaLabel(IsaNode):
 
 
 class IsaComment(IsaNode):
-  """Represent a comment line."""
+  """Represent a comment line.
+
+  Attributes:
+      text: The text (`str`).
+      prefix: The prefix (`str`).
+  """
 
   text: str = ""
   prefix: str = "//"
@@ -246,7 +273,12 @@ class IsaComment(IsaNode):
 
 
 class IsaInstruction(IsaNode):
-  """Represent a generic assembly instruction."""
+  """Represent a generic assembly instruction.
+
+  Attributes:
+      opcode: The opcode (`str`).
+      operands: The operands (`list[IsaNode]`).
+  """
 
   opcode: str = ""
   operands: list[IsaNode] = pydantic.Field(default_factory=list)
@@ -288,4 +320,101 @@ class IsaInstruction(IsaNode):
       res += " "
       res += ", ".join(op.to_text().strip() for op in self.operands)
     res += "".join(t.text for t in self.trailing_trivia)
+    return res
+
+
+class IsaDirective(IsaNode):
+  """Represent an assembler directive (e.g., ``.headerflags``, ``.text``).
+
+  Attributes:
+      name: Directive identifier without the leading dot (`str`).
+      params: Directive parameter strings (`list[str]`).
+  """
+
+  name: str = ""
+  params: list[str] = pydantic.Field(default_factory=list)
+
+  def __init__(
+    self,
+    name: str = "",
+    params: list[str] | None = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
+    **kwargs: CstFieldValue,
+  ) -> None:
+    """Initialize IsaDirective.
+
+    Args:
+        name: Directive name.
+        params: Optional list of string parameters.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+        **kwargs: Subclass field values forwarded to IsaNode.
+    """
+    super().__init__(
+      name=name,
+      params=params if params is not None else [],
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
+      **kwargs,
+    )
+
+  def to_text(self) -> str:
+    """Render the directive to its literal assembly text.
+
+    Returns:
+        str: Rendered directive text with surrounding trivia.
+    """
+    res = self.leading_trivia_text()
+    res += f".{self.name}"
+    if self.params:
+      res += " " + ", ".join(self.params)
+    res += self.trailing_trivia_text()
+    return res
+
+
+IsaStmtT = typing.TypeVar("IsaStmtT", bound=IsaNode)
+
+
+class IsaModule(IsaNode, typing.Generic[IsaStmtT]):
+  """Represent a complete hardware ISA assembly module.
+
+  Attributes:
+      statements: Ordered list of statement CST nodes (`list[IsaStmtT]`).
+  """
+
+  statements: list[IsaStmtT] = pydantic.Field(default_factory=list)
+
+  def __init__(
+    self,
+    statements: typing.Sequence[IsaStmtT] | None = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
+    **kwargs: CstFieldValue,
+  ) -> None:
+    """Initialize IsaModule.
+
+    Args:
+        statements: Ordered statement nodes comprising the module.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+        **kwargs: Subclass field values forwarded to IsaNode.
+    """
+    super().__init__(
+      statements=list(statements) if statements is not None else [],
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
+      **kwargs,
+    )
+
+  def to_text(self) -> str:
+    """Render the module statements and surrounding trivia to literal assembly text.
+
+    Returns:
+        str: Full rendered assembly module text.
+    """
+    res = self.leading_trivia_text()
+    for stmt in self.statements:
+      res += stmt.to_text()
+    res += self.trailing_trivia_text()
     return res

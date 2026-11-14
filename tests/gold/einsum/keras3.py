@@ -4,7 +4,7 @@ import keras
 
 
 def bmm_einsum(x: keras.KerasTensor, y: keras.KerasTensor) -> keras.KerasTensor:
-  """Helper to bmm einsum.
+  """Execute `einsum` to support bmm einsum in keras3 tests.
 
   Args:
       x: Primary input tensor or array operand.

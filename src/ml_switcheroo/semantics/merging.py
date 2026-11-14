@@ -15,24 +15,43 @@ Handles:
 import logging
 import typing
 import warnings
+from dataclasses import dataclass
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
-from pydantic import JsonValue, ValidationError
+from pydantic import BaseModel, JsonValue, ValidationError
 
-from ml_switcheroo.core.dsl import OperationDef, PatternDef
+from ml_switcheroo.core.dsl import FrameworkVariant, OperationDef, PatternDef
 from ml_switcheroo.enums import RuntimeTensorOrValue
+from ml_switcheroo.exceptions import SemanticLoadError
+from ml_switcheroo.semantics.schema import FrameworkTraits
 
 JsonValueLike: typing.TypeAlias = (
-  None
-  | bool
+  bool
   | int
   | float
   | str
-  | typing.Hashable
+  | OperationDef
+  | PatternDef
+  | BaseModel
   | typing.Sequence["JsonValueLike"]
   | typing.Collection["JsonValueLike"]
   | typing.Mapping[str, "JsonValueLike"]
+  | None
 )
+
+
+@dataclass
+class TypedSemanticsStore:
+  """Typed Pydantic model store populated alongside raw semantic dictionaries.
+
+  Attributes:
+      operations: Validated ``OperationDef`` instances keyed by abstract operation ID.
+      framework_traits: Validated ``FrameworkTraits`` instances keyed by framework ID.
+  """
+
+  operations: dict[str, OperationDef]
+  framework_traits: dict[str, FrameworkTraits]
+
 
 logger = logging.getLogger(__name__)
 
@@ -65,9 +84,30 @@ def infer_tier_from_priority(priority: int) -> SemanticTier:
   return SemanticTier.EXTRAS
 
 
+def _sync_typed_framework_entry(
+  typed_configs: dict[str, FrameworkTraits] | None,
+  fw_name: str,
+  raw_config: typing.Mapping[str, JsonValue],
+) -> None:
+  """Validate and store a ``FrameworkTraits`` model into ``typed_configs`` when provided.
+
+  Args:
+      typed_configs: Optional typed ``FrameworkTraits`` store to update.
+      fw_name: Framework identifier key.
+      raw_config: Merged raw configuration dictionary for ``fw_name``.
+  """
+  if typed_configs is None:
+    return
+  try:
+    typed_configs[fw_name] = FrameworkTraits.model_validate(raw_config)
+  except ValidationError as exc:
+    logger.debug("Skipping typed FrameworkTraits sync for '%s': %s", fw_name, exc)
+
+
 def merge_frameworks(
   master_configs: dict[str, dict[str, JsonValue]],
   new_configs: typing.Mapping[str, JsonValue],
+  typed_configs: dict[str, FrameworkTraits] | None = None,
 ) -> None:
   """Merge new framework configurations (from __frameworks__ block) into the master.
 
@@ -76,21 +116,27 @@ def merge_frameworks(
   Args:
       master_configs (Dict[str, Dict[str, JsonValue]]): The central framework definitions dictionary.
       new_configs (Mapping[str, JsonValue]): Dictionary of framework traits to merge.
+      typed_configs: Optional typed ``FrameworkTraits`` store updated alongside ``master_configs``.
 
-  Returns:
-      None
+  Raises:
+      SemanticLoadError: If a framework configuration entry is not a dictionary.
   """
   for fw_name, traits in new_configs.items():
-    assert isinstance(traits, dict)
+    if not isinstance(traits, dict):
+      raise SemanticLoadError(f"Expected dict for framework '{fw_name}', got {type(traits).__name__}.")
     traits_dict: dict[str, JsonValue] = dict(traits)
     if fw_name not in master_configs:
       master_configs[fw_name] = traits_dict
     else:
       current = master_configs[fw_name]
-      if "alias" in traits_dict and "alias" in current:
+      if (
+        "alias" in traits_dict
+        and "alias" in current
+        and isinstance(current["alias"], dict)
+        and isinstance(traits_dict["alias"], dict)
+      ):
         curr_alias = current["alias"]
         new_alias = traits_dict["alias"]
-        assert isinstance(curr_alias, dict) and isinstance(new_alias, dict)
         curr_alias.update(new_alias)
         traits_copy = traits_dict.copy()
         del traits_copy["alias"]
@@ -100,6 +146,23 @@ def merge_frameworks(
         current["traits"] = traits_dict["traits"]
       else:
         current.update(traits_dict)
+    _sync_typed_framework_entry(typed_configs, fw_name, master_configs[fw_name])
+
+
+def _try_validate_pattern(raw: JsonValue) -> PatternDef | None:
+  """Validate a raw JSON pattern definition into a ``PatternDef`` model.
+
+  Args:
+      raw: Raw dictionary or JSON value representing a fusion pattern.
+
+  Returns:
+      Validated ``PatternDef`` instance if valid, otherwise ``None``.
+  """
+  try:
+    return PatternDef.model_validate(raw)
+  except ValidationError as e:
+    logger.warning("⚠️ Invalid pattern definition: %s", e)
+    return None
 
 
 def merge_patterns(
@@ -118,13 +181,10 @@ def merge_patterns(
   existing_names = {p.name for p in master_patterns}
 
   for raw in new_patterns:
-    try:
-      pat = PatternDef.model_validate(raw)
-      if pat.name not in existing_names:
-        master_patterns.append(pat)
-        existing_names.add(pat.name)
-    except ValidationError as e:
-      logger.warning("⚠️ Invalid pattern definition: %s", e)
+    pat = _try_validate_pattern(raw)
+    if pat is not None and pat.name not in existing_names:
+      master_patterns.append(pat)
+      existing_names.add(pat.name)
 
 
 def _normalize_args(
@@ -156,6 +216,137 @@ def _normalize_args(
   return names
 
 
+def _prepare_validated_op(
+  op_name: str,
+  details: typing.Mapping[str, JsonValueLike] | OperationDef,
+  *,
+  is_internal: bool,
+) -> tuple[OperationDef, dict[str, JsonValue]]:
+  """Validate ``details`` into an ``OperationDef`` model and return both model and storage dict.
+
+  Args:
+      op_name: Canonical operation identifier.
+      details: Raw operation definition mapping or pre-validated ``OperationDef``.
+      is_internal: Whether the entry originates from internal defaults.
+
+  Returns:
+      Tuple ``(validated_operation_model, serialized_storage_dict)``.
+  """
+  if isinstance(details, OperationDef):
+    validated_op = details.model_copy(update={"is_internal": True}) if is_internal else details
+    stored_dict = validated_op.model_dump(by_alias=True, exclude_unset=True)
+    stored_dict.setdefault("operation", op_name)
+    stored_dict.setdefault("variants", {})
+    stored_dict.setdefault("description", validated_op.description or f"Autogenerated definition for {op_name}")
+    stored_dict.setdefault("std_args", [])
+    if is_internal:
+      stored_dict["_is_internal"] = True
+    return validated_op, stored_dict
+
+  details_to_validate: dict[str, JsonValueLike] = dict(details)
+  details_to_validate.setdefault("operation", op_name)
+  details_to_validate.setdefault("variants", {})
+  details_to_validate.setdefault("description", f"Autogenerated definition for {op_name}")
+  details_to_validate.setdefault("std_args", [])
+  if is_internal:
+    details_to_validate["_is_internal"] = True
+
+  validated_op = OperationDef.model_validate(details_to_validate)
+  validated_dict = validated_op.model_dump(by_alias=True, exclude_unset=True)
+  stored_dict = {
+    k: v for k, v in details_to_validate.items() if isinstance(v, (int, float, str, bool, list, dict)) or v is None
+  }
+  stored_dict.update(validated_dict)
+  if is_internal:
+    stored_dict["_is_internal"] = True
+  return validated_op, stored_dict
+
+
+def _resolve_signature_conflict(
+  op_name: str,
+  tier: SemanticTier,
+  existing_entry: dict[str, JsonValue],
+  stored_dict: dict[str, JsonValue],
+  *,
+  suppress_internal_conflict: bool,
+) -> None:
+  """Reconcile ``std_args`` differences when two specs at the same tier define ``op_name``.
+
+  Args:
+      op_name: Canonical operation identifier.
+      tier: Semantic tier being loaded.
+      existing_entry: Previously stored operation dictionary.
+      stored_dict: Newly validated operation dictionary (mutated on subset downgrade).
+      suppress_internal_conflict: Whether internal-to-explicit overwrite warnings should be suppressed.
+  """
+  raw_old_args = existing_entry.get("std_args", [])
+  old_args_raw = raw_old_args if isinstance(raw_old_args, list) else []
+  raw_new_args = stored_dict.get("std_args", [])
+  new_args_raw = raw_new_args if isinstance(raw_new_args, list) else []
+
+  old_names = _normalize_args(old_args_raw)
+  new_names = _normalize_args(new_args_raw)
+  if old_names == new_names or suppress_internal_conflict:
+    return
+
+  if len(new_names) < len(old_names):
+    stored_dict["std_args"] = existing_entry.get("std_args")
+    stored_dict["description"] = existing_entry.get("description")
+  elif len(new_names) == len(old_names):
+    warnings.warn(
+      f"Conflict detected for '{op_name}': Signature mismatch within '{tier.value}'. Overwriting.",
+      UserWarning,
+      stacklevel=2,
+    )
+
+
+def _merge_with_existing_op(
+  op_name: str,
+  existing_entry: dict[str, JsonValue],
+  stored_dict: dict[str, JsonValue],
+  prev_tier_val: str,
+  tier: SemanticTier,
+  *,
+  is_internal: bool,
+) -> bool:
+  """Merge ``stored_dict`` variants/signatures against ``existing_entry`` and decide origin update.
+
+  Args:
+      op_name: Canonical operation identifier.
+      existing_entry: Previously stored operation dictionary.
+      stored_dict: Newly validated operation dictionary (mutated in place).
+      prev_tier_val: Previous tier origin string recorded for ``op_name``.
+      tier: Semantic tier of the incoming specification.
+      is_internal: Whether the incoming specification is marked internal.
+
+  Returns:
+      ``True`` if ``key_origins[op_name]`` should be updated to ``tier.value``.
+  """
+  prev_prec = TIER_PRECEDENCE.get(prev_tier_val, 0)
+  curr_prec = TIER_PRECEDENCE.get(tier.value, 0)
+  should_update_origin = curr_prec >= prev_prec
+
+  if curr_prec >= prev_prec:
+    raw_existing_vars = existing_entry.get("variants")
+    existing_variants: dict[str, JsonValue] = dict(raw_existing_vars) if isinstance(raw_existing_vars, dict) else {}
+    raw_new_vars = stored_dict.get("variants")
+    new_variants: dict[str, JsonValue] = dict(raw_new_vars) if isinstance(raw_new_vars, dict) else {}
+    existing_variants.update(new_variants)
+    stored_dict["variants"] = existing_variants
+
+    was_internal = bool(existing_entry.get("_is_internal", False))
+    if tier != SemanticTier.EXTRAS and should_update_origin and curr_prec == prev_prec:
+      _resolve_signature_conflict(
+        op_name,
+        tier,
+        existing_entry,
+        stored_dict,
+        suppress_internal_conflict=was_internal and not is_internal,
+      )
+
+  return should_update_origin
+
+
 def merge_tier_data(
   data: dict[str, dict[str, JsonValue]],
   key_origins: dict[str, str],
@@ -183,141 +374,254 @@ def merge_tier_data(
 
   Returns:
       None
+
+  Raises:
+      TypeError: If an operation entry in ``new_content`` is not a dictionary.
   """
-  # Safety check: Guard against malformed content (e.g. strings or lists)
   if not isinstance(new_content, dict):
     return
 
   data_copy = dict(new_content)
-
   if "__frameworks__" in data_copy:
     raw_fw = data_copy.pop("__frameworks__")
-    assert isinstance(raw_fw, dict)
-    merge_frameworks(framework_configs, raw_fw)
+    if isinstance(raw_fw, dict):
+      merge_frameworks(framework_configs, raw_fw)
 
   if "__patterns__" in data_copy and patterns is not None:
     raw_pats = data_copy.pop("__patterns__")
-    assert isinstance(raw_pats, list)
-    merge_patterns(patterns, raw_pats)
+    if isinstance(raw_pats, list):
+      merge_patterns(patterns, raw_pats)
 
   for op_name, details in data_copy.items():
+    _merge_single_op_entry(
+      op_name=op_name,
+      details=details,
+      data=data,
+      key_origins=key_origins,
+      tier=tier,
+      is_internal=is_internal,
+      operations=None,
+    )
+
+
+def _merge_single_op_entry(
+  *,
+  op_name: str,
+  details: JsonValueLike,
+  data: dict[str, dict[str, JsonValue]],
+  key_origins: dict[str, str],
+  tier: SemanticTier,
+  is_internal: bool,
+  operations: dict[str, OperationDef] | None,
+) -> None:
+  """Validate and merge one abstract operation entry into ``data`` and optional ``operations``.
+
+  Args:
+      op_name: Canonical operation identifier.
+      details: Raw mapping or pre-validated ``OperationDef`` model.
+      data: Master raw operation dictionary.
+      key_origins: Tier-origin map keyed by ``op_name``.
+      tier: Semantic tier being merged.
+      is_internal: Whether the entry originates from internal defaults.
+      operations: Optional typed ``OperationDef`` store updated directly.
+
+  Raises:
+      TypeError: If ``details`` is neither a dictionary nor an ``OperationDef``.
+  """
+  try:
+    if not isinstance(details, (dict, OperationDef)):
+      raise TypeError(f"Expected mapping for operation '{op_name}', got {type(details).__name__}")
+    validated_op, stored_dict = _prepare_validated_op(op_name, details, is_internal=is_internal)
+
     should_update_origin = True
+    if op_name in data:
+      if data[op_name] == stored_dict:
+        if operations is not None and op_name not in operations:
+          operations[op_name] = validated_op
+        return
+      should_update_origin = _merge_with_existing_op(
+        op_name,
+        data[op_name],
+        stored_dict,
+        key_origins.get(op_name, "unknown"),
+        tier,
+        is_internal=is_internal,
+      )
+      validated_op = OperationDef.model_validate(stored_dict)
 
+    data[op_name] = stored_dict
+    if operations is not None:
+      operations[op_name] = validated_op
+    if should_update_origin:
+      key_origins[op_name] = tier.value
+  except ValidationError as e:
+    logger.warning("⚠️  Skipping invalid definition '%s' in %s: %s", op_name, tier.value, e)
+
+
+def merge_tier_with_models(
+  typed_store: TypedSemanticsStore,
+  data: dict[str, dict[str, JsonValue]],
+  key_origins: dict[str, str],
+  framework_configs: dict[str, dict[str, JsonValue]],
+  new_content: JsonValueLike,
+  tier: SemanticTier,
+  patterns: list[PatternDef] | None = None,
+) -> None:
+  """Merge specification content directly into both typed Pydantic stores and raw tables.
+
+  Args:
+      typed_store: Typed ``OperationDef`` and ``FrameworkTraits`` container.
+      data: Master dictionary of serialized operations.
+      key_origins: Dict tracking tier origins per operation.
+      framework_configs: Master dictionary of framework configurations.
+      new_content: Specification content mapping (supporting ``OperationDef`` values directly).
+      tier: Semantic tier of the incoming specification.
+      patterns: Optional list of fusion ``PatternDef`` objects.
+
+  Raises:
+      TypeError: If an operation entry in ``new_content`` is neither a dict nor ``OperationDef``.
+  """
+  if not isinstance(new_content, dict):
+    return
+
+  data_copy = dict(new_content)
+  if "__frameworks__" in data_copy:
+    raw_fw = data_copy.pop("__frameworks__")
+    if isinstance(raw_fw, dict):
+      merge_frameworks(framework_configs, raw_fw, typed_configs=typed_store.framework_traits)
+
+  if "__patterns__" in data_copy and patterns is not None:
+    raw_pats = data_copy.pop("__patterns__")
+    if isinstance(raw_pats, list):
+      merge_patterns(patterns, raw_pats)
+
+  for op_name, details in data_copy.items():
+    _merge_single_op_entry(
+      op_name=op_name,
+      details=details,
+      data=data,
+      key_origins=key_origins,
+      tier=tier,
+      is_internal=False,
+      operations=typed_store.operations,
+    )
+
+
+def _sync_overlay_operation_model(
+  operations: dict[str, OperationDef],
+  op_name: str,
+  target_framework: str,
+  raw_op_dict: typing.Mapping[str, JsonValue],
+  implementation: RuntimeTensorOrValue,
+) -> None:
+  """Update ``operations[op_name]`` with a validated ``FrameworkVariant`` for ``target_framework``.
+
+  Args:
+      operations: Typed ``OperationDef`` dictionary to update.
+      op_name: Canonical abstract operation identifier.
+      target_framework: Framework key whose variant was updated.
+      raw_op_dict: Backing operation dictionary (used if ``op_name`` is a new orphan op).
+      implementation: Incoming variant implementation (``FrameworkVariant``, ``dict``, or ``None``).
+  """
+  existing_op = operations.get(op_name)
+  if existing_op is None:
     try:
-      if not isinstance(details, dict):
-        raise TypeError(f"Expected mapping for operation '{op_name}', got {type(details).__name__}")
-      # FIX: Prepare dictionary for validation by injecting fields implied by structure
-      details_to_validate: dict[str, JsonValue] = dict(details)
+      operations[op_name] = OperationDef.model_validate(raw_op_dict)
+    except ValidationError as exc:
+      logger.debug("Skipping typed orphan OperationDef sync for '%s': %s", op_name, exc)
+    return
 
-      # 1. Inject missing 'operation' field (redundant with key)
-      if "operation" not in details_to_validate:
-        details_to_validate["operation"] = op_name
+  if implementation is None:
+    existing_op.variants[target_framework] = None
+  elif isinstance(implementation, FrameworkVariant):
+    existing_op.variants[target_framework] = implementation
+  elif isinstance(implementation, (BaseModel, dict)):
+    raw_variants = raw_op_dict.get("variants")
+    candidate = raw_variants.get(target_framework) if isinstance(raw_variants, dict) else None
+    fallback = implementation.model_dump(exclude_unset=True) if isinstance(implementation, BaseModel) else implementation
+    merged_raw = candidate if isinstance(candidate, dict) else fallback
+    try:
+      existing_op.variants[target_framework] = FrameworkVariant.model_validate(merged_raw)
+    except ValidationError as exc:
+      logger.debug("Skipping typed FrameworkVariant sync for '%s.%s': %s", op_name, target_framework, exc)
 
-      # 2. Inject missing 'variants' field (Hub specs often lack this)
-      if "variants" not in details_to_validate:
-        details_to_validate["variants"] = {}
 
-      # 3. Inject missing 'description' field (Required by schema)
-      if "description" not in details_to_validate:
-        details_to_validate["description"] = f"Autogenerated definition for {op_name}"
+def _resolve_overlay_target_framework(content: typing.Mapping[str, RuntimeTensorOrValue], filename: str) -> str:
+  """Determine the target framework key for a snapshot overlay from ``__framework__`` or filename.
 
-      # 4. Inject missing 'std_args' field (Required by schema, default empty)
-      if "std_args" not in details_to_validate:
-        details_to_validate["std_args"] = []
+  Args:
+      content: Snapshot overlay mapping.
+      filename: Overlay filename used for ``<fw>_v<ver>`` fallback inference.
 
-      validated_op = OperationDef.model_validate(details_to_validate)
+  Returns:
+      Resolved framework identifier, or empty string if unresolvable.
+  """
+  raw_target_framework = content.get("__framework__")
+  if isinstance(raw_target_framework, str) and raw_target_framework:
+    return raw_target_framework
+  parts = filename.split("_v")
+  return parts[0] if len(parts) > 1 else ""
 
-      # FIX: We want to store a dictionary that includes valid schema fields
-      # BUT PRESERVES extra fields (like 'ver', 'type' in unit tests) that
-      # Pydantic strips out if extra='ignore' or implicit.
-      validated_dict = validated_op.model_dump(by_alias=True, exclude_unset=True)
 
-      # We base the storage dict on the input details (with injections) to keep extra keys,
-      # then overlay the cleaned/validated fields.
-      stored_dict: dict[str, JsonValue] = dict(details_to_validate)
-      stored_dict.update(validated_dict)
+def _apply_overlay_mapping_entry(
+  *,
+  op_name: str,
+  implementation: RuntimeTensorOrValue,
+  target_framework: str,
+  filename: str,
+  data: dict[str, dict[str, JsonValue]],
+  key_origins: dict[str, str],
+  typed_store: TypedSemanticsStore | None,
+) -> None:
+  """Merge a single ``(op_name, implementation)`` overlay entry into ``data`` and ``typed_store``.
 
-      if is_internal:
-        stored_dict["_is_internal"] = True
+  Args:
+      op_name: Canonical abstract operation identifier.
+      implementation: Variant mapping (``FrameworkVariant``, ``dict``, or ``None``).
+      target_framework: Target framework key.
+      filename: Source overlay filename for skeleton description generation.
+      data: Master raw operation dictionary.
+      key_origins: Tier-origin map keyed by ``op_name``.
+      typed_store: Optional typed model store updated directly.
+  """
+  if op_name not in data:
+    data[op_name] = {
+      "description": f"Auto-generated from {filename}",
+      "std_args": [],
+      "variants": {},
+      "operation": op_name,
+    }
+    if op_name not in key_origins:
+      key_origins[op_name] = (
+        SemanticTier.NEURAL.value if (op_name and op_name[0].isupper()) else SemanticTier.EXTRAS.value
+      )
 
-      if op_name in data:
-        # Idempotency Check: If the new definition is identical to existing, skip
-        if data[op_name] == stored_dict:
-          continue
+  existing_variants = data[op_name].get("variants")
+  if not isinstance(existing_variants, dict):
+    variants_dict: dict[str, JsonValue] = {}
+    data[op_name]["variants"] = variants_dict
+  else:
+    variants_dict = existing_variants
 
-        existing_entry = data[op_name]
-        was_internal = bool(existing_entry.get("_is_internal", False))
+  impl_dict: dict[str, JsonValue] | None = (
+    implementation.model_dump(exclude_unset=True)
+    if isinstance(implementation, BaseModel)
+    else (dict(implementation) if isinstance(implementation, dict) else None)
+  )
 
-        prev_tier_val = key_origins.get(op_name, "unknown")
+  if implementation is None:
+    variants_dict[target_framework] = None
+  elif impl_dict is not None:
+    existing_target = variants_dict.get(target_framework)
+    if not isinstance(existing_target, dict):
+      current_variant: dict[str, JsonValue] = {}
+      variants_dict[target_framework] = current_variant
+    else:
+      current_variant = existing_target
+    current_variant.update(impl_dict)
 
-        # Determine precedence
-        prev_prec = TIER_PRECEDENCE.get(prev_tier_val, 0)
-        curr_prec = TIER_PRECEDENCE.get(tier.value, 0)
-
-        # Downgrade Protection: Don't let low-priority spec overwrite high-priority origin tag
-        # Unless origin was internal default and we are loading file (any precedence)
-        if curr_prec < prev_prec:
-          should_update_origin = False
-
-        # Intelligent Merging:
-        # If we are in the same tier, or upgrading, we should try to preserve existing variants
-        # unless the new spec is radically different.
-        if curr_prec >= prev_prec:
-          raw_existing_vars = existing_entry.get("variants")
-          existing_variants: dict[str, JsonValue] = dict(raw_existing_vars) if isinstance(raw_existing_vars, dict) else {}
-          raw_new_vars = stored_dict.get("variants")
-          new_variants: dict[str, JsonValue] = dict(raw_new_vars) if isinstance(raw_new_vars, dict) else {}
-
-          # Merge variants: New variants overwrite existing ones for the same framework key
-          existing_variants.update(new_variants)
-          stored_dict["variants"] = existing_variants
-
-          # Warning Logic:
-          # Warn only if a meaningful conflict (signature mismatch) exists at the same tier.
-          # Upgrades (e.g. Array->Neural) are silent.
-          # Overwriting an Internal Default with explicit File content is also silent.
-          suppress_internal_conflict = was_internal and not is_internal
-
-          if tier != SemanticTier.EXTRAS and should_update_origin and curr_prec == prev_prec:
-            raw_old_args = existing_entry.get("std_args", [])
-            old_args_raw = raw_old_args if isinstance(raw_old_args, list) else []
-            raw_new_args = stored_dict.get("std_args", [])
-            new_args_raw = raw_new_args if isinstance(raw_new_args, list) else []
-
-            # Normalize args to names only to check for True mismatch
-            # (Ignoring metadata upgrades like type/min/max)
-            old_names = _normalize_args(old_args_raw)
-            new_names = _normalize_args(new_args_raw)
-
-            if old_names != new_names and not suppress_internal_conflict:
-              # Conflict Resolution Strategy: Greatest Argument Count Wins
-              # This behaves like 'merging until most complete version'
-              if len(new_names) > len(old_names):
-                # Upgrade: New spec is richer. Silent overwrite.
-                pass
-              elif len(new_names) < len(old_names):
-                # Downgrade: New spec is a subset. Preserve old spec details.
-                stored_dict["std_args"] = existing_entry.get("std_args")
-                stored_dict["description"] = existing_entry.get("description")
-                # FrameworkVariants were merged above, so we keep the variants from new logic
-                pass
-              else:
-                # Equal length but different names. Ambiguous 1-to-1 conflict.
-                warnings.warn(
-                  f"Conflict detected for '{op_name}': Signature mismatch within '{tier.value}'. Overwriting.",
-                  UserWarning,
-                )
-
-      # Merge dictionaries (Overwrite properties with new spec, but variants are merged above)
-      data[op_name] = stored_dict
-
-      # Only update the Tier Origin if precedence allows
-      if should_update_origin:
-        key_origins[op_name] = tier.value
-
-    except ValidationError as e:
-      logger.warning("⚠️  Skipping invalid definition '%s' in %s: %s", op_name, tier.value, e)
-      continue
+  if typed_store is not None:
+    _sync_overlay_operation_model(typed_store.operations, op_name, target_framework, data[op_name], implementation)
 
 
 def merge_overlay_data(
@@ -327,6 +631,7 @@ def merge_overlay_data(
   test_templates: dict[str, dict[str, str]],
   content: typing.Mapping[str, RuntimeTensorOrValue],
   filename: str,
+  typed_store: TypedSemanticsStore | None = None,
 ) -> None:
   """Merge a mapping overlay file (snapshot) into the main data.
 
@@ -340,69 +645,41 @@ def merge_overlay_data(
       test_templates (Dict[str, Dict[str, str]]): Master dictionary of testing templates.
       content (Mapping[str, JsonValue]): The JSON content of the snapshot file.
       filename (str): Filename for metadata inference if needed.
+      typed_store: Optional typed ``OperationDef`` and ``FrameworkTraits`` store updated directly.
 
   Returns:
       None
+
+  Raises:
+      SemanticLoadError: If ``content['mappings']`` is not a dictionary.
   """
-  raw_target_framework = content.get("__framework__")
-  target_framework = str(raw_target_framework) if isinstance(raw_target_framework, str) and raw_target_framework else ""
-
+  target_framework = _resolve_overlay_target_framework(content, filename)
   if not target_framework:
-    # Fallback: try to guess from filename 'torch_v1.0.json' -> 'torch'
-    parts = filename.split("_v")
-    if len(parts) > 1:
-      target_framework = parts[0]
-    else:
-      return  # Cannot determine target framework, skip
+    return
 
-  # 1. Merge Template Config if present
   raw_templates = content.get("templates")
   if isinstance(raw_templates, dict):
     test_templates[target_framework] = {str(k): str(v) for k, v in raw_templates.items()}
 
-  # 2. Merge Framework Traits (Aliases)
   raw_fw_conf = content.get("framework")
   if isinstance(raw_fw_conf, dict):
     if target_framework not in framework_configs:
       framework_configs[target_framework] = dict(raw_fw_conf)
     else:
       framework_configs[target_framework].update(raw_fw_conf)
+    if typed_store is not None:
+      _sync_typed_framework_entry(typed_store.framework_traits, target_framework, framework_configs[target_framework])
 
-  # 4. Merge Mappings
   raw_mappings = content.get("mappings", {})
-  assert isinstance(raw_mappings, dict)
+  if not isinstance(raw_mappings, dict):
+    raise SemanticLoadError(f"Overlay '{filename}' mappings must be a dict, got {type(raw_mappings).__name__}.")
   for op_name, implementation in raw_mappings.items():
-    # A. Check if Op exists in Spec
-    if op_name not in data:
-      # If not in spec, create a skeleton description.
-      data[op_name] = {
-        "description": f"Auto-generated from {filename}",
-        "std_args": [],  # Unknown if not in Spec
-        "variants": {},
-        "operation": op_name,  # ensure basic struct
-      }
-      # Heuristic Tier Detection for orphan mappings
-      if op_name not in key_origins:
-        if op_name and op_name[0].isupper():
-          key_origins[op_name] = SemanticTier.NEURAL.value
-        else:
-          key_origins[op_name] = SemanticTier.EXTRAS.value
-
-    # B. Ensure 'variants' dict exists
-    if "variants" not in data[op_name] or data[op_name]["variants"] is None:
-      data[op_name]["variants"] = {}
-
-    variants_dict = data[op_name]["variants"]
-    assert isinstance(variants_dict, dict)
-
-    # C. Inject FrameworkVariant
-    if implementation is None:
-      variants_dict[target_framework] = None
-    else:
-      assert isinstance(implementation, dict)
-      if target_framework not in variants_dict or variants_dict[target_framework] is None:
-        variants_dict[target_framework] = {}
-
-      current_variant = variants_dict[target_framework]
-      assert isinstance(current_variant, dict)
-      current_variant.update(implementation)
+    _apply_overlay_mapping_entry(
+      op_name=op_name,
+      implementation=implementation,
+      target_framework=target_framework,
+      filename=filename,
+      data=data,
+      key_origins=key_origins,
+      typed_store=typed_store,
+    )

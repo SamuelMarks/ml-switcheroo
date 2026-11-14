@@ -276,3 +276,44 @@ def test_patcher_fallback_and_edge_branches(emitter: MockEmitter) -> None:
   empty_stmt = cst.SimpleStatementLine(body=[])
   assert patcher._unwrap_stmt_if_nested(dummy_expr, empty_stmt) is empty_stmt
   assert patcher._unwrap_stmt_if_nested(cst.Name("x"), empty_stmt) is empty_stmt
+
+  # Non-empty statement unwrapped for Assign returns FlattenSentinel
+  pass_stmt = cst.SimpleStatementLine(body=[cst.Pass()])
+  unwrapped = patcher._unwrap_stmt_if_nested(dummy_assign, pass_stmt)
+  assert isinstance(unwrapped, cst.FlattenSentinel)
+
+  # Direct _handle_node delete returns RemoveFromParent
+  target_name = cst.Name("test")
+  del_patcher = GraphPatcher([DeleteAction(node_id="n1")], {"n1": target_name}, emitter)
+  assert del_patcher._handle_node(target_name, target_name) == cst.RemoveFromParent()
+
+  # Abstract RewriterPass.transform raises NotImplementedError
+  from ml_switcheroo.core.rewriter.context import RewriterContext
+  from ml_switcheroo.core.rewriter.interface import RewriterPass
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  class _MinimalPass(RewriterPass):
+    """Concrete `RewriterPass` subclass for testing base `transform` behavior."""
+
+    def transform(self, module: cst.Module, context: RewriterContext) -> cst.Module:
+      """Return `module` unchanged.
+
+      Args:
+          module: Input CST module.
+          context: Active `RewriterContext`.
+
+      Returns:
+          Unchanged `cst.Module`.
+      """
+      return module
+
+  assert RewriterPass.transform(_MinimalPass(), cst.Module([]), RewriterContext(semantics=SemanticsManager())) is None
+
+  from ml_switcheroo.exceptions import DialectLoweringError
+
+  bad_act = ReplaceAction(node_id="n1", input_vars=[], output_var="out", new_node=LogicalNode(id="n1", op_type="Op"))
+  with pytest.MonkeyPatch.context() as mp:
+    mp.setattr(bad_act, "new_node", "not_a_logical_node")
+    bad_patcher = GraphPatcher([bad_act], {"n1": target_name}, emitter)
+    with pytest.raises(DialectLoweringError, match="ReplaceAction requires LogicalNode"):
+      bad_patcher._handle_node(target_name, target_name)

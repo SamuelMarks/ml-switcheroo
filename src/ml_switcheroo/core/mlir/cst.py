@@ -10,7 +10,8 @@ import typing
 import pydantic
 from pydantic import JsonValue
 
-from ml_switcheroo.core.cst.base import CSTNode, CstFieldValue, Trivia, TriviaInput as TriviaInput
+from ml_switcheroo.core.cst.base import CstFieldValue, CSTNode, Trivia
+from ml_switcheroo.core.cst.base import TriviaInput as TriviaInput
 
 
 class MlirNode(CSTNode):
@@ -33,7 +34,11 @@ class MlirNode(CSTNode):
 
 
 class TypeNode(MlirNode):
-  """Represent a type annotation."""
+  """Represent a type annotation.
+
+  Attributes:
+      body: The body (`str`).
+  """
 
   body: str = ""
 
@@ -69,7 +74,14 @@ class TypeNode(MlirNode):
 
 
 class ValueNode(MlirNode):
-  """Represent an SSA Value identifier (e.g. %0)."""
+  """Represent an SSA Value identifier (e.g. %0).
+
+  Attributes:
+      name: The name (`str`).
+      use_index: The use index (`int | None`).
+      type_node: The type node (`TypeNode | None`).
+      colon_trivia: The colon trivia (`list[Trivia]`).
+  """
 
   name: str = ""
   use_index: int | None = None
@@ -123,7 +135,14 @@ class ValueNode(MlirNode):
 
 
 class AttributeNode(MlirNode):
-  """Represent a named attribute."""
+  """Represent a named attribute.
+
+  Attributes:
+      name: The name (`str`).
+      use_index: The use index (`int | None`).
+      value: The value (`str | int | float | bool | list[str] | MlirNode | JsonValue`).
+      type_annotation: The type annotation (`str | None`).
+  """
 
   name: str = ""
   use_index: int | None = None
@@ -167,10 +186,7 @@ class AttributeNode(MlirNode):
     out = "".join(t.text for t in self.leading_trivia)
     suffix = f" : {self.type_annotation}" if self.type_annotation else ""
 
-    if isinstance(self.value, list):
-      val_str = f"[{', '.join(str(x) for x in self.value)}]"
-    else:
-      val_str = str(self.value)
+    val_str = f"[{', '.join(str(x) for x in self.value)}]" if isinstance(self.value, list) else str(self.value)
 
     out += f"{self.name} = {val_str}{suffix}"
     out += "".join(t.text for t in self.trailing_trivia)
@@ -178,7 +194,13 @@ class AttributeNode(MlirNode):
 
 
 class BlockNode(MlirNode):
-  """Represent a Basic Block within a Region."""
+  """Represent a Basic Block within a Region.
+
+  Attributes:
+      label: The label (`str`).
+      operations: The operations (`list['OperationNode']`).
+      arguments: The arguments (`list[tuple[ValueNode, TypeNode]]`).
+  """
 
   label: str = ""
   operations: list["OperationNode"] = pydantic.Field(default_factory=list)
@@ -238,7 +260,11 @@ class BlockNode(MlirNode):
 
 
 class RegionNode(MlirNode):
-  """Represent a Region containing Blocks."""
+  """Represent a Region containing Blocks.
+
+  Attributes:
+      blocks: The blocks (`list[BlockNode]`).
+  """
 
   blocks: list[BlockNode] = pydantic.Field(default_factory=list)
 
@@ -277,7 +303,25 @@ class RegionNode(MlirNode):
 
 
 class OperationNode(MlirNode):
-  """Represent a specific MLIR Operation."""
+  """Represent a specific MLIR Operation.
+
+  Attributes:
+      name: The name (`str`).
+      use_index: The use index (`int | None`).
+      is_generic: The is generic (`bool`).
+      location: The location (`str | None`).
+      properties: The properties (`list['AttributeNode']`).
+      successors: The successors (`list[str]`).
+      results: The results (`list[ValueNode]`).
+      operands: The operands (`list[ValueNode]`).
+      attributes: The attributes (`list[AttributeNode]`).
+      regions: The regions (`list[RegionNode]`).
+      result_types: The result types (`list[TypeNode]`).
+      op_tail_str: The op tail str (`str`).
+      op_tail_trivia: The op tail trivia (`list[Trivia]`).
+      name_trivia: The name trivia (`str | list[Trivia] | None`).
+      has_parens: The has parens (`bool`).
+  """
 
   name: str = ""
   use_index: int | None = None
@@ -295,6 +339,29 @@ class OperationNode(MlirNode):
   name_trivia: str | list[Trivia] | None = pydantic.Field(default_factory=list)
   has_parens: bool = True
 
+  @pydantic.field_validator(
+    "properties",
+    "successors",
+    "results",
+    "operands",
+    "attributes",
+    "regions",
+    "result_types",
+    "op_tail_trivia",
+    mode="before",
+  )
+  @classmethod
+  def _coerce_optional_list(cls, v: CstFieldValue) -> CstFieldValue:
+    """Normalize ``None`` list field inputs into empty lists during construction.
+
+    Args:
+        v: Raw list field input or ``None``.
+
+    Returns:
+        Empty list when ``v`` is ``None``, otherwise ``v`` unchanged.
+    """
+    return [] if v is None else v
+
   @pydantic.field_validator("name_trivia", mode="before")
   @classmethod
   def _coerce_name_trivia(cls, v: TriviaInput) -> list[Trivia]:
@@ -306,72 +373,105 @@ class OperationNode(MlirNode):
     Returns:
         Normalized list of Trivia instances.
     """
-    return [Trivia(v)] if isinstance(v, str) else list(v or [])
+    return [Trivia(v)] if isinstance(v, str) else cls._coerce_trivia(v)
 
-  def __init__(
-    self,
-    name: str = "",
-    use_index: int | None = None,
-    is_generic: bool = False,
-    location: str | None = None,
-    properties: list["AttributeNode"] | None = None,
-    successors: list[str] | None = None,
-    results: list[ValueNode] | None = None,
-    operands: list[ValueNode] | None = None,
-    attributes: list[AttributeNode] | None = None,
-    regions: list[RegionNode] | None = None,
-    result_types: list[TypeNode] | None = None,
-    op_tail_str: str = "",
-    op_tail_trivia: list[Trivia] | None = None,
-    name_trivia: TriviaInput = None,
-    has_parens: bool = True,
-    leading_trivia: TriviaInput = None,
-    trailing_trivia: TriviaInput = None,
-  ) -> None:
-    """Initialize OperationNode.
+  def _post_init(self) -> None:
+    """Initialize node after creation."""
+    super()._post_init()
+
+  def _format_header(self) -> str:
+    """Render leading trivia, SSA results prefix, operation name, and name trivia.
+
+    Returns:
+        str: Formatted operation header string.
+    """
+    parts: list[str] = [t.text for t in self.leading_trivia]
+    if self.results:
+      parts.append(", ".join(r.to_text() for r in self.results))
+      parts.append(" = ")
+    parts.append(f'"{self.name}"' if self.is_generic else self.name)
+    if isinstance(self.name_trivia, list) and self.name_trivia:
+      parts.extend(t.text for t in self.name_trivia)
+    return "".join(parts)
+
+  def _format_operands(self) -> str:
+    """Render SSA operands with leading spacing and optional parentheses.
+
+    Returns:
+        str: Formatted operands segment, or empty string when absent.
+    """
+    if not self.operands:
+      return ""
+    prefix = ""
+    if not self.name_trivia and not self.has_parens:
+      if not self.operands[0].leading_trivia:
+        prefix = " "
+    elif not self.name_trivia and self.has_parens:
+      prefix = " "
+
+    op_names = [
+      (" " + o.to_text() if i > 0 and not o.leading_trivia else o.to_text()) for i, o in enumerate(self.operands)
+    ]
+    joined = ",".join(op_names)
+    return f"{prefix}({joined})" if self.has_parens else f"{prefix}{joined}"
+
+  def _format_metadata(self) -> str:
+    """Render successors, properties, source location, and attribute dictionary.
+
+    Returns:
+        str: Formatted metadata segment.
+    """
+    parts: list[str] = []
+    if self.successors:
+      parts.append(f" [{', '.join(self.successors)}]")
+    if self.properties:
+      parts.append(f" <{{{', '.join(a.to_text() for a in self.properties)}}}>")
+    if self.location:
+      parts.append(f" loc({self.location})")
+    if self.attributes:
+      if not self.name_trivia:
+        parts.append(" ")
+      parts.append(f"{{{', '.join(a.to_text() for a in self.attributes)}}}")
+    return "".join(parts)
+
+  def _format_result_types(self) -> str:
+    """Render operation tail trivia, separator, and result type annotations.
+
+    Returns:
+        str: Formatted result types segment, or empty string when absent.
+    """
+    if not self.result_types:
+      return ""
+    parts: list[str] = [t.text for t in self.op_tail_trivia]
+    if not self.op_tail_str:
+      if not self.op_tail_trivia and not self.name_trivia:
+        parts.append(" : ")
+      else:
+        parts.append(": ")
+    else:
+      parts.append(self.op_tail_str)
+
+    if len(self.result_types) == 1:
+      parts.append(self.result_types[0].to_text())
+    else:
+      joined = ", ".join(t.to_text() for t in self.result_types)
+      wrap_parens = self.op_tail_str == "-> " or not self.op_tail_str
+      parts.append(f"({joined})" if wrap_parens else joined)
+    return "".join(parts)
+
+  def _format_regions(self, current_text: str) -> str:
+    """Render attached regions with separating space when required.
 
     Args:
-        name: Operation name.
-        use_index: Optional index.
-        is_generic: Generic operation syntax flag.
-        location: Optional location string.
-        properties: Operation properties list.
-        successors: Successor block names.
-        results: Result ValueNode list.
-        operands: Operand ValueNode list.
-        attributes: AttributeNode list.
-        regions: RegionNode list.
-        result_types: Result TypeNode list.
-        op_tail_str: Operation tail string.
-        op_tail_trivia: Operation tail trivia list.
-        name_trivia: Trivia following operation name.
-        has_parens: Whether operand parentheses are present.
-        leading_trivia: Optional leading trivia.
-        trailing_trivia: Optional trailing trivia.
-    """
-    super().__init__(
-      name=name,
-      use_index=use_index,
-      is_generic=is_generic,
-      location=location,
-      properties=properties if properties is not None else [],
-      successors=successors if successors is not None else [],
-      results=results if results is not None else [],
-      operands=operands if operands is not None else [],
-      attributes=attributes if attributes is not None else [],
-      regions=regions if regions is not None else [],
-      result_types=result_types if result_types is not None else [],
-      op_tail_str=op_tail_str,
-      op_tail_trivia=op_tail_trivia if op_tail_trivia is not None else [],
-      name_trivia=name_trivia if name_trivia is not None else [],
-      has_parens=has_parens,
-      leading_trivia=leading_trivia if leading_trivia is not None else [],
-      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
-    )
+        current_text: Rendered prefix preceding the region list.
 
-  def __post_init__(self) -> None:
-    """Initialize node after creation."""
-    super().__post_init__()
+    Returns:
+        str: Formatted regions segment, or empty string when absent.
+    """
+    if not self.regions:
+      return ""
+    prefix = " " if current_text and not current_text.endswith(" ") and not self.regions[0].leading_trivia else ""
+    return prefix + "".join(reg.to_text() for reg in self.regions)
 
   def to_text(self) -> str:
     """Return textual representation of the node.
@@ -379,98 +479,10 @@ class OperationNode(MlirNode):
     Returns:
         str: The rendered operation string.
     """
-    parts = []
-    for t in self.leading_trivia:
-      parts.append(t.text)
-
-    if self.results:
-      r_names = [r.to_text() for r in self.results]
-      parts.append(", ".join(r_names))
-      parts.append(" = ")
-
-    if self.is_generic:
-      parts.append(f'"{self.name}"')
-    else:
-      parts.append(self.name)
-
-    if isinstance(self.name_trivia, list) and self.name_trivia:
-      for t in self.name_trivia:
-        parts.append(t.text)
-
-    if self.operands:
-      if not self.name_trivia and not self.has_parens:
-        # Check if first operand has leading trivia, if not, add space
-        if not self.operands[0].leading_trivia:
-          parts.append(" ")
-      elif not self.name_trivia and self.has_parens:
-        parts.append(" ")
-      op_names = []
-      for i, o in enumerate(self.operands):
-        # If no trivia and not first operand, add space
-        if i > 0 and not o.leading_trivia:
-          op_names.append(" " + o.to_text())
-        else:
-          op_names.append(o.to_text())
-
-      if self.has_parens:
-        parts.append(f"({','.join(op_names)})")
-      else:
-        parts.append(",".join(op_names))
-
-    if self.successors:
-      parts.append(" [")
-      parts.append(", ".join(self.successors))
-      parts.append("]")
-
-    if self.properties:
-      parts.append(" <{")
-      parts.append(", ".join([a.to_text() for a in self.properties]))
-      parts.append("}>")
-
-    if self.location:
-      parts.append(f" loc({self.location})")
-
-    if self.attributes:
-      if not self.name_trivia:
-        parts.append(" ")
-      parts.append("{")
-      attrs_str = ", ".join([a.to_text() for a in self.attributes])
-      parts.append(attrs_str)
-      parts.append("}")
-
-    if self.result_types:
-      for t in self.op_tail_trivia:
-        parts.append(t.text)
-      if not self.op_tail_str:
-        if not self.op_tail_trivia and not self.name_trivia:
-          parts.append(" : ")
-        else:
-          parts.append(": ")
-      else:
-        parts.append(self.op_tail_str)
-
-      if len(self.result_types) == 1:
-        parts.append(self.result_types[0].to_text())
-      else:
-        r_types = [t.to_text() for t in self.result_types]
-        if self.op_tail_str == "-> ":
-          parts.append(f"({', '.join(r_types)})")  # e.g. -> (tensor<...>, tensor<...>)
-        elif not self.op_tail_str:
-          parts.append(f"({', '.join(r_types)})")
-        else:
-          parts.append(", ".join(r_types))
-
-    if self.regions:
-      if parts and not parts[-1].endswith(" ") and not self.regions[0].leading_trivia:
-        parts.append(" ")
-      for reg in self.regions:
-        parts.append(reg.to_text())
-
-    for t in self.trailing_trivia:
-      parts.append(t.text)
-
-    out = "".join(parts)
-    return out
+    body = self._format_header() + self._format_operands() + self._format_metadata() + self._format_result_types()
+    regions_str = self._format_regions(body)
+    trailing = "".join(t.text for t in self.trailing_trivia)
+    return body + regions_str + trailing
 
 
 class StableHloConstantOp(OperationNode):
@@ -482,9 +494,7 @@ class StableHloConstantOp(OperationNode):
     Returns:
         str: The rendered constant operation string.
     """
-    parts = []
-    for t in self.leading_trivia:
-      parts.append(t.text)
+    parts: list[str] = [t.text for t in self.leading_trivia]
 
     if self.results:
       r_names = [r.to_text() for r in self.results]
@@ -494,8 +504,7 @@ class StableHloConstantOp(OperationNode):
     parts.append(self.name)
 
     if isinstance(self.name_trivia, list) and self.name_trivia:
-      for t in self.name_trivia:
-        parts.append(t.text)
+      parts.extend(t.text for t in self.name_trivia)
 
     if self.successors:
       parts.append(" [")
@@ -524,15 +533,20 @@ class StableHloConstantOp(OperationNode):
         t_names = [t.to_text() for t in self.result_types]
         parts.append(f"({', '.join(t_names)})")
 
-    for t in self.trailing_trivia:
-      parts.append(t.text)
+    parts.extend(t.text for t in self.trailing_trivia)
 
-    out = "".join(parts)
-    return out
+    return "".join(parts)
 
 
 class AttributeAliasDefNode(MlirNode):
-  """Represent a top-level attribute alias definition."""
+  """Represent a top-level attribute alias definition.
+
+  Attributes:
+      name: The name (`str`).
+      use_index: The use index (`int | None`).
+      value_node: The value node (`MlirNode | None`).
+      value_str: The value str (`str`).
+  """
 
   name: str = ""
   use_index: int | None = None
@@ -584,7 +598,15 @@ class AttributeAliasDefNode(MlirNode):
 
 
 class TypeAliasDefNode(MlirNode):
-  """Represent a type alias definition."""
+  """Represent a type alias definition.
+
+  Attributes:
+      name: The name (`str`).
+      use_index: The use index (`int | None`).
+      type_node: The type node (`TypeNode | None`).
+      leading_trivia: The leading trivia (`list[Trivia]`).
+      trailing_trivia: The trailing trivia (`list[Trivia]`).
+  """
 
   name: str = ""
   use_index: int | None = None
@@ -633,7 +655,12 @@ AliasNodeUnion: typing.TypeAlias = AttributeAliasDefNode | TypeAliasDefNode | Ml
 
 
 class ModuleNode(MlirNode):
-  """Top-level container."""
+  """Top-level container.
+
+  Attributes:
+      body: The body (`BlockNode`).
+      aliases: The aliases (`list[AliasNodeUnion]`).
+  """
 
   body: BlockNode = pydantic.Field(default_factory=BlockNode)
   aliases: list[AliasNodeUnion] = pydantic.Field(default_factory=list)

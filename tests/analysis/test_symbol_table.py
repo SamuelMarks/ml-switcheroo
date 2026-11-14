@@ -8,7 +8,6 @@ the resolution of types for neural network and tensor operations using the
 """
 
 from __future__ import annotations
-from tests.conftest import _test_getattr
 
 from unittest.mock import MagicMock
 
@@ -91,9 +90,7 @@ self.y = x
   assert scope.get("x") == TensorType(framework="torch")
 
   assigns: list[cst.CSTNode] = [
-    node
-    for node in analyzer.table._node_types.keys()
-    if isinstance(node, cst.Attribute) and _test_getattr(node.attr, "value", "") == "y"
+    node for node in analyzer.table._node_types if isinstance(node, cst.Attribute) and node.attr.value == "y"
   ]
   assert len(assigns) == 1
   assert analyzer.table.get_type(assigns[0]) == TensorType(framework="torch")
@@ -152,8 +149,8 @@ else:
   sym: SymbolType | None = analyzer.current_scope.get("x")
   assert isinstance(sym, UnionType)
   assert len(sym.types) == 2
-  assert any(_test_getattr(t, "framework", "") == "torch" for t in sym.types)
-  assert any(_test_getattr(t, "framework", "") == "jax" for t in sym.types)
+  assert any(isinstance(t, TensorType) and t.framework == "torch" for t in sym.types)
+  assert any(isinstance(t, TensorType) and t.framework == "jax" for t in sym.types)
 
 
 def test_symbol_table_analyzer_control_flow_loops() -> None:
@@ -208,7 +205,7 @@ x = torch.randn() if True else jax.numpy.zeros()
   tree: cst.Module = cst.parse_module(code)
   tree.visit(analyzer)
 
-  ifexp_nodes: list[cst.CSTNode] = [node for node in analyzer.table._node_types.keys() if isinstance(node, cst.IfExp)]
+  ifexp_nodes: list[cst.CSTNode] = [node for node in analyzer.table._node_types if isinstance(node, cst.IfExp)]
   assert len(ifexp_nodes) == 1
   sym: SymbolType | None = analyzer.table.get_type(ifexp_nodes[0])
   assert isinstance(sym, UnionType)
@@ -426,10 +423,12 @@ def test_make_union_len_one() -> None:
   u2: UnionType = UnionType([t1])
   res: SymbolType = analyzer._make_union(t1, u2)
   assert isinstance(res, TensorType)
+  assert res == t1
+  assert res.framework == "torch"
 
 
 def analyze(code: str) -> SymbolTableAnalyzer:
-  """Helper to run the SymbolTableAnalyzer on a snippet of code.
+  """Run the SymbolTableAnalyzer on a snippet of code.
 
   Args:
       code (str): Source code to parse and analyze.
@@ -643,6 +642,9 @@ else:
   _analyze_with(code, analyzer)
   sym: SymbolType | None = analyzer.current_scope.get("x")
   assert isinstance(sym, UnionType)
+  assert len(sym.types) == 2
+  assert ModuleType(name="Module", path="torch.nn") in sym.types
+  assert TensorType(name="Tensor", framework="torch") in sym.types
 
 
 def test_while_loop(analyzer: SymbolTableAnalyzer) -> None:
@@ -660,6 +662,9 @@ while True:
   _analyze_with(code, analyzer)
   sym: SymbolType | None = analyzer.current_scope.get("x")
   assert isinstance(sym, UnionType)
+  assert len(sym.types) == 2
+  assert ModuleType(name="Module", path="torch.nn") in sym.types
+  assert TensorType(name="Tensor", framework="torch") in sym.types
 
 
 def test_while_loop_else(analyzer: SymbolTableAnalyzer) -> None:
@@ -679,6 +684,9 @@ else:
   _analyze_with(code, analyzer)
   sym: SymbolType | None = analyzer.current_scope.get("x")
   assert isinstance(sym, UnionType)
+  assert len(sym.types) == 2
+  assert ModuleType(name="Module", path="torch.nn") in sym.types
+  assert TensorType(name="Tensor", framework="torch") in sym.types
 
 
 def test_ifexp_partial(analyzer: SymbolTableAnalyzer) -> None:
@@ -693,8 +701,12 @@ x = torch.randn(1) if True else untyped_func()
 y = untyped_func() if True else torch.randn(1)
 """
   _analyze_with(code, analyzer)
-  assert isinstance(analyzer.current_scope.get("x"), TensorType)
-  assert isinstance(analyzer.current_scope.get("y"), TensorType)
+  sym_x: SymbolType | None = analyzer.current_scope.get("x")
+  sym_y: SymbolType | None = analyzer.current_scope.get("y")
+  assert isinstance(sym_x, TensorType)
+  assert sym_x.framework == "torch"
+  assert isinstance(sym_y, TensorType)
+  assert sym_y.framework == "torch"
 
 
 def test_merge_states_b_only(analyzer: SymbolTableAnalyzer) -> None:
@@ -713,6 +725,7 @@ else:
   _analyze_with(code, analyzer)
   sym: SymbolType | None = analyzer.current_scope.get("z")
   assert isinstance(sym, TensorType)
+  assert sym.framework == "torch"
 
 
 def test_make_union_same(analyzer: SymbolTableAnalyzer) -> None:
@@ -751,6 +764,8 @@ def test_make_union_dedup_single(analyzer: SymbolTableAnalyzer) -> None:
   u1: UnionType = UnionType([t1])
   res: SymbolType = analyzer._make_union(u1, t2)
   assert isinstance(res, TensorType)
+  assert res.framework == "torch"
+  assert res == t1
 
 
 def test_import_from(analyzer: SymbolTableAnalyzer) -> None:
@@ -809,7 +824,7 @@ class A:
       Args:
           node: CST or AST node under inspection or transformation.
       """
-      if _test_getattr(node.attr, "value", "") == "x":
+      if node.attr.value == "x":
         self.nodes.append(node)
 
   v: AttrVisitor = AttrVisitor()
@@ -836,6 +851,7 @@ y = x.view()
   _analyze_with(code, analyzer)
   sym: SymbolType | None = analyzer.current_scope.get("y")
   assert isinstance(sym, TensorType)
+  assert sym.framework == "torch"
 
 
 def test_ifexp_both_unknown(analyzer: SymbolTableAnalyzer) -> None:

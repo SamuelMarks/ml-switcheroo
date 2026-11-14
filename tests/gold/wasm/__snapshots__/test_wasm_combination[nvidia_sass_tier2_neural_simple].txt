@@ -1,0 +1,37 @@
+--- Forward ---
+; RDNA Code Generation Initialized (Arch: gfx1030)
+; BEGIN Linear (fc)
+    v_mov_b32       v0, 0;
+    s_mov_b32       v1, 0;
+L_GEMM_fc:
+    global_load_dword v2, v4, off;
+    global_load_dword v3, v5, off;
+    s_waitcnt       vmcnt(0);
+    v_fmac_f32      v0, v2, v3;
+    v_add_u32       v4, v4, 4;
+    v_add_u32       v5, v5, 4;
+    s_add_i32       v1, v1, 1;
+    s_cmp_lt_i32    v1, 10;
+    s_cbranch_scc1  L_GEMM_fc;
+; END Linear (fc)
+; BEGIN ReLU (relu)
+    v_max_f32       v6, v7, 0;
+; END ReLU (relu)
+
+--- Backward ---
+// BEGIN Linear (fc)
+    mov             R0, RZ;
+    mov             R1, RZ;
+L_GEMM_fc:
+    ldg.e.f32       R2, [R2];
+    ldg.e.f32       R3, [R3];
+    ffma            R0, R2, R3, R0;
+    iadd3           R2, R2, 4, RZ;
+    iadd3           R3, R3, 4, RZ;
+    iadd3           R1, R1, 1, RZ;
+    isetp.lt.and    P0, PT, R1, 10, PT;
+    @P0 bra         L_GEMM_fc:;
+// END Linear (fc)
+// BEGIN ReLU (relu)
+    fmax            R4, R5, RZ;
+// END ReLU (relu)

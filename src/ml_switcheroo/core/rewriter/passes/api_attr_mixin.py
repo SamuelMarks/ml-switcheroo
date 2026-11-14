@@ -1,296 +1,235 @@
-"""Mixin for ApiTransformer Attribute and Assign rewriting.
+"""Attribute and Assignment Rewrite Collaborator for ``ApiTransformer``.
 
-This module provides `ApiTransformerAttrMixin`, a mixin class intended to be used with
-LibCST CSTTransformers (specifically the main ApiTransformer). It implements the AST
-traversal hooks for `Assign` and `Attribute` nodes. This allows tracking assignments
-of stateful neural network variables, performing functional-to-OOP assignment unwrapping
-based on framework-specific structural traits, and mapping attributes, constants, enums,
-or macros from a source machine learning framework to a target framework.
+Provides ``AttributeRewriteHandler``, which handles stateful neural variable
+tracking, functional-to-OOP tuple assignment unwrapping, and constant/attribute
+remapping over ``RewriterHost``.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 
 import libcst as cst
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
 
+from ml_switcheroo.core.rewriter.calls import transformers as _call_transformers
 from ml_switcheroo.core.rewriter.calls.utils import is_functional_apply
 from ml_switcheroo.core.tracer import get_tracer
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.semantics.schema import StructuralTraits
 from ml_switcheroo.utils.node_diff import capture_node_source
 
 if typing.TYPE_CHECKING:
-  from ml_switcheroo.config import RuntimeConfig
   from ml_switcheroo.core.rewriter.context import RewriterContext
   from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-class _SourceTraitsProtocol(typing.Protocol):
-  """Protocol for transformers exposing `source_traits`."""
+class AttributeRewriteHost(typing.Protocol):
+  """Structural protocol required by ``AttributeRewriteHandler``.
 
-  source_traits: StructuralTraits
-
-
-def _has_source_traits(
-  obj: "ApiTransformerAttrMixin | _SourceTraitsProtocol",
-) -> typing.TypeGuard[_SourceTraitsProtocol]:
-  """Check if `obj` exposes `source_traits`.
-
-  Args:
-      obj: Candidate transformer instance.
-
-  Returns:
-      True if non-None.
-  """
-  return obj is not None
-
-
-class ApiTransformerAttrMixin:
-  """Mixin class that handles rewriting and tracking for assignment and attribute CST nodes.
-
-  This mixin is designed to be combined with a LibCST `CSTTransformer` that provides
-  semantic definitions (`self.semantics`), target framework settings (`self.target_framework`),
-  and context/scope tracking (`self.context`).
-
-  It implements:
-
-  1. Assignment interception to track neural network state variable instantiation
-     and scope tracking.
-  2. Assignment unwrapping from functional style execution (e.g., returning state and output)
-     to OOP-style assignment where only the output is captured.
-  3. Attribute rewriting for constants, enums, and other properties, supporting macro
-     substitutions and framework-specific API mappings.
+  Attributes:
+      context: Active ``RewriterContext`` instance.
   """
 
-  # Added for type checking
   context: "RewriterContext"
 
-  if typing.TYPE_CHECKING:
-
-    @property
-    def config(self) -> "RuntimeConfig":
-      """Return the runtime configuration.
-
-      Returns:
-          RuntimeConfig instance.
-      """
-      ...
-
-    @property
-    def semantics(self) -> "SemanticsManager":
-      """Return the semantics manager.
-
-      Returns:
-          SemanticsManager instance.
-      """
-      ...
-
-    @property
-    def source_framework(self) -> str:
-      """Return the source framework identifier.
-
-      Returns:
-          Source framework identifier.
-      """
-      ...
-
-    @property
-    def target_framework(self) -> str:
-      """Return the target framework identifier.
-
-      Returns:
-          Target framework identifier.
-      """
-      ...
-
-    @property
-    def strict_mode(self) -> bool:
-      """Return whether strict mode is enabled.
-
-      Returns:
-          True if strict mode is enabled.
-      """
-      ...
-
-    def _get_qualified_name(self, node: cst.BaseExpression) -> str | None:
-      """Resolve a CST expression node to its fully qualified name string.
-
-      Args:
-          node: CST expression node to resolve.
-
-      Returns:
-          Optional[str]: Resolved qualified name string or None.
-      """
-      ...
-
-    def _mark_stateful(self, var_name: str) -> None:
-      """Mark a variable name as stateful in the current scope.
-
-      Args:
-          var_name: Variable identifier to mark as stateful.
-      """
-      ...
-
-    def _get_mapping(self, name: str, silent: bool = False) -> dict[str, JsonValue] | None:
-      """Retrieve the target framework mapping for a qualified API name.
-
-      Args:
-          name: Qualified API name string.
-          silent: Whether to suppress failure reporting on missing mappings.
-
-      Returns:
-          Optional[Dict[str, JsonValue]]: Target mapping dictionary or None.
-      """
-      ...
-
-    def _handle_variant_imports(self, variant: typing.Mapping[str, RuntimeTensorOrValue]) -> None:
-      """Inject required imports specified by a target variant mapping.
-
-      Args:
-          variant: Target variant dictionary.
-      """
-      ...
-
-    def _create_dotted_name(self, name_str: str) -> cst.Name | cst.Attribute:
-      """Construct a CST Name or Attribute chain from a dotted name string.
-
-      Args:
-          name_str: Dotted name string.
-
-      Returns:
-          Union[cst.Name, cst.Attribute]: Constructed CST Name or Attribute node.
-      """
-      ...
-
-  def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign) -> cst.Assign:
-    """Intercept and post-processes CST assignment nodes during traversal.
-
-    This method performs two distinct transformations:
-
-    1. Stateful Variable Tracking: It checks if the right-hand side of the assignment
-       is a functional call to a neural network component (based on the framework's semantic tier).
-       If so, it tracks the variable name inside the corresponding context scope.
-    2. Assignment Unwrapping: It handles situations where functional execution returns a tuple
-       of (output, updated_state) but the target OOP style expects only the primary output.
-       If the assignment matches the functional execution method pattern, it unwraps the targets
-       to assign only to the first element (the primary output).
-
-    Args:
-        original_node (cst.Assign): The original LibCST assignment node before children traversal.
-        updated_node (cst.Assign): The updated LibCST assignment node with child-level updates.
+  @property
+  def semantics(self) -> "SemanticsManager":
+    """Return active ``SemanticsManager``.
 
     Returns:
-        cst.Assign: The mutated or original updated LibCST assignment node.
+        Active ``SemanticsManager``.
     """
-    # 1. Track Variable Initialization
-    if isinstance(original_node.value, cst.Call):
-      func_name = self._get_qualified_name(original_node.value.func)
-      if func_name:
-        definition = self.semantics.get_definition(func_name)
-        if definition:
-          abstract_id, _ = definition
-          try:
-            origins = self.semantics._key_origins
-          except AttributeError:
-            origins = {}
-          tier = origins.get(abstract_id)
-          if tier == SemanticTier.NEURAL.value:
-            for target in original_node.targets:
-              target_name = self._get_qualified_name(target.target)
-              if target_name:
-                if target_name.startswith("self.") and len(self.context.scope_stack) > 1:
-                  # Track stateful variable in the class scope (parent of init scope)
-                  self.context.scope_stack[-2].add(target_name)
-                else:
-                  self._mark_stateful(target_name)
+    ...
 
-    # 2. Assignment Unwrapping (Functional -> OOP)
-    if isinstance(original_node.value, cst.Call):
-      try:
-        assert _has_source_traits(self)
-        traits = self.source_traits
-      except AttributeError:
-        traits = StructuralTraits()
+  @property
+  def target_framework(self) -> str:
+    """Return target framework identifier.
 
-      unwrap_method = traits.functional_execution_method
-      if is_functional_apply(original_node.value, unwrap_method):
-        if len(updated_node.targets) == 1:
-          assign_target = updated_node.targets[0].target
-          if isinstance(assign_target, (cst.Tuple, cst.List)):
-            elements = assign_target.elements
-            if len(elements) > 0:
-              primary_target = elements[0].value
-              if isinstance(primary_target, cst.BaseAssignTargetExpression):
-                new_target = cst.AssignTarget(target=primary_target)
-                new_node = updated_node.with_changes(targets=[new_target])
-                get_tracer().log_mutation(
-                  "Assignment Unwrapping",
-                  capture_node_source(original_node),
-                  capture_node_source(new_node),
-                )
-                return new_node
+    Returns:
+        Target framework name.
+    """
+    ...
+
+  @property
+  def source_traits(self) -> StructuralTraits:
+    """Return ``StructuralTraits`` for the source framework.
+
+    Returns:
+        Source ``StructuralTraits``.
+    """
+    ...
+
+  def _get_qualified_name(self, node: cst.BaseExpression) -> str | None:
+    """Resolve ``node`` to a fully qualified API name.
+
+    Args:
+        node: Expression node to resolve.
+
+    Returns:
+        Qualified name string or ``None``.
+    """
+    ...
+
+  def _mark_stateful(self, var_name: str) -> None:
+    """Mark ``var_name`` as stateful in the current scope.
+
+    Args:
+        var_name: Variable name to mark.
+    """
+    ...
+
+  def _get_mapping(self, name: str, silent: bool = False) -> dict[str, JsonValue] | None:
+    """Resolve target variant mapping for ``name``.
+
+    Args:
+        name: Fully qualified source name.
+        silent: Whether to suppress failure reporting.
+
+    Returns:
+        Target variant mapping dict or ``None``.
+    """
+    ...
+
+  def _handle_variant_imports(self, variant: typing.Mapping[str, RuntimeTensorOrValue]) -> None:
+    """Inject required imports declared on ``variant``.
+
+    Args:
+        variant: Target variant mapping.
+    """
+    ...
+
+  def _create_dotted_name(self, name_str: str) -> cst.Name | cst.Attribute:
+    """Build a CST ``Name`` or ``Attribute`` chain from ``name_str``.
+
+    Args:
+        name_str: Dotted identifier path.
+
+    Returns:
+        Constructed ``cst.Name`` or ``cst.Attribute``.
+    """
+    ...
+
+
+class AttributeRewriteHandler:
+  """Single-responsibility handler rewriting ``cst.Assign`` and ``cst.Attribute`` nodes.
+
+  Attributes:
+      host: Host ``ApiTransformer`` (or ``AttributeRewriteHost``) providing state and resolution.
+  """
+
+  def __init__(self, host: AttributeRewriteHost) -> None:
+    """Initialize ``AttributeRewriteHandler`` bound to ``host``.
+
+    Args:
+        host: Host ``AttributeRewriteHost`` instance.
+    """
+    self.host: AttributeRewriteHost = host
+
+  def _track_neural_stateful_targets(self, call_node: cst.Call, targets: typing.Sequence[cst.AssignTarget]) -> None:
+    """Register assigned target names as stateful when ``call_node`` constructs a ``NEURAL`` tier layer.
+
+    Args:
+        call_node: Assigned ``cst.Call`` node.
+        targets: Assignment targets from ``original_node.targets``.
+    """
+    func_name = self.host._get_qualified_name(call_node.func)
+    if not func_name:
+      return
+    definition = self.host.semantics.get_definition(func_name)
+    if not definition:
+      return
+    abstract_id, _ = definition
+    try:
+      origins = self.host.semantics._key_origins
+    except AttributeError:
+      origins = {}
+    if origins.get(abstract_id) != SemanticTier.NEURAL.value:
+      return
+    for target in targets:
+      target_name = self.host._get_qualified_name(target.target)
+      if target_name:
+        if target_name.startswith("self.") and len(self.host.context.scope_stack) > 1:
+          self.host.context.scope_stack[-2].add(target_name)
+        else:
+          self.host._mark_stateful(target_name)
+
+  def rewrite_assign(self, original_node: cst.Assign, updated_node: cst.Assign) -> cst.Assign:
+    """Track stateful neural assignments and unwrap functional ``(output, state)`` tuples.
+
+    Args:
+        original_node: Original ``cst.Assign`` node before child traversal.
+        updated_node: Updated ``cst.Assign`` node after child traversal.
+
+    Returns:
+        Transformed or unchanged ``cst.Assign`` node.
+    """
+    if not isinstance(original_node.value, cst.Call):
+      return updated_node
+
+    self._track_neural_stateful_targets(original_node.value, original_node.targets)
+
+    try:
+      traits = self.host.source_traits
+    except AttributeError:
+      traits = StructuralTraits()
+
+    if is_functional_apply(original_node.value, traits.functional_execution_method) and len(updated_node.targets) == 1:
+      assign_target = updated_node.targets[0].target
+      if isinstance(assign_target, (cst.Tuple, cst.List)) and len(assign_target.elements) > 0:
+        primary_target = assign_target.elements[0].value
+        if isinstance(primary_target, cst.BaseAssignTargetExpression):
+          new_node = updated_node.with_changes(targets=[cst.AssignTarget(target=primary_target)])
+          get_tracer().log_mutation(
+            "Assignment Unwrapping",
+            capture_node_source(original_node),
+            capture_node_source(new_node),
+          )
+          return new_node
 
     return updated_node
 
-  def leave_Attribute(self, original_node: cst.Attribute, updated_node: cst.Attribute) -> cst.BaseExpression:
-    """Intercept and rewrites CST attribute nodes during traversal.
-
-    This method resolves the qualified name of an attribute (e.g., `torch.float32`) and
-    maps it to the equivalent representation in the target framework (e.g., `jax.numpy.float32`
-    or `mlx.core.float32`). It supports standard API replacements, plugin-guarded attributes,
-    and constant macro templates (e.g., rewriting infinite values using custom macro patterns).
+  def rewrite_attribute(self, original_node: cst.Attribute, updated_node: cst.Attribute) -> cst.BaseExpression:
+    """Rewrite constant, dtype, enum, and macro-templated ``cst.Attribute`` expressions.
 
     Args:
-        original_node (cst.Attribute): The original LibCST attribute node before children traversal.
-        updated_node (cst.Attribute): The updated LibCST attribute node with child-level updates.
+        original_node: Original ``cst.Attribute`` node before child traversal.
+        updated_node: Updated ``cst.Attribute`` node after child traversal.
 
     Returns:
-        cst.BaseExpression: The rewritten CST node (which could be an Attribute, a Name, or a general CSTNode)
-        corresponding to the target framework's equivalent, or the original updated node
-        if no rewriting rule was matched.
+        Rewritten ``cst.BaseExpression`` or unchanged ``updated_node``.
     """
-    name = self._get_qualified_name(original_node)
+    name = self.host._get_qualified_name(original_node)
     if not name:
       return updated_node
 
-    lookup = self.semantics.get_definition(name)
+    lookup = self.host.semantics.get_definition(name)
     if lookup:
       _, details = lookup
       raw_variants = details.get("variants")
-      target_var = raw_variants.get(self.target_framework) if isinstance(raw_variants, dict) else None
+      target_var = raw_variants.get(self.host.target_framework) if isinstance(raw_variants, dict) else None
 
-      # Plugin guard
       if isinstance(target_var, dict) and "requires_plugin" in target_var:
         return updated_node
 
-      # Check Op Type
       op_type = details.get("op_type", "function")
+      if op_type == "function" and "std_args" in details and details["std_args"]:
+        return updated_node
 
-      # Function guard: If it is a function, let leave_Call handle it.
-      # attributes should be processed here.
-      if op_type == "function":
-        if "std_args" in details and details["std_args"]:
-          return updated_node
-
-    # Perform mapping logic for constant/enum/attribute
-    target_impl = self._get_mapping(name, silent=True)
+    target_impl = self.host._get_mapping(name, silent=True)
 
     if target_impl:
-      # If semantic definition says it's an attribute/context, we rewrite aliases
       if "api" in target_impl and isinstance(target_impl["api"], str):
-        self._handle_variant_imports(target_impl)
-        dotted_node: cst.BaseExpression = self._create_dotted_name(target_impl["api"])
+        self.host._handle_variant_imports(target_impl)
+        dotted_node: cst.BaseExpression = self.host._create_dotted_name(target_impl["api"])
         return dotted_node
 
-      # Support macros for constants (e.g. inf -> float('inf'))
       if "macro_template" in target_impl and isinstance(target_impl["macro_template"], str):
         try:
-          from ml_switcheroo.core.rewriter.calls.transformers import rewrite_as_macro
-
-          # Constants have no args, pass empty lists
-          return rewrite_as_macro(target_impl["macro_template"], [], [])
-        except (ValueError, cst.ParserSyntaxError, Exception):
+          return _call_transformers.rewrite_as_macro(target_impl["macro_template"], [], [])
+        except (ValueError, TypeError, KeyError, cst.ParserSyntaxError):
           pass
 
     return updated_node
+
+
+__all__ = ["AttributeRewriteHandler", "AttributeRewriteHost"]

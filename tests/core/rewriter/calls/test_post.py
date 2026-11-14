@@ -1,235 +1,209 @@
-"""Test suite for post.py"""
-
-from tests.conftest import _test_getattr, _test_setattr
-
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
-from unittest.mock import MagicMock
+"""Unit tests for call post-processing (`ml_switcheroo.core.rewriter.calls.post`)."""
 
 import libcst as cst
+from pydantic import JsonValue
 
 from ml_switcheroo.core.rewriter.calls.post import handle_post_processing
+from ml_switcheroo.core.rewriter.types import SignatureContext
+from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo.semantics.schema import StructuralTraits
 
 
-class MockContext:
-  """Test helper class MockContext."""
-
-  def __init__(self) -> None:
-    """Initialize test helper instance."""
-    self.signature_stack: list[RuntimeTensorOrValue] = []
-
-
-class MockSemantics:
-  """Test helper class MockSemantics."""
-
-  def __init__(self) -> None:
-    """Initialize test helper instance."""
-    self._key_origins: dict[str, str] = {"my_id": "neural_ops"}
-    self.known_magic_args: set[str] = set()
-
-
-class MockTraits:
-  """Test helper class MockTraits."""
-
-  def __init__(self) -> None:
-    """Initialize test helper instance."""
-    self.inject_magic_args: list[tuple[str, str]] = [("is_training", "True")]
-    self.strip_magic_args: list[str] = ["training"]
-    self.auto_strip_magic_args: bool = False
-
-
-class MockRewriter:
-  """Test helper class MockRewriter."""
-
-  def __init__(self) -> None:
-    """Initialize test helper instance."""
-    self.context = MockContext()
-    self.semantics = MockSemantics()
-    self._report_failure = MagicMock()
-
-  def _create_dotted_name(self, name: str) -> cst.Name:
-    """Execute create dotted name helper logic.
-
-    Returns:
-        Resulting `cst.Name` from create dotted name.
-    """
-    return cst.Name(name)
-
-  def _get_target_traits(self) -> MockTraits:
-    """Execute get target traits helper logic.
-
-    Returns:
-        Resulting `MockTraits` from get target traits.
-    """
-    return MockTraits()
-
-
-def parse_call(code: str) -> cst.Call:
-  """Execute parse call helper logic.
+def _parse_call(code: str) -> cst.Call:
+  """Parse a Python call expression string into a `cst.Call`.
 
   Args:
-      code: Python or DSL source code string to parse or transpile.
+      code: Python call expression string.
 
   Returns:
-      Resulting `cst.Call` from parse call.
+      Parsed `cst.Call` node.
   """
-  module = cst.parse_module(code)
-  expr = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
-  return cst.ensure_type(expr, cst.Call)
+  return cst.ensure_type(cst.parse_expression(code), cst.Call)
 
 
-def test_handle_post_processing_output_select_index() -> None:
-  """Verify handle post processing output select index behavior."""
-  rewriter = MockRewriter()
-  node = parse_call("func()")
-  mapping = {"output_select_index": 1}
+def _expr_code(node: cst.CSTNode) -> str:
+  """Serialize a rewritten CST expression to stripped Python source code.
 
-  result = handle_post_processing(rewriter, node, mapping, "id")
-  # Result should be func()[1]
-  assert isinstance(result, cst.Subscript)
-  assert cst.ensure_type(cst.ensure_type(result.slice[0].slice, cst.Index).value, cst.Integer).value == "1"
+  Args:
+      node: Rewritten CST expression node.
 
-
-def test_handle_post_processing_output_select_index_failure() -> None:
-  """Verify handle post processing output select index failure behavior."""
-  rewriter = MockRewriter()
-  node = parse_call("func()")
-  # Force failure in apply_index_select by giving an invalid index type for CST Subscript builder
-  mapping = {"output_select_index": "not_an_int"}
-
-  result = handle_post_processing(rewriter, node, mapping, "id")
-  # Should report failure and return original node
-  rewriter._report_failure.assert_called_once()
-  assert result == node
+  Returns:
+      Formatted Python expression string.
+  """
+  assert isinstance(node, cst.BaseExpression)
+  return cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=node)])]).code.strip()
 
 
-def test_handle_post_processing_output_cast() -> None:
-  """Verify handle post processing output cast behavior."""
-  rewriter = MockRewriter()
-  node = parse_call("func()")
-  mapping = {"output_cast": "float32"}
+class _PostContextStub:
+  """Typed context stub carrying `signature_stack`."""
 
-  result = handle_post_processing(rewriter, node, mapping, "id")
-  # func().astype(jnp.float32)
-  assert isinstance(result, cst.Call)
-  assert isinstance(result.func, cst.Attribute)
-  assert result.func.attr.value == "astype"
-  assert cst.ensure_type(result.args[0].value, cst.Name).value == "float32"
-
-
-def test_handle_post_processing_output_cast_failure() -> None:
-  """Verify handle post processing output cast failure behavior."""
-  rewriter = MockRewriter()
-  # Mock _create_dotted_name to raise
-  _test_setattr(rewriter, "_create_dotted_name", MagicMock(side_effect=ValueError))
-
-  node = parse_call("func()")
-  mapping = {"output_cast": "invalid"}
-
-  result = handle_post_processing(rewriter, node, mapping, "id")
-  assert result == node
-
-
-class MockSignature:
-  """Test helper class MockSignature."""
-
-  def __init__(self, is_init: bool, is_module_method: bool) -> None:
-    """Initialize test helper instance.
+  def __init__(self, *, is_init: bool = False, is_module_method: bool = False) -> None:
+    """Initialize optional `SignatureContext` frame.
 
     Args:
-        is_init: The is init (bool) for init.
-        is_module_method: The is module method (bool) for init.
+        is_init: Whether currently inside `__init__`.
+        is_module_method: Whether currently inside a module method.
     """
-    self.is_init = is_init
-    self.is_module_method = is_module_method
+    self.signature_stack: list[SignatureContext] = []
+    if is_init or is_module_method:
+      sig = SignatureContext()
+      sig.is_init = is_init
+      sig.is_module_method = is_module_method
+      self.signature_stack.append(sig)
 
 
-def test_handle_post_processing_state_threading_neural() -> None:
-  """Verify handle post processing state threading neural behavior."""
-  rewriter = MockRewriter()
-  rewriter.context.signature_stack.append(MockSignature(is_init=True, is_module_method=True))
+class _PostSemanticsStub:
+  """Typed semantics stub exposing `_key_origins` and `known_magic_args`."""
 
-  node = parse_call("func(training=True)")
-  mapping: dict[str, RuntimeTensorOrValue] = {}
+  def __init__(self, origins: dict[str, str] | None = None, magic: set[str] | None = None) -> None:
+    """Initialize tier origins and magic argument names.
 
-  # neural_ops tier, will inject and strip
-  result = handle_post_processing(rewriter, node, mapping, "my_id")
-
-  assert isinstance(result, cst.Call)
-  args: list[str] = [arg.keyword.value for arg in result.args if arg.keyword]
-  assert "is_training" in args
-  assert "training" not in args
+    Args:
+        origins: Mapping from abstract op ID to semantic tier value.
+        magic: Known framework magic keyword argument names.
+    """
+    self._key_origins: dict[str, str] = origins or {}
+    self.known_magic_args: set[str] = magic or set()
 
 
-def test_handle_post_processing_state_threading_force() -> None:
-  """Verify handle post processing state threading force behavior."""
-  rewriter = MockRewriter()
-  rewriter.context.signature_stack.append(MockSignature(is_init=True, is_module_method=True))
+class _PostRewriterStub:
+  """Typed rewriter host stub implementing post-processing hooks."""
 
-  # Not neural ops
-  rewriter.semantics._key_origins = {"other_id": "math"}
+  def __init__(
+    self,
+    context: _PostContextStub | None = None,
+    semantics: _PostSemanticsStub | None = None,
+    traits: StructuralTraits | None = None,
+  ) -> None:
+    """Initialize post-processing rewriter host.
 
-  # But forced because magic arg 'training' is present
-  node = parse_call("func(training=True)")
-  mapping: dict[str, RuntimeTensorOrValue] = {}
+    Args:
+        context: Optional `_PostContextStub`.
+        semantics: Optional `_PostSemanticsStub`.
+        traits: Optional target `StructuralTraits`.
+    """
+    self.context = context or _PostContextStub()
+    self.semantics = semantics or _PostSemanticsStub()
+    self.traits = traits or StructuralTraits()
+    self.failures: list[str] = []
 
-  result = handle_post_processing(rewriter, node, mapping, "other_id")
+  def _create_dotted_name(self, name: str) -> cst.BaseExpression:
+    """Construct a CST expression for `name`, raising `ValueError` on `'invalid'`.
 
-  args: list[str] = _test_getattr(
-    {
-      "v": [
-        _test_getattr(
-          {
-            "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-              _test_getattr({"v": _test_getattr({"v": arg}, "__getitem__")("v").keyword}, "__getitem__")("v"),
-              _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
-            )
-          },
-          "__getitem__",
-        )("v").value
-        for arg in _test_getattr({"v": result}, "__getitem__")("v").args
-        if _test_getattr({"v": arg}, "__getitem__")("v").keyword
-      ]
-    },
-    "__getitem__",
-  )("v")
-  assert "is_training" in args
-  assert "training" not in args
+    Args:
+        name: Dotted target type or attribute string.
+
+    Returns:
+        Parsed CST expression node.
+
+    Raises:
+        ValueError: When `name == 'invalid'`.
+    """
+    if name == "invalid":
+      raise ValueError("invalid cast target")
+    return cst.parse_expression(name)
+
+  def _report_failure(self, msg: str) -> None:
+    """Record reported post-processing failure message.
+
+    Args:
+        msg: Diagnostic message string.
+    """
+    self.failures.append(msg)
+
+  def _get_target_traits(self) -> StructuralTraits:
+    """Return configured target `StructuralTraits`.
+
+    Returns:
+        Target `StructuralTraits` instance.
+    """
+    return self.traits
 
 
-def test_handle_post_processing_state_threading_auto_strip() -> None:
-  """Verify handle post processing state threading auto strip behavior."""
-  rewriter = MockRewriter()
-  rewriter.context.signature_stack.append(MockSignature(is_init=True, is_module_method=True))
+def test_output_select_index_and_output_cast() -> None:
+  """Verify `output_select_index` and `output_cast` transformations and graceful error recovery."""
+  rewriter = _PostRewriterStub()
+  call = _parse_call("func(x)")
 
-  traits = MockTraits()
-  traits.auto_strip_magic_args = True
-  rewriter.semantics.known_magic_args = {"extra_magic"}
-  _test_setattr(rewriter, "_get_target_traits", lambda: traits)
+  assert handle_post_processing(rewriter, call, {}, "op") is call
+  assert handle_post_processing(rewriter, call, {"output_select_index": None}, "op") is call
 
-  node = parse_call("func(training=True, extra_magic=1)")
-  mapping: dict[str, RuntimeTensorOrValue] = {}
+  indexed = handle_post_processing(rewriter, call, {"output_select_index": 1}, "op")
+  assert _expr_code(indexed) == "func(x)[1]"
 
-  result = handle_post_processing(rewriter, node, mapping, "my_id")
+  casted = handle_post_processing(rewriter, call, {"output_cast": "jnp.float32"}, "op")
+  assert _expr_code(casted) == "func(x).astype(jnp.float32)"
 
-  args: list[str] = _test_getattr(
-    {
-      "v": [
-        _test_getattr(
-          {
-            "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-              _test_getattr({"v": _test_getattr({"v": arg}, "__getitem__")("v").keyword}, "__getitem__")("v"),
-              _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
-            )
-          },
-          "__getitem__",
-        )("v").value
-        for arg in _test_getattr({"v": result}, "__getitem__")("v").args
-        if _test_getattr({"v": arg}, "__getitem__")("v").keyword
-      ]
-    },
-    "__getitem__",
-  )("v")
-  assert "is_training" in args
-  assert "training" not in args
-  assert "extra_magic" not in args
+  chained = handle_post_processing(rewriter, call, {"output_select_index": 0, "output_cast": "float32"}, "op")
+  assert _expr_code(chained) == "func(x)[0].astype(float32)"
+
+  # Invalid index reports failure when `_report_failure` exists, and returns unchanged when absent
+  bad_idx: dict[str, JsonValue] = {"output_select_index": "not_an_int"}
+  assert handle_post_processing(rewriter, call, bad_idx, "op") is call
+  assert len(rewriter.failures) == 1
+
+  class _BareRewriter:
+    """Host satisfying `PostRewriterProtocol` while lacking `_report_failure` and `context`."""
+
+    def _create_dotted_name(self, name_str: str) -> cst.BaseExpression:
+      """Construct `cst.Name` from `name_str`.
+
+      Args:
+          name_str: Identifier string.
+
+      Returns:
+          `cst.Name` node.
+      """
+      return cst.Name(name_str)
+
+  x_node = cst.Name("x")
+  assert handle_post_processing(_BareRewriter(), x_node, bad_idx, "op") is x_node
+
+  # Invalid `output_cast` swallows `ValueError` from `_create_dotted_name` and preserves node
+  assert handle_post_processing(rewriter, call, {"output_cast": "invalid"}, "op") is call
+
+
+def test_state_threading_magic_arg_injection_and_stripping() -> None:
+  """Verify magic argument injection/stripping across neural ops, forced magic args, and `auto_strip_magic_args`."""
+  traits = StructuralTraits(
+    inject_magic_args=[("rngs", "flax.nnx.Rngs(0)")],
+    strip_magic_args=["training"],
+    auto_strip_magic_args=False,
+  )
+  ctx = _PostContextStub(is_init=True, is_module_method=True)
+  sem = _PostSemanticsStub(
+    origins={"neural_id": SemanticTier.NEURAL.value, "math_id": "math"},
+    magic={"rngs", "extra_magic"},
+  )
+  rewriter = _PostRewriterStub(context=ctx, semantics=sem, traits=traits)
+
+  # 1. Neural op inside `__init__`: strips `training` and injects `rngs`
+  neural_res = handle_post_processing(rewriter, _parse_call("Linear(10, training=True)"), {}, "neural_id")
+  assert _expr_code(neural_res) == "Linear(10, rngs=rngs)"
+
+  # 2. Non-neural op WITH a known magic arg (`rngs`) forces injection/stripping
+  forced_res = handle_post_processing(rewriter, _parse_call("helper(x, training=False, rngs=r)"), {}, "math_id")
+  assert _expr_code(forced_res) == "helper(x, rngs=r)"
+
+  # 3. Non-neural op WITHOUT magic args is untouched
+  untouched = _parse_call("helper(x, axis=1)")
+  assert handle_post_processing(rewriter, untouched, {}, "math_id") is untouched
+
+  # 4. Non-Call result on a neural op returns unchanged
+  name_node = cst.Name("x")
+  assert handle_post_processing(rewriter, name_node, {}, "neural_id") is name_node
+
+  # 5. `auto_strip_magic_args=True` strips `known_magic_args` excluding injected target keys
+  auto_traits = StructuralTraits(
+    inject_magic_args=[("is_training", "True")],
+    strip_magic_args=["training"],
+    auto_strip_magic_args=True,
+  )
+  auto_rewriter = _PostRewriterStub(context=ctx, semantics=sem, traits=auto_traits)
+  auto_res = handle_post_processing(
+    auto_rewriter,
+    _parse_call("Block(x, training=True, extra_magic=1)"),
+    {},
+    "neural_id",
+  )
+  assert _expr_code(auto_res) == "Block(x, is_training=is_training)"

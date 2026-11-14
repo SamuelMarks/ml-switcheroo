@@ -11,10 +11,10 @@ from ml_switcheroo.core.tikz.nodes import TikzBaseNode, TikzEdge, TikzGraph, Tik
 
 __all__ = [
   "TikzBaseNode",
-  "TriviaNode",
-  "TikzOption",
-  "TikzTable",
-  "TikzNode",
   "TikzEdge",
   "TikzGraph",
+  "TikzNode",
+  "TikzOption",
+  "TikzTable",
+  "TriviaNode",
 ]

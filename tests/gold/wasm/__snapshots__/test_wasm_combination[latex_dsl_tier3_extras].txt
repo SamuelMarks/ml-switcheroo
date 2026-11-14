@@ -1,0 +1,16 @@
+--- Forward ---
+// Input x -> R0
+
+--- Backward ---
+% ------------------------------------------------------------------
+% [Requirement] midl.sty
+% This document uses the Machine Intelligence Definition Language.
+% Ensure 'midl.sty' is in your LaTeX path.
+% ------------------------------------------------------------------
+\documentclass[tikz, border=10pt, landscape]{standalone}
+\usepackage{midl}
+\begin{document}
+\begin{DefModel}{DecompiledModel}
+  \Input{input}{[_]}
+\end{DefModel}
+\end{document}

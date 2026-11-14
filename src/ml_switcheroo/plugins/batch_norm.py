@@ -88,8 +88,4 @@ def transform_batch_norm(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   # 3. Wrap in Subscript [0]
   # We select the first element (the output tensor)
   # The second element (the collection updates) is discarded in this AST replacement
-  unwrapped_expression = cst.Subscript(
-    value=stateful_call, slice=[cst.SubscriptElement(slice=cst.Index(value=cst.Integer("0")))]
-  )
-
-  return unwrapped_expression
+  return cst.Subscript(value=stateful_call, slice=[cst.SubscriptElement(slice=cst.Index(value=cst.Integer("0")))])

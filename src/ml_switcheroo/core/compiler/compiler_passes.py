@@ -13,9 +13,10 @@ This module bridges `ml-switcheroo-compiler`'s middle-end `PassManager` and
 from __future__ import annotations
 
 import importlib
-import sys
+import inspect
+import logging
 import types
-from pathlib import Path
+import typing
 
 import libcst as cst
 from ml_switcheroo_ir import (
@@ -26,46 +27,9 @@ from ml_switcheroo_ir import (
 )
 
 from ml_switcheroo.config import OptimizationLevel
+from ml_switcheroo.core.bootstrap import ensure_compiler_and_zero_on_path as ensure_compiler_and_zero_on_path
 from ml_switcheroo.core.compiler.sharding import ShardingInferencePass, estimate_tensor_memory
 from ml_switcheroo.core.tracer import TraceLogger
-
-_SIBLING_REPOS: tuple[str, ...] = (
-  "ml-switcheroo-compiler",
-  "ml-switcheroo-ir",
-  "zero-jax",
-  "zero-chex",
-  "zero-optax",
-  "zero-grain",
-  "zero-orbax",
-  "zero-flax",
-  "zero-pytorch",
-  "zero-keras",
-  "zero-tensorflow",
-  "zero-mlx",
-  "zero-pax",
-  "zero-zoo",
-)
-
-
-def ensure_compiler_and_zero_on_path(workspace_parent: Path | None = None) -> list[str]:
-  """Ensure sibling `ml-switcheroo-compiler` and `zero-*` source directories are on `sys.path`.
-
-  Args:
-      workspace_parent: Optional parent directory containing sibling repositories.
-          Defaults to five levels above this module (`repos/`).
-
-  Returns:
-      List of newly added directory paths.
-  """
-  base_dir = workspace_parent if workspace_parent is not None else Path(__file__).resolve().parents[5]
-  added: list[str] = []
-  for repo_name in _SIBLING_REPOS:
-    src_dir = base_dir / repo_name / "src"
-    src_str = str(src_dir)
-    if src_dir.is_dir() and src_str not in sys.path:
-      sys.path.append(src_str)
-      added.append(src_str)
-  return added
 
 
 def _load_compiler_passes_module() -> types.ModuleType | None:
@@ -94,6 +58,72 @@ def _load_pass_manager_module() -> types.ModuleType | None:
     return None
 
 
+@typing.runtime_checkable
+class _GraphPassCallableProtocol(typing.Protocol):
+  """Protocol for single-argument `LogicalGraph` compiler pass callables."""
+
+  def __call__(self, graph: LogicalGraph) -> LogicalGraph | None:
+    """Apply pass transformation to ``graph``.
+
+    Args:
+        graph: Target `LogicalGraph`.
+
+    Returns:
+        Optional updated `LogicalGraph` or None when mutated in-place.
+    """
+
+
+@typing.runtime_checkable
+class _PassManagerInstanceProtocol(typing.Protocol):
+  """Protocol for `ml_switcheroo_compiler.transforms.pass_manager.PassManager` instances."""
+
+  def add_pass(self, pass_fn: _GraphPassCallableProtocol, name: str = "") -> None:
+    """Register a pass callable with the pass manager.
+
+    Args:
+        pass_fn: Pass callable.
+        name: Human-readable pass identifier.
+    """
+
+  def run_until_converged(self, graph: LogicalGraph, max_iterations: int = 5) -> LogicalGraph:
+    """Execute registered passes iteratively until convergence.
+
+    Args:
+        graph: Input `LogicalGraph`.
+        max_iterations: Maximum fixpoint iterations.
+
+    Returns:
+        Converged `LogicalGraph`.
+    """
+
+
+@typing.runtime_checkable
+class _PassManagerModuleProtocol(typing.Protocol):
+  """Protocol for `ml_switcheroo_compiler.transforms.pass_manager` module.
+
+  Attributes:
+      PassManager: Pass manager constructor.
+  """
+
+  PassManager: typing.Callable[[], _PassManagerInstanceProtocol]
+
+
+def _lookup_graph_pass(passes_mod: types.ModuleType, pass_name: str) -> _GraphPassCallableProtocol | None:
+  """Look up a named graph pass callable from ``passes_mod`` without ``getattr_static``.
+
+  Args:
+      passes_mod: Loaded `ml_switcheroo_compiler.transforms.passes` module.
+      pass_name: Function name of the pass to retrieve.
+
+  Returns:
+      Matching pass callable if present, otherwise None.
+  """
+  for name, member in inspect.getmembers(passes_mod):
+    if name == pass_name and isinstance(member, _GraphPassCallableProtocol):
+      return member
+  return None
+
+
 def _invoke_graph_pass(passes_mod: types.ModuleType, pass_name: str, graph: LogicalGraph) -> bool:
   """Invoke a single named pass on `graph` safely.
 
@@ -105,13 +135,13 @@ def _invoke_graph_pass(passes_mod: types.ModuleType, pass_name: str, graph: Logi
   Returns:
       True if the pass executed without raising an exception.
   """
-  import inspect
-
+  pass_fn = _lookup_graph_pass(passes_mod, pass_name)
+  if pass_fn is None:
+    return False
   try:
-    pass_fn = inspect.getattr_static(passes_mod, pass_name)
     pass_fn(graph)
     return True
-  except Exception:
+  except (ValueError, TypeError, KeyError, AttributeError, IndexError, RuntimeError):
     return False
 
 
@@ -285,23 +315,22 @@ def run_multi_pass_optimizer(
 
     pm_mod = _load_pass_manager_module()
     passes_mod = _load_compiler_passes_module()
-    if pm_mod is not None and passes_mod is not None and graph.outputs:
+    if isinstance(pm_mod, _PassManagerModuleProtocol) and passes_mod is not None and graph.outputs:
       try:
-        import inspect
-
-        pm_cls = inspect.getattr_static(pm_mod, "PassManager")
-        pm = pm_cls()
+        pm = pm_mod.PassManager()
         for p_name in (
           "constant_folding_pass",
+          "canonicalize_pass",
           "common_subexpression_elimination_pass",
-          "dead_code_elimination_pass",
           "operator_fusion_pass",
         ):
-          pm.add_pass(inspect.getattr_static(passes_mod, p_name), name=p_name)
+          p_fn = _lookup_graph_pass(passes_mod, p_name)
+          if p_fn is not None:
+            pm.add_pass(p_fn, name=p_name)
         graph = pm.run_until_converged(graph, max_iterations=5)
         executed_passes.append("PassManager.run_until_converged")
-      except Exception:
-        pass
+      except (ValueError, TypeError, KeyError, AttributeError, IndexError, RuntimeError) as exc:
+        logging.getLogger(__name__).debug("PassManager.run_until_converged skipped: %s", exc)
 
   if tracer is not None:
     tracer.log_mutation(

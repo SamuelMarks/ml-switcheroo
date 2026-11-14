@@ -14,14 +14,14 @@ Key Features:
 - **ODL Generation**: Generates validated ODL dictionary mappings with domain and opset tracking.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
 import re
 import typing
 from pathlib import Path
 
-from pydantic import JsonValue
 import yaml
+from pydantic import JsonValue
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.utils.console import log_error, log_info
 
 OnnxParsedDef = dict[
@@ -68,6 +68,59 @@ class OnnxSpecImporter:
     log_info(f"Parsing ONNX Spec: {target_file.name}...")
     return self._parse_markdown(target_file)
 
+  @staticmethod
+  def _extract_h3_operator_name(inline_content: str) -> str | None:
+    """Extract the anchored operator identifier from an ``<h3>`` heading inline token.
+
+    Args:
+        inline_content: Raw Markdown/HTML inline string inside ``<h3>``.
+
+    Returns:
+        Operator name from ``<a name="...">``, or ``None`` if absent.
+    """
+    from bs4 import BeautifulSoup, Tag
+
+    soup = BeautifulSoup(inline_content, "html.parser")
+    a_tag = soup.find("a", attrs={"name": True})
+    if isinstance(a_tag, Tag) and isinstance(a_tag.get("name"), str):
+      return str(a_tag["name"])
+    return None
+
+  def _extract_dl_arguments(self, html_content: str) -> list[tuple[str, str]]:
+    """Parse ``<dt>`` entries inside an Inputs/Attributes HTML block into ``(name, type_hint)`` pairs.
+
+    Args:
+        html_content: HTML block string containing ``<dl>/<dt>`` definitions.
+
+    Returns:
+        Ordered list of ``(arg_name, mapped_type_hint)`` tuples.
+    """
+    import bs4.element
+    from bs4 import BeautifulSoup
+
+    soup = BeautifulSoup(html_content, "html.parser")
+    extracted: list[tuple[str, str]] = []
+    for dt in soup.find_all("dt"):
+      raw_type = "Any"
+      first_tag = dt.find(["tt", "b", "code", "span"])
+      if first_tag:
+        raw_name = first_tag.get_text().strip()
+        remaining_text = "".join(str(c) for c in dt.contents if isinstance(c, bs4.element.NavigableString))
+        if ":" in remaining_text:
+          raw_type = remaining_text.split(":", 1)[1].strip()
+      else:
+        text = dt.get_text()
+        if ":" in text:
+          raw_name, raw_type = text.split(":", 1)
+        else:
+          raw_name = text
+
+      tokens = raw_name.strip().split()
+      arg_name = tokens[0] if tokens else ""
+      if arg_name:
+        extracted.append((arg_name, self._map_onnx_type(raw_type)))
+    return extracted
+
   def _parse_markdown(self, fpath: Path) -> dict[str, OnnxParsedDef]:
     """Parse markdown structurally.
 
@@ -77,83 +130,47 @@ class OnnxSpecImporter:
     Returns:
         Dict mapping operator names to extracted semantic properties.
     """
-    import bs4.element
-    from bs4 import BeautifulSoup, Tag
     from markdown_it import MarkdownIt
 
-    content = fpath.read_text(encoding="utf-8")
-    md = MarkdownIt()
-    tokens = md.parse(content)
-
+    tokens = MarkdownIt().parse(fpath.read_text(encoding="utf-8"))
     semantics: dict[str, OnnxParsedDef] = {}
+    op_std_args: dict[str, list[tuple[str, str]]] = {}
     raw_summaries: dict[str, list[str]] = {}
-    current_op: str = ""
-    current_section: str = ""
+    current_op = ""
+    current_section = ""
     is_in_heading = False
 
     for i, token in enumerate(tokens):
       if token.type == "heading_open":
         is_in_heading = True
-        if token.tag == "h3":
-          if i + 1 < len(tokens) and tokens[i + 1].type == "inline":
-            inline_content = tokens[i + 1].content
-            soup = BeautifulSoup(inline_content, "html.parser")
-            a_tag = soup.find("a", attrs={"name": True})
-            if isinstance(a_tag, Tag) and isinstance(a_tag.get("name"), str):
-              name_val = a_tag["name"]
-              current_op = str(name_val)
-              if current_op not in semantics:
-                semantics[current_op] = {
-                  "from": fpath.name,
-                  "description": "",
-                  "std_args": [],
-                }
-                raw_summaries[current_op] = []
-              current_section = "Summary"
-        elif token.tag == "h4":
-          if i + 1 < len(tokens) and tokens[i + 1].type == "inline":
-            current_section = tokens[i + 1].content.strip()
+        has_next_inline = i + 1 < len(tokens) and tokens[i + 1].type == "inline"
+        if token.tag == "h3" and has_next_inline:
+          op_id = self._extract_h3_operator_name(tokens[i + 1].content)
+          if op_id is not None:
+            current_op = op_id
+            if current_op not in semantics:
+              args_buf: list[tuple[str, str]] = []
+              op_std_args[current_op] = args_buf
+              semantics[current_op] = {"from": fpath.name, "description": "", "std_args": args_buf}
+              raw_summaries[current_op] = []
+            current_section = "Summary"
+        elif token.tag == "h4" and has_next_inline:
+          current_section = tokens[i + 1].content.strip()
       elif token.type == "heading_close":
         is_in_heading = False
       elif current_op and not is_in_heading:
-        if current_section == "Summary":
-          if token.type == "inline":
-            raw_sum = raw_summaries[current_op]
-            if not raw_sum:
-              text = token.content.replace("*", "").strip()
-              if text and text != current_op:
-                raw_sum.append(token.content)
-        elif current_section in ("Inputs", "Attributes"):
-          if token.type == "html_block" or (token.type == "inline" and "<dl>" in token.content):
-            soup = BeautifulSoup(token.content, "html.parser")
-            dts = soup.find_all("dt")
-            for dt in dts:
-              raw_name = ""
-              raw_type = "Any"
-              first_tag = dt.find(["tt", "b", "code", "span"])
-              if first_tag:
-                raw_name = first_tag.get_text().strip()
-                remaining_text = "".join([str(c) for c in dt.contents if isinstance(c, bs4.element.NavigableString)])
-                if ":" in remaining_text:
-                  raw_type = remaining_text.split(":", 1)[1].strip()
-              else:
-                text = dt.get_text()
-                if ":" in text:
-                  raw_name, raw_type = text.split(":", 1)
-                else:
-                  raw_name = text
-                  raw_type = "Any"
+        if current_section == "Summary" and token.type == "inline" and not raw_summaries[current_op]:
+          text = token.content.replace("*", "").strip()
+          if text and text != current_op:
+            raw_summaries[current_op].append(token.content)
+        elif current_section in ("Inputs", "Attributes") and (
+          token.type == "html_block" or (token.type == "inline" and "<dl>" in token.content)
+        ):
+          op_std_args[current_op].extend(self._extract_dl_arguments(token.content))
 
-              arg_name = raw_name.strip().split()[0] if raw_name.strip().split() else ""
-              if arg_name:
-                type_hint = self._map_onnx_type(raw_type)
-                cur_args = semantics[current_op]["std_args"]
-                assert isinstance(cur_args, list)
-                cur_args.append((arg_name, type_hint))
-
+    max_len = 300
     for op_key, op in semantics.items():
       summary = " ".join(raw_summaries[op_key]).strip()
-      max_len = 300
       op["description"] = (summary[:max_len] + "...") if len(summary) > max_len else summary
 
     return semantics
@@ -227,8 +244,8 @@ class OnnxSpecImporter:
 
       std_args: list[JsonValue] = []
       raw_std_args = op_data.get("std_args", [])
-      assert isinstance(raw_std_args, list)
-      for arg in raw_std_args:
+      arg_items = raw_std_args if isinstance(raw_std_args, list) else []
+      for arg in arg_items:
         if isinstance(arg, (tuple, list)) and len(arg) >= 2:
           std_args.append({"name": str(arg[0]), "type": str(arg[1])})
         elif isinstance(arg, str):

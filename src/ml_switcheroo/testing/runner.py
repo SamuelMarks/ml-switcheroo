@@ -4,19 +4,173 @@ Uses ``hypothesis`` to generate property-based test cases for operations.
 Maps ODL definitions to Strategies and executes cross-framework comparison.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue, ShapeProtocol
 import ast
-import importlib
 import operator
+import pkgutil
 import typing
 
+import numpy as np
 from hypothesis import given, settings
 from hypothesis import strategies as st
-import numpy as np
 
+from ml_switcheroo.enums import CallableTargetProtocol, RuntimeTensorOrValue, ShapeProtocol
 from ml_switcheroo.exceptions import VerificationExecutionError
 from ml_switcheroo.frameworks import get_adapter
 from ml_switcheroo.testing.fuzzer import InputFuzzer
+
+
+def _eval_shape_builtin(name: str, args: list[RuntimeTensorOrValue]) -> RuntimeTensorOrValue:
+  """Evaluate a whitelisted shape-calculation builtin call.
+
+  Args:
+      name: Builtin function identifier (``len``, ``tuple``, ``list``, ``int``, ``max``, ``min``).
+      args: Evaluated positional arguments.
+
+  Returns:
+      Evaluated shape value.
+
+  Raises:
+      ValueError: If ``name`` is not a permitted shape builtin or arguments have invalid types.
+  """
+  if name == "len" and len(args) == 1 and isinstance(args[0], typing.Sized):
+    return len(args[0])
+  if name == "tuple" and len(args) == 1 and isinstance(args[0], typing.Iterable):
+    return tuple(args[0])
+  if name == "list" and len(args) == 1 and isinstance(args[0], typing.Iterable):
+    return list(args[0])
+  if name == "int" and len(args) == 1 and isinstance(args[0], (int, float)):
+    return int(float(args[0]))
+  if name in ("max", "min") and args:
+    nums: list[int | float] = [a for a in args if isinstance(a, (int, float))]
+    if len(nums) == len(args):
+      return max(nums) if name == "max" else min(nums)
+  raise ValueError(f"Unsupported call in shape_calc: {name}")
+
+
+_SHAPE_BIN_OPS: dict[
+  type[ast.operator],
+  typing.Callable[[RuntimeTensorOrValue, RuntimeTensorOrValue], RuntimeTensorOrValue],
+] = {
+  ast.Add: operator.add,
+  ast.Sub: operator.sub,
+  ast.Mult: operator.mul,
+  ast.FloorDiv: operator.floordiv,
+  ast.Div: operator.truediv,
+  ast.Mod: operator.mod,
+}
+
+
+def _is_shape_seq(val: RuntimeTensorOrValue) -> typing.TypeGuard[typing.Sequence[int | float]]:
+  """Check if a value is an indexable sequence of shape dimensions.
+
+  Args:
+      val: Value evaluated during shape calculation.
+
+  Returns:
+      True if ``val`` is a sequence of numeric dimensions.
+  """
+  return isinstance(val, typing.Sequence)
+
+
+def _eval_shape_attribute(node: ast.Attribute, param_name: str, x_val: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
+  """Evaluate safe ``.shape`` attribute access within a ``shape_calc`` expression.
+
+  Args:
+      node: AST ``Attribute`` node.
+      param_name: Lambda parameter identifier bound to ``x_val``.
+      x_val: Input tensor or array value.
+
+  Returns:
+      Shape sequence extracted from the target value.
+
+  Raises:
+      VerificationExecutionError: If the attribute is private or not ``shape`` on a ``ShapeProtocol`` value.
+  """
+  val = _eval_node(node.value, param_name, x_val)
+  if node.attr.startswith("_"):
+    raise VerificationExecutionError(f"Private attribute access forbidden: {node.attr}")
+  if node.attr != "shape" or not isinstance(val, ShapeProtocol):
+    raise VerificationExecutionError(f"Unsupported attribute '{node.attr}' in shape_calc.")
+  return val.shape
+
+
+def _eval_shape_subscript(node: ast.Subscript, param_name: str, x_val: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
+  """Evaluate sequence indexing or slicing within a ``shape_calc`` expression.
+
+  Args:
+      node: AST ``Subscript`` node.
+      param_name: Lambda parameter identifier bound to ``x_val``.
+      x_val: Input tensor or array value.
+
+  Returns:
+      Indexed dimension or sliced sub-sequence.
+
+  Raises:
+      VerificationExecutionError: If the target is not a sequence or indices/bounds are non-integers.
+  """
+  val = _eval_node(node.value, param_name, x_val)
+  if not _is_shape_seq(val):
+    raise VerificationExecutionError("Subscript target in shape_calc must be a shape sequence.")
+  if isinstance(node.slice, ast.Slice):
+    lower = _eval_node(node.slice.lower, param_name, x_val) if node.slice.lower else None
+    upper = _eval_node(node.slice.upper, param_name, x_val) if node.slice.upper else None
+    step = _eval_node(node.slice.step, param_name, x_val) if node.slice.step else None
+    if not (
+      (lower is None or isinstance(lower, int))
+      and (upper is None or isinstance(upper, int))
+      and (step is None or isinstance(step, int))
+    ):
+      raise VerificationExecutionError("Slice bounds in shape_calc must evaluate to integers or None.")
+    return val[slice(lower, upper, step)]
+  slc = _eval_node(node.slice, param_name, x_val)
+  if not isinstance(slc, int):
+    raise VerificationExecutionError("Subscript index in shape_calc must evaluate to an integer.")
+  return val[slc]
+
+
+def _eval_node(node: ast.AST, param_name: str, x_val: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
+  """Recursively evaluate a safe subset of Python AST nodes for ``shape_calc``.
+
+  Args:
+      node: AST node to evaluate.
+      param_name: Lambda parameter identifier bound to ``x_val``.
+      x_val: Input tensor or array value.
+
+  Returns:
+      Evaluated Python value.
+
+  Raises:
+      VerificationExecutionError: If unary negation receives a non-numeric operand.
+      ValueError: If an unknown identifier or unsupported AST expression is encountered.
+  """
+  if isinstance(node, ast.Constant):
+    val_const = node.value
+    return str(val_const) if isinstance(val_const, bytes) else val_const
+  if isinstance(node, ast.Name):
+    if node.id == param_name:
+      return x_val
+    raise ValueError(f"Unknown identifier in shape_calc: {node.id}")
+  if isinstance(node, ast.Tuple):
+    return tuple(_eval_node(elt, param_name, x_val) for elt in node.elts)
+  if isinstance(node, ast.List):
+    return [_eval_node(elt, param_name, x_val) for elt in node.elts]
+  if isinstance(node, ast.Attribute):
+    return _eval_shape_attribute(node, param_name, x_val)
+  if isinstance(node, ast.Subscript):
+    return _eval_shape_subscript(node, param_name, x_val)
+  if isinstance(node, ast.BinOp):
+    op_fn = _SHAPE_BIN_OPS.get(type(node.op))
+    if op_fn is not None:
+      return op_fn(_eval_node(node.left, param_name, x_val), _eval_node(node.right, param_name, x_val))
+  if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.USub):
+    op_val = _eval_node(node.operand, param_name, x_val)
+    if not isinstance(op_val, (int, float, complex)):
+      raise VerificationExecutionError(f"Unary '-' requires numeric operand in shape_calc, got {type(op_val).__name__}.")
+    neg_val: RuntimeTensorOrValue = operator.neg(op_val)
+    return neg_val
+  if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+    return _eval_shape_builtin(node.func.id, [_eval_node(a, param_name, x_val) for a in node.args])
+  raise ValueError(f"Unsupported AST node in shape_calc: {type(node).__name__}")
 
 
 def _evaluate_shape_calc(shape_calc: str, x_val: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
@@ -39,103 +193,7 @@ def _evaluate_shape_calc(shape_calc: str, x_val: RuntimeTensorOrValue) -> Runtim
   if not isinstance(tree.body, ast.Lambda) or len(tree.body.args.args) != 1:
     raise ValueError(f"Expected single-argument lambda in shape_calc, got: {shape_calc}")
   param_name = tree.body.args.args[0].arg
-  env: dict[str, RuntimeTensorOrValue] = {
-    param_name: x_val,
-    "len": len,
-    "tuple": tuple,
-    "list": list,
-    "int": int,
-    "max": max,
-    "min": min,
-  }
-
-  def _is_shape_seq(val: RuntimeTensorOrValue) -> typing.TypeGuard[typing.Sequence[int | float]]:
-    """Check if a value is an indexable sequence of shape dimensions.
-
-    Args:
-        val: Value evaluated during shape calculation.
-
-    Returns:
-        True if ``val`` is a sequence of numeric dimensions.
-    """
-    return isinstance(val, typing.Sequence)
-
-  def _eval_node(node: ast.AST) -> RuntimeTensorOrValue:
-    """Recursively evaluate a safe subset of Python AST nodes.
-
-    Args:
-        node: AST node to evaluate.
-
-    Returns:
-        Evaluated Python value.
-    """
-    if isinstance(node, ast.Constant):
-      val_const = node.value
-      return str(val_const) if isinstance(val_const, bytes) else val_const
-    if isinstance(node, ast.Name):
-      if node.id in env:
-        env_val = env[node.id]
-        assert not isinstance(env_val, bytes)
-        return x_val if node.id == param_name else int(0)
-      raise ValueError(f"Unknown identifier in shape_calc: {node.id}")
-    if isinstance(node, ast.Tuple):
-      return tuple(_eval_node(elt) for elt in node.elts)
-    if isinstance(node, ast.List):
-      return [_eval_node(elt) for elt in node.elts]
-    if isinstance(node, ast.Attribute):
-      val = _eval_node(node.value)
-      if node.attr.startswith("_"):
-        raise ValueError(f"Private attribute access forbidden: {node.attr}")
-      assert node.attr == "shape" and isinstance(val, ShapeProtocol)
-      return val.shape
-    if isinstance(node, ast.Subscript):
-      val = _eval_node(node.value)
-      assert _is_shape_seq(val)
-      if isinstance(node.slice, ast.Slice):
-        lower = _eval_node(node.slice.lower) if node.slice.lower else None
-        upper = _eval_node(node.slice.upper) if node.slice.upper else None
-        step = _eval_node(node.slice.step) if node.slice.step else None
-        assert lower is None or isinstance(lower, int)
-        assert upper is None or isinstance(upper, int)
-        assert step is None or isinstance(step, int)
-        return val[slice(lower, upper, step)]
-      slc = _eval_node(node.slice)
-      assert isinstance(slc, int)
-      return val[slc]
-    if isinstance(node, ast.BinOp):
-      left = _eval_node(node.left)
-      right = _eval_node(node.right)
-      bin_ops: dict[
-        type[ast.operator],
-        typing.Callable[[RuntimeTensorOrValue, RuntimeTensorOrValue], RuntimeTensorOrValue],
-      ] = {
-        ast.Add: operator.add,
-        ast.Sub: operator.sub,
-        ast.Mult: operator.mul,
-        ast.FloorDiv: operator.floordiv,
-        ast.Div: operator.truediv,
-        ast.Mod: operator.mod,
-      }
-      op_fn = bin_ops.get(type(node.op))
-      if op_fn is not None:
-        bin_res: RuntimeTensorOrValue = op_fn(left, right)
-        return bin_res
-    if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.USub):
-      op_val = _eval_node(node.operand)
-      assert isinstance(op_val, (int, float, complex))
-      neg_val: RuntimeTensorOrValue = operator.neg(op_val)
-      return neg_val
-    if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in env:
-      from ml_switcheroo.core.rewriter.calls.pre import _unbox_attr
-
-      fn = _unbox_attr(env[node.func.id])
-      assert callable(fn)
-      raw_call_res = fn(*[_eval_node(a) for a in node.args])
-      assert isinstance(raw_call_res, (int, float, str, bool, tuple, list))
-      return raw_call_res
-    raise ValueError(f"Unsupported AST node in shape_calc: {type(node).__name__}")
-
-  return _eval_node(tree.body.body)
+  return _eval_node(tree.body.body, param_name, x_val)
 
 
 class EquivalenceRunner:
@@ -273,16 +331,17 @@ class EquivalenceRunner:
 
     Returns:
         The return value of the executed API function, or None if the API path is invalid.
+
+    Raises:
+        TypeError: If the resolved attribute is not callable.
     """
     if "." not in api:
       return None
     m, f = api.rsplit(".", 1)
-    mod = importlib.import_module(m)
-    from ml_switcheroo.core.rewriter.calls.pre import _resolve_attr
-
-    fn = _resolve_attr(mod, f)
-    assert callable(fn)
-    res: RuntimeTensorOrValue = fn(**kwargs)
+    resolved = pkgutil.resolve_name(f"{m}:{f}")
+    if not isinstance(resolved, CallableTargetProtocol):
+      raise TypeError(f"Resolved API target '{api}' is not callable.")
+    res: RuntimeTensorOrValue = resolved(**kwargs)
     return res
 
   def _remap_args(
@@ -357,7 +416,7 @@ class EquivalenceRunner:
         True if the values are structurally and numerically equivalent, False otherwise.
     """
     if isinstance(a, (list, tuple)) and isinstance(b, (list, tuple)):
-      return len(a) == len(b) and all(self._deep_compare(x, y, rtol, atol) for x, y in zip(a, b))
+      return len(a) == len(b) and all(self._deep_compare(x, y, rtol, atol) for x, y in zip(a, b, strict=False))
 
     if isinstance(a, (int, float, np.ndarray, np.generic)):
       try:

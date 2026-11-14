@@ -1,0 +1,225 @@
+"""Test suite for rewriter calls dispatch."""
+
+import libcst as cst
+from pydantic import JsonValue
+
+from ml_switcheroo.core.rewriter.calls.dispatch import (
+  _check_rule_condition,
+  _extract_argument_node,
+  _node_to_literal,
+  evaluate_dispatch_rules,
+)
+from ml_switcheroo.enums import LogicOp
+
+
+class DummyRule:
+  """Sentinel `DummyRule` fixture class used in rewriter calls dispatch tests."""
+
+  def __init__(
+    self,
+    if_arg: str,
+    if_value: JsonValue | set[JsonValue] | tuple[JsonValue, ...],
+    use_api: str,
+    op: str = LogicOp.EQ.value,
+  ) -> None:
+    """Initialize test helper instance.
+
+    Args:
+        if_arg: Input `if_arg` parameter value (`str`).
+        if_value: Input `if_value` parameter value (`JsonValue | set[JsonValue] | tuple[JsonValue, ...]`).
+        use_api: Input `use_api` parameter value (`str`).
+        op: Input `op` parameter value (`str`).
+    """
+    self.if_arg = if_arg
+    self.is_val = if_value
+    self.use_api = use_api
+    self.op = op
+
+
+class DummyRewriter:
+  """Sentinel `DummyRewriter` fixture class used in rewriter calls dispatch tests."""
+
+  def __init__(self) -> None:
+    """Initialize test helper instance."""
+    self.source_framework = "torch"
+
+
+def test_dispatch_rules_branches() -> None:
+  """Verify `evaluate_dispatch_rules` handles dispatch rules branches as expected."""
+  rewriter: DummyRewriter = DummyRewriter()
+  _raw_node = cst.parse_expression("f()")
+  assert isinstance(_raw_node, cst.Call)
+  node: cst.Call = _raw_node
+
+  # 29 -> 31
+  # 31 -> 32
+  # 33 -> 28
+  # 33 -> 34
+  details1 = {"variants": {"torch": {"args": {}}}, "std_args": [{"name": "a"}, {"other": "b"}]}
+  evaluate_dispatch_rules(rewriter, node, [], details1)
+
+  # 31 -> 36
+  details2 = {"variants": {"torch": {"args": {}}}, "std_args": ["c"]}
+  evaluate_dispatch_rules(rewriter, node, [], details2)
+
+  # 42 -> 43
+  rule1: DummyRule = DummyRule(if_arg="missing", if_value=1, use_api="f1")
+  evaluate_dispatch_rules(rewriter, node, [rule1], details1)
+
+  details_various = {"variants": {"torch": {"args": {"a": "a_src"}}}, "std_args": [("a", "int")]}
+
+  rule1_val: DummyRule = DummyRule(if_arg="a", if_value=1, use_api="f1")
+  _raw_node_with_a_1 = cst.parse_expression("f(a_src=1)")
+  assert isinstance(_raw_node_with_a_1, cst.Call)
+  node_with_a_1: cst.Call = _raw_node_with_a_1
+
+  # 45 -> 46
+  assert evaluate_dispatch_rules(rewriter, node_with_a_1, [rule1_val], details_various) == "f1"
+
+  # 45 -> 38
+  rule2: DummyRule = DummyRule(if_arg="a", if_value=2, use_api="f2")
+  assert evaluate_dispatch_rules(rewriter, node_with_a_1, [rule2], details_various) is None
+
+
+def test_extract_argument_node_branches() -> None:
+  """Verify `RewriterWithModuleAlias` handles extract argument node branches as expected."""
+  rewriter: DummyRewriter = DummyRewriter()
+  _raw_node = cst.parse_expression("obj.f(a=1, b=2)")
+  assert isinstance(_raw_node, cst.Call)
+  node: cst.Call = _raw_node
+
+  assert _extract_argument_node(rewriter, node, "a", "a", ["a", "b"]) is not None
+  _raw_node2 = cst.parse_expression("obj.f(1, 2)")
+  assert isinstance(_raw_node2, cst.Call)
+
+  node2: cst.Call = _raw_node2
+  assert _extract_argument_node(rewriter, node2, "a", "a", ["a", "b"]) is not None
+
+  class RewriterWithModuleAlias:
+    """Test double `RewriterWithModuleAlias` used in rewriter calls dispatch tests."""
+
+    def _is_module_alias(self, val: cst.CSTNode) -> bool:
+      """Execute `_is_module_alias` on `RewriterWithModuleAlias` for rewriter calls dispatch tests.
+
+      Args:
+          val: Input `val` parameter value (`cst.CSTNode`).
+
+      Returns:
+          Resulting `bool` from is module alias.
+      """
+      return True
+
+  rewriter2: RewriterWithModuleAlias = RewriterWithModuleAlias()
+  assert _extract_argument_node(rewriter2, node2, "a", "a", ["a", "b"]) is not None
+  _raw_node3 = cst.parse_expression("obj.f(2)")
+  assert isinstance(_raw_node3, cst.Call)
+
+  node3: cst.Call = _raw_node3
+
+  class RewriterNotModule:
+    """Test double `RewriterNotModule` implementing `_is_module_alias` for rewriter calls dispatch tests."""
+
+    def _is_module_alias(self, val: cst.CSTNode) -> bool:
+      """Execute `_is_module_alias` on `RewriterNotModule` for rewriter calls dispatch tests.
+
+      Args:
+          val: Input `val` parameter value (`cst.CSTNode`).
+
+      Returns:
+          Resulting `bool` from is module alias.
+      """
+      return False
+
+  rewriter3: RewriterNotModule = RewriterNotModule()
+  assert _extract_argument_node(rewriter3, node3, "b", "b", ["x", "b"]) is not None
+
+  assert _extract_argument_node(rewriter3, node3, "c", "c", ["x", "b", "c"]) is None
+
+  node5: cst.Call = cst.Call(func=cst.Name("f"), args=[cst.Arg(value=cst.Integer("1"), keyword=cst.Name("wrong"))])
+  assert _extract_argument_node(rewriter3, node5, "target", "target", ["target"]) is None
+
+
+def test_node_to_literal() -> None:
+  """Verify `_node_to_literal` returns `1` across rewriter calls dispatch inputs."""
+  assert _node_to_literal(cst.Integer("1")) == 1
+  assert _node_to_literal(cst.Float("1.5")) == 1.5
+  assert _node_to_literal(cst.SimpleString('"abc"')) == "abc"
+  assert _node_to_literal(cst.Name("True"))
+  assert not _node_to_literal(cst.Name("False"))
+  assert _node_to_literal(cst.Name("None")) is None
+  assert _node_to_literal(cst.Name("other")) is None
+
+  assert _node_to_literal(cst.Pass()) is None
+
+
+def test_check_rule_condition_branches() -> None:
+  """Verify `_check_rule_condition` handles branches as expected."""
+  rule_int: DummyRule = DummyRule("a", "int", "f", LogicOp.IS_TYPE.value)
+  assert _check_rule_condition(cst.Integer("1"), rule_int)
+  assert not _check_rule_condition(cst.Float("1.0"), rule_int)
+
+  rule_float: DummyRule = DummyRule("a", "float", "f", LogicOp.IS_TYPE.value)
+  assert _check_rule_condition(cst.Float("1.0"), rule_float)
+  assert not _check_rule_condition(cst.Integer("1"), rule_float)
+
+  rule_str: DummyRule = DummyRule("a", "str", "f", LogicOp.IS_TYPE.value)
+  assert _check_rule_condition(cst.SimpleString('"abc"'), rule_str)
+  assert not _check_rule_condition(cst.Integer("1"), rule_str)
+
+  rule_list: DummyRule = DummyRule("a", "list", "f", LogicOp.IS_TYPE.value)
+  assert _check_rule_condition(cst.List([]), rule_list)
+  assert _check_rule_condition(cst.Tuple([]), rule_list)
+  assert not _check_rule_condition(cst.Integer("1"), rule_list)
+
+  rule_dict: DummyRule = DummyRule("a", "dict", "f", LogicOp.IS_TYPE.value)
+  assert _check_rule_condition(cst.Dict([]), rule_dict)
+  assert not _check_rule_condition(cst.Integer("1"), rule_dict)
+
+  rule_bool: DummyRule = DummyRule("a", "bool", "f", LogicOp.IS_TYPE.value)
+  assert _check_rule_condition(cst.Name("True"), rule_bool)
+  assert _check_rule_condition(cst.Name("False"), rule_bool)
+  assert not _check_rule_condition(cst.Name("None"), rule_bool)
+
+  rule_eq: DummyRule = DummyRule("a", 1, "f", LogicOp.EQ.value)
+  assert not _check_rule_condition(cst.Name("other"), rule_eq)
+
+  assert _check_rule_condition(cst.Integer("1"), DummyRule("a", 1, "f", LogicOp.EQ.value))
+  assert not _check_rule_condition(cst.Integer("1"), DummyRule("a", 1, "f", LogicOp.NEQ.value))
+  assert _check_rule_condition(cst.Integer("1"), DummyRule("a", 2, "f", LogicOp.NEQ.value))
+
+  assert _check_rule_condition(cst.Integer("2"), DummyRule("a", 1, "f", LogicOp.GT.value))
+  assert _check_rule_condition(cst.Integer("1"), DummyRule("a", 2, "f", LogicOp.LT.value))
+  assert _check_rule_condition(cst.Integer("1"), DummyRule("a", 1, "f", LogicOp.GTE.value))
+  assert _check_rule_condition(cst.Integer("1"), DummyRule("a", 1, "f", LogicOp.LTE.value))
+
+  assert _check_rule_condition(cst.Integer("1"), DummyRule("a", [1, 2], "f", LogicOp.IN.value))
+  assert _check_rule_condition(cst.Integer("3"), DummyRule("a", [1, 2], "f", LogicOp.NOT_IN.value))
+
+  assert not _check_rule_condition(cst.Integer("1"), DummyRule("a", 1, "f", "UNKNOWN"))
+
+
+def test_node_to_literal_valueerror() -> None:
+  """Verify `HackyInt` handles node to literal valueerror as expected."""
+  import libcst as cst
+
+  from ml_switcheroo.core.rewriter.calls.dispatch import _node_to_literal
+
+  class HackyInt(cst.Integer):
+    """Stub `cst.Integer` subclass implementing `_validate` for rewriter calls dispatch tests."""
+
+    def _validate(self) -> None:
+      """Execute `_validate` on `HackyInt` for rewriter calls dispatch tests."""
+
+  class HackyFloat(cst.Float):
+    """Stub `cst.Float` subclass implementing `_validate` for rewriter calls dispatch tests."""
+
+    def _validate(self) -> None:
+      """Execute `_validate` on `HackyFloat` for rewriter calls dispatch tests."""
+
+  # integer ValueError
+  int_node: HackyInt = HackyInt("not_an_int")
+  assert _node_to_literal(int_node) is None
+
+  # float ValueError
+  float_node: HackyFloat = HackyFloat("not_a_float")
+  assert _node_to_literal(float_node) is None

@@ -9,12 +9,12 @@ from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
 from ml_switcheroo.core.compiler.backends.visual_backends import LatexBackend, TikzBackend
 
 __all__ = [
-  "PythonBackend",
-  "RdnaBackend",
-  "NvidiaSassBackend",
   "HtmlBackend",
-  "TikzBackend",
   "LatexBackend",
   "MlirBackend",
+  "NvidiaSassBackend",
+  "PythonBackend",
+  "RdnaBackend",
   "StableHloBackend",
+  "TikzBackend",
 ]

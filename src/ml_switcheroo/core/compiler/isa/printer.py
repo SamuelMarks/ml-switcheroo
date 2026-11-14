@@ -7,7 +7,11 @@ from ml_switcheroo.core.compiler.isa.cst import IsaComment, IsaInstruction, IsaL
 
 @typing.runtime_checkable
 class _PredicatedInstructionProtocol(typing.Protocol):
-  """Protocol for ISA instruction nodes carrying a `predicate` attribute."""
+  """Protocol for ISA instruction nodes carrying a `predicate` attribute.
+
+  Attributes:
+      predicate: The predicate (`IsaNode | str | None`).
+  """
 
   predicate: IsaNode | str | None
 
@@ -48,10 +52,7 @@ class IsaPrinter:
         if node.operands:
           operands_str = ", ".join(op.to_text().strip() for op in node.operands)
           pred = node.predicate if isinstance(node, _PredicatedInstructionProtocol) else ""
-          if pred:
-            opcode_field = f"@{pred} {opcode}"
-          else:
-            opcode_field = opcode
+          opcode_field = f"@{pred} {opcode}" if pred else opcode
 
           padding = max(1, self.operand_tab_stop - len(opcode_field))
           lines.append(f"{prefix}{opcode_field}{' ' * padding}{operands_str};")

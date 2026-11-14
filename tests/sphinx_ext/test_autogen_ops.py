@@ -1,15 +1,13 @@
 """Test suite for the Autogen Ops module."""
 
-from tests.conftest import _test_getattr
-
 import io
 import pathlib
 import typing
 from unittest import mock
 from unittest.mock import MagicMock
 
-from pydantic import JsonValue
 import yaml
+from pydantic import JsonValue
 
 from ml_switcheroo.sphinx_ext.autogen_ops import (
   IndentedDumper,
@@ -21,19 +19,19 @@ from ml_switcheroo.sphinx_ext.autogen_ops import (
 
 
 class MockEnum:
-  """Test helper class MockEnum."""
+  """Sentinel `MockEnum` fixture class used in autogen operations tests."""
 
   def __init__(self, value: str) -> None:
     """Initializes the MockEnum instance.
 
     Args:
-        value: The value (str) for init.
+        value: Input `value` parameter value (`str`).
     """
     self.value = value
 
 
 def test_indented_dumper() -> None:
-  """Verifies the behavior of indented dumper."""
+  """Verify `IndentedDumper` handles indented dumper as expected."""
   dumper = IndentedDumper(io.StringIO())
   dumper.increase_indent(flow=False, indentless=True)
   result = None
@@ -57,94 +55,33 @@ def test_build_yaml_entry() -> None:
   assert entry["operation"] == "test_op"
   assert entry["description"] == "Test desc `with` backticks"
   assert entry["op_type"] == "test_enum_val"
-  assert _test_getattr(
-    {"v": len(_test_getattr({"v": _test_getattr({"v": entry}, "__getitem__")("v")["std_args"]}, "__getitem__")("v"))},
-    "__getitem__",
-  )("v") == _test_getattr({"v": 4}, "__getitem__")("v")
-  assert _test_getattr(
-    {"v": _test_getattr({"v": _test_getattr({"v": entry}, "__getitem__")("v")["std_args"]}, "__getitem__")("v")[0]},
-    "__getitem__",
-  )("v") == _test_getattr(
-    {
-      "v": {
-        "name": _test_getattr({"v": "arg_str"}, "__getitem__")("v"),
-        "type": _test_getattr({"v": "Any"}, "__getitem__")("v"),
-      }
-    },
-    "__getitem__",
-  )("v")
-  assert _test_getattr(
-    {"v": _test_getattr({"v": _test_getattr({"v": entry}, "__getitem__")("v")["std_args"]}, "__getitem__")("v")[1]},
-    "__getitem__",
-  )("v") == _test_getattr(
-    {
-      "v": {
-        "name": _test_getattr({"v": "arg_tuple_name"}, "__getitem__")("v"),
-        "type": _test_getattr({"v": "arg_tuple_type"}, "__getitem__")("v"),
-      }
-    },
-    "__getitem__",
-  )("v")
-  assert _test_getattr(
-    {"v": _test_getattr({"v": _test_getattr({"v": entry}, "__getitem__")("v")["std_args"]}, "__getitem__")("v")[2]},
-    "__getitem__",
-  )("v") == _test_getattr(
-    {
-      "v": {
-        "name": _test_getattr({"v": "arg_dict_name"}, "__getitem__")("v"),
-        "type": _test_getattr({"v": "arg_dict_type"}, "__getitem__")("v"),
-      }
-    },
-    "__getitem__",
-  )("v")
-  assert _test_getattr(
-    {"v": _test_getattr({"v": _test_getattr({"v": entry}, "__getitem__")("v")["std_args"]}, "__getitem__")("v")[3]},
-    "__getitem__",
-  )("v") == _test_getattr(
-    {
-      "v": {
-        "name": _test_getattr({"v": "arg_dict_2"}, "__getitem__")("v"),
-        "type": _test_getattr({"v": "arg_dict_type_2"}, "__getitem__")("v"),
-      }
-    },
-    "__getitem__",
-  )("v")
-  assert _test_getattr({"v": "jax"}, "__getitem__")("v") in _test_getattr(
-    {"v": _test_getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__"
-  )("v")
-  assert _test_getattr(
-    {
-      "v": list(
-        _test_getattr(
-          {
-            "v": _test_getattr(
-              {
-                "v": _test_getattr(
-                  {
-                    "v": _test_getattr({"v": _test_getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__")(
-                      "v"
-                    )["jax"]
-                  },
-                  "__getitem__",
-                )("v").keys
-              },
-              "__getitem__",
-            )("v")()
-          },
-          "__getitem__",
-        )("v")
-      )
-    },
-    "__getitem__",
-  )("v") == _test_getattr(
-    {"v": [_test_getattr({"v": "a"}, "__getitem__")("v"), _test_getattr({"v": "b"}, "__getitem__")("v")]}, "__getitem__"
-  )("v")
-  assert _test_getattr({"v": "torch"}, "__getitem__")("v") not in _test_getattr(
-    {"v": _test_getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__"
-  )("v")
-  assert _test_getattr({"v": "numpy"}, "__getitem__")("v") in _test_getattr(
-    {"v": _test_getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__"
-  )("v")
+  std_args = entry["std_args"]
+  assert isinstance(std_args, list)
+  assert len(std_args) == 4
+  assert std_args[0] == {
+    "name": "arg_str",
+    "type": "Any",
+  }
+  assert std_args[1] == {
+    "name": "arg_tuple_name",
+    "type": "arg_tuple_type",
+  }
+  assert std_args[2] == {
+    "name": "arg_dict_name",
+    "type": "arg_dict_type",
+  }
+  assert std_args[3] == {
+    "name": "arg_dict_2",
+    "type": "arg_dict_type_2",
+  }
+  variants = entry["variants"]
+  assert isinstance(variants, dict)
+  assert "jax" in variants
+  jax_var = variants["jax"]
+  assert isinstance(jax_var, dict)
+  assert list(jax_var.keys()) == ["a", "b"]
+  assert "torch" not in variants
+  assert "numpy" in variants
 
 
 def test_build_yaml_entry_minimal() -> None:
@@ -162,24 +99,20 @@ def test_build_yaml_entry_minimal() -> None:
 
 
 def test_write_yaml_update(tmp_path: pathlib.Path) -> None:
-  """Verifies the behavior of write yaml update.
+  """Verify `out_path.exists` emits `OpA` for write YAML update.
 
   Args:
       tmp_path (Path): Tmp path pytest fixture.
   """
   out_path = tmp_path / "operations.yaml"
-  new_entries = [{"operation": "OpB", "val": 2}, {"operation": "OpA", "val": 1}]
-  _test_getattr({"v": _write_yaml_update}, "__getitem__")("v")(
-    _test_getattr({"v": out_path}, "__getitem__")("v"), _test_getattr({"v": new_entries}, "__getitem__")("v")
-  )
+  new_entries: list[dict[str, JsonValue]] = [{"operation": "OpB", "val": 2}, {"operation": "OpA", "val": 1}]
+  _write_yaml_update(out_path, new_entries)
   assert out_path.exists()
   content = out_path.read_text()
   assert "OpA" in content
   assert "OpB" in content
-  new_entries_2 = [{"operation": "OpA", "val": 99}, {"operation": "OpC", "val": 3}]
-  _test_getattr({"v": _write_yaml_update}, "__getitem__")("v")(
-    _test_getattr({"v": out_path}, "__getitem__")("v"), _test_getattr({"v": new_entries_2}, "__getitem__")("v")
-  )
+  new_entries_2: list[dict[str, JsonValue]] = [{"operation": "OpA", "val": 99}, {"operation": "OpC", "val": 3}]
+  _write_yaml_update(out_path, new_entries_2)
   loaded = yaml.safe_load(out_path.read_text())
   assert len(loaded) == 3
   assert loaded[0]["operation"] == "OpA"
@@ -189,55 +122,49 @@ def test_write_yaml_update(tmp_path: pathlib.Path) -> None:
 
 
 def test_write_yaml_update_corrupt_existing(tmp_path: pathlib.Path) -> None:
-  """Verifies the behavior of write yaml update corrupt existing.
+  """Verify `yaml.safe_load` handles write YAML update corrupt existing as expected.
 
   Args:
       tmp_path (Path): Tmp path pytest fixture.
   """
   out_path = tmp_path / "operations.yaml"
   out_path.write_text("invalid: yaml: [")
-  new_entries = [{"operation": "OpA", "val": 1}]
-  _test_getattr({"v": _write_yaml_update}, "__getitem__")("v")(
-    _test_getattr({"v": out_path}, "__getitem__")("v"), _test_getattr({"v": new_entries}, "__getitem__")("v")
-  )
+  new_entries: list[dict[str, JsonValue]] = [{"operation": "OpA", "val": 1}]
+  _write_yaml_update(out_path, new_entries)
   loaded = yaml.safe_load(out_path.read_text())
   assert len(loaded) == 1
   assert loaded[0]["operation"] == "OpA"
 
 
 def test_write_yaml_update_existing_not_list(tmp_path: pathlib.Path) -> None:
-  """Verifies the behavior of write yaml update existing not list.
+  """Verify `yaml.safe_load` handles write YAML update existing not list as expected.
 
   Args:
       tmp_path (Path): Tmp path pytest fixture.
   """
   out_path = tmp_path / "operations.yaml"
   out_path.write_text("not_a_list: true")
-  new_entries = [{"operation": "OpA", "val": 1}]
-  _test_getattr({"v": _write_yaml_update}, "__getitem__")("v")(
-    _test_getattr({"v": out_path}, "__getitem__")("v"), _test_getattr({"v": new_entries}, "__getitem__")("v")
-  )
+  new_entries: list[dict[str, JsonValue]] = [{"operation": "OpA", "val": 1}]
+  _write_yaml_update(out_path, new_entries)
   loaded = yaml.safe_load(out_path.read_text())
   assert len(loaded) == 1
   assert loaded[0]["operation"] == "OpA"
 
 
 def test_write_yaml_update_ioerror(tmp_path: pathlib.Path) -> None:
-  """Verifies the behavior of write yaml update ioerror.
+  """Verify `out_path.exists` handles write YAML update ioerror as expected.
 
   Args:
       tmp_path (Path): Tmp path pytest fixture.
   """
   out_path = tmp_path / "not_exist_dir" / "operations.yaml"
-  new_entries = [{"operation": "OpA", "val": 1}]
-  _test_getattr({"v": _write_yaml_update}, "__getitem__")("v")(
-    _test_getattr({"v": out_path}, "__getitem__")("v"), _test_getattr({"v": new_entries}, "__getitem__")("v")
-  )
+  new_entries: list[dict[str, JsonValue]] = [{"operation": "OpA", "val": 1}]
+  _write_yaml_update(out_path, new_entries)
   assert not out_path.exists()
 
 
 def test_write_index_file(tmp_path: pathlib.Path) -> None:
-  """Verifies the behavior of write index file.
+  """Verify `_write_index_file` emits `Operation Reference` across autogen operations inputs.
 
   Args:
       tmp_path (Path): Tmp path pytest fixture.
@@ -255,13 +182,13 @@ def test_write_index_file(tmp_path: pathlib.Path) -> None:
 
 
 class MockApp:
-  """Test helper class MockApp."""
+  """Sentinel `MockApp` fixture class used in autogen operations tests."""
 
   def __init__(self, srcdir: str) -> None:
     """Initializes the MockApp instance.
 
     Args:
-        srcdir: The srcdir (str) for init.
+        srcdir: Input `srcdir` parameter value (`str`).
     """
     self.srcdir = srcdir
 
@@ -339,13 +266,19 @@ def test_generate_op_docs_ioerror(
   app = MockApp(str(srcdir))
   original_open = open
 
-  def mock_open(path: str | pathlib.Path, *args: JsonValue, **kwargs: JsonValue) -> typing.IO[str]:
+  def mock_open(
+    path: str | pathlib.Path,
+    mode: str = "r",
+    buffering: int = -1,
+    encoding: str | None = None,
+  ) -> typing.IO[str]:
     """Provides a mock open for testing.
 
     Args:
         path: Path to mock.
-        *args: Variable arguments.
-        **kwargs: Keyword arguments.
+        mode: Open mode string.
+        buffering: Buffering policy integer.
+        encoding: Optional text encoding name.
 
     Raises:
         IOError: Mock error.
@@ -355,15 +288,9 @@ def test_generate_op_docs_ioerror(
     """
     if "ValidOp.rst" in str(path):
       raise IOError("mock error")
-    _ret_v: typing.IO[str] = _test_getattr(
-      {
-        "v": _test_getattr({"v": original_open}, "__getitem__")("v")(
-          _test_getattr({"v": path}, "__getitem__")("v"), *args, **_test_getattr({"v": kwargs}, "__getitem__")("v")
-        )
-      },
-      "__getitem__",
-    )("v")
-    return _ret_v
+    if "r" in mode:
+      return original_open(path, mode="r", buffering=buffering, encoding=encoding)
+    return original_open(path, mode="w", buffering=buffering, encoding=encoding)
 
   with mock.patch("builtins.open", mock_open):
     generate_op_docs(app)
@@ -397,18 +324,14 @@ def test_generate_op_docs_empty(
 
 
 def test_autogen_ops_variant_with_enum() -> None:
-  """Verify autogen ops variant with enum behavior.
-
-  Returns:
-      Resulting `None` from test autogen ops variant with enum.
-  """
+  """Verify `_build_yaml_entry` handles autogen operations variant with enum as expected."""
 
   class DummyEnum:
-    """Test helper class DummyEnum."""
+    """Test double `DummyEnum` implementing `value` for autogen operations tests."""
 
     @property
     def value(self) -> str:
-      """Execute value helper logic.
+      """Return the `value` property from `DummyEnum`.
 
       Returns:
           Resulting `str` from value.
@@ -418,15 +341,11 @@ def test_autogen_ops_variant_with_enum() -> None:
   definition = {"variants": {"jax": {"some_field": DummyEnum()}}}
 
   res = _build_yaml_entry("TestOp", definition)
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {"v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]},
-        "__getitem__",
-      )("v")["some_field"]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "enum_val"}, "__getitem__")("v")
+  variants = res["variants"]
+  assert isinstance(variants, dict)
+  jax_var = variants["jax"]
+  assert isinstance(jax_var, dict)
+  assert jax_var["some_field"] == "enum_val"
 
 
 def test_write_yaml_update_item_without_operation(tmp_path: pathlib.Path) -> None:

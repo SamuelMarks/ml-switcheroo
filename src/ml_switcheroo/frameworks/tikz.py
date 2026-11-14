@@ -4,12 +4,10 @@ Provides the metadata and configuration required to map intermediate representat
 operations and semantics to TikZ/LaTeX visualization output.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
-
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.frameworks.base import (
   FrameworkAdapter,
   ImportConfig,
@@ -29,6 +27,11 @@ class TikzAdapter(FrameworkAdapter):
   This adapter handles structural and semantic translation from intermediate
   representations to TikZ-compatible LaTeX code snippets, enabling the generation
   of visual diagrams representing neural networks and operations.
+
+  Attributes:
+      display_name: The display name (`str`).
+      inherits_from: The inherits from (`str | None`).
+      ui_priority: The ui priority (`int`).
   """
 
   display_name: str = "TikZ (LaTeX)"
@@ -41,7 +44,6 @@ class TikzAdapter(FrameworkAdapter):
 
     Sets up the initial state required for TikZ metadata extraction.
     """
-    pass
 
   @property
   def import_alias(self) -> tuple[str, str]:
@@ -268,7 +270,6 @@ class TikzAdapter(FrameworkAdapter):
     Args:
         snapshot: A dictionary containing structural snapshot details.
     """
-    pass
 
   def get_doc_url(self, api_name: str) -> str | None:
     """Get the external documentation URL for a given framework API or node.

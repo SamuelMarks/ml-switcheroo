@@ -1,24 +1,22 @@
 """Test suite for the Paxml Definitions module."""
 
-import typing
-
 import pytest
 
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 @pytest.fixture
-def semantics() -> typing.Generator[SemanticsManager, None, None]:
+def semantics() -> SemanticsManager:
   """Provides a mock semantics for testing.
 
-  Yields:
+  Returns:
       SemanticsManager: A semantics manager instance.
   """
-  yield SemanticsManager()
+  return SemanticsManager()
 
 
 def test_linear_layer_paxml_mapping(semantics: SemanticsManager) -> None:
-  """Verifies the behavior of linear layer Paxml mapping.
+  """Verify `semantics.get_definition_by_id` handles linear layer PaxML mapping as expected.
 
   Args:
       semantics (SemanticsManager): The semantics manager fixture.
@@ -40,7 +38,7 @@ def test_linear_layer_paxml_mapping(semantics: SemanticsManager) -> None:
 
 
 def test_sequential_container_paxml_mapping(semantics: SemanticsManager) -> None:
-  """Verifies the behavior of sequential container Paxml mapping.
+  """Verify `semantics.get_definition_by_id` handles sequential container PaxML mapping as expected.
 
   Args:
       semantics (SemanticsManager): The semantics manager fixture.
@@ -57,7 +55,7 @@ def test_sequential_container_paxml_mapping(semantics: SemanticsManager) -> None
 
 
 def test_relu_paxml_mapping(semantics: SemanticsManager) -> None:
-  """Verifies the behavior of relu Paxml mapping.
+  """Verify `semantics.get_definition_by_id` handles relu PaxML mapping as expected.
 
   Args:
       semantics (SemanticsManager): The semantics manager fixture.
@@ -74,7 +72,7 @@ def test_relu_paxml_mapping(semantics: SemanticsManager) -> None:
 
 
 def test_flatten_paxml_mapping(semantics: SemanticsManager) -> None:
-  """Verifies the behavior of flatten Paxml mapping.
+  """Verify `semantics.get_definition_by_id` handles flatten PaxML mapping as expected.
 
   Args:
       semantics (SemanticsManager): The semantics manager fixture.

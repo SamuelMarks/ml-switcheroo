@@ -6,10 +6,10 @@ Semantic Knowledge Base, calculating differences in API names and argument
 conventions (e.g., `dim` vs `axis`), and producing a structured migration guide.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 from collections import defaultdict
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 
 if typing.TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
@@ -45,12 +45,9 @@ class MigrationGuideGenerator:
     # Structure: {"array": [op_name, ...], "neural": [...]}
     tiered_ops: dict[str, list[str]] = defaultdict(list)
     known_apis = self.semantics.get_known_apis()
-    import inspect
+    origins = self.semantics._key_origins
 
-    raw_origins = inspect.getattr_static(self.semantics, "_key_origins")
-    origins = raw_origins if isinstance(raw_origins, dict) else {}
-
-    for op_name in known_apis.keys():
+    for op_name in known_apis:
       tier = origins.get(op_name, "Uncategorized")
       tiered_ops[tier].append(op_name)
 
@@ -195,5 +192,4 @@ class MigrationGuideGenerator:
     if not variant:
       return "—"
     res = variant.get("api", "—")
-    assert isinstance(res, str)
-    return res
+    return str(res) if res is not None else "—"

@@ -5,10 +5,11 @@ supporting both standard Python frameworks and custom markup/DSL ingestion hooks
 via `CustomParserProtocol` and Pipeline Routing.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
+import importlib
+import importlib.util
 import json
 import logging
+import os
 import typing
 from enum import Enum
 from functools import lru_cache
@@ -16,12 +17,39 @@ from pathlib import Path
 
 import libcst as cst
 from ml_switcheroo_ir.schema.ghost import GhostRef, SemanticTier, StandardMap
-from pydantic import BaseModel, Field, JsonValue
+from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
 from ml_switcheroo.core.dsl import OperationDef as OperationDef
+from ml_switcheroo.enums import RuntimeTensorOrValue
+from ml_switcheroo.exceptions import ConfigurationError
 from ml_switcheroo.semantics.schema import PluginTraits, StructuralTraits
 
-SNAPSHOT_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent / "ml-ecosystem-snapshots"
+SNAPSHOT_DIR: Path | None = None
+
+
+def resolve_snapshot_dir(snapshot_dir: Path | None = None) -> Path | None:
+  """Resolve the snapshot directory from explicit argument, override, env var, or installed package.
+
+  Args:
+      snapshot_dir: Optional explicit snapshot directory path.
+
+  Returns:
+      Path | None: Resolved directory path if configured or installed, otherwise ``None``.
+  """
+  if snapshot_dir is not None:
+    return snapshot_dir
+  if SNAPSHOT_DIR is not None:
+    return SNAPSHOT_DIR
+  env_dir = os.environ.get("ML_SWITCHEROO_SNAPSHOT_DIR", "").strip()
+  if env_dir:
+    return Path(env_dir)
+  try:
+    spec = importlib.util.find_spec("ml_ecosystem_snapshots")
+  except (ImportError, ValueError, AttributeError):
+    spec = None
+  if spec is not None and spec.origin:
+    return Path(spec.origin).resolve().parent
+  return None
 
 
 @typing.runtime_checkable
@@ -58,9 +86,6 @@ class FrameworkAdapter(typing.Protocol):
   and code generation methods required to integrate a machine learning framework
   into the translation and analysis pipelines.
   """
-
-  _mode: InitMode = InitMode.LIVE
-  _snapshot_data: dict[str, JsonValue] = {}
 
   def __init__(self) -> None:
     """Initialize the framework adapter instance."""
@@ -345,19 +370,21 @@ class FrameworkAdapter(typing.Protocol):
     ...
 
 
-def load_snapshot_for_adapter(fw_key: str) -> dict[str, JsonValue]:
-  """Load the most recent snapshot JSON data for a given framework key from the SNAPSHOT_DIR.
+def load_snapshot_for_adapter(fw_key: str, snapshot_dir: Path | None = None) -> dict[str, JsonValue]:
+  """Load the most recent snapshot JSON data for ``fw_key`` from the resolved snapshot directory.
 
   Args:
       fw_key: The identifier key representing the framework adapter.
+      snapshot_dir: Optional explicit directory containing ``<fw_key>_v*.json`` files.
 
   Returns:
       The parsed JSON snapshot dictionary, or an empty dictionary if no snapshots
       are found or if loading fails.
   """
-  if not SNAPSHOT_DIR.exists():
+  resolved_dir = resolve_snapshot_dir(snapshot_dir)
+  if resolved_dir is None or not resolved_dir.exists():
     return {}
-  candidates = sorted(list(SNAPSHOT_DIR.glob(f"{fw_key}_v*.json")))
+  candidates = sorted(list(resolved_dir.glob(f"{fw_key}_v*.json")))
   if not candidates:
     return {}
   target = candidates[-1]
@@ -370,17 +397,149 @@ def load_snapshot_for_adapter(fw_key: str) -> dict[str, JsonValue]:
     return {}
 
 
-_ADAPTER_REGISTRY: dict[str, type[FrameworkAdapter]] = {}
+class FrameworkSnapshot(BaseModel):
+  """Typed Ghost Protocol snapshot container wrapping validated ``GhostRef`` entries.
+
+  Attributes:
+      version: Framework version string recorded in the snapshot envelope, if any.
+      categories: Mapping from semantic tier key to validated ``GhostRef`` definitions.
+  """
+
+  model_config = ConfigDict(extra="ignore")
+
+  version: str = ""
+  categories: dict[str, list[GhostRef]] = Field(default_factory=dict)
+
+  def is_empty(self) -> bool:
+    """Check whether the snapshot holds neither categorized entries nor version metadata.
+
+    Returns:
+        True when both ``categories`` and ``version`` are empty.
+    """
+    return not self.categories and not self.version
+
+  @classmethod
+  def from_raw(
+    cls,
+    raw: "FrameworkSnapshot | typing.Mapping[str, JsonValue] | None",
+  ) -> "FrameworkSnapshot":
+    """Validate an arbitrary snapshot mapping or ``FrameworkSnapshot`` into a typed model.
+
+    Args:
+        raw: Optional ``FrameworkSnapshot`` instance or raw JSON mapping.
+
+    Returns:
+        Validated ``FrameworkSnapshot`` wrapping ``GhostRef`` entries.
+    """
+    if isinstance(raw, cls):
+      return raw
+    if not isinstance(raw, typing.Mapping) or not raw:
+      return cls()
+    raw_version = raw.get("version")
+    version_str = (
+      str(raw_version) if isinstance(raw_version, (str, int, float)) and not isinstance(raw_version, bool) else ""
+    )
+    parsed_cats: dict[str, list[GhostRef]] = {}
+    raw_cats = raw.get("categories")
+    if isinstance(raw_cats, typing.Mapping):
+      for cat_key, raw_list in raw_cats.items():
+        if isinstance(raw_list, list):
+          parsed_cats[str(cat_key)] = [GhostRef.model_validate(item) for item in raw_list if isinstance(item, dict)]
+    return cls(version=version_str, categories=parsed_cats)
+
+  def get_category(self, category: SemanticTier) -> list[GhostRef]:
+    """Retrieve validated ``GhostRef`` entries for ``category``.
+
+    Args:
+        category: Semantic tier category to extract.
+
+    Returns:
+        List of ``GhostRef`` entries for ``category``.
+    """
+    return list(self.categories.get(category.value, []))
+
+
+class SnapshotBackedAdapter:
+  """Composition helper managing live/ghost initialization mode and typed snapshot lookup.
+
+  Attributes:
+      framework_key: Canonical framework key used when loading fallback snapshots.
+      mode: Active initialization mode (``InitMode.LIVE`` or ``InitMode.GHOST``).
+      snapshot: Validated ``FrameworkSnapshot`` model loaded in ghost mode.
+      snapshot_data: Alias to ``snapshot`` holding the typed ``FrameworkSnapshot`` model.
+  """
+
+  def __init__(
+    self,
+    framework_key: str,
+    *,
+    is_live_available: bool = True,
+    loader: typing.Callable[[str], FrameworkSnapshot | dict[str, JsonValue] | None] | None = None,
+    missing_message: str | None = None,
+  ) -> None:
+    """Initialize snapshot-backed state for a framework adapter.
+
+    Args:
+        framework_key: Canonical framework identifier (e.g., ``"torch"``, ``"jax"``).
+        is_live_available: Whether the live Python framework package is importable.
+        loader: Optional snapshot loader override (defaults to ``load_snapshot_for_adapter``).
+        missing_message: Optional debug log message emitted when ghost snapshot data is absent.
+    """
+    self.framework_key: str = framework_key
+    if is_live_available:
+      self.mode: InitMode = InitMode.LIVE
+      self.snapshot: FrameworkSnapshot = FrameworkSnapshot()
+    else:
+      self.mode = InitMode.GHOST
+      active_loader = loader if loader is not None else load_snapshot_for_adapter
+      loaded = active_loader(framework_key)
+      self.snapshot = FrameworkSnapshot.from_raw(loaded)
+      if (
+        loaded is None or loaded == {} or (isinstance(loaded, FrameworkSnapshot) and loaded.is_empty())
+      ) and missing_message:
+        logging.debug(missing_message)
+    self.snapshot_data: FrameworkSnapshot = self.snapshot
+
+  @staticmethod
+  def collect_ghost_from(
+    snapshot_data: FrameworkSnapshot | typing.Mapping[str, JsonValue] | None,
+    category: SemanticTier,
+  ) -> list[GhostRef]:
+    """Hydrate ``GhostRef`` entries for ``category`` from a ``FrameworkSnapshot`` or mapping.
+
+    Args:
+        snapshot_data: Typed ``FrameworkSnapshot``, raw snapshot mapping, or ``None``.
+        category: Semantic tier category to extract.
+
+    Returns:
+        Validated list of ``GhostRef`` models for ``category``.
+    """
+    if snapshot_data is None:
+      return []
+    return FrameworkSnapshot.from_raw(snapshot_data).get_category(category)
+
+  def collect_ghost(self, category: SemanticTier) -> list[GhostRef]:
+    """Hydrate ``GhostRef`` entries for ``category`` from ``self.snapshot``.
+
+    Args:
+        category: Semantic tier category to extract.
+
+    Returns:
+        Validated list of ``GhostRef`` models for ``category``.
+    """
+    return self.snapshot.get_category(category)
+
+
 AdapterT = typing.TypeVar("AdapterT")
 
 
 def _is_adapter_class(
-  cls: type[AdapterT] | type[FrameworkAdapter],
+  cls: AdapterT | type[FrameworkAdapter],
 ) -> typing.TypeGuard[type[FrameworkAdapter]]:
-  """Verify whether a decorated class is a valid framework adapter type.
+  """Verify whether a decorated object is a valid framework adapter class.
 
   Args:
-      cls: The class being registered in the adapter registry.
+      cls: Candidate class being registered in the adapter registry.
 
   Returns:
       True if ``cls`` is a class type, narrowing it to ``type[FrameworkAdapter]``.
@@ -388,7 +547,129 @@ def _is_adapter_class(
   return isinstance(cls, type)
 
 
-def register_framework(name: str) -> typing.Callable[[type[AdapterT]], type[AdapterT]]:
+class AdapterRegistry:
+  """Explicit registry encapsulating ``FrameworkAdapter`` classes and cached adapter instances.
+
+  Attributes:
+      adapters: Mapping from canonical framework identifiers to ``FrameworkAdapter`` classes.
+  """
+
+  def __init__(self) -> None:
+    """Initialize an empty framework adapter registry."""
+    self.adapters: dict[str, type[FrameworkAdapter]] = {}
+    self._instances: dict[str, FrameworkAdapter] = {}
+
+  def register_class(self, name: str, cls: type[FrameworkAdapter]) -> None:
+    """Register an adapter class under ``name`` and invalidate any cached instance.
+
+    Args:
+        name: Canonical framework identifier.
+        cls: Concrete ``FrameworkAdapter`` implementation class.
+    """
+    self.adapters[name] = cls
+    self._instances.pop(name, None)
+
+  def register(self, name: str) -> typing.Callable[[AdapterT], AdapterT]:
+    """Create a class decorator registering a ``FrameworkAdapter`` implementation under ``name``.
+
+    Args:
+        name: Canonical framework identifier.
+
+    Returns:
+        Decorator returning the registered class unchanged.
+    """
+
+    def wrapper(cls: AdapterT) -> AdapterT:
+      """Validate and register ``cls`` in this ``AdapterRegistry``.
+
+      Args:
+          cls: Concrete ``FrameworkAdapter`` implementation class.
+
+      Returns:
+          Unchanged ``cls``.
+
+      Raises:
+          ConfigurationError: If ``cls`` is not a class object.
+      """
+      reg_cls: AdapterT | type[FrameworkAdapter] = cls
+      if not _is_adapter_class(reg_cls):
+        raise ConfigurationError(f"Adapter registered for '{name}' must be a class.")
+      self.register_class(name, reg_cls)
+      return cls
+
+    return wrapper
+
+  def available_frameworks(self) -> list[str]:
+    """Return all registered framework identifiers.
+
+    Returns:
+        List of registered framework names.
+    """
+    return list(self.adapters.keys())
+
+  def get_adapter_class(self, name: str) -> type[FrameworkAdapter] | None:
+    """Look up the registered adapter class for ``name`` (or ``{name}_nnx`` fallback).
+
+    Args:
+        name: Registered framework name.
+
+    Returns:
+        Registered ``FrameworkAdapter`` class if found, else ``None``.
+    """
+    return self.adapters.get(name) or self.adapters.get(f"{name}_nnx")
+
+  def get_adapter(self, name: str) -> FrameworkAdapter | None:
+    """Return a cached ``FrameworkAdapter`` instance for ``name``, instantiating lazily on first request.
+
+    Args:
+        name: Registered framework name.
+
+    Returns:
+        Cached ``FrameworkAdapter`` instance if registered, otherwise ``None``.
+    """
+    if name in self._instances:
+      return self._instances[name]
+    cls = self.get_adapter_class(name)
+    if cls is not None:
+      instance: FrameworkAdapter = cls()
+      self._instances[name] = instance
+      return instance
+    return None
+
+  def clear_cache(self) -> None:
+    """Clear all cached ``FrameworkAdapter`` instances."""
+    self._instances.clear()
+
+  def snapshot(self) -> dict[str, type[FrameworkAdapter]]:
+    """Return a shallow copy of the registered adapter classes mapping.
+
+    Returns:
+        Copy of ``self.adapters``.
+    """
+    return self.adapters.copy()
+
+  def restore(self, state: typing.Mapping[str, type[FrameworkAdapter]]) -> None:
+    """Restore registered adapter classes from ``state`` and clear cached instances.
+
+    Args:
+        state: Saved mapping of framework names to adapter classes.
+    """
+    self.adapters.clear()
+    self.adapters.update(state)
+    self._instances.clear()
+
+
+@lru_cache(maxsize=1)
+def get_default_adapter_registry() -> AdapterRegistry:
+  """Return the lazily instantiated default ``AdapterRegistry``.
+
+  Returns:
+      Default ``AdapterRegistry`` instance.
+  """
+  return AdapterRegistry()
+
+
+def register_framework(name: str) -> typing.Callable[[AdapterT], AdapterT]:
   """Get a decorator to register concrete FrameworkAdapter classes under a specific name.
 
   Args:
@@ -396,24 +677,9 @@ def register_framework(name: str) -> typing.Callable[[type[AdapterT]], type[Adap
 
   Returns:
       A decorator function that maps the decorated class to the given name
-      in the registry and returns the class itself.
+      in the default ``AdapterRegistry`` and returns the class itself.
   """
-
-  def wrapper(cls: type[AdapterT]) -> type[AdapterT]:
-    """Register the decorated class in the framework adapter registry.
-
-    Args:
-        cls: The FrameworkAdapter implementation class.
-
-    Returns:
-        The unchanged adapter class.
-    """
-    reg_cls: type[AdapterT] | type[FrameworkAdapter] = cls
-    assert _is_adapter_class(reg_cls)
-    _ADAPTER_REGISTRY[name] = reg_cls
-    return cls
-
-  return wrapper
+  return get_default_adapter_registry().register(name)
 
 
 def available_frameworks() -> list[str]:
@@ -422,10 +688,21 @@ def available_frameworks() -> list[str]:
   Returns:
       A list of registered framework adapter keys/names.
   """
-  return list(_ADAPTER_REGISTRY.keys())
+  return get_default_adapter_registry().available_frameworks()
 
 
-@lru_cache(maxsize=None)
+def get_adapter_class(name: str) -> type[FrameworkAdapter] | None:
+  """Return the registered ``FrameworkAdapter`` class for ``name`` without instantiating it.
+
+  Args:
+      name: Registered name of the framework adapter.
+
+  Returns:
+      Registered ``FrameworkAdapter`` class if found, else ``None``.
+  """
+  return get_default_adapter_registry().get_adapter_class(name)
+
+
 def get_adapter(name: str) -> FrameworkAdapter | None:
   """Instantiate and return the registered FrameworkAdapter subclass corresponding to the given name.
 
@@ -435,11 +712,26 @@ def get_adapter(name: str) -> FrameworkAdapter | None:
   Returns:
       An instance of FrameworkAdapter if registered, otherwise None.
   """
-  cls = _ADAPTER_REGISTRY.get(name) or _ADAPTER_REGISTRY.get(f"{name}_nnx")
-  if cls:
-    res: FrameworkAdapter = cls()
-    return res
-  return None
+  return get_default_adapter_registry().get_adapter(name)
 
 
-__all__ = ["SemanticTier", "StandardMap", "GhostRef", "FrameworkAdapter", "PluginTraits", "StructuralTraits"]
+__all__ = [
+  "AdapterRegistry",
+  "CustomParserProtocol",
+  "FrameworkAdapter",
+  "FrameworkSnapshot",
+  "GhostRef",
+  "ImportConfig",
+  "InitMode",
+  "PluginTraits",
+  "SemanticTier",
+  "SnapshotBackedAdapter",
+  "StandardMap",
+  "StructuralTraits",
+  "available_frameworks",
+  "get_adapter",
+  "get_adapter_class",
+  "get_default_adapter_registry",
+  "load_snapshot_for_adapter",
+  "register_framework",
+]

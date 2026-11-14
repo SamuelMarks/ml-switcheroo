@@ -1,7 +1,5 @@
 """Test suite for the Linter module."""
 
-from tests.conftest import _test_getattr
-
 import pathlib
 from unittest.mock import MagicMock, patch
 
@@ -12,7 +10,7 @@ from ml_switcheroo.testing.linter import StructuralLinter, validate_transpilatio
 
 @pytest.fixture
 def linter() -> StructuralLinter:
-  """Execute linter helper logic.
+  """Create a configured `StructuralLinter` fixture for linter tests.
 
   Returns:
       Configured `linter` fixture value (StructuralLinter).
@@ -21,14 +19,22 @@ def linter() -> StructuralLinter:
 
 
 def test_linter_clean_code(linter: StructuralLinter) -> None:
-  """Verifies the behavior of linter clean code."""
+  """Verify `linter.check` returns `0` for linter clean code.
+
+  Args:
+      linter: StructuralLinter fixture under test.
+  """
   code: str = "\nimport jax.numpy as jnp\ndef f(x):\n    return jnp.abs(x)\n"
   errors: list[str] = linter.check(code)
   assert len(errors) == 0
 
 
 def test_linter_detects_import(linter: StructuralLinter) -> None:
-  """Verifies the behavior of linter detects import."""
+  """Verify `linter.check` emits `Forbidden Import: 'torch'` for linter detects import.
+
+  Args:
+      linter: StructuralLinter fixture under test.
+  """
   code: str = "\nimport torch\nx = torch.abs(y)\n"
   errors: list[str] = linter.check(code)
   assert len(errors) > 0
@@ -36,7 +42,11 @@ def test_linter_detects_import(linter: StructuralLinter) -> None:
 
 
 def test_linter_detects_from_import(linter: StructuralLinter) -> None:
-  """Verifies the behavior of linter detects from import."""
+  """Verify `linter.check` handles linter detects from import as expected.
+
+  Args:
+      linter: StructuralLinter fixture under test.
+  """
   code: str = "from flax import linen as nn"
   errors: list[str] = linter.check(code)
   assert len(errors) > 0
@@ -44,7 +54,11 @@ def test_linter_detects_from_import(linter: StructuralLinter) -> None:
 
 
 def test_linter_detects_aliased_usage(linter: StructuralLinter) -> None:
-  """Verifies the behavior of linter detects aliased usage."""
+  """Verify `linter.check` emits `alias of torch` for linter detects aliased usage.
+
+  Args:
+      linter: StructuralLinter fixture under test.
+  """
   code: str = "\nimport torch as t\n# Usage of alias\ny = t.abs(x)\n"
   errors: list[str] = linter.check(code)
   assert len(errors) >= 1
@@ -57,7 +71,7 @@ def test_linter_parse_error(linter: StructuralLinter) -> None:
   """Hits lines 53-54 where cst.parse_module fails.
 
   Args:
-      linter: The linter (StructuralLinter) for test linter parse error.
+      linter: Input `linter` parameter value (`StructuralLinter`).
   """
   errors: list[str] = linter.check("def f(): this is invalid python !")
   assert len(errors) == 1
@@ -68,7 +82,7 @@ def test_linter_detects_wildcard_import(linter: StructuralLinter) -> None:
   """Hits line 114 for wildcard imports.
 
   Args:
-      linter: The linter (StructuralLinter) for test linter detects wildcard import.
+      linter: Input `linter` parameter value (`StructuralLinter`).
   """
   code: str = "from torch import *"
   errors: list[str] = linter.check(code)
@@ -79,7 +93,7 @@ def test_linter_detects_direct_access(linter: StructuralLinter) -> None:
   """Hits lines 158-161 where forbidden root is accessed directly without explicit alias import tracking.
 
   Args:
-      linter: The linter (StructuralLinter) for test linter detects direct access.
+      linter: Input `linter` parameter value (`StructuralLinter`).
   """
   # torch is forbidden, we just use it directly
   code: str = "x = torch.Tensor()"
@@ -90,7 +104,11 @@ def test_linter_detects_direct_access(linter: StructuralLinter) -> None:
 
 
 def test_linter_complex_attribute_name(linter: StructuralLinter) -> None:
-  """Hits lines 192 and 198-200 for recursive attribute resolution in linter."""
+  """Hits lines 192 and 198-200 for recursive attribute resolution in linter.
+
+  Args:
+      linter: StructuralLinter fixture under test.
+  """
   # We test _get_full_name_from_node directly or via checking attribute access
   import libcst as cst
 
@@ -99,7 +117,11 @@ def test_linter_complex_attribute_name(linter: StructuralLinter) -> None:
 
   # Triggering _get_full_name_from_node manually to guarantee line coverage
   tree: cst.Module = cst.parse_module("torch.nn.functional")
-  attr_node: cst.BaseExpression = _test_getattr(_test_getattr(_test_getattr(tree, "body")[0], "body")[0], "value")
+  stmt = tree.body[0]
+  assert isinstance(stmt, cst.SimpleStatementLine)
+  expr_stmt = stmt.body[0]
+  assert isinstance(expr_stmt, cst.Expr)
+  attr_node: cst.BaseExpression = expr_stmt.value
   assert linter._get_full_name_from_node(attr_node) == "torch.nn.functional"
 
   # Triggering _get_root_name manually
@@ -110,7 +132,7 @@ def test_linter_get_root_name_fallback(linter: StructuralLinter) -> None:
   """Hits line 192 in _get_root_name fallback.
 
   Args:
-      linter: The linter (StructuralLinter) for test linter get root name fallback.
+      linter: Input `linter` parameter value (`StructuralLinter`).
   """
   import libcst as cst
 
@@ -119,7 +141,7 @@ def test_linter_get_root_name_fallback(linter: StructuralLinter) -> None:
 
 
 def test_facade_flax_inheritance() -> None:
-  """Verifies the behavior of facade Flax inheritance."""
+  """Verify `validate_transpilation` emits `Forbidden Import: 'jax'` for facade flax inheritance."""
   mock_adapter: MagicMock = MagicMock()
   mock_adapter.import_alias = ("flax.nnx", "nnx")
   mock_adapter.inherits_from = "jax"
@@ -133,7 +155,7 @@ def test_facade_flax_inheritance() -> None:
 
 
 def test_facade_mlx_detection(tmp_path: pathlib.Path) -> None:
-  """Verifies the behavior of facade MLX detection.
+  """Verify `validate_transpilation` handles facade MLX detection as expected.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
@@ -152,7 +174,11 @@ def test_facade_mlx_detection(tmp_path: pathlib.Path) -> None:
 
 
 def test_linter_branches(linter: StructuralLinter) -> None:
-  """Hits missing branches in linter.py."""
+  """Hits missing branches in linter.py.
+
+  Args:
+      linter: StructuralLinter fixture under test.
+  """
   code: str = """
 import numpy as np
 from . import relative
@@ -171,7 +197,7 @@ def test_linter_duplicate_violations(linter: StructuralLinter) -> None:
   """Hits duplicate violation branches.
 
   Args:
-      linter: The linter (StructuralLinter) for test linter duplicate violations.
+      linter: Input `linter` parameter value (`StructuralLinter`).
   """
   code: str = """
 import torch as t
@@ -199,7 +225,12 @@ def test_validate_transpilation_missing_adapter() -> None:
     is_valid: bool
     errors: list[str]
     is_valid, errors = validate_transpilation("import torch", "unknown")
-    assert is_valid
+    assert is_valid is True
+    assert errors == []
+
+    bad_valid, bad_errors = validate_transpilation("import unknown", "unknown")
+    assert bad_valid is False
+    assert bad_errors == ["Forbidden Import: 'unknown'"]
 
 
 def test_validate_transpilation_empty_adapter() -> None:
@@ -209,14 +240,15 @@ def test_validate_transpilation_empty_adapter() -> None:
     is_valid: bool
     errors: list[str]
     is_valid, errors = validate_transpilation("import torch", "torch")
-    assert not is_valid
+    assert is_valid is False
+    assert errors == ["Forbidden Import: 'torch'"]
 
 
 def test_linter_duplicate_direct(linter: StructuralLinter) -> None:
   """Hits duplicate direct usage.
 
   Args:
-      linter: The linter (StructuralLinter) for test linter duplicate direct.
+      linter: Input `linter` parameter value (`StructuralLinter`).
   """
   code: str = """
 a = torch.tensor()
@@ -233,7 +265,7 @@ def test_linter_empty_names(linter: StructuralLinter) -> None:
   """Hits impossible empty names branch.
 
   Args:
-      linter: The linter (StructuralLinter) for test linter empty names.
+      linter: Input `linter` parameter value (`StructuralLinter`).
   """
   import libcst as cst
 
@@ -250,7 +282,7 @@ def test_linter_empty_names(linter: StructuralLinter) -> None:
 
 
 def test_linter_missing_coverage() -> None:
-  """Verifies the behavior of linter missing coverage."""
+  """Verify `StructuralLinter` handles linter missing coverage as expected."""
   from ml_switcheroo.testing.linter import StructuralLinter
 
   linter: StructuralLinter = StructuralLinter({"torch"})
@@ -263,7 +295,7 @@ def test_linter_missing_coverage() -> None:
 
 
 def test_linter_get_full_name_attribute() -> None:
-  """Verifies the behavior of linter get full name attribute."""
+  """Verify `StructuralLinter` handles linter get full name attribute as expected."""
   import libcst as cst
 
   from ml_switcheroo.testing.linter import StructuralLinter
@@ -274,7 +306,7 @@ def test_linter_get_full_name_attribute() -> None:
 
 
 def test_linter_parse_error_extra() -> None:
-  """Verifies the behavior of linter parse correctly handling an error."""
+  """Verify `validate_transpilation` handles linter parse error extra as expected."""
   from ml_switcheroo.testing.linter import validate_transpilation
 
   ok: bool
@@ -285,7 +317,7 @@ def test_linter_parse_error_extra() -> None:
 
 
 def test_linter_direct_access() -> None:
-  """Verifies the behavior of linter direct access."""
+  """Verify `validate_transpilation` handles linter direct access as expected."""
   from ml_switcheroo.testing.linter import validate_transpilation
 
   code: str = "import something_else\ntorch.add(x, y)"

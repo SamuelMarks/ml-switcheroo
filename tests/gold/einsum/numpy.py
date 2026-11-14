@@ -5,7 +5,7 @@ import numpy.typing
 
 
 def bmm_einsum(x: np.typing.NDArray[np.float64], y: np.typing.NDArray[np.float64]) -> np.typing.NDArray[np.float64]:
-  """Helper to bmm einsum.
+  """Execute `np.asarray` to support bmm einsum in numpy tests.
 
   Args:
       x: Primary input tensor or array operand.

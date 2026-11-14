@@ -7,8 +7,8 @@ def compute_loss(logits: tf.Tensor, targets: tf.Tensor) -> tf.Tensor:
   """Computes loss.
 
   Args:
-      logits: The logits (tf.Tensor) for compute loss.
-      targets: The targets (tf.Tensor) for compute loss.
+      logits: Input `logits` parameter value (`tf.Tensor`).
+      targets: Input `targets` parameter value (`tf.Tensor`).
 
   Returns:
       Resulting `tf.Tensor` from compute loss.

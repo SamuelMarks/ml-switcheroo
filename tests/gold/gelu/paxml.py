@@ -5,11 +5,11 @@ from praxis.layers import activations
 
 
 def gelu_activation(x: jnp.ndarray, approximate: bool = False) -> jnp.ndarray:
-  """Helper to gelu activation.
+  """Execute `instantiate` to support gelu activation in PaxML tests.
 
   Args:
       x: Primary input tensor or array operand.
-      approximate: The approximate (bool) for gelu activation.
+      approximate: Input `approximate` parameter value (`bool`).
 
   Returns:
       Resulting `jnp.ndarray` from gelu activation.

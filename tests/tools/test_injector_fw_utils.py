@@ -1,10 +1,8 @@
 """Test suite for the Injector Fw Utils Missing module."""
 
-from tests.conftest import _test_getattr
-
 
 def test_injector_fw_utils_missing() -> None:
-  """Verifies the behavior of injector framework utilities missing."""
+  """Verify `get_import_root` handles injector fw utils missing as expected."""
   import libcst as cst
 
   from ml_switcheroo.tools.injector_fw.utils import (
@@ -31,15 +29,13 @@ def test_injector_fw_utils_missing() -> None:
     assert isinstance(convert_to_cst_literal("something"), cst.SimpleString)
 
   class UnrecognizedObject:
-    """Test helper class UnrecognizedObject."""
-
-    pass
+    """Sentinel `UnrecognizedObject` fixture class used in injector fw utils tests."""
 
   assert isinstance(convert_to_cst_literal(UnrecognizedObject()), cst.SimpleString)
 
 
 def test_injector_fw_utils_convert_complex() -> None:
-  """Verifies the behavior of injector framework utilities convert complex."""
+  """Verify `convert_to_cst_literal` handles injector fw utils convert complex as expected."""
   import libcst as cst
 
   from ml_switcheroo.tools.injector_fw.utils import convert_to_cst_literal
@@ -47,16 +43,18 @@ def test_injector_fw_utils_convert_complex() -> None:
   assert isinstance(convert_to_cst_literal([1, 2]), cst.List)
   assert isinstance(convert_to_cst_literal((1, 2)), cst.Tuple)
   assert isinstance(convert_to_cst_literal({"a": 1, "b": 2}), cst.Dict)
-  assert isinstance(convert_to_cst_literal(None), cst.Name)
-  assert _test_getattr(convert_to_cst_literal(None), "value") == "None"
-  assert isinstance(convert_to_cst_literal(True), cst.Name)
-  assert _test_getattr(convert_to_cst_literal(True), "value") == "True"
+  none_node = convert_to_cst_literal(None)
+  assert isinstance(none_node, cst.Name)
+  assert none_node.value == "None"
+  true_node = convert_to_cst_literal(True)
+  assert isinstance(true_node, cst.Name)
+  assert true_node.value == "True"
   assert isinstance(convert_to_cst_literal(1.0), cst.Float)
   assert isinstance(convert_to_cst_literal(1), cst.Integer)
 
 
 def test_injector_fw_utils_get_import_root_name() -> None:
-  """Verifies the behavior of injector framework utilities get import root name."""
+  """Verify `get_import_root` handles injector fw utils get import root name as expected."""
   import libcst as cst
 
   from ml_switcheroo.tools.injector_fw.utils import get_import_root, is_docstring
@@ -66,7 +64,7 @@ def test_injector_fw_utils_get_import_root_name() -> None:
 
 
 def test_injector_fw_utils_is_future_import() -> None:
-  """Verifies the behavior of injector framework utilities is future import."""
+  """Verify `is_future_import` handles injector fw utils is future import as expected."""
   import libcst as cst
 
   from ml_switcheroo.tools.injector_fw.utils import is_future_import
@@ -82,7 +80,7 @@ def test_injector_fw_utils_is_future_import() -> None:
 
 
 def test_injector_fw_utils_get_import_root_attr() -> None:
-  """Verifies the behavior of injector framework utilities get import root attribute."""
+  """Verify `get_import_root` handles injector fw utils get import root attr as expected."""
   import libcst as cst
 
   from ml_switcheroo.tools.injector_fw.utils import get_import_root, is_docstring
@@ -92,13 +90,24 @@ def test_injector_fw_utils_get_import_root_attr() -> None:
 
 
 def test_injector_fw_utils_convert_negative() -> None:
-  """Verifies the behavior of injector framework utilities convert negative."""
+  """Verify `convert_to_cst_literal` handles injector fw utils convert negative as expected."""
   import libcst as cst
 
   from ml_switcheroo.tools.injector_fw.utils import convert_to_cst_literal
 
-  assert isinstance(convert_to_cst_literal(-1), cst.UnaryOperation)
-  assert isinstance(convert_to_cst_literal(-1.0), cst.UnaryOperation)
+  neg_int = convert_to_cst_literal(-1)
+  assert isinstance(neg_int, cst.UnaryOperation)
+  assert isinstance(neg_int.operator, cst.Minus)
+  assert isinstance(neg_int.expression, cst.Integer)
+  assert neg_int.expression.value == "1"
+  assert cst.Module([]).code_for_node(neg_int) == "-1"
+
+  neg_float = convert_to_cst_literal(-1.0)
+  assert isinstance(neg_float, cst.UnaryOperation)
+  assert isinstance(neg_float.operator, cst.Minus)
+  assert isinstance(neg_float.expression, cst.Float)
+  assert neg_float.expression.value == "1.0"
+  assert cst.Module([]).code_for_node(neg_float) == "-1.0"
 
 
 def test_injector_fw_utils_convert_empty_containers() -> None:

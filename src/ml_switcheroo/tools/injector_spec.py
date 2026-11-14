@@ -6,16 +6,15 @@ Knowledge Base JSON files (The Hub) with new operation definitions.
 It replaces the legacy LibCST-based injector that modified `standards_internal.py`.
 """
 
+import typing
 from enum import Enum
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
-import typing
-
+import yaml
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
-import yaml
 
 from ml_switcheroo.core.dsl import OperationDef, ParameterDef
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.semantics.paths import resolve_semantics_dir
 from ml_switcheroo.utils.console import log_info, log_success
 

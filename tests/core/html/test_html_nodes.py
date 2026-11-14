@@ -1,5 +1,7 @@
 """Test suite for the Html Nodes module."""
 
+import pytest
+
 from ml_switcheroo.core.html.nodes import (
   AttributeNode,
   CommentNode,
@@ -13,7 +15,7 @@ from ml_switcheroo.core.html.nodes import (
 
 
 def test_svg_arrow_render() -> None:
-  """Verifies the behavior of svg arrow render."""
+  """Verify `SvgArrow` handles svg arrow render as expected."""
   arrow = SvgArrow(x1=0, y1=0, x2=50, y2=50, style_class="s-red", marker_end="url(#mr)", parent_style="left:100%")
   html: str = arrow.to_html()
   assert '<svg class="sw-arrow" style="left:100%">' in html
@@ -23,7 +25,7 @@ def test_svg_arrow_render() -> None:
 
 
 def test_grid_box_render_standard() -> None:
-  """Verifies the behavior of grid box render standard."""
+  """Verify `SvgArrow` emits `<code>x=1</code>` for grid box render standard."""
   arrow = SvgArrow(x1=0, y1=0, x2=10, y2=10, style_class="s-blue", marker_end="", parent_style="")
   box = GridBox(row=2, col=1, css_class="box r", header_text="Header", code_text="x=1", body_text="Body", arrows=[arrow])
   html: str = box.to_html()
@@ -36,7 +38,7 @@ def test_grid_box_render_standard() -> None:
 
 
 def test_grid_box_render_circle() -> None:
-  """Verifies the behavior of grid box render circle."""
+  """Verify `GridBox` emits `Return` for grid box render circle."""
   box = GridBox(row=5, col=2, css_class="circ", header_text="Return")
   html: str = box.to_html()
   assert 'class="circ"' in html
@@ -45,7 +47,7 @@ def test_grid_box_render_circle() -> None:
 
 
 def test_document_render_structure() -> None:
-  """Verifies the behavior of document render structure."""
+  """Verify `GridBox` emits `Model: TestNet` for document render structure."""
   b1 = GridBox(row=2, col=1, css_class="b", header_text="A")
   b2 = GridBox(row=3, col=1, css_class="b", header_text="B")
   doc = HtmlDocument(model_name="TestNet", children=[b1, b2])
@@ -61,7 +63,7 @@ def test_document_render_structure() -> None:
 
 
 def test_html_node_base() -> None:
-  """Verify html node base behavior."""
+  """Verify `HtmlNode` raises `NotImplementedError` during HTML node base."""
   import pytest
 
   node = HtmlNode()
@@ -73,19 +75,19 @@ def test_html_node_base() -> None:
 
 
 def test_text_node() -> None:
-  """Verify text node behavior."""
+  """Verify `TextNode` handles text node as expected."""
   node = TextNode(content="hello")
   assert node.emit() == "hello"
 
 
 def test_comment_node() -> None:
-  """Verify comment node behavior."""
+  """Verify `CommentNode` handles comment node as expected."""
   node = CommentNode(content=" test ")
   assert node.emit() == "<!-- test -->"
 
 
 def test_attribute_node() -> None:
-  """Verify attribute node behavior."""
+  """Verify `AttributeNode` handles attribute node as expected."""
   attr = AttributeNode(name="class", value="test", quote_style="'")
   assert attr.emit() == "class='test'"
   attr2 = AttributeNode(name="disabled")
@@ -93,7 +95,7 @@ def test_attribute_node() -> None:
 
 
 def test_tag_node() -> None:
-  """Verify tag node behavior."""
+  """Verify `TagNode` handles tag node as expected."""
   tag = TagNode(name="br", self_closing=True)
   assert tag.emit() == "<br/>"
   tag2 = TagNode(name="div", children=[TextNode(content="hello")])
@@ -101,7 +103,7 @@ def test_tag_node() -> None:
 
 
 def test_tag_node_with_children() -> None:
-  """Verify tag node with children behavior."""
+  """Verify `TagNode` emits `<span>A</span>` for tag node with children."""
   child = TagNode(name="span", children=[TextNode(content="A")])
   tag = TagNode(name="div", attributes=[AttributeNode(name="id", value="main")], children=[child])
   html: str = tag.emit()
@@ -110,7 +112,7 @@ def test_tag_node_with_children() -> None:
 
 
 def test_tag_node_manipulation() -> None:
-  """Verify tag node manipulation behavior."""
+  """Verify `TagNode` raises `ValueError` during tag node manipulation."""
   tag = TagNode(name="div")
 
   # Attribute manipulation
@@ -144,11 +146,8 @@ def test_tag_node_manipulation() -> None:
   assert tag.children[0] == child2
 
   # Remove non-existent
-  try:
+  with pytest.raises(ValueError, match="not in list"):
     tag.remove_child(child1)
-    assert False, "Should raise ValueError"
-  except ValueError:
-    pass
 
 
 def test_html_nodes_remaining_branches() -> None:
@@ -176,7 +175,7 @@ def test_html_nodes_remaining_branches() -> None:
     children=[TagNode(name="div", children=[TextNode(content="CST Content")])],
   )
   pure_html = pure_doc.emit()
-  assert "<!-- header --><div>CST Content</div><!-- footer -->" == pure_html
+  assert pure_html == "<!-- header --><div>CST Content</div><!-- footer -->"
 
   # 5. Empty HtmlDocument
   empty_doc = HtmlDocument(model_name="EmptyModel", children=[])

@@ -1,13 +1,8 @@
-"""Plugin for Native TensorFlow Data Pipeline Generation.
+"""Plugin for Functional Dataset Pipeline Generation.
 
-This module converts generic `DataLoader` usage (typically from PyTorch) into
-native `tf.data.Dataset` pipelines. It performs significantly more structural
-changes than the generic shim, rewriting the iterator construction into a
-functional method chain.
-
-Transformation Overview:
-    Input: `DataLoader(TensorDataset(x, y), batch_size=64, shuffle=True)`
-    Output: `tf.data.Dataset.from_tensor_slices((x, y)).shuffle(1024).batch(64).prefetch(AUTOTUNE)`
+Converts generic ``DataLoader`` constructions into chained dataset pipelines
+(``.from_tensor_slices(...).shuffle(...).batch(...).prefetch(...)``) driven
+strictly by ``HookContext.current_variant`` without hardcoded framework paths.
 """
 
 import typing
@@ -15,18 +10,20 @@ import typing
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
+from ml_switcheroo.plugins.utils import create_dotted_name, resolve_variant_api
+
+_DATASET_KEYWORDS = frozenset({"dataset", "tensors", "data"})
 
 
 def _get_arg_by_name(args: typing.Sequence[cst.Arg], name: str) -> cst.Arg | None:
   """Retrieve an argument node by its keyword name.
 
   Args:
-      args: List of call arguments.
+      args: Sequence of call arguments.
       name: Keyword string to search for.
 
   Returns:
-      The matched argument or None.
-
+      Matched ``cst.Arg`` or ``None``.
   """
   for arg in args:
     if arg.keyword and arg.keyword.value == name:
@@ -34,20 +31,33 @@ def _get_arg_by_name(args: typing.Sequence[cst.Arg], name: str) -> cst.Arg | Non
   return None
 
 
-def _extract_tensor_dataset_inputs(
-  node: cst.BaseExpression,
-) -> list[cst.BaseExpression] | None:
-  """Heuristic to unwrap `TensorDataset(x, y)` calls.
-
-  PyTorch wraps tensors in a dataset object. TensorFlow expects the
-  tensors passed directly to `from_tensor_slices`.
+def _extract_dataset_expr(args: typing.Sequence[cst.Arg]) -> cst.BaseExpression | None:
+  """Extract the dataset expression from positional or keyword call arguments.
 
   Args:
-      node: The expression node passed as the dataset argument.
+      args: Call arguments passed to ``DataLoader(...)``.
 
   Returns:
-      A list of tensor expression nodes if a wrapper was found, or None.
+      Dataset expression node if found, otherwise ``None``.
+  """
+  for kw in ("dataset", "tensors", "data"):
+    found = _get_arg_by_name(args, kw)
+    if found is not None:
+      return found.value
+  for arg in args:
+    if arg.keyword is None and not arg.star:
+      return arg.value
+  return None
 
+
+def _extract_tensor_dataset_inputs(node: cst.BaseExpression) -> list[cst.BaseExpression] | None:
+  """Unwrap ``TensorDataset(x, y)`` wrapper calls into constituent tensor expressions.
+
+  Args:
+      node: Candidate dataset expression node.
+
+  Returns:
+      List of unwrapped tensor expressions if ``node`` calls ``TensorDataset``, else ``None``.
   """
   if isinstance(node, cst.Call):
     func_name = ""
@@ -55,65 +65,47 @@ def _extract_tensor_dataset_inputs(
       func_name = node.func.value
     elif isinstance(node.func, cst.Attribute):
       func_name = node.func.attr.value
-
     if func_name == "TensorDataset":
-      return [arg.value for arg in node.args]
-
+      return [arg.value for arg in node.args if not arg.star]
   return None
 
 
 @register_hook("tf_data_loader")
 def transform_tf_dataloader(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """Plugin Transform Rewrites DataLoader construction into a tf.data pipeline.
+  """Rewrite ``DataLoader`` construction into a chained dataset pipeline.
 
-  Logic:
-  1.  Extracts the dataset argument (assumed to be position 0).
-  2.  Unwraps `TensorDataset` calls to get raw tensors.
-  3.  Constructs `tf.data.Dataset.from_tensor_slices(...)`.
-  4.  Chains `.shuffle(1024)` if `shuffle=True`.
-  5.  Chains `.batch(...)` based on `batch_size` arg or defaults to 1.
-  6.  Chains `.prefetch(tf.data.AUTOTUNE)` for performance optimization.
+  Resolves the target Dataset class path strictly from ``ctx.current_variant``
+  or semantic lookup for ``"DataLoader"`` (e.g., ``tf.data.Dataset``), aborting
+  safely if unmapped.
 
   Args:
-      node: The original DataLoader call node.
-      ctx: HookContext (unused for logic but required by protocol).
+      node: Original ``DataLoader`` call node.
+      ctx: HookContext providing ``current_variant`` and API lookup.
 
   Returns:
-      The transformed method chain representing the TF Dataset.
-
+      Transformed method chain, or ``node`` unchanged if unmapped or empty.
   """
-  if not node.args:
+  dataset_api = resolve_variant_api(ctx, "DataLoader")
+  if not dataset_api:
     return node
 
-  # 1. Parse Arguments
-  dataset_arg = node.args[0].value
+  dataset_expr = _extract_dataset_expr(node.args)
+  if dataset_expr is None:
+    return node
+
   batch_size_arg = _get_arg_by_name(node.args, "batch_size")
   shuffle_arg = _get_arg_by_name(node.args, "shuffle")
 
-  # 2. Unwrap Dataset
-  tensors = _extract_tensor_dataset_inputs(dataset_arg)
-  if not tensors:
-    tensors = [dataset_arg]
-
-  # 3. Construct Input Tuple
-  slice_input: cst.BaseExpression
-  if len(tensors) > 1:
-    slice_input = cst.Tuple(elements=[cst.Element(t) for t in tensors])
-  else:
-    slice_input = tensors[0]
-
-  # 4. Build Pipeline Chain
-  # Root: tf.data.Dataset.from_tensor_slices
-  tf_data_ds = cst.Attribute(
-    value=cst.Attribute(value=cst.Name("tf"), attr=cst.Name("data")),
-    attr=cst.Name("Dataset"),
+  tensors = _extract_tensor_dataset_inputs(dataset_expr) or [dataset_expr]
+  slice_input: cst.BaseExpression = (
+    cst.Tuple(elements=[cst.Element(t) for t in tensors]) if len(tensors) > 1 else tensors[0]
   )
-  from_slices = cst.Attribute(value=tf_data_ds, attr=cst.Name("from_tensor_slices"))
 
-  base = cst.Call(func=from_slices, args=[cst.Arg(slice_input)])
-  current_chain = base
+  from_slices = create_dotted_name(f"{dataset_api}.from_tensor_slices")
+  autotune_path = f"{dataset_api.rsplit('.', 1)[0]}.AUTOTUNE" if "." in dataset_api else "AUTOTUNE"
 
-  # .shuffle(buffer_size=1024)
+  current_chain = cst.Call(func=from_slices, args=[cst.Arg(slice_input)])
+
   if shuffle_arg and isinstance(shuffle_arg.value, cst.Name) and shuffle_arg.value.value == "True":
     current_chain = cst.Call(
       func=cst.Attribute(value=current_chain, attr=cst.Name("shuffle")),
@@ -129,24 +121,13 @@ def transform_tf_dataloader(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
       ],
     )
 
-  # .batch(batch_size)
   batch_val = batch_size_arg.value if batch_size_arg else cst.Integer("1")
   current_chain = cst.Call(
     func=cst.Attribute(value=current_chain, attr=cst.Name("batch")),
     args=[cst.Arg(value=batch_val)],
   )
 
-  # .prefetch(AUTOTUNE)
-  current_chain = cst.Call(
+  return cst.Call(
     func=cst.Attribute(value=current_chain, attr=cst.Name("prefetch")),
-    args=[
-      cst.Arg(
-        value=cst.Attribute(
-          value=cst.Attribute(value=cst.Name("tf"), attr=cst.Name("data")),
-          attr=cst.Name("AUTOTUNE"),
-        )
-      )
-    ],
+    args=[cst.Arg(value=create_dotted_name(autotune_path))],
   )
-
-  return current_chain

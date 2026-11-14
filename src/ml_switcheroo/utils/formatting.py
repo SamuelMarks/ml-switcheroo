@@ -6,22 +6,29 @@ escaping helper utilities.
 """
 
 import html
-import inspect
 import typing
 
 from pydantic import JsonValue
 
 from ml_switcheroo.core.markup.cst import MarkupNode
+from ml_switcheroo.enums import _CustomInstanceProtocol
+from ml_switcheroo.exceptions import CSTValidationError
 
 
 @typing.runtime_checkable
 class _MarkupChildrenProtocol(typing.Protocol):
   """Protocol for markup nodes exposing `children`."""
 
-  children: typing.Sequence[typing.Hashable | "_MarkupChildrenProtocol" | MarkupNode]
+  @property
+  def children(self) -> typing.Sequence["MarkupVisitable"]:
+    """Return nested child nodes.
+
+    Returns:
+        Sequence of child markup items.
+    """
 
 
-MarkupVisitable: typing.TypeAlias = MarkupNode | _MarkupChildrenProtocol | JsonValue | typing.Hashable
+MarkupVisitable: typing.TypeAlias = MarkupNode | _MarkupChildrenProtocol | _CustomInstanceProtocol | JsonValue
 
 
 class StructuredFormatter:
@@ -107,23 +114,54 @@ def escape_latex(text: str | int | float | bool | None) -> str:
   return text_str.replace("%", "\\%")
 
 
+MarkupNodeT = typing.TypeVar("MarkupNodeT")
+
+
 class MarkupVisitor:
-  """Base class for traversing Markup nodes."""
+  """Base class for traversing Markup nodes via explicit type-keyed handler registration."""
+
+  def __init__(self) -> None:
+    """Initialize the visitor handler registry."""
+    self._visitors: dict[type, typing.Callable[[MarkupVisitable], None]] = {}
+
+  def register_visitor(
+    self,
+    node_type: type[MarkupNodeT],
+    handler: typing.Callable[[MarkupNodeT], None],
+  ) -> None:
+    """Register a typed visitor callback for ``node_type``.
+
+    Args:
+        node_type: Concrete markup node class to match.
+        handler: Callback invoked when visiting an instance of ``node_type``.
+    """
+
+    def _wrapped(node: MarkupVisitable) -> None:
+      """Narrow ``node`` to ``node_type`` and invoke ``handler``.
+
+      Args:
+          node: Visited markup node matching ``node_type``.
+
+      Raises:
+          CSTValidationError: If ``node`` is not an instance of ``node_type``.
+      """
+      if not isinstance(node, node_type):
+        raise CSTValidationError(f"Expected {node_type.__name__}, got {type(node).__name__}.")
+      handler(node)
+
+    self._visitors[node_type] = _wrapped
 
   def visit(self, node: MarkupVisitable) -> None:
-    """Dispatch traversal of a markup AST node to its class-specific visitor method.
+    """Dispatch traversal of a markup AST node to its registered visitor method or ``generic_visit``.
 
     Args:
         node: Markup AST node to visit.
     """
-    method_name = f"visit_{type(node).__name__}"
-    try:
-      raw_visitor = inspect.getattr_static(self, method_name)
-    except AttributeError:
+    handler = self._visitors.get(type(node))
+    if handler is None:
       self.generic_visit(node)
       return
-    assert callable(raw_visitor)
-    raw_visitor(self, node)
+    handler(node)
 
   def generic_visit(self, node: MarkupVisitable) -> None:
     """Recursively visit all child nodes when no specialized visitor method exists.

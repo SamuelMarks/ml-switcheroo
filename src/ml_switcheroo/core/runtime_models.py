@@ -348,6 +348,99 @@ class InputShapeInferenceVisitor(cst.CSTVisitor):
       self._record_layer_call(layer_name, node.args[1].value)
     return True
 
+  @staticmethod
+  def _extract_linear_or_conv_dims(
+    op_type: str,
+    pos_ints: list[int],
+    kw_ints: dict[str, int],
+  ) -> tuple[int | None, int | None, bool]:
+    """Extract ``(in_features, out_features, is_lazy)`` for Dense, Linear, and Conv layer families.
+
+    Args:
+        op_type: Leaf constructor class name.
+        pos_ints: Positional integer arguments passed to the constructor.
+        kw_ints: Keyword integer arguments passed to the constructor.
+
+    Returns:
+        Tuple of ``(in_features, out_features, is_lazy)``.
+    """
+    if op_type == "Dense":
+      out_feat = kw_ints.get("units") or (pos_ints[0] if pos_ints else None)
+      in_feat = kw_ints.get("input_dim")
+      return in_feat, out_feat, in_feat is None
+
+    if op_type == "Linear":
+      in_feat = kw_ints.get("in_features") or kw_ints.get("input_dims")
+      out_feat = kw_ints.get("out_features") or kw_ints.get("output_dims")
+      if in_feat is None and len(pos_ints) >= 2:
+        return pos_ints[0], pos_ints[1], False
+      if in_feat is None and len(pos_ints) == 1 and out_feat is None:
+        return None, pos_ints[0], True
+      return in_feat, out_feat, in_feat is None
+
+    in_feat = kw_ints.get("in_channels") or kw_ints.get("in_features") or kw_ints.get("input_dims")
+    out_feat = kw_ints.get("out_channels") or kw_ints.get("out_features") or kw_ints.get("filters")
+    if in_feat is None and len(pos_ints) >= 2:
+      return pos_ints[0], pos_ints[1], False
+    return in_feat, out_feat, in_feat is None
+
+  @classmethod
+  def _extract_layer_telemetry(
+    cls,
+    op_type: str,
+    pos_ints: list[int],
+    kw_ints: dict[str, int],
+  ) -> tuple[int | None, int | None, bool]:
+    """Extract ``(in_features, out_features, is_lazy)`` across supported neural layer families.
+
+    Args:
+        op_type: Leaf constructor class name.
+        pos_ints: Positional integer arguments passed to the constructor.
+        kw_ints: Keyword integer arguments passed to the constructor.
+
+    Returns:
+        Tuple of ``(in_features, out_features, is_lazy)``.
+    """
+    if op_type in ("LazyLinear", "LazyConv1d", "LazyConv2d", "LazyConv3d"):
+      out_feat = kw_ints.get("out_features") or kw_ints.get("out_channels") or (pos_ints[0] if pos_ints else None)
+      return None, out_feat, True
+    if op_type in ("Dense", "Linear", "Conv1d", "Conv1D", "Conv2d", "Conv2D", "Conv3d", "Conv3D", "Conv"):
+      return cls._extract_linear_or_conv_dims(op_type, pos_ints, kw_ints)
+    if op_type == "Embedding":
+      in_feat = kw_ints.get("num_embeddings") or (pos_ints[0] if pos_ints else 16)
+      out_feat = kw_ints.get("embedding_dim") or (pos_ints[1] if len(pos_ints) >= 2 else 8)
+      return in_feat, out_feat, False
+    if op_type == "MultiheadAttention":
+      in_feat = kw_ints.get("embed_dim") or (pos_ints[0] if pos_ints else 8)
+      return in_feat, in_feat, False
+    return None, None, False
+
+  def _update_inferred_input_from_layer(self, op_type: str, in_feat: int | None) -> None:
+    """Populate ``inferred_shape`` and ``inferred_dtype`` from the first eager layer constructor.
+
+    Args:
+        op_type: Leaf constructor class name.
+        in_feat: Extracted input feature/channel dimension, if known.
+    """
+    if op_type == "Embedding":
+      self.inferred_shape = (2, 8)
+      self.inferred_dtype = "int32"
+      return
+    if in_feat is None:
+      return
+    shape_templates: dict[str, tuple[int, ...]] = {
+      "Linear": (2, in_feat),
+      "Conv1d": (2, in_feat, 8),
+      "Conv1D": (2, in_feat, 8),
+      "Conv2d": (2, in_feat, 8, 8),
+      "Conv2D": (2, in_feat, 8, 8),
+      "Conv": (2, in_feat, 8, 8),
+      "Conv3d": (2, in_feat, 4, 4, 4),
+      "Conv3D": (2, in_feat, 4, 4, 4),
+      "MultiheadAttention": (2, 4, in_feat),
+    }
+    self.inferred_shape = shape_templates.get(op_type)
+
   def _record_layer_call(self, layer_name: str, call: cst.Call) -> None:
     """Extract constructor dimensions and first-layer input shape from a layer call.
 
@@ -369,43 +462,7 @@ class InputShapeInferenceVisitor(cst.CSTVisitor):
         else:
           kw_ints[arg.keyword.value] = val
 
-    in_feat: int | None = None
-    out_feat: int | None = None
-    is_lazy = False
-
-    if op_type in ("LazyLinear", "LazyConv1d", "LazyConv2d", "LazyConv3d"):
-      is_lazy = True
-      out_feat = kw_ints.get("out_features") or kw_ints.get("out_channels") or (pos_ints[0] if pos_ints else None)
-    elif op_type in ("Dense",):
-      out_feat = kw_ints.get("units") or (pos_ints[0] if pos_ints else None)
-      in_feat = kw_ints.get("input_dim")
-      is_lazy = in_feat is None
-    elif op_type in ("Linear",):
-      in_feat = kw_ints.get("in_features") or kw_ints.get("input_dims")
-      out_feat = kw_ints.get("out_features") or kw_ints.get("output_dims")
-      if in_feat is None and len(pos_ints) >= 2:
-        in_feat = pos_ints[0]
-        out_feat = pos_ints[1]
-      elif in_feat is None and len(pos_ints) == 1 and out_feat is None:
-        out_feat = pos_ints[0]
-        is_lazy = True
-      elif in_feat is None:
-        is_lazy = True
-    elif op_type in ("Conv1d", "Conv1D", "Conv2d", "Conv2D", "Conv3d", "Conv3D", "Conv"):
-      in_feat = kw_ints.get("in_channels") or kw_ints.get("in_features") or kw_ints.get("input_dims")
-      out_feat = kw_ints.get("out_channels") or kw_ints.get("out_features") or kw_ints.get("filters")
-      if in_feat is None and len(pos_ints) >= 2:
-        in_feat = pos_ints[0]
-        out_feat = pos_ints[1]
-      elif in_feat is None:
-        is_lazy = True
-    elif op_type == "Embedding":
-      in_feat = kw_ints.get("num_embeddings") or (pos_ints[0] if pos_ints else 16)
-      out_feat = kw_ints.get("embedding_dim") or (pos_ints[1] if len(pos_ints) >= 2 else 8)
-    elif op_type == "MultiheadAttention":
-      in_feat = kw_ints.get("embed_dim") or (pos_ints[0] if pos_ints else 8)
-      out_feat = in_feat
-
+    in_feat, out_feat, is_lazy = self._extract_layer_telemetry(op_type, pos_ints, kw_ints)
     self.declared_layers[layer_name] = DeclaredLayerSpec(
       layer_name=layer_name,
       op_type=op_type,
@@ -413,21 +470,8 @@ class InputShapeInferenceVisitor(cst.CSTVisitor):
       out_features=out_feat,
       is_lazy=is_lazy,
     )
-
     if self.inferred_shape is None:
-      if op_type == "Linear" and in_feat is not None:
-        self.inferred_shape = (2, in_feat)
-      elif op_type in ("Conv1d", "Conv1D") and in_feat is not None:
-        self.inferred_shape = (2, in_feat, 8)
-      elif op_type in ("Conv2d", "Conv2D", "Conv") and in_feat is not None:
-        self.inferred_shape = (2, in_feat, 8, 8)
-      elif op_type in ("Conv3d", "Conv3D") and in_feat is not None:
-        self.inferred_shape = (2, in_feat, 4, 4, 4)
-      elif op_type == "Embedding":
-        self.inferred_shape = (2, 8)
-        self.inferred_dtype = "int32"
-      elif op_type == "MultiheadAttention" and in_feat is not None:
-        self.inferred_shape = (2, 4, in_feat)
+      self._update_inferred_input_from_layer(op_type, in_feat)
 
 
 def _extract_dims_from_annotation_text(text: str) -> tuple[int, ...] | None:

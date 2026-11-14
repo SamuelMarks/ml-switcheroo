@@ -14,58 +14,75 @@ import subprocess
 import sys
 from pathlib import Path
 
+from pydantic import BaseModel, ConfigDict
 from rich.table import Table
 
-from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.config import RuntimeConfig, RuntimeConfigOverrides
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.core.engine import ConversionResult as ConversionResult
 from ml_switcheroo.core.hooks import load_plugins
+from ml_switcheroo.exceptions import MLSwitcherooError
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.testing.harness_generator import HarnessGenerator
 from ml_switcheroo.utils.console import console, log_error, log_info, log_success, log_warning
 
 
-def handle_convert(
-  input_path: Path,
-  output_path: Path | None,
-  source: str | None,
-  target: str | None,
-  verify: bool,
-  strict: bool | None,
-  intermediate: str | bool | None,
-  plugin_settings: dict[str, str | int | float | bool] | None = None,
-  json_trace_path: Path | None = None,
-  enable_sharding: bool = False,
-  mode: str | None = None,
-  opt_level: str | None = None,
-  execution_backend: str | None = None,
-  enable_on_device_execution: bool | None = None,
-) -> int:
-  """Handle the 'convert' command execution.
+class CliConvertOptions(BaseModel):
+  """Typed CLI options bundle for ``handle_convert``.
+
+  Attributes:
+      input_path: Path to the source file or directory to convert.
+      output_path: Optional destination file or directory path.
+      source: Optional source framework override (e.g. ``'torch'``).
+      target: Optional target framework override (e.g. ``'jax'``).
+      verify: Whether to generate and execute a verification harness test immediately.
+      strict: Optional strict mode override on the Engine.
+      intermediate: Optional intermediate representation format (e.g. ``'mlir'``).
+      plugin_settings: Optional dictionary of plugin configuration flags.
+      json_trace_path: Optional path to write execution trace JSON.
+      enable_sharding: Whether to enable sharding extraction.
+      mode: Optional conversion mode (``'preserve_trivia'`` or ``'optimized'``).
+      opt_level: Optional optimization level (``'O0'``, ``'O1'``, ``'O2'``, ``'O3'``).
+      execution_backend: Optional execution backend (e.g. ``'webgpu'``, ``'wasm_simd'``, ``'cuda'``).
+      enable_on_device_execution: Optional flag to execute forward and backward passes on-device.
+  """
+
+  model_config = ConfigDict(extra="forbid")
+
+  input_path: Path
+  output_path: Path | None = None
+  source: str | None = None
+  target: str | None = None
+  verify: bool = False
+  strict: bool | None = None
+  intermediate: str | bool | None = None
+  plugin_settings: dict[str, str | int | float | bool] | None = None
+  json_trace_path: Path | None = None
+  enable_sharding: bool = False
+  mode: str | None = None
+  opt_level: str | None = None
+  execution_backend: str | None = None
+  enable_on_device_execution: bool | None = None
+
+
+def handle_convert(options: CliConvertOptions) -> int:
+  """Handle the ``convert`` CLI command execution.
 
   Orchestrates the loading of configuration, initialization of the semantic
   knowledge base, and the execution of the transpilation engine on files or directories.
 
   Args:
-      input_path: Path to the source file or directory to convert.
-      output_path: Path where generated code should be saved.
-      source: Override for source framework (e.g. 'torch').
-      target: Override for target framework (e.g. 'jax').
-      verify: If True, generates and runs a verification harness test immediately.
-      strict: If True, enforces strict strict_mode on the Engine.
-      intermediate: If provided, forces a roundtrip via this IR (e.g. 'mlir').
-      plugin_settings: Dictionary of specific plugin configuration flags.
-      json_trace_path: Optional path to dump execution trace JSON.
-      enable_sharding: If True, enables sharding extraction.
-      mode: Optional conversion mode ('preserve_trivia' or 'optimized').
-      opt_level: Optional optimization level ('O0', 'O1', 'O2', 'O3').
-      execution_backend: Optional execution backend (e.g. 'webgpu', 'wasm_simd', 'cuda').
-      enable_on_device_execution: Optional flag to execute forward and backward passes on-device.
+      options: Typed ``CliConvertOptions`` bundle describing input/output paths and compiler flags.
 
   Returns:
       int: Exit code (0 for success, 1 for failure).
-
   """
+  input_path = options.input_path
+  output_path = options.output_path
+  source = options.source
+  verify = options.verify
+  json_trace_path = options.json_trace_path
+
   if not input_path.exists():
     log_error(f"Input not found: {input_path}")
     return 1
@@ -80,17 +97,19 @@ def handle_convert(
 
   # 2. Load Configuration (TOML + CLI overrides)
   config = RuntimeConfig.load(
-    source=source,
-    target=target,
-    strict_mode=strict,
-    intermediate=intermediate if isinstance(intermediate, str) else None,
-    enable_sharding=enable_sharding,
-    plugin_settings=plugin_settings,
-    search_path=input_path if input_path.is_dir() else input_path.parent,
-    mode=mode,
-    opt_level=opt_level,
-    execution_backend=execution_backend,
-    enable_on_device_execution=enable_on_device_execution,
+    RuntimeConfigOverrides(
+      source=source,
+      target=options.target,
+      strict_mode=options.strict,
+      intermediate=options.intermediate if isinstance(options.intermediate, str) else None,
+      enable_sharding=options.enable_sharding,
+      plugin_settings=options.plugin_settings,
+      search_path=input_path if input_path.is_dir() else input_path.parent,
+      mode=options.mode,
+      opt_level=options.opt_level,
+      execution_backend=options.execution_backend,
+      enable_on_device_execution=options.enable_on_device_execution,
+    )
   )
 
   # 2. Wire External Plugins
@@ -173,7 +192,7 @@ def _convert_single_file(
         with open(json_trace_path, "wt", encoding="utf-8") as f:
           json.dump(result.trace_events, f, indent=2)
         log_info(f"Trace saved to [path]{json_trace_path}[/path]")
-      except Exception as e:
+      except (OSError, TypeError, ValueError, RuntimeError) as e:
         log_error(f"Failed to write trace: {e}")
 
     if not result.success:
@@ -213,7 +232,7 @@ def _convert_single_file(
         result.errors.append("Verification Harness Failed")
 
     return result
-  except Exception as e:
+  except (OSError, UnicodeError, ValueError, TypeError, KeyError, AttributeError, RuntimeError, MLSwitcherooError) as e:
     log_error(f"Failed to convert {input_path}: {e}")
     return ConversionResult(success=False, errors=[str(e)])
 

@@ -1,129 +1,123 @@
-"""Expression Generation Mixin for MLIR->Python.
+"""Expression Generation Delegate for MLIR -> Python.
 
-Handles converting operation nodes (`sw.op`, `sw.call`) into CST Expressions.
+Provides ``MlirExpressionGenerator``, a single-responsibility delegate translating
+MLIR expression operations (``sw.op``, ``sw.call``, ``sw.getattr``, ``sw.constant``)
+into LibCST expressions.
 """
 
 import ast
+import typing
 
 import libcst as cst
 
 from ml_switcheroo.core.mlir.cst import OperationNode
-from ml_switcheroo.core.mlir.gen_base import BaseGeneratorMixin
+from ml_switcheroo.core.mlir.gen_base import MlirGenHelpers
 
 
-class ExpressionGeneratorMixin(BaseGeneratorMixin):
-  """Mixin for generating LibCST Expressions from MLIR Operations.
-
-  Assumes `self._resolve_operand` is available on the host class.
-  """
+class MlirExprGeneratorHost(typing.Protocol):
+  """Structural protocol required by ``MlirExpressionGenerator``."""
 
   def _resolve_operand(self, ssa_name: str) -> cst.BaseExpression:
-    """Abstract placeholder.
-
-    Must be implemented by the main Generator class to resolve variables.
+    """Resolve an SSA value identifier to its LibCST expression.
 
     Args:
-        ssa_name: The SSA name to resolve.
+        ssa_name: SSA identifier string.
 
     Returns:
-        The resolved expression.
-
+        Resolved ``cst.BaseExpression``.
     """
-    raise NotImplementedError
+    ...
 
-  def _parse_keywords(self, op: OperationNode) -> list[str | None]:
-    """Extract arg_keywords attribute from operation.
 
-    Returns a list of strings (keyword names or empty strings).
+class MlirExpressionGenerator:
+  """Single-responsibility delegate generating LibCST expressions from MLIR operations.
+
+  Attributes:
+      host: Bound ``MlirExprGeneratorHost`` supplying SSA operand resolution.
+      helpers: ``MlirGenHelpers`` utility instance.
+  """
+
+  def __init__(self, host: MlirExprGeneratorHost, helpers: MlirGenHelpers | None = None) -> None:
+    """Initialize ``MlirExpressionGenerator`` bound to ``host``.
 
     Args:
-        op: The operation node to parse.
+        host: Bound ``MlirExprGeneratorHost`` instance.
+        helpers: Optional ``MlirGenHelpers`` instance.
+    """
+    self.host: MlirExprGeneratorHost = host
+    self.helpers: MlirGenHelpers = helpers if helpers is not None else MlirGenHelpers()
+
+  def parse_keywords(self, op: OperationNode) -> list[str]:
+    """Extract ``arg_keywords`` from ``op`` into cleaned keyword strings.
+
+    Args:
+        op: ``OperationNode`` to inspect.
 
     Returns:
-        A list of keyword strings or None for positional arguments.
-
+        List of keyword names (empty string when positional).
     """
     for attr in op.attributes:
       if attr.name == "arg_keywords":
-        # Case 1: Already list (from in-memory object)
         if isinstance(attr.value, list):
           return [str(v).strip('"') for v in attr.value]
-
-        # Case 2: String representation (from parser)
-        # e.g. '["", "rngs"]'
         if isinstance(attr.value, str):
           try:
-            # Safe evaluation of list literal
             val = ast.literal_eval(attr.value)
             if isinstance(val, list):
-              # Ensure strings are clean
               return [str(v).strip('"').strip("'") for v in val]
           except (ValueError, SyntaxError):
             pass
-
     return []
 
-  def _expr_sw_constant(self, op: OperationNode) -> cst.BaseExpression:
-    """Generate constant literal expression.
+  def expr_sw_constant(self, op: OperationNode) -> cst.BaseExpression:
+    """Generate a Python constant literal expression from an ``sw.constant`` op.
 
     Args:
-        op: The operation node representing the constant.
+        op: ``OperationNode`` representing ``sw.constant``.
 
     Returns:
-        A LibCST expression representing the constant value.
-
+        Parsed ``cst.BaseExpression`` or fallback ``cst.Name``.
     """
-    val_str = self._get_attr(op, "value") or "0"
+    val_str = self.helpers.get_attr(op, "value") or "0"
     try:
       return cst.parse_expression(val_str)
-    except Exception:
+    except cst.ParserSyntaxError:
       return cst.Name(val_str)
 
-  def _expr_sw_getattr(self, op: OperationNode) -> cst.BaseExpression:
-    """Generate attribute access (e.g. self.layer).
+  def expr_sw_getattr(self, op: OperationNode) -> cst.BaseExpression:
+    """Generate a Python attribute access expression from an ``sw.getattr`` op.
 
     Args:
-        op: The operation node for getattr.
+        op: ``OperationNode`` representing ``sw.getattr``.
 
     Returns:
-        A LibCST attribute access expression.
-
+        Constructed ``cst.Attribute`` (or ``cst.Name('error')`` if missing operands).
     """
     if not op.operands:
       return cst.Name("error")
-    obj_expr = self._resolve_operand(op.operands[0].name)
-    attr_name = (self._get_attr(op, "name") or "unknown").strip('"')
+    obj_expr = self.host._resolve_operand(op.operands[0].name)
+    attr_name = (self.helpers.get_attr(op, "name") or "unknown").strip('"')
     return cst.Attribute(value=obj_expr, attr=cst.Name(attr_name))
 
-  def _expr_sw_call(self, op: OperationNode) -> cst.BaseExpression:
-    """Generate function call expression.
+  def expr_sw_call(self, op: OperationNode) -> cst.BaseExpression:
+    """Generate a Python call expression from an ``sw.call`` op.
 
     Args:
-        op: The operation node representing the call.
+        op: ``OperationNode`` representing ``sw.call``.
 
     Returns:
-        A LibCST call expression.
-
+        Constructed ``cst.Call`` expression.
     """
-    # Operands: [func, arg0, arg1...]
     if not op.operands:
       return cst.Call(func=cst.Name("unknown"))
 
-    func_expr = self._resolve_operand(op.operands[0].name)
-    keywords = self._parse_keywords(op)
-
-    args = []
-    # args correspond to operands[1:]
+    func_expr = self.host._resolve_operand(op.operands[0].name)
+    keywords = self.parse_keywords(op)
+    args: list[cst.Arg] = []
 
     for i, op_val in enumerate(op.operands[1:]):
-      arg_expr = self._resolve_operand(op_val.name)
-
-      kw_node = None
-      if i < len(keywords):
-        kw_val = keywords[i]
-        if kw_val:
-          kw_node = cst.Name(kw_val)
-
+      arg_expr = self.host._resolve_operand(op_val.name)
+      kw_node = cst.Name(keywords[i]) if (i < len(keywords) and keywords[i]) else None
       args.append(
         cst.Arg(
           value=arg_expr,
@@ -136,36 +130,27 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
 
     return cst.Call(func=func_expr, args=args)
 
-  def _expr_sw_op(self, op: OperationNode) -> cst.BaseExpression:
-    """Generate generic operation call (e.g. torch.add).
-
-    Handles specialized binary operation mapping via `binop.` types.
+  def expr_sw_op(self, op: OperationNode) -> cst.BaseExpression:
+    """Generate a Python call or binary expression from an ``sw.op`` operation.
 
     Args:
-        op: The operation node to generate an expression for.
+        op: ``OperationNode`` representing ``sw.op``.
 
     Returns:
-        A LibCST expression representing the operation.
-
+        Constructed ``cst.Call`` or ``cst.BinaryOperation`` expression.
     """
-    type_name = self._get_attr(op, "type") or '"unknown"'
+    type_name = self.helpers.get_attr(op, "type") or '"unknown"'
     if "binop." in type_name:
-      return self._expr_binop(op, type_name)
+      return self.expr_binop(op, type_name)
 
     dotted_path = type_name.strip('"')
-    func_node = self._create_dotted_name(dotted_path)
-
-    keywords = self._parse_keywords(op)
-    args = []
+    func_node = self.helpers.create_dotted_name(dotted_path)
+    keywords = self.parse_keywords(op)
+    args: list[cst.Arg] = []
 
     for i, op_val in enumerate(op.operands):
-      arg_expr = self._resolve_operand(op_val.name)
-      kw_node = None
-      if i < len(keywords):
-        kw_val = keywords[i]
-        if kw_val:
-          kw_node = cst.Name(kw_val)
-
+      arg_expr = self.host._resolve_operand(op_val.name)
+      kw_node = cst.Name(keywords[i]) if (i < len(keywords) and keywords[i]) else None
       args.append(
         cst.Arg(
           value=arg_expr,
@@ -178,25 +163,24 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
 
     return cst.Call(func=func_node, args=args)
 
-  def _expr_binop(self, op: OperationNode, type_attr: str) -> cst.BaseExpression:
-    """Generate binary operation expression (e.g. a + b).
+  def expr_binop(self, op: OperationNode, type_attr: str) -> cst.BaseExpression:
+    """Generate a ``cst.BinaryOperation`` from a ``binop.*`` ``sw.op``.
 
     Args:
-        op: The binary operation node.
-        type_attr: The type attribute string indicating the operation.
+        op: Binary ``OperationNode``.
+        type_attr: ``type`` attribute string containing ``binop.<code>``.
 
     Returns:
-        A LibCST binary operation expression.
-
+        Constructed ``cst.BinaryOperation`` (or ``cst.Name('error_binop')`` if <2 operands).
     """
     op_code = type_attr.strip('"').replace("binop.", "")
     if len(op.operands) < 2:
       return cst.Name("error_binop")
 
-    lhs_expr = self._resolve_operand(op.operands[0].name)
-    rhs_expr = self._resolve_operand(op.operands[1].name)
+    lhs_expr = self.host._resolve_operand(op.operands[0].name)
+    rhs_expr = self.host._resolve_operand(op.operands[1].name)
 
-    op_map = {
+    op_map: dict[str, cst.BaseBinaryOp] = {
       "add": cst.Add(),
       "sub": cst.Subtract(),
       "mul": cst.Multiply(),
@@ -212,3 +196,6 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
       "xor": cst.BitXor(),
     }
     return cst.BinaryOperation(left=lhs_expr, operator=op_map.get(op_code, cst.Add()), right=rhs_expr)
+
+
+__all__ = ["MlirExprGeneratorHost", "MlirExpressionGenerator"]

@@ -14,12 +14,14 @@ symbolic dimension tuples, activation buffers, gradient states, and device place
 import math
 import typing
 
+from ml_switcheroo_ir import SymInt, SymNode
+
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalMesh, PartitionSpec
 from ml_switcheroo.utils.console import log_warning
 
 
 def estimate_tensor_memory(
-  shape: typing.Sequence[int | float | str | typing.Hashable | None],
+  shape: typing.Sequence[int | float | str | SymNode | SymInt | None],
   dtype: str = "float32",
   symbolic_map: dict[str, int] | None = None,
   default_symbolic_dim: int = 1,
@@ -66,7 +68,7 @@ def estimate_tensor_memory(
     from ml_ecosystem_snapshots.compliance import estimate_tensor_memory_bytes
 
     return float(estimate_tensor_memory_bytes(resolved_dims, dtype))
-  except Exception:
+  except (ImportError, ValueError, TypeError, KeyError, AttributeError, RuntimeError):
     bits = 32
     dt = dtype.lower()
     if "64" in dt:
@@ -90,6 +92,10 @@ class ShardingInferencePass:
   - Linear layers with 'o_proj', 'down_proj' -> Row Parallel ("tensor", None).
   - Embedding layers -> Row Parallel ("tensor", None) along vocab dimension.
   - Convolution and other linear layers -> Data Parallel ("data", None) fallback.
+
+  Attributes:
+      DEFAULT_COLUMN_PARALLEL_PATTERNS: The default column parallel patterns (`tuple[str, ...]`).
+      DEFAULT_ROW_PARALLEL_PATTERNS: The default row parallel patterns (`tuple[str, ...]`).
   """
 
   DEFAULT_COLUMN_PARALLEL_PATTERNS: tuple[str, ...] = ("q_proj", "k_proj", "v_proj", "gate_proj", "up_proj")
@@ -175,7 +181,7 @@ class ShardingInferencePass:
 
       report = estimate_graph_communication_volume(graph)
       return float(report.total_volume_bytes)
-    except Exception:
+    except (ImportError, ValueError, TypeError, KeyError, AttributeError, RuntimeError):
       total_comm = 0.0
       for node in graph.nodes.values():
         if node.op_type in ("all_reduce", "all_gather", "reduce_scatter", "all_to_all") or node.op_type.startswith(

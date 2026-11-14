@@ -40,13 +40,13 @@ class ASTToCppMapper:
     """
     if isinstance(node, ast.Name):
       return Identifier(name=node.id)
-    elif isinstance(node, ast.BinOp):
+    if isinstance(node, ast.BinOp):
       left = self.map_expression(node.left)
       right = self.map_expression(node.right)
       op_name = type(node.op).__name__
       op = self.op_map.get(op_name, "+")
       return BinaryExpression(left=left, operator=op, right=right)
-    elif isinstance(node, ast.Call):
+    if isinstance(node, ast.Call):
       if isinstance(node.func, ast.Name):
         func_name = node.func.id
       elif isinstance(node.func, ast.Attribute):
@@ -56,7 +56,7 @@ class ASTToCppMapper:
         func_name = "unknown"
       args = [self.map_expression(arg) for arg in node.args]
       return MethodCall(name=func_name, arguments=args)
-    elif isinstance(node, ast.Constant):
+    if isinstance(node, ast.Constant):
       return Identifier(name=str(node.value))
 
     raise ValueError(f"Unsupported AST node: {type(node)}")

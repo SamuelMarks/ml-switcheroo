@@ -5,14 +5,14 @@ import numpy.typing
 
 
 class AttentionModel:
-  """Test helper class AttentionModel."""
+  """Sentinel `AttentionModel` fixture class used in numpy tests."""
 
   def __init__(self, embed_dim: int, num_heads: int):
     """Initializes the AttentionModel instance.
 
     Args:
-        embed_dim: The embed dim (int) for   init  .
-        num_heads: The num heads (int) for   init  .
+        embed_dim: Input `embed_dim` parameter value (`int`).
+        num_heads: Input `num_heads` parameter value (`int`).
     """
     self.embed_dim = embed_dim
     self.num_heads = num_heads
@@ -26,9 +26,9 @@ class AttentionModel:
     """Executes the callable instance.
 
     Args:
-        query: The query (np.typing.NDArray[np.float64]) for   call  .
-        key: The key (np.typing.NDArray[np.float64]) for   call  .
-        value: The value (np.typing.NDArray[np.float64]) for   call  .
+        query: Input `query` parameter value (`np.typing.NDArray[np.float64]`).
+        key: Input `key` parameter value (`np.typing.NDArray[np.float64]`).
+        value: Input `value` parameter value (`np.typing.NDArray[np.float64]`).
 
     Returns:
         Output tensor or value computed by the forward pass.

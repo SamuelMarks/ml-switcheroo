@@ -1,0 +1,25 @@
+--- Forward ---
+import jax.numpy as jnp
+import flax.nnx as nnx
+
+class Net(nnx.Module):
+    def __init__(self, rngs: nnx.Rngs):
+        self.fc = nnx.Linear(10, 10, rngs=rngs)
+
+    def __call__(self, x):
+        x = self.fc(x)
+        return nnx.relu(x, inplace=False)
+
+--- Backward ---
+import torch.nn.functional as F
+import torch
+import torch.nn as nn
+
+class Net(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.fc = nn.Linear(10, 10)
+
+    def forward(self, x):
+        x = self.fc(x)
+        return F.relu(x, inplace=False)

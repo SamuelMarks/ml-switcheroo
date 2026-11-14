@@ -25,7 +25,11 @@ from ml_switcheroo.semantics.schema import StructuralTraits
 
 @typing.runtime_checkable
 class _ModuleBaseProtocol(typing.Protocol):
-  """Protocol for traits objects exposing `module_base`."""
+  """Protocol for traits objects exposing `module_base`.
+
+  Attributes:
+      module_base: The module base (`str | None`).
+  """
 
   module_base: str | None
 
@@ -143,7 +147,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     """
     if isinstance(node, cst.Name):
       return node.value
-    elif isinstance(node, cst.Attribute):
+    if isinstance(node, cst.Attribute):
       base = self._cst_to_string(node.value)
       if base:
         return f"{base}.{node.attr.value}"
@@ -200,29 +204,20 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
         "dsl.Module",
         "midl.Module",
       }
-      # Scan all registered configs for module_base traits
-      for _, config in self.context.semantics.framework_configs.items():
+      for config in self.context.semantics.framework_configs.values():
         traits = config.get("traits")
         if traits:
-          # Handle both dict and object access safely
           base = (
             traits.get("module_base")
             if isinstance(traits, dict)
             else (traits.module_base if isinstance(traits, _ModuleBaseProtocol) else None)
           )
-
           if isinstance(base, str) and base:
             self._known_module_bases.add(base)
 
     if name in self._known_module_bases:
       return True
-
-    # Suffix Check (e.g. 'nn.Module' matches 'torch.nn.Module')
-    for known in self._known_module_bases:
-      if known.endswith(f".{name}"):
-        return True
-
-    return False
+    return any(known.endswith(f".{name}") for known in self._known_module_bases)
 
   def _get_source_inference_methods(self) -> set[str]:
     """Get inference/forward methods for the source framework.
@@ -231,13 +226,12 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
         A set of method names identified as the main execution/inference hooks in
         the source framework (e.g., {'forward', '__call__', 'call'}).
     """
-    defaults = {"forward", "__call__", "call"}
-    config = self.context.semantics.get_framework_config(self.context.source_framework)
-    if config and "traits" in config:
-      traits = StructuralTraits.model_validate(config["traits"])
-      if traits.known_inference_methods:
-        return traits.known_inference_methods
-    return defaults
+    from ml_switcheroo.semantics.resolution import query_framework_traits
+
+    fw_traits = query_framework_traits(self.context.semantics, self.context.source_framework)
+    if fw_traits.traits is not None and fw_traits.traits.known_inference_methods:
+      return fw_traits.traits.known_inference_methods
+    return {"forward", "__call__", "call"}
 
   def _get_type_mapping(self, name: str) -> dict[str, JsonValue] | None:
     """Look up the semantic type definition mapping in the database.
@@ -249,7 +243,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
         A dictionary containing the resolved type target variant details, or None
         if no mapping was found.
     """
-    if name in {
+    builtin_types = {
       "int",
       "float",
       "str",
@@ -268,7 +262,8 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
       "Callable",
       "Iterable",
       "Sequence",
-    }:
+    }
+    if name in builtin_types:
       return None
 
     tensor_types = {
@@ -297,10 +292,26 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     if not lookup:
       return None
     abstract_id, _ = lookup
-    res: dict[str, JsonValue] | None = self.context.semantics.resolve_variant(abstract_id, self.context.target_framework)
-    return res
+    return self.context.semantics.resolve_variant(abstract_id, self.context.target_framework)
 
   # --- Visitor Logic: Module Preamble Injection ---
+
+  @staticmethod
+  def _parse_module_preamble_snippet(
+    code: str,
+  ) -> typing.Sequence[cst.SimpleStatementLine | cst.BaseCompoundStatement]:
+    """Parse a module preamble source string into CST statements.
+
+    Args:
+        code: Source code snippet to parse as a CST module.
+
+    Returns:
+        Parsed module body statements, or an empty tuple if parsing fails.
+    """
+    try:
+      return cst.parse_module(code).body
+    except (cst.ParserSyntaxError, ValueError, TypeError):
+      return ()
 
   def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
     """Inject accumulated module-level preamble statements into the transformed module.
@@ -322,11 +333,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     new_stmts: list[cst.BaseStatement] = []
     # Deduplication now handled at insertion time in Context, so order is preserved.
     for code in self.context.module_preamble:
-      try:
-        mod = cst.parse_module(code)
-        new_stmts.extend(mod.body)
-      except (cst.ParserSyntaxError, Exception):
-        pass
+      new_stmts.extend(self._parse_module_preamble_snippet(code))
 
     # Clear buffer to prevent re-injection
     self.context.module_preamble.clear()
@@ -594,12 +601,73 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     )
     return True
 
+  def _rename_module_method(
+    self,
+    updated_node: cst.FunctionDef,
+    sig_ctx: SignatureContext,
+    traits: StructuralTraits,
+  ) -> cst.FunctionDef:
+    """Rename forward/inference or ``__init__`` lifecycle methods according to ``traits``.
+
+    Args:
+        updated_node: Candidate ``cst.FunctionDef`` node.
+        sig_ctx: Active ``SignatureContext`` popped for the method.
+        traits: Target framework ``StructuralTraits``.
+
+    Returns:
+        Renamed or unchanged ``cst.FunctionDef`` node.
+    """
+    curr_name = updated_node.name.value
+    target_fwd = traits.forward_method
+    if target_fwd and curr_name in self._get_source_inference_methods() and curr_name != target_fwd:
+      updated_node = updated_node.with_changes(name=cst.Name(target_fwd))
+    if sig_ctx.is_init and traits.init_method_name and traits.init_method_name != "__init__":
+      updated_node = updated_node.with_changes(name=cst.Name(traits.init_method_name))
+    return updated_node
+
+  def _reconcile_init_magic_and_super(
+    self,
+    updated_node: cst.FunctionDef,
+    sig_ctx: SignatureContext,
+    traits: StructuralTraits,
+  ) -> cst.FunctionDef:
+    """Queue magic constructor parameters, strip incompatible magic args, and reconcile ``super().__init__``.
+
+    Args:
+        updated_node: Candidate ``__init__`` ``cst.FunctionDef`` node.
+        sig_ctx: Active ``SignatureContext`` whose ``injected_args`` may be appended.
+        traits: Target framework ``StructuralTraits``.
+
+    Returns:
+        Updated ``cst.FunctionDef`` node.
+    """
+    injections = list(traits.inject_magic_args)
+    tgt_adapter = get_adapter(self.context.target_framework)
+    try:
+      adapter_fallback_inj = tgt_adapter.structural_traits.fallback_magic_injection if tgt_adapter else None
+    except AttributeError:
+      adapter_fallback_inj = None
+    fallback_inj = traits.fallback_magic_injection or adapter_fallback_inj
+    if not injections and fallback_inj:
+      injections.append(fallback_inj)
+
+    for arg_name, arg_type in injections:
+      if arg_name not in sig_ctx.existing_args and all(n != arg_name for n, _ in sig_ctx.injected_args):
+        sig_ctx.injected_args.append((arg_name, arg_type))
+
+    args_to_strip = set(traits.strip_magic_args)
+    if traits.auto_strip_magic_args:
+      args_to_strip.update(self.context.semantics.known_magic_args)
+      args_to_strip -= {a[0] for a in injections}
+
+    for arg_name in args_to_strip:
+      updated_node = self._strip_argument_from_signature(updated_node, arg_name)
+      updated_node = self._strip_docstring_arg(updated_node, arg_name)
+
+    return self._ensure_super_init(updated_node) if traits.requires_super_init else self._strip_super_init(updated_node)
+
   def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> cst.FunctionDef:
     """Apply signature transformations, renaming, and body injections when leaving functions.
-
-    Performs method renaming for lifecycle hooks (like forward to __call__), strips or injects
-    magic framework parameters, configures super init calls, prepends body statements,
-    and updates any associated docstrings.
 
     Args:
         original_node: The original CST FunctionDef node.
@@ -615,64 +683,15 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     sig_ctx = self.context.signature_stack.pop()
     traits = self.target_traits
 
-    # 1. Method Renaming
     if sig_ctx.is_module_method:
-      curr_name = updated_node.name.value
-      target_fwd = traits.forward_method
-      known_fwds = self._get_source_inference_methods()
+      updated_node = self._rename_module_method(updated_node, sig_ctx, traits)
+      if sig_ctx.is_init:
+        updated_node = self._reconcile_init_magic_and_super(updated_node, sig_ctx, traits)
 
-      if target_fwd and curr_name in known_fwds and curr_name != target_fwd:
-        updated_node = updated_node.with_changes(name=cst.Name(target_fwd))
-
-      if sig_ctx.is_init and traits.init_method_name and traits.init_method_name != "__init__":
-        updated_node = updated_node.with_changes(name=cst.Name(traits.init_method_name))
-
-    # 2. Magic Arguments & Super Init Logic
-    if sig_ctx.is_init and sig_ctx.is_module_method:
-      # Inject Magic Args (e.g. rngs)
-      injections = list(traits.inject_magic_args)
-      tgt_adapter = get_adapter(self.context.target_framework)
-      try:
-        adapter_fallback_inj = tgt_adapter.structural_traits.fallback_magic_injection if tgt_adapter else None
-      except AttributeError:
-        adapter_fallback_inj = None
-      fallback_inj = traits.fallback_magic_injection or adapter_fallback_inj
-      if not injections and fallback_inj:
-        injections.append(fallback_inj)
-
-      for arg_name, arg_type in injections:
-        if arg_name not in sig_ctx.existing_args:
-          found_injected = any(n == arg_name for n, _ in sig_ctx.injected_args)
-          if not found_injected:
-            sig_ctx.injected_args.append((arg_name, arg_type))
-
-      # Strip Magic Args
-      args_to_strip = set(traits.strip_magic_args)
-      if traits.auto_strip_magic_args:
-        args_to_strip.update(self.context.semantics.known_magic_args)
-        native = {a[0] for a in injections}
-        args_to_strip -= native
-
-      for arg_name in args_to_strip:
-        updated_node = self._strip_argument_from_signature(updated_node, arg_name)
-        updated_node = self._strip_docstring_arg(updated_node, arg_name)
-
-      # Super Init Logic
-      if traits.requires_super_init:
-        updated_node = self._ensure_super_init(updated_node)
-      else:
-        updated_node = self._strip_super_init(updated_node)
-
-    # 3. Apply Injection Queue
-    # Params
     for name, annotation in sig_ctx.injected_args:
       updated_node = self._inject_argument_to_signature(updated_node, name, annotation)
-
-    # Preamble Statements
     if sig_ctx.preamble_stmts:
       updated_node = self._apply_preamble(updated_node, sig_ctx.preamble_stmts)
-
-    # Docstrings
     if sig_ctx.injected_args:
       updated_node = self._update_docstring(updated_node, sig_ctx.injected_args)
 

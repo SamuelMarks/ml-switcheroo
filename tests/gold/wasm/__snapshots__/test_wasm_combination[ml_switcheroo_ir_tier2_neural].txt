@@ -1,0 +1,27 @@
+--- Forward ---
+// Graph -> MLIR compilation output
+module {
+  func.func @main() {
+    %x = "sw.constant" {value = 1} : i32
+    %relu1 = "sw.op" {type = "Relu"} : !sw.unknown
+  }
+}
+
+--- Backward ---
+"""Auto-generated LogicalGraph definition."""
+
+import ml_switcheroo_ir as sw_ir
+
+def build_graph() -> sw_ir.LogicalGraph:
+    """Construct and return the LogicalGraph."""
+    mesh = None
+    nodes = {
+    }
+    edges = [
+    ]
+    return sw_ir.LogicalGraph(
+        name='GeneratedNet',
+        nodes=nodes,
+        edges=edges,
+        mesh=mesh,
+    )

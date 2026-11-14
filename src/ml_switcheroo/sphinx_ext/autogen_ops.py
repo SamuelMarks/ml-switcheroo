@@ -12,15 +12,16 @@ Features:
 2. Exports `docs/operations.yaml` ensuring appended updates rather than destructive overwrites.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
 import shutil
 import typing
 from pathlib import Path
 
-from pydantic import JsonValue
 import yaml
+from pydantic import JsonValue
 from sphinx.util import logging
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+from ml_switcheroo.exceptions import ConfigurationError
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.utils.doc_context import DocContextBuilder
 from ml_switcheroo.utils.doc_renderer import OpPageRenderer
@@ -44,7 +45,11 @@ class _EnumValueProtocol(typing.Protocol):
 
 @typing.runtime_checkable
 class _SphinxSrcdirProtocol(typing.Protocol):
-  """Protocol for Sphinx application exposing `srcdir`."""
+  """Protocol for Sphinx application exposing `srcdir`.
+
+  Attributes:
+      srcdir: The srcdir (`str | Path`).
+  """
 
   srcdir: str | Path
 
@@ -80,8 +85,8 @@ def _build_yaml_entry(op_name: str, definition: typing.Mapping[str, RuntimeTenso
   # 1. Normalize Arguments
   yaml_args: list[JsonValue] = []
   raw_std_args = definition.get("std_args", [])
-  assert isinstance(raw_std_args, typing.Sequence)
-  for arg in raw_std_args:
+  std_arg_seq = raw_std_args if isinstance(raw_std_args, typing.Sequence) and not isinstance(raw_std_args, str) else []
+  for arg in std_arg_seq:
     entry: dict[str, JsonValue] = {}
     if isinstance(arg, str):
       entry = {"name": arg, "type": "Any"}
@@ -100,8 +105,8 @@ def _build_yaml_entry(op_name: str, definition: typing.Mapping[str, RuntimeTenso
 
   # 3. Normalize Variants
   clean_variants: dict[str, JsonValue] = {}
-  variants = definition.get("variants", {})
-  assert isinstance(variants, typing.Mapping)
+  raw_variants = definition.get("variants", {})
+  variants = raw_variants if isinstance(raw_variants, typing.Mapping) else {}
   for fw, details in variants.items():
     if isinstance(details, dict) and details:
       clean_details: dict[str, JsonValue] = {}
@@ -146,7 +151,7 @@ def _write_yaml_update(out_path: Path, new_entries: typing.Sequence[typing.Mappi
           for item in loaded:
             if isinstance(item, dict) and "operation" in item:
               existing_map[str(item["operation"])] = item
-    except Exception as e:
+    except (OSError, yaml.YAMLError, ValueError, TypeError, KeyError) as e:
       logger.warning(f"[ml-switcheroo] Could not read existing YAML: {e}. Overwriting.")
 
   # Upsert new entries (Code is source of truth during auto-gen)
@@ -185,10 +190,13 @@ def generate_op_docs(app: RuntimeTensorOrValue) -> None:
   Args:
       app: The Sphinx application instance.
 
+  Raises:
+      ConfigurationError: If ``app`` does not expose a ``srcdir`` attribute.
   """
   # Determine output directory
   # app.srcdir usually points to 'docs/'
-  assert isinstance(app, _SphinxSrcdirProtocol)
+  if not isinstance(app, _SphinxSrcdirProtocol):
+    raise ConfigurationError("Sphinx application instance must expose 'srcdir'.")
   srcdir = Path(str(app.srcdir))
   out_dir = srcdir / "ops"
 
@@ -278,8 +286,7 @@ def _write_index_file(out_dir: Path, files: list[str]) -> None:
     "   :caption: Operations",
     "",
   ]
-  for name in files:
-    header.append(f"   {name}")
+  header.extend(f"   {name}" for name in files)
 
   with open(index_path, "w", encoding="utf-8") as f:
     f.write("\n".join(header))

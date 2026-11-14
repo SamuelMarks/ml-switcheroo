@@ -1,75 +1,95 @@
-"""Plugin for MLX Optimizer translation.
+"""Plugin for Functional Optimizer Translation.
 
-Handles impedance mismatches for Functional Optimizers.
+Handles impedance mismatches between stateful parameter-bound optimizers and
+functional stateless optimizer constructors, updates, and gradient resets
+without hardcoded target framework strings.
 """
 
 import libcst as cst
 
 from ml_switcheroo.core.escape_hatch import EscapeHatch
 from ml_switcheroo.core.hooks import HookContext, register_hook
-from ml_switcheroo.plugins.utils import create_dotted_name
+from ml_switcheroo.plugins.utils import (
+  create_dotted_name,
+  resolve_variant_api,
+  resolve_variant_arg_name,
+)
+
+_PARAM_KEYWORDS = frozenset({"params", "parameters", "var_list", "trainable_variables"})
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """Create a CST attribute chain from a string string.
+  """Create a CST attribute chain from a dotted API path string.
 
   Args:
-      name_str (str): The dotted path (e.g. 'mlx.optimizers.Adam').
+      name_str: Dotted API path string.
 
   Returns:
-      cst.BaseExpression: The resulting CST node (Attribute or Name).
-
+      Resulting CST ``Attribute`` or ``Name`` node.
   """
   return create_dotted_name(name_str)
 
 
-@register_hook("mlx_optimizer_init")
-def transform_mlx_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """Transform Transforms Optimizer Constructor.
-
-  1. Renames API based on context lookup or dynamic class construction.
-  2. Strips parameter argument (Arg 0).
-  3. Renames `lr` -> `learning_rate`.
+def _is_numeric_literal(expr: cst.BaseExpression) -> bool:
+  """Check whether an expression is a scalar numeric literal (e.g., learning rate).
 
   Args:
-      node (cst.Call): Original CST call.
-      ctx (HookContext): Hook execution context.
+      expr: Candidate CST expression.
 
   Returns:
-      cst.Call: Transformed optimizer initialization.
-
+      True if ``expr`` is a float, int, or negated numeric literal.
   """
-  # 1. Rename API
-  # Try strict lookup first
-  op_id = ctx.current_op_id or "Adam"
-  target_api = ctx.lookup_api(op_id)
+  if isinstance(expr, (cst.Float, cst.Integer)):
+    return True
+  return isinstance(expr, cst.UnaryOperation) and isinstance(expr.expression, (cst.Float, cst.Integer))
 
+
+@register_hook("mlx_optimizer_init")
+def transform_mlx_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
+  """Transform an optimizer constructor call using ``HookContext.current_variant``.
+
+  Resolves the target API strictly from ``ctx.current_variant`` or semantic lookup
+  (aborting safely if unmapped), strips parameter collection arguments (whether
+  passed positionally or by keyword), and remaps ``lr`` to the target learning-rate
+  parameter declared in ``current_variant.args`` (defaulting to ``learning_rate``).
+
+  Args:
+      node: Original CST call node.
+      ctx: Hook execution context.
+
+  Returns:
+      Transformed optimizer initialization call, or ``node`` if unmapped.
+  """
+  target_api = resolve_variant_api(ctx, "Adam")
   if not target_api:
-    # Fallback: Construct 'mlx.optimizers.<Name>' if source was 'optim.<Name>'
-    old_name = ""
-    if isinstance(node.func, cst.Name):
-      old_name = node.func.value
-    elif isinstance(node.func, cst.Attribute):
-      old_name = node.func.attr.value
-    target_api = f"mlx.optimizers.{old_name}" if old_name else "mlx.optimizers.Adam"
+    return node
 
   new_func = _create_dotted_name(target_api)
+  lr_kw = resolve_variant_arg_name(
+    ctx,
+    "learning_rate",
+    resolve_variant_arg_name(ctx, "lr", "learning_rate"),
+  )
 
-  # 2. Filter Args & Rename Keywords
-  new_args = []
+  new_args: list[cst.Arg] = []
+  for idx, arg in enumerate(node.args):
+    if arg.star:
+      continue
+    if arg.keyword is not None:
+      kw_name = arg.keyword.value
+      if kw_name in _PARAM_KEYWORDS:
+        continue
+      if kw_name == "lr":
+        arg = arg.with_changes(keyword=cst.Name(lr_kw))
+      else:
+        mapped_kw = resolve_variant_arg_name(ctx, kw_name, kw_name)
+        if mapped_kw != kw_name:
+          arg = arg.with_changes(keyword=cst.Name(mapped_kw))
+      new_args.append(arg)
+      continue
 
-  # Heuristic: Strip first arg if Positional (params)
-  start_idx = 0
-  if len(node.args) > 0 and node.args[0].keyword is None:
-    start_idx = 1
-
-  for i in range(start_idx, len(node.args)):
-    arg = node.args[i]
-
-    # Explicit Rename: lr -> learning_rate
-    if arg.keyword and arg.keyword.value == "lr":
-      arg = arg.with_changes(keyword=cst.Name("learning_rate"))
-
+    if idx == 0 and not _is_numeric_literal(arg.value):
+      continue
     new_args.append(arg)
 
   return node.with_changes(func=new_func, args=new_args)
@@ -79,24 +99,16 @@ def transform_mlx_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
 def transform_mlx_optimizer_step(
   node: cst.Call, ctx: HookContext
 ) -> cst.CSTNode | cst.FlattenSentinel[cst.BaseStatement]:
-  """Transform Transforms `optimizer.step()` into an EscapeHatch pattern.
-
-  Functional optimizers (like MLX/Optax) require explicit update calls `opt.update(model, state)`.
+  """Transform imperative optimizer step calls into an EscapeHatch functional update.
 
   Args:
-      node (cst.Call): Original CST call.
-      ctx (HookContext): Hook execution context.
+      node: Original CST call node.
+      ctx: Hook execution context.
 
   Returns:
-      Union[cst.Call, cst.FlattenSentinel]: The node wrapped in an EscapeHatch.
-
+      Call node wrapped in an EscapeHatch failure marker.
   """
-  optimizer_var = None
-  if isinstance(node.func, cst.Attribute):
-    optimizer_var = node.func.value
-  else:
-    optimizer_var = cst.Name("optimizer")
-
+  optimizer_var: cst.BaseExpression = node.func.value if isinstance(node.func, cst.Attribute) else cst.Name("optimizer")
   new_func = cst.Attribute(value=optimizer_var, attr=cst.Name("update"))
   args = [
     cst.Arg(value=cst.Name("model"), comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))),
@@ -110,14 +122,13 @@ def transform_mlx_optimizer_step(
 
 @register_hook("mlx_zero_grad")
 def transform_mlx_zero_grad(node: cst.Call, ctx: HookContext) -> cst.CSTNode | cst.FlattenSentinel[cst.BaseStatement]:
-  """Transform Transforms `optimizer.zero_grad()` into `None` (No-Op).
+  """Transform ``optimizer.zero_grad()`` into a ``None`` no-op expression.
 
   Args:
-      node (cst.Call): Original CST call.
-      ctx (HookContext): Non-used hook context.
+      node: Original CST call node.
+      ctx: Hook execution context.
 
   Returns:
-      cst.CSTNode: A 'None' node execution.
-
+      ``cst.Name("None")`` no-op node.
   """
   return cst.Name("None")

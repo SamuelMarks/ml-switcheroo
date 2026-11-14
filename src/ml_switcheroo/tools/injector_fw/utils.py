@@ -4,10 +4,11 @@ This module provides helper functions to convert Python runtime objects (diction
 lists, primitives) into LibCST nodes, as well as utilities for inspecting import definitions.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
 import json
 
 import libcst as cst
+
+from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
 def get_import_root(node: cst.CSTNode) -> str:
@@ -59,9 +60,13 @@ def is_future_import(node: cst.CSTNode) -> bool:
   """
   if isinstance(node, cst.SimpleStatementLine):
     for stmt in node.body:
-      if isinstance(stmt, cst.ImportFrom):
-        if stmt.module and isinstance(stmt.module, cst.Name) and stmt.module.value == "__future__":
-          return True
+      if (
+        isinstance(stmt, cst.ImportFrom)
+        and stmt.module
+        and isinstance(stmt.module, cst.Name)
+        and stmt.module.value == "__future__"
+      ):
+        return True
   return False
 
 
@@ -92,8 +97,7 @@ def convert_to_cst_literal(val: RuntimeTensorOrValue) -> cst.BaseExpression:
 
     if isinstance(val, list):
       return cst.List(elements=elements)
-    else:
-      return cst.Tuple(elements=elements)
+    return cst.Tuple(elements=elements)
 
   # 2. Key-Value Recursion (Dict)
   if isinstance(val, dict):
@@ -118,21 +122,20 @@ def convert_to_cst_literal(val: RuntimeTensorOrValue) -> cst.BaseExpression:
   # 3. Primitives
   if isinstance(val, bool):
     return cst.Name("True") if val else cst.Name("False")
-  elif isinstance(val, int):
+  if isinstance(val, int):
     if val < 0:
       return cst.UnaryOperation(operator=cst.Minus(), expression=cst.Integer(str(abs(val))))
     return cst.Integer(str(val))
-  elif isinstance(val, float):
+  if isinstance(val, float):
     # repr ensures high precision float string
     if val < 0:
       return cst.UnaryOperation(operator=cst.Minus(), expression=cst.Float(repr(abs(val))))
     return cst.Float(repr(val))
-  elif isinstance(val, str):
+  if isinstance(val, str):
     # Use json.dumps to force double quotes for string literals,
     # matching expectation in tests and standard style.
     return cst.SimpleString(json.dumps(val))
-  elif val is None:
+  if val is None:
     return cst.Name("None")
-  else:
-    # Final Fallback
-    return cst.SimpleString(repr(str(val)))
+  # Final Fallback
+  return cst.SimpleString(repr(str(val)))

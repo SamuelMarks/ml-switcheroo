@@ -4,7 +4,7 @@ import ml_switcheroo.frameworks.keras as keras_fw
 
 
 def test_keras_init_no_keras() -> None:
-  """Verifies the behavior of Keras initialization no Keras."""
+  """Verify `keras_fw.KerasAdapter` handles keras init no keras as expected."""
   original_keras = keras_fw.keras
   keras_fw.keras = None
   try:

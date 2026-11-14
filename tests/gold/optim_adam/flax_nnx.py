@@ -1,20 +1,18 @@
 """Test suite for the Flax Nnx module."""
 
 import jax.numpy as jnp
-
 import optax
 from flax import nnx
 
 
 def setup_adam(model: nnx.Module, lr: float = 0.001) -> jnp.ndarray:
-  """Helper to setup adam.
+  """Execute `nnx.Optimizer` to support setup adam in flax NNX tests.
 
   Args:
       model: Neural network model instance under test.
-      lr: The lr (float) for setup adam.
+      lr: Input `lr` parameter value (`float`).
 
   Returns:
       Resulting `jnp.ndarray` from setup adam.
   """
-  optimizer = nnx.Optimizer(model, optax.adam(lr))
-  return optimizer
+  return nnx.Optimizer(model, optax.adam(lr))

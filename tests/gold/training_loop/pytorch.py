@@ -12,10 +12,10 @@ def train_step(
 
   Args:
       model: Neural network model instance under test.
-      optimizer: The optimizer (optim.Optimizer) for train step.
+      optimizer: Input `optimizer` parameter value (`optim.Optimizer`).
       x: Primary input tensor or array operand.
       y: Secondary input tensor or target operand.
-      loss_fn: The loss fn (torch.Tensor) for train step.
+      loss_fn: Input `loss_fn` parameter value (`torch.Tensor`).
 
   Returns:
       Resulting `torch.Tensor` from train step.

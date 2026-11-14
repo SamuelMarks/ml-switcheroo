@@ -1,13 +1,12 @@
 """Logic for Conditional API Dispatch."""
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 
 import libcst as cst
 from pydantic import JsonValue
 
 from ml_switcheroo.core.dsl import Rule
-from ml_switcheroo.enums import LogicOp
+from ml_switcheroo.enums import LogicOp, RuntimeTensorOrValue
 
 if typing.TYPE_CHECKING:
   from ml_switcheroo.core.rewriter.interface import RewriterHost
@@ -73,7 +72,14 @@ class _SourceFrameworkProtocol(typing.Protocol):
 
 
 class _RuleAttrsProtocol(typing.Protocol):
-  """Protocol for rule objects exposing `if_arg`, `use_api`, `op`, and `is_val`."""
+  """Protocol for rule objects exposing `if_arg`, `use_api`, `op`, and `is_val`.
+
+  Attributes:
+      if_arg: The if arg (`str`).
+      use_api: The use api (`str`).
+      op: The op (`str | None`).
+      is_val: The is val (`RuntimeTensorOrValue`).
+  """
 
   if_arg: str
   use_api: str
@@ -85,12 +91,12 @@ def _is_rule_attrs(obj: RuleInput) -> typing.TypeGuard[_RuleAttrsProtocol]:
   """Check if `obj` is an attribute-based rule object.
 
   Args:
-      obj: Rule object or dictionary.
+      obj: Rule object, dictionary, or raw JSON value.
 
   Returns:
-      True if `obj` is not a dict.
+      True if `obj` is a structured rule instance rather than a JSON primitive or container.
   """
-  return not isinstance(obj, dict)
+  return obj is not None and not isinstance(obj, (dict, list, str, int, float, bool))
 
 
 def evaluate_dispatch_rules(
@@ -133,7 +139,8 @@ def evaluate_dispatch_rules(
       std_args_order.append(str(item))
 
   for rule in rules:
-    assert _is_rule_attrs(rule)
+    if not _is_rule_attrs(rule):
+      continue
     if_arg = str(rule.if_arg or "")
     use_api = str(rule.use_api or "")
     src_arg_name = source_arg_map.get(if_arg, if_arg)
@@ -217,8 +224,53 @@ def _node_to_literal(node: cst.CSTNode) -> str | int | float | bool | None:
     return node.value.strip("'").strip('"')
   if isinstance(node, cst.Name):
     name_map = {"True": True, "False": False, "None": None}
-    return name_map.get(node.value, None)
+    return name_map.get(node.value)
   return None
+
+
+_NUMERIC_RULE_OPS: dict[LogicOp | str, typing.Callable[[int | float, int | float], bool]] = {
+  LogicOp.GT: lambda a, b: a > b,
+  LogicOp.LT: lambda a, b: a < b,
+  LogicOp.GTE: lambda a, b: a >= b,
+  LogicOp.LTE: lambda a, b: a <= b,
+}
+
+
+def _matches_is_type_rule(node: cst.CSTNode, expected_type: str) -> bool:
+  """Check whether ``node`` satisfies a ``LogicOp.IS_TYPE`` dispatch rule.
+
+  Args:
+      node: Candidate CST argument expression node.
+      expected_type: Lowercased expected type tag string.
+
+  Returns:
+      ``True`` if ``node`` matches ``expected_type``, otherwise ``False``.
+  """
+  if isinstance(node, cst.Integer):
+    return expected_type == "int"
+  if isinstance(node, cst.Float):
+    return expected_type == "float"
+  if isinstance(node, cst.SimpleString):
+    return expected_type == "str"
+  if isinstance(node, (cst.List, cst.Tuple)):
+    return expected_type in ("list", "tuple", "sequence")
+  if isinstance(node, cst.Dict):
+    return expected_type == "dict"
+  if isinstance(node, cst.Name) and node.value in ("True", "False"):
+    return expected_type == "bool"
+  return False
+
+
+def _is_non_bool_number(val: RuntimeTensorOrValue) -> typing.TypeGuard[int | float]:
+  """Check whether ``val`` is an ``int`` or ``float`` (excluding ``bool``).
+
+  Args:
+      val: Candidate value to inspect.
+
+  Returns:
+      ``True`` if ``val`` is numeric and not a boolean.
+  """
+  return isinstance(val, (int, float)) and not isinstance(val, bool)
 
 
 def _check_rule_condition(node: cst.CSTNode, rule: RuleInput) -> bool:
@@ -232,25 +284,13 @@ def _check_rule_condition(node: cst.CSTNode, rule: RuleInput) -> bool:
       True if the condition is met, False otherwise.
 
   """
-  assert _is_rule_attrs(rule)
+  if not _is_rule_attrs(rule):
+    return False
   op = rule.op
   target = rule.is_val
 
   if op == LogicOp.IS_TYPE:
-    expected_type = str(target).lower()
-    if isinstance(node, cst.Integer):
-      return expected_type == "int"
-    if isinstance(node, cst.Float):
-      return expected_type == "float"
-    if isinstance(node, cst.SimpleString):
-      return expected_type == "str"
-    if isinstance(node, (cst.List, cst.Tuple)):
-      return expected_type in ["list", "tuple", "sequence"]
-    if isinstance(node, cst.Dict):
-      return expected_type == "dict"
-    if isinstance(node, cst.Name) and node.value in ["True", "False"]:
-      return expected_type == "bool"
-    return False
+    return _matches_is_type_rule(node, str(target).lower())
 
   val = _node_to_literal(node)
   if val is None:
@@ -260,42 +300,8 @@ def _check_rule_condition(node: cst.CSTNode, rule: RuleInput) -> bool:
     return bool(val == target)
   if op == LogicOp.NEQ:
     return bool(val != target)
-  if op == LogicOp.GT:
-    return (
-      bool(val > target)
-      if isinstance(val, (int, float))
-      and isinstance(target, (int, float))
-      and not isinstance(val, bool)
-      and not isinstance(target, bool)
-      else False
-    )
-  if op == LogicOp.LT:
-    return (
-      bool(val < target)
-      if isinstance(val, (int, float))
-      and isinstance(target, (int, float))
-      and not isinstance(val, bool)
-      and not isinstance(target, bool)
-      else False
-    )
-  if op == LogicOp.GTE:
-    return (
-      bool(val >= target)
-      if isinstance(val, (int, float))
-      and isinstance(target, (int, float))
-      and not isinstance(val, bool)
-      and not isinstance(target, bool)
-      else False
-    )
-  if op == LogicOp.LTE:
-    return (
-      bool(val <= target)
-      if isinstance(val, (int, float))
-      and isinstance(target, (int, float))
-      and not isinstance(val, bool)
-      and not isinstance(target, bool)
-      else False
-    )
+  if op in _NUMERIC_RULE_OPS:
+    return _NUMERIC_RULE_OPS[op](val, target) if (_is_non_bool_number(val) and _is_non_bool_number(target)) else False
   if op == LogicOp.IN:
     return bool(val in target) if isinstance(target, (list, tuple, set, str, dict)) else False
   if op == LogicOp.NOT_IN:

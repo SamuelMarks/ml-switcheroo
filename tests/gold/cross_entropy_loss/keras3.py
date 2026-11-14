@@ -7,8 +7,8 @@ def compute_loss(logits: keras.KerasTensor, targets: keras.KerasTensor) -> keras
   """Computes loss.
 
   Args:
-      logits: The logits (keras.KerasTensor) for compute loss.
-      targets: The targets (keras.KerasTensor) for compute loss.
+      logits: Input `logits` parameter value (`keras.KerasTensor`).
+      targets: Input `targets` parameter value (`keras.KerasTensor`).
 
   Returns:
       Resulting `keras.KerasTensor` from compute loss.

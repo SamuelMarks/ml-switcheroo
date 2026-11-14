@@ -4,14 +4,15 @@ Generates standalone verification scripts.
 Bundles fuzzer logic (including Hypothesis strategies).
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
+import contextlib
 import inspect
 import json
 import textwrap
-from pathlib import Path
 import typing
+from pathlib import Path
 
 import libcst as cst
+import pydantic
 
 # Imports needed for bundling the fuzzer logic
 import ml_switcheroo.testing.fuzzer.generators
@@ -20,53 +21,64 @@ import ml_switcheroo.testing.fuzzer.parser
 import ml_switcheroo.testing.fuzzer.strategies
 import ml_switcheroo.testing.fuzzer.type_parser
 import ml_switcheroo.testing.fuzzer.utils
-from ml_switcheroo.frameworks.base import _ADAPTER_REGISTRY, get_adapter
+from ml_switcheroo.enums import RuntimeTensorOrValue
+from ml_switcheroo.frameworks.base import get_adapter, get_default_adapter_registry
 from ml_switcheroo.testing.fuzzer.core import InputFuzzer
 from ml_switcheroo.testing.harness_generator_template import get_harness_skeleton
 from ml_switcheroo.testing.signature_extractor import SignatureExtractor
 from ml_switcheroo.utils.code_extractor import CodeExtractor
 
 
+class HarnessConfig(pydantic.BaseModel):
+  """Typed configuration bundle for ``HarnessInjector``.
+
+  Attributes:
+      fuzzer_block: Standalone code block containing fuzzer logic.
+      imports_block: Import statements required for the target framework.
+      init_helpers_block: Initialization helper code block.
+      injection_block: Block containing parameter injection logic.
+      to_numpy_block: Logic for converting framework outputs to NumPy arrays.
+      source_path: File path of the source framework code.
+      target_path: File path of the target framework code.
+      source_framework: Name of the source framework (e.g., ``'torch'``).
+      target_framework: Name of the target framework (e.g., ``'jax'``).
+      hints_json: JSON string mapping ops to standard parameter types.
+  """
+
+  model_config = pydantic.ConfigDict(extra="forbid", frozen=True)
+
+  fuzzer_block: str = ""
+  imports_block: str = ""
+  init_helpers_block: str = ""
+  injection_block: str = ""
+  to_numpy_block: str = ""
+  source_path: str = ""
+  target_path: str = ""
+  source_framework: str = ""
+  target_framework: str = ""
+  hints_json: str = "{}"
+
+
 class HarnessInjector(cst.CSTTransformer):
   """Inject dynamic blocks into the harness skeleton."""
 
-  def __init__(
-    self,
-    fuzzer_block: str,
-    imports_block: str,
-    init_helpers_block: str,
-    injection_block: str,
-    to_numpy_block: str,
-    source_path: str,
-    target_path: str,
-    source_framework: str,
-    target_framework: str,
-    hints_json: str,
-  ) -> None:
-    """Initialize the injector with code blocks and metadata.
+  def __init__(self, config: HarnessConfig) -> None:
+    """Initialize the injector with a ``HarnessConfig`` parameter bundle.
 
     Args:
-        fuzzer_block: Standalone code block containing fuzzer logic.
-        imports_block: Import statements required for the target framework.
-        init_helpers_block: Initialization helper code block.
-        injection_block: Block containing parameter injection logic.
-        to_numpy_block: Logic for converting framework outputs to NumPy arrays.
-        source_path: File path of the source framework code.
-        target_path: File path of the target framework code.
-        source_framework: Name of the source framework (e.g., 'torch').
-        target_framework: Name of the target framework (e.g., 'jax').
-        hints_json: JSON string mapping ops to standard parameter types.
+        config: Typed ``HarnessConfig`` containing code blocks and framework metadata.
     """
-    self.fuzzer_block = fuzzer_block
-    self.imports_block = imports_block
-    self.init_helpers_block = init_helpers_block
-    self.injection_block = injection_block
-    self.to_numpy_block = to_numpy_block
-    self.source_path = source_path
-    self.target_path = target_path
-    self.source_framework = source_framework
-    self.target_framework = target_framework
-    self.hints_json = hints_json
+    self.config = config
+    self.fuzzer_block = config.fuzzer_block
+    self.imports_block = config.imports_block
+    self.init_helpers_block = config.init_helpers_block
+    self.injection_block = config.injection_block
+    self.to_numpy_block = config.to_numpy_block
+    self.source_path = config.source_path
+    self.target_path = config.target_path
+    self.source_framework = config.source_framework
+    self.target_framework = config.target_framework
+    self.hints_json = config.hints_json
 
   def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
     """Inject imports, fuzzer, and helpers at the module level.
@@ -140,10 +152,9 @@ class HarnessInjector(cst.CSTTransformer):
         isinstance(comp.operator, cst.NotIn)
         and isinstance(comp.comparator, cst.Name)
         and comp.comparator.value == "tgt_inputs"
-      ):
-        if self.injection_block.strip() != "pass":
-          parsed = cst.parse_module(self.injection_block).body
-          return updated_node.with_changes(body=updated_node.body.with_changes(body=parsed))
+      ) and self.injection_block.strip() != "pass":
+        parsed = cst.parse_module(self.injection_block).body
+        return updated_node.with_changes(body=updated_node.body.with_changes(body=parsed))
     return updated_node
 
   def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.BaseExpression:
@@ -202,8 +213,8 @@ class HarnessGenerator:
       for op_name, details in semantics.items():
         func_hints = {}
         raw_std_args = details.get("std_args", [])
-        assert isinstance(raw_std_args, list)
-        for arg in raw_std_args:
+        std_args_list = raw_std_args if isinstance(raw_std_args, list) else []
+        for arg in std_args_list:
           if isinstance(arg, (list, tuple)) and len(arg) == 2:
             func_hints[str(arg[0])] = str(arg[1])
           elif isinstance(arg, dict):
@@ -226,16 +237,18 @@ class HarnessGenerator:
     skeleton = get_harness_skeleton()
     module = cst.parse_module(skeleton)
     injector = HarnessInjector(
-      fuzzer_block=fuzzer_block,
-      imports_block=imports_block,
-      init_helpers_block=init_helpers_block,
-      injection_block=injection_logic_block,
-      to_numpy_block=to_numpy_block,
-      source_path=source_file.resolve().as_posix(),
-      target_path=target_file.resolve().as_posix(),
-      source_framework=source_framework,
-      target_framework=target_framework,
-      hints_json=hints_json,
+      HarnessConfig(
+        fuzzer_block=fuzzer_block,
+        imports_block=imports_block,
+        init_helpers_block=init_helpers_block,
+        injection_block=injection_logic_block,
+        to_numpy_block=to_numpy_block,
+        source_path=source_file.resolve().as_posix(),
+        target_path=target_file.resolve().as_posix(),
+        source_framework=source_framework,
+        target_framework=target_framework,
+        hints_json=hints_json,
+      )
     )
 
     modified_module = module.visit(injector)
@@ -265,6 +278,7 @@ class HarnessGenerator:
     deps.append("from pydantic import JsonValue")
     deps.append("import re")
     deps.append("import numpy as np")
+    deps.append("import dataclasses")
     deps.append("import numpy.typing as npt")
     deps.append("import typing")
     deps.append("NumpyScalar = np.number | np.bool_")
@@ -272,7 +286,7 @@ class HarnessGenerator:
     deps.append("FuzzValue = object")
     deps.append("FuzzConstraints = dict[str, object]")
 
-    for type_cls in (
+    type_classes = (
       ml_switcheroo.testing.fuzzer.type_parser.ParsedType,
       ml_switcheroo.testing.fuzzer.type_parser.AnyType,
       ml_switcheroo.testing.fuzzer.type_parser.NoneType,
@@ -284,8 +298,8 @@ class HarnessGenerator:
       ml_switcheroo.testing.fuzzer.type_parser.DictType,
       ml_switcheroo.testing.fuzzer.type_parser.TensorType,
       ml_switcheroo.testing.fuzzer.type_parser.CallableType,
-    ):
-      deps.append(self.extractor.extract_class(type_cls))
+    )
+    deps.extend(self.extractor.extract_class(type_cls) for type_cls in type_classes)
 
     from types import ModuleType
 
@@ -296,7 +310,7 @@ class HarnessGenerator:
           module: The Python module object to extract functions from.
       """
       funcs = inspect.getmembers(module, inspect.isfunction)
-      for name, func in funcs:
+      for _name, func in funcs:
         if func.__module__ == module.__name__:
           try:
             source = inspect.getsource(func)
@@ -316,7 +330,7 @@ class HarnessGenerator:
 
     fuzzer_class = self.extractor.extract_class(InputFuzzer)
 
-    return "\n\n".join(deps + [fuzzer_class])
+    return "\n\n".join([*deps, fuzzer_class])
 
   def _build_dynamic_init(self, target_framework: str) -> tuple[str, str, str]:
     """Build initialization helpers and parameter injection logic for the target framework.
@@ -383,10 +397,8 @@ class HarnessGenerator:
       adapter = get_adapter(fw)
       code = None
       if adapter is not None:
-        try:
+        with contextlib.suppress(AttributeError, TypeError, ValueError, RuntimeError):
           code = adapter.get_to_numpy_code()
-        except (AttributeError, TypeError, ValueError, RuntimeError):
-          pass
       if code:
         blocks.append(f"# Framework: {fw}\n{code}")
 
@@ -404,6 +416,7 @@ class HarnessGenerator:
       "def get_adapter(framework: str) -> object:",
       "    class GenericAdapter:",
       "        def convert(self, data: object) -> object:",
+      "            import logging",
       "            try:",
       "                import numpy as np",
       "                if not isinstance(data, (np.ndarray, np.generic)) and not isinstance(data, (list, tuple)):",
@@ -412,10 +425,11 @@ class HarnessGenerator:
       "                pass",
       "",
     ]
-    frameworks = sorted(_ADAPTER_REGISTRY.keys())
+    adapter_map = get_default_adapter_registry().adapters
+    frameworks = sorted(adapter_map.keys())
     first = True
     for fw_name in frameworks:
-      adapter_cls = _ADAPTER_REGISTRY[fw_name]
+      adapter_cls = adapter_map[fw_name]
       try:
         convert_fn = adapter_cls.convert
       except AttributeError:

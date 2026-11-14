@@ -60,7 +60,7 @@ class WasmBackend(CompilerBackend):
 
     # Determine inputs
     inputs = [n for n in graph.nodes.values() if n.op_type == "Input"]
-    for i, inp in enumerate(inputs):
+    for i, _inp in enumerate(inputs):
       func.params.append(WatParam(name=WasmRegister(f"arg{i}"), type_id="f32"))
 
     # Map nodes to instructions

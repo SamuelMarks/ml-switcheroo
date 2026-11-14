@@ -4,7 +4,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_neural_ops_sass_variants() -> None:
-  """Verifies the behavior of neural ops NVIDIA_SASS variants."""
+  """Verify `SemanticsManager` handles neural operations SASS variants as expected."""
   mgr = SemanticsManager()
   variant = mgr.resolve_variant("Conv2d", "nvidia_sass")
   assert variant is not None
@@ -16,7 +16,7 @@ def test_neural_ops_sass_variants() -> None:
 
 
 def test_math_ops_sass_variants() -> None:
-  """Verifies the behavior of math ops NVIDIA_SASS variants."""
+  """Verify `SemanticsManager` handles math operations SASS variants as expected."""
   mgr = SemanticsManager()
 
   variant_add = mgr.resolve_variant("Add", "nvidia_sass")
@@ -36,7 +36,7 @@ def test_no_dummy_instructions_in_nvidia_sass() -> None:
   path = os.path.join(os.path.dirname(__file__), "../../src/ml_switcheroo/semantics/nvidia_sass_isa.json")
   with open(path, "r") as f:
     data = json.load(f)
-  for k in data.keys():
+  for k in data:
     assert not k.startswith("DUMMY_NVIDIA_SASS_INST"), f"Found dummy instruction: {k}"
   assert "FFMA" in data
   assert "LDG" in data

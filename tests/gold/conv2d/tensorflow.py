@@ -4,7 +4,7 @@ import tensorflow as tf
 
 
 class ConvModel:
-  """Test helper class ConvModel."""
+  """Test double `ConvModel` implementing `call` for tensorflow tests."""
 
   def __init__(self, in_channels: int, out_channels: int, kernel_size: int = 3):
     """Initializes the ConvModel instance.
@@ -18,7 +18,7 @@ class ConvModel:
     self.conv = tf.keras.layers.Conv2D(out_channels, kernel_size, input_shape=(None, None, in_channels))
 
   def call(self, x: tf.Tensor) -> tf.Tensor:
-    """Helper to call.
+    """Execute `conv` to support call in tensorflow tests.
 
     Args:
         x: Primary input tensor or array operand.

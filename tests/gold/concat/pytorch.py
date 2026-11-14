@@ -4,12 +4,12 @@ import torch
 
 
 def concat_tensors(x: torch.Tensor, y: torch.Tensor, dim: int = -1) -> torch.Tensor:
-  """Helper to concat tensors.
+  """Execute `torch.cat` to support concat tensors in pytorch tests.
 
   Args:
       x: Primary input tensor or array operand.
       y: Secondary input tensor or target operand.
-      dim: The dim (int) for concat tensors.
+      dim: Input `dim` parameter value (`int`).
 
   Returns:
       Resulting `torch.Tensor` from concat tensors.

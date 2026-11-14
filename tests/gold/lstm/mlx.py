@@ -1,19 +1,18 @@
 """Test suite for the Mlx module."""
 
 import mlx.core as mx
-
 import mlx.nn as nn
 
 
 class LSTMModel:
-  """Test helper class LSTMModel."""
+  """Sentinel `LSTMModel` fixture class used in MLX tests."""
 
   def __init__(self, input_size: int, hidden_size: int):
     """Initializes the LSTMModel instance.
 
     Args:
-        input_size: The input size (int) for   init  .
-        hidden_size: The hidden size (int) for   init  .
+        input_size: Input `input_size` parameter value (`int`).
+        hidden_size: Input `hidden_size` parameter value (`int`).
     """
     super().__init__()
     self.lstm = nn.LSTM(input_size, hidden_size)
@@ -27,5 +26,5 @@ class LSTMModel:
     Returns:
         Output tensor or value computed by the forward pass.
     """
-    (output, (hn, cn)) = self.lstm(x)
+    (output, (_hn, _cn)) = self.lstm(x)
     return output

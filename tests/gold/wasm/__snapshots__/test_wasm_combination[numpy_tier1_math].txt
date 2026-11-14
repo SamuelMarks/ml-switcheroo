@@ -1,0 +1,30 @@
+--- Forward ---
+import keras
+import numpy as np
+
+def linear_algebra_ops(a, b):
+    # Tier 1: Standard Numeric Computing
+    # Matrix Multiplication
+    dot = np.matmul(a, b)
+
+    # Element-wise operations
+    diff = keras.ops.abs(a - b)
+
+    # Aggregation
+    norm = np.linalg.norm(diff)
+    return dot, norm
+
+--- Backward ---
+import numpy as np
+
+def linear_algebra_ops(a, b):
+    # Tier 1: Standard Numeric Computing
+    # Matrix Multiplication
+    dot = np.matmul(a, b)
+
+    # Element-wise operations
+    diff = np.abs(a - b)
+
+    # Aggregation
+    norm = np.linalg.norm(diff)
+    return dot, norm

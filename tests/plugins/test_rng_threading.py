@@ -1,8 +1,5 @@
 """Test suite for the Rng Threading module."""
 
-from tests.conftest import _test_getattr, _test_setattr
-
-import typing
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -30,14 +27,14 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 
 @pytest.fixture
-def rewriter() -> typing.Generator[PivotRewriter, None, None]:
+def rewriter() -> PivotRewriter:
   """Provides a mock rewriter for testing.
 
-  Yields:
+  Returns:
       PivotRewriter: A mock rewriter instance.
   """
-  _test_getattr(hooks._HOOKS, "__setitem__")("inject_prng", inject_prng_threading)
-  hooks._PLUGINS_LOADED = True
+  hooks.register_hook("inject_prng")(inject_prng_threading)
+  hooks.set_plugins_loaded(True)
   mgr: MagicMock = MagicMock()
   op_def: dict[str, dict[str, dict[str, str]]] = {"variants": {"jax": {"requires_plugin": "inject_prng"}}}
   mgr.get_definition.return_value = ("dropout", op_def)
@@ -45,11 +42,11 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   mgr.get_framework_config.return_value = {"plugin_traits": PluginTraits(requires_explicit_rng=True)}
   mgr.framework_configs = {}
   cfg: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
-  yield PivotRewriter(mgr, cfg)
+  return PivotRewriter(mgr, cfg)
 
 
 def test_rng_basic_injection(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of rng basic injection.
+  """Verify `rewrite_code` emits `key=key` for RNG basic injection.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
@@ -62,7 +59,7 @@ def test_rng_basic_injection(rewriter: PivotRewriter) -> None:
 
 
 def test_rng_custom_configuration(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of rng custom configuration.
+  """Verify `rewrite_code` emits `key=k` for RNG custom configuration.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
@@ -75,16 +72,18 @@ def test_rng_custom_configuration(rewriter: PivotRewriter) -> None:
   assert "key=k" in res
 
 
-def test_no_injection_if_traits_disabled(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of no injection if traits disabled.
+def test_no_injection_if_traits_disabled(rewriter: PivotRewriter, monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `rewrite_code` handles no injection if traits disabled as expected.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
-  _test_setattr(
+  monkeypatch.setattr(
     rewriter.semantics.get_framework_config,
     "return_value",
     {"plugin_traits": PluginTraits(requires_explicit_rng=False)},
+    raising=False,
   )
   code: str = "def f(x):\n  return torch.dropout(x)"
   res: str = rewrite_code(rewriter, code)
@@ -93,7 +92,7 @@ def test_no_injection_if_traits_disabled(rewriter: PivotRewriter) -> None:
 
 
 def test_rng_deduplication(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of rng deduplication.
+  """Verify `rewrite_code` returns `1` for RNG deduplication.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.

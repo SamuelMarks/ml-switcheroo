@@ -4,19 +4,19 @@ import keras
 
 
 class FlattenModel:
-  """Test helper class FlattenModel."""
+  """Test double `FlattenModel` implementing `call` for keras3 tests."""
 
   def __init__(self, start_dim: int = 1) -> None:
     """Initializes the FlattenModel instance.
 
     Args:
-        start_dim: The start dim (int) for   init  .
+        start_dim: Input `start_dim` parameter value (`int`).
     """
     super().__init__()
     self.flatten = keras.layers.Flatten()
 
   def call(self, x: keras.KerasTensor) -> keras.KerasTensor:
-    """Helper to call.
+    """Execute `flatten` to support call in keras3 tests.
 
     Args:
         x: Primary input tensor or array operand.

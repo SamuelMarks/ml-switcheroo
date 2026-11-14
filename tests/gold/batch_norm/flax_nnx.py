@@ -5,13 +5,13 @@ from flax import nnx
 
 
 class BNModel(nnx.Module):
-  """Test helper class BNModel."""
+  """Minimal `nnx.Module` test double used in flax NNX tests."""
 
   def __init__(self, num_features: int, rngs: nnx.Rngs):
     """Initializes the BNModel instance.
 
     Args:
-        num_features: The num features (int) for   init  .
+        num_features: Input `num_features` parameter value (`int`).
         rngs: Flax NNX Rngs container for stochastic parameter initialization.
     """
     self.bn = nnx.BatchNorm(num_features, rngs=rngs)
@@ -21,7 +21,7 @@ class BNModel(nnx.Module):
 
     Args:
         x: Primary input tensor or array operand.
-        use_running_average: The use running average (bool) for   call  .
+        use_running_average: Input `use_running_average` parameter value (`bool`).
 
     Returns:
         Output tensor or value computed by the forward pass.

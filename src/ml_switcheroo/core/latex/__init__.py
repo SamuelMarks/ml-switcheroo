@@ -16,11 +16,11 @@ from ml_switcheroo.core.latex.nodes import (
 )
 
 __all__ = [
-  "LatexNode",
-  "ModelContainer",
-  "MemoryNode",
-  "InputNode",
   "ComputeNode",
-  "StateOpNode",
+  "InputNode",
+  "LatexNode",
+  "MemoryNode",
+  "ModelContainer",
   "ReturnNode",
+  "StateOpNode",
 ]

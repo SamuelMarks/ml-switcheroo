@@ -1,6 +1,7 @@
-"""Test suite for parser."""
+"""Unit tests for `NvidiaSassParser`, `NvidiaSassTransformer`, and SASS CST (`ml_switcheroo.core.compiler.frontends.nvidia_sass`)."""
 
-from tests.conftest import _test_getattr
+import pytest
+from lark import Token, Tree
 
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
@@ -9,152 +10,206 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassInstruction,
   NvidiaSassLabel,
   NvidiaSassMemory,
-  NvidiaSassNode,
   NvidiaSassPredicate,
   NvidiaSassRegister,
 )
-from ml_switcheroo.core.compiler.frontends.nvidia_sass.parser import NvidiaSassParser
+from ml_switcheroo.core.compiler.frontends.nvidia_sass.parser import (
+  NvidiaSassParser,
+  NvidiaSassTransformer,
+  _get_trivia,
+)
+from ml_switcheroo.core.cst.base import Trivia
+
+_NL = chr(10)
 
 
-def test_parse_empty() -> None:
-  """Parses empty."""
-  parser = NvidiaSassParser("")
-  assert len(parser.parse().statements) == 0
+def test_nvidia_sass_parser_directives_predicates_operands_and_memory() -> None:
+  """Verify `NvidiaSassParser` parses comments, labels, directives, predicates, registers, memory, and immediates."""
+  assert NvidiaSassParser("").parse().statements == []
+  assert NvidiaSassParser("   ").parse().statements == []
+  assert NvidiaSassParser(";").parse().statements == []
 
+  cmt = NvidiaSassParser("// comment").parse().statements[0]
+  assert isinstance(cmt, NvidiaSassComment)
+  assert cmt.text == "comment"
 
-def test_parse_semicolon() -> None:
-  """Parses semicolon."""
-  parser = NvidiaSassParser(";")
-  assert len(parser.parse().statements) == 0
+  lbl = NvidiaSassParser("L_1:").parse().statements[0]
+  assert isinstance(lbl, NvidiaSassLabel)
+  assert lbl.name == "L_1"
 
+  d_bare = NvidiaSassParser(".text").parse().statements[0]
+  assert isinstance(d_bare, NvidiaSassDirective)
+  assert (d_bare.name, d_bare.params) == ("text", [])
 
-def test_parse_comment() -> None:
-  """Parses comment."""
-  parser = NvidiaSassParser("// comment")
-  nodes: list[NvidiaSassNode] = parser.parse().statements
-  assert len(nodes) == 1
-  assert isinstance(nodes[0], NvidiaSassComment)
-  assert nodes[0].text == "comment"
+  d_semi = NvidiaSassParser(".headerflags 1, 2;").parse().statements[0]
+  assert isinstance(d_semi, NvidiaSassDirective)
+  assert (d_semi.name, d_semi.params) == ("headerflags", ["1", "2"])
 
+  for dir_src, expected_params in (
+    ('.headerflags @"NV_PROFILE", "OTHER"', ['@"NV_PROFILE"', '"OTHER"']),
+    ('.headerflags @"NV_PROFILE", @"OTHER"', ['@"NV_PROFILE"', '@"OTHER"']),
+    ('.req foo, 5, @"test"', ["foo", "5", '@"test"']),
+  ):
+    d_item = NvidiaSassParser(dir_src).parse().statements[0]
+    assert isinstance(d_item, NvidiaSassDirective)
+    assert d_item.params == expected_params
 
-def test_parse_label() -> None:
-  """Parses label."""
-  parser = NvidiaSassParser("L_1:")
-  nodes: list[NvidiaSassNode] = parser.parse().statements
-  assert len(nodes) == 1
-  assert isinstance(nodes[0], NvidiaSassLabel)
-  assert nodes[0].name == "L_1"
+  assert len(NvidiaSassParser(f".text{_NL}.global main").parse().statements) == 2
+  assert len(NvidiaSassParser(f"MOV R0, R1{_NL}.text").parse().statements) == 2
+  assert len(NvidiaSassParser(f"FADD;{_NL}NOP").parse().statements) == 2
+  assert len(NvidiaSassParser(f"main:{_NL}  MOV R0, R1").parse().statements) == 2
 
+  # Guarded instructions (`@P0`, `@!P1`) and zero-operand instructions (`NOP;`, `RET`)
+  g_pos = NvidiaSassParser("@P0 FADD R0, R1;").parse().statements[0]
+  assert isinstance(g_pos, NvidiaSassInstruction)
+  assert g_pos.predicate is not None
+  assert (g_pos.predicate.name, g_pos.predicate.negated) == ("P0", False)
 
-def test_parse_directive() -> None:
-  """Parses directive."""
-  parser = NvidiaSassParser(".headerflags 1, 2;")
-  nodes: list[NvidiaSassNode] = parser.parse().statements
-  assert len(nodes) == 1
-  assert isinstance(nodes[0], NvidiaSassDirective)
-  assert nodes[0].name == "headerflags"
-  assert nodes[0].params == ["1", "2"]
+  g_neg = NvidiaSassParser("@!P1 FADD R0, R1;").parse().statements[0]
+  assert isinstance(g_neg, NvidiaSassInstruction)
+  assert g_neg.predicate is not None
+  assert (g_neg.predicate.name, g_neg.predicate.negated) == ("P1", True)
 
+  ret_inst = NvidiaSassParser("RET").parse().statements[0]
+  assert isinstance(ret_inst, NvidiaSassInstruction)
+  assert ret_inst.operands == []
 
-def test_parse_directive_multiline() -> None:
-  """Parses directive multiline."""
-  parser = NvidiaSassParser(".headerflags 1\n.global_base")
-  nodes: list[NvidiaSassNode] = parser.parse().statements
-  assert len(nodes) == 2
-
-
-def test_parse_instruction_simple() -> None:
-  """Parses instruction simple."""
-  parser = NvidiaSassParser("NOP;")
-  nodes: list[NvidiaSassNode] = parser.parse().statements
-  assert len(nodes) == 1
-  assert isinstance(nodes[0], NvidiaSassInstruction)
-  assert nodes[0].opcode == "NOP"
-
-
-def test_parse_instruction_predicate() -> None:
-  """Parses instruction predicate."""
-  parser = NvidiaSassParser("@P0 FADD R0, R1;")
-  nodes: list[NvidiaSassNode] = parser.parse().statements
-  assert len(nodes) == 1
-  inst = nodes[0]
-  assert isinstance(inst, NvidiaSassInstruction)
-  assert inst.opcode == "FADD"
-  assert isinstance(inst.predicate, NvidiaSassPredicate)
-  assert inst.predicate.name == "P0"
-  assert inst.predicate.negated is False
-  parser2 = NvidiaSassParser("@!P1 FADD R0, R1;")
-  inst2 = parser2.parse().statements[0]
-  assert isinstance(inst2, NvidiaSassInstruction)
-  assert inst2.predicate is not None
-  assert inst2.predicate.name == "P1"
-  assert inst2.predicate.negated is True
-
-
-def test_parse_operands() -> None:
-  """Parses operands."""
-  parser = NvidiaSassParser("FADD R0, -R1, |R2|, -|R3|, c[0x0][0x4], [R1 + 0x4], [R2], 0x1, 1.5, @P0, L_1, L_2")
-  nodes: list[NvidiaSassNode] = parser.parse().statements
-  inst = nodes[0]
-  assert isinstance(inst, NvidiaSassInstruction)
-  assert len(inst.operands) == 12
-  assert isinstance(inst.operands[0], NvidiaSassRegister) and inst.operands[0].name == "R0"
-  assert isinstance(inst.operands[1], NvidiaSassRegister) and inst.operands[1].negated is True
-  assert isinstance(inst.operands[2], NvidiaSassRegister) and inst.operands[2].absolute is True
-  assert (
-    isinstance(inst.operands[3], NvidiaSassRegister)
-    and inst.operands[3].absolute is True
-    and (inst.operands[3].negated is True)
+  # Rich 12-operand instruction + predicate/register/memory/immediate permutations
+  rich = (
+    NvidiaSassParser("FADD R0, -R1, |R2|, -|R3|, c[0x0][0x4], [R1 + 0x4], [R2], 0x1, 1.5, @P0, L_1, 5")
+    .parse()
+    .statements[0]
   )
-  assert (
-    isinstance(inst.operands[4], NvidiaSassMemory)
-    and inst.operands[4].base == "c[0x0]"
-    and (inst.operands[4].offset == 4)
+  assert isinstance(rich, NvidiaSassInstruction)
+  assert len(rich.operands) == 12
+  r0, r1, r2, r3 = rich.operands[0], rich.operands[1], rich.operands[2], rich.operands[3]
+  assert isinstance(r0, NvidiaSassRegister)
+  assert r0.name == "R0"
+  assert isinstance(r1, NvidiaSassRegister)
+  assert r1.negated is True
+  assert isinstance(r2, NvidiaSassRegister)
+  assert r2.absolute is True
+  assert isinstance(r3, NvidiaSassRegister)
+  assert (r3.absolute, r3.negated) == (True, True)
+
+  m_bank, m_pos, m_zero = rich.operands[4], rich.operands[5], rich.operands[6]
+  assert isinstance(m_bank, NvidiaSassMemory)
+  assert (m_bank.base, m_bank.offset) == ("c[0x0]", 4)
+  assert isinstance(m_pos, NvidiaSassMemory)
+  assert m_pos.offset == 4
+  assert isinstance(m_zero, NvidiaSassMemory)
+  assert m_zero.offset is None
+
+  imm_hex, imm_flt, pred_op, lbl_op, imm_int = (
+    rich.operands[7],
+    rich.operands[8],
+    rich.operands[9],
+    rich.operands[10],
+    rich.operands[11],
   )
-  assert (
-    isinstance(inst.operands[5], NvidiaSassMemory)
-    and _test_getattr(inst.operands[5].base, "name", None) == "R1"
-    and (inst.operands[5].offset == 4)
-  )
-  assert (
-    isinstance(inst.operands[6], NvidiaSassMemory)
-    and _test_getattr(inst.operands[6].base, "name", None) == "R2"
-    and (inst.operands[6].offset is None)
-  )
-  assert (
-    isinstance(inst.operands[7], NvidiaSassImmediate)
-    and inst.operands[7].value == 1
-    and (inst.operands[7].is_hex is True)
-  )
-  assert isinstance(inst.operands[8], NvidiaSassImmediate) and inst.operands[8].value == 1.5
-  assert isinstance(inst.operands[9], NvidiaSassPredicate) and inst.operands[9].name == "P0"
-  assert isinstance(inst.operands[10], NvidiaSassLabel) and inst.operands[10].name == "L_1"
-  assert isinstance(inst.operands[11], NvidiaSassLabel) and inst.operands[11].name == "L_2"
+  assert isinstance(imm_hex, NvidiaSassImmediate)
+  assert (imm_hex.value, imm_hex.is_hex) == (1, True)
+  assert isinstance(imm_flt, NvidiaSassImmediate)
+  assert imm_flt.value == 1.5
+  assert isinstance(pred_op, NvidiaSassPredicate)
+  assert pred_op.name == "P0"
+  assert isinstance(lbl_op, NvidiaSassLabel)
+  assert lbl_op.name == "L_1"
+  assert isinstance(imm_int, NvidiaSassImmediate)
+  assert (imm_int.value, imm_int.is_hex) == (5, False)
+
+  # Additional memory/predicate operand forms (`c[0x0]`, `[R1 + 10]`, `[R1 - 0x4]`, `@!P0`, `!PT`, `PT`, `@!R1`, `@R1`, `!P1`)
+  for extra_asm in (
+    "FADD R0, c[0x0]",
+    "FADD [R1 + 10]",
+    "FADD R0, [R1 - 0x4]",
+    "FADD R0, @!P0",
+    "FADD R0, !PT",
+    "FADD R0, PT",
+    "FADD R0, @!R1",
+    "FADD R0, @R1",
+    "FADD R0, !P1",
+  ):
+    parsed_extra = NvidiaSassParser(extra_asm).parse().statements[0]
+    assert isinstance(parsed_extra, NvidiaSassInstruction)
 
 
-def test_parse_memory_missing_offset() -> None:
-  """Parses memory missing offset."""
-  parser = NvidiaSassParser("FADD c[0x0]")
-  nodes: list[NvidiaSassNode] = parser.parse().statements
-  inst = nodes[0]
-  assert isinstance(inst, NvidiaSassInstruction)
-  assert isinstance(inst.operands[0], NvidiaSassMemory)
-  assert inst.operands[0].base == "c[0x0]"
-  assert inst.operands[0].offset is None
+def test_nvidia_sass_cst_printing_errors_and_transformer_helpers() -> None:
+  """Verify SASS CST stringification, invalid opcodes/syntax, `_get_trivia`, and `NvidiaSassTransformer`."""
+  for bad_src in ("~", "?", "MOV ¿"):
+    with pytest.raises(ValueError, match="Unexpected"):
+      NvidiaSassParser(bad_src).parse()
 
+  with pytest.raises(ValueError, match="Invalid NVIDIA_SASS opcode"):
+    NvidiaSassInstruction(opcode="BAD OPCODE", operands=[])
 
-def test_parse_memory_dec_offset() -> None:
-  """Parses memory dec offset."""
-  parser = NvidiaSassParser("FADD [R1 + 10]")
-  nodes: list[NvidiaSassNode] = parser.parse().statements
-  inst = nodes[0]
-  assert isinstance(inst, NvidiaSassInstruction)
-  assert isinstance(inst.operands[0], NvidiaSassMemory)
-  assert inst.operands[0].offset == 10
+  mod_txt = str(NvidiaSassParser(f"main:{_NL}  MOV R0, R1{_NL}.text{_NL}// foo{_NL}").parse())
+  assert "MOV" in mod_txt
+  assert "main:" in mod_txt
+  assert ".text" in mod_txt
 
+  assert str(NvidiaSassImmediate(value=42, is_hex=False)) == "42"
+  assert str(NvidiaSassImmediate(value=42, is_hex=True)) == "0x2a"
+  assert str(NvidiaSassImmediate(value=-42, is_hex=False)) == "-42"
+  assert str(NvidiaSassImmediate(value=-42, is_hex=True)) == "-0x2a"
+  assert str(NvidiaSassPredicate(name="PT", negated=False)) == "PT"
+  assert str(NvidiaSassPredicate(name="PT", negated=True)) == "!PT"
 
-def test_instruction_multiline() -> None:
-  """Verifies the behavior of instruction multiline."""
-  # Changed from FADD\nNOP because Lark might parse it as FADD NOP (operands)
-  parser = NvidiaSassParser("FADD;\nNOP")
-  assert len(parser.parse().statements) == 2
+  reg = NvidiaSassRegister(name="R0")
+  assert str(reg) == "R0"
+  assert str(NvidiaSassRegister(name="R0", negated=True)) == "-R0"
+  assert str(NvidiaSassRegister(name="R0", absolute=True)) == "|R0|"
+  assert str(NvidiaSassRegister(name="R0", absolute=True, negated=True)) == "-|R0|"
+
+  assert "[R0]" in str(NvidiaSassMemory(base=reg, offset=0))
+  assert "[R0 + 0x4]" in str(NvidiaSassMemory(base=reg, offset=4))
+  assert "[R0 + -0x4]" in str(NvidiaSassMemory(base=reg, offset=-4))
+  assert "c[0x0][0x8]" in str(NvidiaSassMemory(base="c[0x0]", offset=8))
+  assert "c[0x0][0x0]" in str(NvidiaSassMemory(base="c[0x0]", offset=None))
+
+  guard_pred = NvidiaSassPredicate(name="PT", is_guard=True)
+  assert "@PT MOV;" in str(NvidiaSassInstruction(opcode="MOV", operands=[], predicate=guard_pred))
+  op1 = NvidiaSassImmediate(value=1, is_hex=False)
+  op2 = NvidiaSassImmediate(value=2, is_hex=False)
+  op2.leading_trivia = [Trivia(" ")]
+  assert "MOV 1 2;" in str(NvidiaSassInstruction(opcode="MOV", operands=[op1, op2]))
+  assert ".text a, b" in str(NvidiaSassDirective(name="text", params=["a", "b"]))
+
+  # `_get_trivia` across direct trivia, empty children, missing children, and nested child trivia
+  class _EmptyChildren:
+    """Stub node with empty `children`."""
+
+    def __init__(self) -> None:
+      """Set empty `children`."""
+      self.children: list[Token] = []
+
+  class _NoChildren:
+    """Stub node without `children` or `leading_trivia`."""
+
+  class _ChildWithTrivia:
+    """Stub node with `leading_trivia`."""
+
+    def __init__(self) -> None:
+      """Set `leading_trivia`."""
+      self.leading_trivia = [Trivia("some_trivia")]
+
+  assert _get_trivia(_EmptyChildren()) == []
+  assert _get_trivia(_NoChildren()) == []
+  assert _get_trivia(_ChildWithTrivia()) == [Trivia("some_trivia")]
+  assert _get_trivia(Tree("dummy", [_ChildWithTrivia()])) == [Trivia("some_trivia")]
+
+  # `NvidiaSassTransformer` non-list / mixed / `at_string` directive params and empty instruction
+  t = NvidiaSassTransformer()
+  assert t.directive([Token("DOT", "."), Token("IDENTIFIER", "req"), "string_param"]).params == ["string_param"]
+  assert t.directive([Token("DOT", "."), Token("IDENTIFIER", "req"), [Token("IDENTIFIER", "abc"), 123]]).params == [
+    "abc",
+    "123",
+  ]
+  at_tree = Tree("at_string", [Token("AT", "@"), Token("STRING", '"val"')])
+  assert t.directive([Token("DOT", "."), Token("IDENTIFIER", "req"), [at_tree]]).params == ['@"val"']
+  assert t.instruction([None, None]).opcode == ""
+
+  from ml_switcheroo.exceptions import SyntaxParseError
+
+  with pytest.raises(SyntaxParseError, match="Expected NvidiaSassModule root"):
+    NvidiaSassParser("NOP;")._validate_module(NvidiaSassLabel(name="not_mod"))

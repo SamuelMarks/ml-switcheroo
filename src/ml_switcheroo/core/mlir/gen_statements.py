@@ -1,203 +1,211 @@
-"""Statement Generation Mixin for MLIR->Python.
+"""Statement Generation Delegate for MLIR -> Python.
 
-This module implements the transformation logic for structural MLIR operations
-(`sw.module`, `sw.func`, `sw.setattr`, `sw.return`) into Python LibCST statements.
-It operates as a mixin to be combined with expression generation logic in the main generator.
+Provides ``MlirStatementGenerator``, a single-responsibility delegate translating
+structural MLIR operations (``sw.module``, ``sw.func`` / ``func.func``,
+``sw.setattr``, ``sw.import``, and ``sw.return``) into Python LibCST statements.
 """
 
 import ast
+import typing
 from collections import defaultdict
 
 import libcst as cst
 
 from ml_switcheroo.core.mlir.cst import BlockNode, OperationNode
-from ml_switcheroo.core.mlir.gen_base import BaseGeneratorMixin
+from ml_switcheroo.core.mlir.gen_base import MlirGenHelpers
 from ml_switcheroo.core.mlir.naming import NamingContext
 
 
-class StatementGeneratorMixin(BaseGeneratorMixin):
-  """Mixin class for generating LibCST Statements from MLIR Operations.
+class MlirStmtGeneratorHost(typing.Protocol):
+  """Structural protocol required by ``MlirStatementGenerator``.
 
   Attributes:
-      ctx: The naming context used for resolving variable names and scopes.
-      usage_counts: A dictionary counting the usage of variables/SSA values.
-      usage_consumers: A dictionary mapping SSA names to their consumer operations.
+      ctx: Active ``NamingContext`` for variable naming.
+      usage_counts: Mapping of SSA value names to usage counts.
+      usage_consumers: Mapping of SSA value names to consumer operations.
   """
 
-  # Interface requirements from host class (MlirToPythonGenerator)
   ctx: NamingContext
   usage_counts: defaultdict[str, int]
   usage_consumers: dict[str, OperationNode]
 
   def _resolve_operand(self, ssa_name: str) -> cst.BaseExpression:
-    """Resolve an SSA value name to its Python expression.
+    """Resolve an SSA value name to its Python ``cst.BaseExpression``.
 
     Args:
-        ssa_name: The name of the SSA value.
+        ssa_name: SSA value identifier.
 
     Returns:
-        The corresponding LibCST expression.
+        Resolved ``cst.BaseExpression``.
     """
-    raise NotImplementedError
+    ...
 
   def _convert_block(self, block: BlockNode) -> list[cst.SimpleStatementLine | cst.BaseCompoundStatement]:
-    """Convert a block of MLIR operations into a list of Python statements.
+    """Convert an MLIR ``BlockNode`` into a list of Python statements.
 
     Args:
-        block: The MLIR block node.
+        block: MLIR ``BlockNode`` to convert.
 
     Returns:
-        A list of LibCST statements.
+        List of LibCST statements.
     """
-    raise NotImplementedError
+    ...
 
   def _scan_block_usage(self, block: BlockNode) -> None:
-    """Scan a block to analyze variable usage.
+    """Analyze SSA operand usage counts within ``block``.
 
     Args:
-        block: The MLIR block node.
-
-    Returns:
-        None.
+        block: MLIR ``BlockNode`` to scan.
     """
-    raise NotImplementedError
+    ...
 
-  def _convert_setattr(self, op: OperationNode) -> cst.SimpleStatementLine:
-    """Convert a `sw.setattr` operation to a Python assignment statement.
+
+class MlirStatementGenerator:
+  """Single-responsibility delegate generating LibCST statements from structural MLIR ops.
+
+  Attributes:
+      host: Bound ``MlirStmtGeneratorHost`` instance.
+      helpers: ``MlirGenHelpers`` utility instance.
+  """
+
+  def __init__(self, host: MlirStmtGeneratorHost, helpers: MlirGenHelpers | None = None) -> None:
+    """Initialize ``MlirStatementGenerator`` bound to ``host``.
 
     Args:
-        op: The MLIR operation node representing the `sw.setattr` instruction.
+        host: Bound ``MlirStmtGeneratorHost`` instance.
+        helpers: Optional ``MlirGenHelpers`` instance.
+    """
+    self.host: MlirStmtGeneratorHost = host
+    self.helpers: MlirGenHelpers = helpers if helpers is not None else MlirGenHelpers()
+
+  def convert_setattr(self, op: OperationNode) -> cst.SimpleStatementLine:
+    """Convert an ``sw.setattr`` operation into a Python attribute assignment statement.
+
+    Args:
+        op: ``OperationNode`` representing ``sw.setattr``.
 
     Returns:
-        A LibCST SimpleStatementLine representing the Python assignment.
+        ``cst.SimpleStatementLine`` containing the assignment (or ``pass`` if malformed).
     """
     if len(op.operands) < 2:
       return cst.SimpleStatementLine(body=[cst.Pass()])
 
-    obj_expr = self._resolve_operand(op.operands[0].name)
-    val_expr = self._resolve_operand(op.operands[1].name)
-    attr_name = (self._get_attr(op, "name") or "unknown").strip('"')
+    obj_expr = self.host._resolve_operand(op.operands[0].name)
+    val_expr = self.host._resolve_operand(op.operands[1].name)
+    attr_name = (self.helpers.get_attr(op, "name") or "unknown").strip('"')
 
     target = cst.Attribute(value=obj_expr, attr=cst.Name(attr_name))
     assign = cst.Assign(targets=[cst.AssignTarget(target=target)], value=val_expr)
     return cst.SimpleStatementLine(body=[assign])
 
-  def _convert_import(self, op: OperationNode) -> cst.SimpleStatementLine:
-    """Convert `sw.import` back to Import/ImportFrom statement.
+  def convert_import(self, op: OperationNode) -> cst.SimpleStatementLine:
+    """Convert an ``sw.import`` operation back into a Python ``import`` / ``from ... import`` line.
 
     Args:
-        op: The MLIR operation node representing the import statement.
+        op: ``OperationNode`` representing ``sw.import``.
 
     Returns:
-        A LibCST SimpleStatementLine containing the equivalent Python import statement.
+        ``cst.SimpleStatementLine`` containing the reconstructed import statement.
     """
-    module_attr = self._get_attr(op, "module")
-    names_attr = self._get_attr(op, "names")
-    aliases_attr = self._get_attr(op, "aliases")
+    module_attr = self.helpers.get_attr(op, "module")
+    names_attr = self.helpers.get_attr(op, "names")
+    aliases_attr = self.helpers.get_attr(op, "aliases")
 
-    # Parse list strings using ast.literal_eval for safety
-    names = []
-    aliases = []
+    names: list[str] = []
+    aliases: list[str] = []
     try:
       if names_attr:
-        names = ast.literal_eval(names_attr)
+        parsed_names = ast.literal_eval(names_attr)
+        if isinstance(parsed_names, list):
+          names = [str(item) for item in parsed_names]
       if aliases_attr:
-        aliases = ast.literal_eval(aliases_attr)
-    except Exception:
+        parsed_aliases = ast.literal_eval(aliases_attr)
+        if isinstance(parsed_aliases, list):
+          aliases = [str(item) for item in parsed_aliases]
+    except (ValueError, SyntaxError):
       pass
 
     module_val = module_attr.strip('"') if module_attr else None
 
-    import_aliases = []
-    for n, a in zip(names, aliases):
-      # Clean quotes
-      n = str(n).strip("'").strip('"')
-      a = str(a).strip("'").strip('"')
+    import_aliases: list[cst.ImportAlias] = []
+    for n, a in zip(names, aliases, strict=False):
+      clean_n = str(n).strip("'").strip('"')
+      clean_a = str(a).strip("'").strip('"')
 
-      if n == "*":
-        # ImportStar
+      if clean_n == "*":
         return cst.SimpleStatementLine(
-          body=[cst.ImportFrom(module=self._create_dotted_name(module_val or ""), names=cst.ImportStar())]
+          body=[cst.ImportFrom(module=self.helpers.create_dotted_name(module_val or ""), names=cst.ImportStar())]
         )
 
-      asname = None
-      if a and a != n:
-        asname = cst.AsName(name=cst.Name(a))
-
-      import_aliases.append(cst.ImportAlias(name=self._create_dotted_name(n), asname=asname))
+      asname = cst.AsName(name=cst.Name(clean_a)) if (clean_a and clean_a != clean_n) else None
+      import_aliases.append(cst.ImportAlias(name=self.helpers.create_dotted_name(clean_n), asname=asname))
 
     if module_val:
       if import_aliases:
         return cst.SimpleStatementLine(
-          body=[cst.ImportFrom(module=self._create_dotted_name(module_val or ""), names=import_aliases)]
+          body=[cst.ImportFrom(module=self.helpers.create_dotted_name(module_val), names=import_aliases)]
         )
-      else:
-        return cst.SimpleStatementLine(
-          body=[cst.Import(names=[cst.ImportAlias(name=self._create_dotted_name(module_val))])]
-        )
-    else:
-      if import_aliases:
-        return cst.SimpleStatementLine(body=[cst.Import(names=import_aliases)])
-      else:
-        return cst.SimpleStatementLine(body=[cst.Pass()])
+      return cst.SimpleStatementLine(
+        body=[cst.Import(names=[cst.ImportAlias(name=self.helpers.create_dotted_name(module_val))])]
+      )
 
-  def _convert_return(self, op: OperationNode) -> cst.SimpleStatementLine:
-    """Convert a `sw.return` operation to a Python return statement.
+    if import_aliases:
+      return cst.SimpleStatementLine(body=[cst.Import(names=import_aliases)])
+    return cst.SimpleStatementLine(body=[cst.Pass()])
+
+  def convert_return(self, op: OperationNode) -> cst.SimpleStatementLine:
+    """Convert a return operation into a Python ``return`` statement.
 
     Args:
-        op: The MLIR operation node representing the return instruction.
+        op: ``OperationNode`` representing ``sw.return`` / ``func.return`` / ``stablehlo.return``.
 
     Returns:
-        A LibCST SimpleStatementLine containing the return statement.
+        ``cst.SimpleStatementLine`` containing ``cst.Return``.
     """
-    val_node = None
-    if op.operands:
-      val_node = self._resolve_operand(op.operands[0].name)
+    val_node = self.host._resolve_operand(op.operands[0].name) if op.operands else None
     return cst.SimpleStatementLine(body=[cst.Return(value=val_node)])
 
-  def _convert_class_def(self, op: OperationNode) -> cst.ClassDef:
-    """Convert a `sw.module` operation to a Python Class definition.
+  def convert_class_def(self, op: OperationNode) -> cst.ClassDef:
+    """Convert an ``sw.module`` operation into a Python ``cst.ClassDef``.
 
     Args:
-        op: The MLIR operation node representing the module/class definition.
+        op: ``OperationNode`` representing ``sw.module``.
 
     Returns:
-        A LibCST ClassDef representing the Python class.
+        Constructed ``cst.ClassDef``.
     """
-    name_attr = self._get_attr(op, "sym_name")
+    name_attr = self.helpers.get_attr(op, "sym_name")
     class_name = name_attr.strip('"') if name_attr else "UnknownClass"
 
-    base_nodes = []
-    bases_attr = self._get_attr(op, "bases")
+    base_nodes: list[cst.Arg] = []
+    bases_attr = self.helpers.get_attr(op, "bases")
     if bases_attr:
       clean = bases_attr.strip("[]")
       if clean:
-        parts = clean.split(",")
-        for p in parts:
+        for p in clean.split(","):
           b = p.strip().strip('"').strip("'")
           if b:
-            base_nodes.append(cst.Arg(value=self._create_dotted_name(b)))
+            base_nodes.append(cst.Arg(value=self.helpers.create_dotted_name(b)))
 
-    body_stmts = []
+    body_stmts: list[cst.SimpleStatementLine | cst.BaseCompoundStatement] = []
     if op.regions and op.regions[0].blocks:
-      # Recursively convert body block
-      body_stmts = self._convert_block(op.regions[0].blocks[0])
+      body_stmts = self.host._convert_block(op.regions[0].blocks[0])
 
     if not body_stmts:
       body_stmts = [cst.SimpleStatementLine(body=[cst.Pass()])]
 
     return cst.ClassDef(name=cst.Name(class_name), bases=base_nodes, body=cst.IndentedBlock(body=body_stmts))
 
-  def _convert_func_def(self, op: OperationNode) -> cst.FunctionDef:
-    """Convert a `sw.func` operation to a Python Function definition.
+  def convert_func_def(self, op: OperationNode) -> cst.FunctionDef:
+    """Convert an ``sw.func`` / ``func.func`` operation into a Python ``cst.FunctionDef``.
 
     Args:
-        op: The MLIR operation node representing the function definition.
+        op: ``OperationNode`` representing the function definition.
 
     Returns:
-        A LibCST FunctionDef representing the Python function.
+        Constructed ``cst.FunctionDef``.
     """
-    name_attr = self._get_attr(op, "sym_name")
+    name_attr = self.helpers.get_attr(op, "sym_name")
     func_name = name_attr.strip('"').lstrip("@") if name_attr else ""
     if not func_name and isinstance(op.name_trivia, list):
       for t in op.name_trivia:
@@ -208,47 +216,45 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
     if not func_name:
       func_name = "unknown_func"
 
-    # Scope Reset
-    prev_ctx = self.ctx
-    self.ctx = NamingContext()
+    prev_ctx = self.host.ctx
+    self.host.ctx = NamingContext()
+    prev_usage_counts = self.host.usage_counts
+    self.host.usage_counts = defaultdict(int)
+    prev_usage_consumers = self.host.usage_consumers
+    self.host.usage_consumers = {}
 
-    # Reset Usage Counts
-    prev_usage_counts = self.usage_counts
-    self.usage_counts = defaultdict(int)
-    # Also reset consumers map
-    prev_usage_consumers = self.usage_consumers
-    self.usage_consumers = {}
-
-    params = []
-    body_stmts = []
+    params: list[cst.Param] = []
+    body_stmts: list[cst.SimpleStatementLine | cst.BaseCompoundStatement] = []
 
     try:
       if op.regions and op.regions[0].blocks:
         block0 = op.regions[0].blocks[0]
-        # Pre-analyze usage for this scope
-        self._scan_block_usage(block0)
+        self.host._scan_block_usage(block0)
 
-        # Register arguments in local context
         for val, typ in block0.arguments:
-          py_name = self.ctx.register(val.name, hint=val.name)
+          py_name = self.host.ctx.register(val.name, hint=val.name)
           annotation = None
           type_str = typ.body
           if type_str and type_str.startswith("!sw.type<"):
             inner = type_str[9:-1].strip('"').strip("'")
             if inner != "Any":
-              annotation = cst.Annotation(annotation=self._create_dotted_name(inner))
+              annotation = cst.Annotation(annotation=self.helpers.create_dotted_name(inner))
           params.append(cst.Param(name=cst.Name(py_name), annotation=annotation))
 
-        body_stmts = self._convert_block(block0)
+        body_stmts = self.host._convert_block(block0)
 
       if not body_stmts:
         body_stmts = [cst.SimpleStatementLine(body=[cst.Pass()])]
-
     finally:
-      self.ctx = prev_ctx
-      self.usage_counts = prev_usage_counts
-      self.usage_consumers = prev_usage_consumers
+      self.host.ctx = prev_ctx
+      self.host.usage_counts = prev_usage_counts
+      self.host.usage_consumers = prev_usage_consumers
 
     return cst.FunctionDef(
-      name=cst.Name(func_name), params=cst.Parameters(params=params), body=cst.IndentedBlock(body=body_stmts)
+      name=cst.Name(func_name),
+      params=cst.Parameters(params=params),
+      body=cst.IndentedBlock(body=body_stmts),
     )
+
+
+__all__ = ["MlirStatementGenerator", "MlirStmtGeneratorHost"]

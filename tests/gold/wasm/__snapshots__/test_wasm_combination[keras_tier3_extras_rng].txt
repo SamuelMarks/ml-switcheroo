@@ -1,0 +1,15 @@
+--- Forward ---
+import keras
+
+def generate_noise(shape):
+  # Tier 3: Random Number Generation
+  seed = keras.random.SeedGenerator(42)
+  return keras.random.normal(shape, seed=seed)
+
+--- Backward ---
+import keras
+
+def generate_noise(shape):
+  # Tier 3: Random Number Generation
+  seed = keras.random.SeedGenerator(42)
+  return keras.random.normal(shape, seed=seed)

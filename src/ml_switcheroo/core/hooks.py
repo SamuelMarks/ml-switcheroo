@@ -1,41 +1,42 @@
 """Plugin Binding Infrastructure.
 
-This module provides the infrastructure for extending ml-switcheroo via plugins.
-It enables developers to intercept and modify the Abstract Syntax Tree (AST)
-during the conversion process using a hook-based system.
-
-Refactor:
-    - Added `auto_wire` support to the `register_hook` decorator.
-    - Plugins can now declare their own Semantic definitions.
-    - HookContext now exposes `plugin_traits` and `current_variant` for data-driven logic.
-    - **New**: `resolve_type` method to query Symbol Table.
+This module provides the ``HookContext`` passed to plugin hooks during AST
+transpilation and re-exports ``HookRegistry`` registration and lookup helpers.
 """
 
-from __future__ import annotations  # noqa: E402
+from __future__ import annotations
 
-import sys  # noqa: E402
-import types  # noqa: E402
-import typing  # noqa: E402
-from pydantic import BaseModel, Field, ConfigDict, JsonValue  # noqa: E402
-import libcst as cst  # noqa: E402
+import typing
 
-# We import RuntimeConfig for type hinting
-from ml_switcheroo.core.dsl import FrameworkVariant  # noqa: E402
-from ml_switcheroo.semantics.schema import PluginTraits  # noqa: E402
+import libcst as cst
+from pydantic import BaseModel, JsonValue
 
-# Lazy import to avoid circular dependency
-if typing.TYPE_CHECKING:
-  from ml_switcheroo.analysis.symbol_table import SymbolTable as SymbolTableType
-  from ml_switcheroo.config import RuntimeConfig as RuntimeConfigType
-  from ml_switcheroo.semantics.manager import SemanticsManager as SemanticsManagerType
-else:
-  SymbolTableType = type
-  RuntimeConfigType = type
-  SemanticsManagerType = type
+from ml_switcheroo.analysis.symbol_table import SymbolTable as SymbolTableType
+from ml_switcheroo.config import RuntimeConfig as RuntimeConfigType
+from ml_switcheroo.core.dsl import FrameworkVariant, ParameterDef
+from ml_switcheroo.core.hooks_registry import (
+  AutoWireSpec,
+  HookCallable,
+  HookRegistry,
+  bind_hook_registry,
+  clear_hooks,
+  get_all_hook_metadata,
+  get_default_hook_registry,
+  get_hook,
+  load_plugins,
+  register_hook,
+  set_plugins_loaded,
+)
+from ml_switcheroo.semantics.manager import SemanticsManager as SemanticsManagerType
+from ml_switcheroo.semantics.resolution import (
+  query_framework_traits,
+  query_operation,
+  query_variant,
+)
+from ml_switcheroo.semantics.schema import PluginTraits
 
 T = typing.TypeVar("T", bound=BaseModel)
 
-# Callbacks for plugin side-effects
 ArgInjectorType = typing.Callable[[str, str | None], None]
 PreambleInjectorType = typing.Callable[[str], None]
 PluginMetadataValue: typing.TypeAlias = (
@@ -46,29 +47,28 @@ PluginMetadataValue: typing.TypeAlias = (
   | dict[str, cst.BaseExpression]
 )
 
-
-class AutoWireSpec(BaseModel):
-  """Schema for plugin self-registration metadata.
-
-  Allows a plugin to define the Semantic Operation it satisfies.
-  """
-
-  model_config = ConfigDict(extra="allow")
-
-  ops: dict[str, JsonValue] | None = Field(
-    default_factory=lambda: {},
-    description="Dictionary of Abstract Operations to inject into SemanticsManager.",
-  )
+HookFunction = HookCallable
 
 
-# Updated Type alias to allow arbitrary CSTNodes (e.g. For, Call)
 class HookContext:
   """Context object passed to every plugin hook during transcoding.
 
-  Provides read-only access to global state and write access
-  to specific injection points (signature args, function body preambles).
-  Now exposes `plugin_traits` and `current_variant` for data-driven decisions.
+  Provides read-only access to semantic/config state and controlled write access
+  to function signature argument and preamble injection points.
+
+  Attributes:
+      semantics: Reference to the ``SemanticsManager`` (or ``None``).
+      hook_registry: Active ``HookRegistry`` associated with this conversion run.
+      source_framework: Effective source framework identifier.
+      target_framework: Effective target framework identifier.
+      metadata: Per-conversion mutable plugin state dictionary.
+      current_op_id: Currently active abstract operation identifier, if any.
   """
+
+  semantics: SemanticsManagerType | None = None
+  current_op_id: str | None = None
+  source_framework: str = ""
+  target_framework: str = ""
 
   def __init__(
     self,
@@ -77,27 +77,28 @@ class HookContext:
     arg_injector: ArgInjectorType | None = None,
     preamble_injector: PreambleInjectorType | None = None,
     symbol_table: SymbolTableType | None = None,
-  ):
+    hook_registry: HookRegistry | None = None,
+  ) -> None:
     """Initialize the hook context.
 
     Args:
-        semantics: Reference to the SemanticsManager.
+        semantics: Reference to the ``SemanticsManager``.
         config: Runtime configuration (strict mode, selected frameworks).
         arg_injector: Callback to inject arguments into function signature.
         preamble_injector: Callback to inject code at top of function.
         symbol_table: Pre-calculated Symbol Table for type resolution.
-
+        hook_registry: Optional explicit ``HookRegistry`` instance.
     """
     self.semantics: SemanticsManagerType | None = semantics
     self._runtime_config = config
     self._arg_injector = arg_injector
     self._preamble_injector = preamble_injector
     self._symbol_table = symbol_table
+    self.hook_registry: HookRegistry = hook_registry if hook_registry is not None else get_default_hook_registry()
 
     self.source_framework = config.effective_source
     self.target_framework = config.effective_target
 
-    # Plugin State
     self.metadata: dict[str, PluginMetadataValue] = {}
     self.current_op_id: str | None = None
 
@@ -108,8 +109,7 @@ class HookContext:
         node: The LibCST node to inspect.
 
     Returns:
-        str: "Tensor" if it's a tensor, "Module" if module, or None.
-
+        ``"Tensor"`` if tensor, ``"Module"`` if module, symbol name string, or ``None``.
     """
     if not self._symbol_table:
       return None
@@ -118,7 +118,6 @@ class HookContext:
     if not sym:
       return None
 
-    # Return simple string type indicator
     if "Tensor" in sym.name:
       return "Tensor"
     if "Module" in sym.name:
@@ -129,60 +128,33 @@ class HookContext:
   def plugin_traits(self) -> PluginTraits:
     """Return the capabilities of the current Target Framework.
 
-    This allows plugins to check functionality (e.g. has_numpy_compatible_arrays)
-    rather than checking the framework name string.
-
     Returns:
-        PluginTraits: The capability flags for the target framework.
-
+        Capability flags for the target framework.
     """
     if self.semantics is None:
       return PluginTraits()
 
-    conf = self.semantics.get_framework_config(self.target_framework)
-    if not conf:
-      return PluginTraits()
-
-    # Handle dict or Pydantic object
-    traits = conf.get("plugin_traits")
-    if not traits:
-      return PluginTraits()
-
-    if isinstance(traits, dict):
-      return PluginTraits.model_validate(traits)
-    if isinstance(traits, PluginTraits):
-      return traits
-
-    return PluginTraits()
+    fw_traits = query_framework_traits(self.semantics, self.target_framework)
+    return fw_traits.plugin_traits if fw_traits.plugin_traits is not None else PluginTraits()
 
   @property
   def current_variant(self) -> FrameworkVariant | None:
-    """Return the Variant definition for the current operation/target.
-
-    Allows plugins to read extra metadata defined in the JSON (e.g. pack_to_tuple).
+    """Return the ``FrameworkVariant`` definition for the current operation and target.
 
     Returns:
-        Optional[FrameworkVariant]: The variant definition if resolved, else None.
-
+        The variant definition if resolved, else ``None``.
     """
     if self.semantics is None or not self.current_op_id:
       return None
 
-    # Access definition
-    # Use low-level retrieval to avoid recursion
-    data = self.semantics.resolve_variant(self.current_op_id, self.target_framework)
-    if not data:
-      return None
-
-    return FrameworkVariant.model_validate(data)
+    return query_variant(self.semantics, self.current_op_id, self.target_framework)
 
   def inject_signature_arg(self, name: str, annotation: str | None = None) -> None:
-    """Request injection of argument into the current function signature.
+    """Request injection of an argument into the current function signature.
 
     Args:
-        name (str): The name of the argument to inject.
-        annotation (Optional[str]): Type hint string for the argument.
-
+        name: Name of the argument to inject.
+        annotation: Optional type hint string for the argument.
     """
     if self._arg_injector:
       self._arg_injector(name, annotation)
@@ -191,8 +163,7 @@ class HookContext:
     """Request injection of a statement at the beginning of the function body.
 
     Args:
-        code_str (str): Python source code string to inject.
-
+        code_str: Python source code string to inject.
     """
     if self._preamble_injector:
       self._preamble_injector(code_str)
@@ -201,25 +172,23 @@ class HookContext:
     """Retrieve a raw value from the unstructured plugin settings dict.
 
     Args:
-        key (str): Configuration key.
+        key: Configuration key.
         default: Default value if key is not found.
 
     Returns:
         The configuration value.
-
     """
     res: JsonValue = self._runtime_config.plugin_settings.get(key, default)
     return res
 
   def validate_settings(self, model: type[T]) -> T:
-    """Validate global config against a Plugin-specific Pydantic schema.
+    """Validate global plugin settings against a plugin-specific Pydantic schema.
 
     Args:
-        model (Type[T]): Pydantic model definition.
+        model: Pydantic model definition.
 
     Returns:
-        T: Validated configuration object.
-
+        Validated configuration object.
     """
     relevant = model.model_fields.keys()
     subset = {k: v for k, v in self._runtime_config.plugin_settings.items() if k in relevant}
@@ -229,38 +198,32 @@ class HookContext:
     """Resolve target framework's API string for a given standard operation.
 
     Args:
-        op_name (str): Standard operation ID.
+        op_name: Standard operation ID.
 
     Returns:
-        Optional[str]: The target API string, or None if not found.
-
+        Target API string, or ``None`` if not found.
     """
     if self.semantics is None:
       return None
 
-    # Use the inheritance-aware resolve_variant method
-    # instead of direct dict access to support child frameworks (e.g. flax_nnx -> jax mapping)
-    target_variant = self.semantics.resolve_variant(op_name, self.target_framework)
-
-    if not target_variant:
-      return None
-
-    api_val = target_variant.get("api")
-    return str(api_val) if api_val is not None else None
+    typed_variant = query_variant(self.semantics, op_name, self.target_framework)
+    return typed_variant.api if typed_variant is not None else None
 
   def lookup_signature(self, op_name: str) -> list[str]:
     """Retrieve standard argument list for a given operation.
 
     Args:
-        op_name (str): Standard operation ID.
+        op_name: Standard operation ID.
 
     Returns:
-        List[str]: List of argument names.
-
+        List of argument names.
     """
     if self.semantics is None:
       return []
-    # get_definition_by_id checks main data store
+    op_model = query_operation(self.semantics, op_name)
+    if op_model is not None:
+      return [item.name if isinstance(item, ParameterDef) else item for item in op_model.std_args]
+
     details = self.semantics.get_definition_by_id(op_name)
     if not details:
       return []
@@ -272,7 +235,6 @@ class HookContext:
       if isinstance(item, (list, tuple)) and item:
         cleaned_args.append(str(item[0]))
       elif isinstance(item, dict):
-        # Handle ParameterDef dict or object
         name = item.get("name")
         if isinstance(name, str) and name:
           cleaned_args.append(name)
@@ -281,85 +243,21 @@ class HookContext:
     return cleaned_args
 
 
-import ml_switcheroo.core.hooks_registry as _hr  # noqa: E402
-from ml_switcheroo.core.hooks_registry import (  # noqa: E402
-  register_hook,
-  get_hook,
-  get_all_hook_metadata,
-  clear_hooks,
-  load_plugins,
-  _HOOKS,
-  _HOOK_METADATA,
-  HookCallable,
-)
-
-HookFunction = HookCallable
-
-_PLUGINS_LOADED: bool = False
-
-
-class _HooksModule(types.ModuleType):
-  """Module subclass synchronizing ``_PLUGINS_LOADED`` with ``hooks_registry``."""
-
-  def __init__(self, base_mod: types.ModuleType) -> None:
-    """Initialize the module proxy from the existing ``hooks`` module.
-
-    Args:
-        base_mod: Original ``ml_switcheroo.core.hooks`` module instance.
-    """
-    super().__init__(base_mod.__name__, base_mod.__doc__)
-    self._base_mod = base_mod
-    self.__file__ = base_mod.__file__
-    self.__package__ = base_mod.__package__
-    self.__spec__ = base_mod.__spec__
-    self.HookContext = HookContext
-    self.PluginMetadataValue = PluginMetadataValue
-    self.FrameworkVariant = FrameworkVariant
-    self.AutoWireSpec = AutoWireSpec
-    self.PluginTraits = PluginTraits
-    self.register_hook = register_hook
-    self.get_hook = get_hook
-    self.get_all_hook_metadata = get_all_hook_metadata
-    self.clear_hooks = clear_hooks
-    self.load_plugins = load_plugins
-    self._HOOKS = _HOOKS
-    self._HOOK_METADATA = _HOOK_METADATA
-    self.HookCallable = HookCallable
-    self.HookFunction = HookFunction
-    self._hr = _hr
-
-  @property
-  def _PLUGINS_LOADED(self) -> bool:
-    """Indicate whether plugins have been loaded in the hook registry.
-
-    Returns:
-        bool: True if plugins have been loaded, False otherwise.
-    """
-    return _hr._PLUGINS_LOADED
-
-  @_PLUGINS_LOADED.setter
-  def _PLUGINS_LOADED(self, value: bool) -> None:
-    """Set the plugin loading state in the hook registry.
-
-    Args:
-        value: The new plugin loaded state.
-    """
-    _hr._PLUGINS_LOADED = value
-
-
-sys.modules[__name__] = _HooksModule(sys.modules[__name__])
-
 __all__ = [
-  "HookContext",
-  "PluginMetadataValue",
   "AutoWireSpec",
+  "FrameworkVariant",
+  "HookCallable",
+  "HookContext",
+  "HookFunction",
+  "HookRegistry",
+  "PluginMetadataValue",
   "PluginTraits",
-  "register_hook",
-  "get_hook",
-  "get_all_hook_metadata",
+  "bind_hook_registry",
   "clear_hooks",
+  "get_all_hook_metadata",
+  "get_default_hook_registry",
+  "get_hook",
   "load_plugins",
-  "_HOOKS",
-  "_HOOK_METADATA",
-  "_PLUGINS_LOADED",
+  "register_hook",
+  "set_plugins_loaded",
 ]

@@ -6,22 +6,23 @@ by introspecting grounded snapshot APIs, existing ODL catalog definitions,
 and ISA specification files (`rdna_isa.json`, `nvidia_sass_isa.json`).
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
 import argparse
 import json
 import sys
 import typing
 from pathlib import Path
 
-from pydantic import JsonValue
 import yaml
+from pydantic import JsonValue
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from ml_switcheroo.enums import RuntimeTensorOrValue
+from scripts.drain_quarantine import build_variant_entry, find_snapshot_api_match
+from scripts.snapshots.loader import load_snapshots_multi
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-if str(REPO_ROOT) not in sys.path:
-  sys.path.insert(0, str(REPO_ROOT))
-
-from scripts.drain_quarantine import build_variant_entry, find_snapshot_api_match  # noqa: E402
-from scripts.snapshots.loader import load_snapshots_multi  # noqa: E402
 
 
 def _load_odl_catalog_maps(
@@ -90,6 +91,109 @@ def _load_odl_catalog_maps(
 ISA_ALU_MACRO_MAP, CANONICAL_MATH_MAP = _load_odl_catalog_maps()
 
 
+def _collect_search_names(
+  op_name: str,
+  stem_name: str | None,
+  variants: dict[str, JsonValue],
+) -> list[str]:
+  """Build ordered candidate symbol names for snapshot and catalog variant matching.
+
+  Args:
+      op_name: Canonical operation name from ODL YAML.
+      stem_name: Optional YAML file stem candidate.
+      variants: Existing variants mapping on the ODL dictionary.
+
+  Returns:
+      Ordered list of candidate operation/function names.
+  """
+  search_names: list[str] = [op_name]
+  if stem_name and stem_name not in search_names:
+    search_names.append(stem_name)
+  torch_var = variants.get("torch")
+  torch_api = torch_var.get("api") if isinstance(torch_var, dict) else None
+  if isinstance(torch_api, str) and torch_api:
+    fn_name = torch_api.split(".")[-1]
+    if fn_name not in search_names:
+      search_names.append(fn_name)
+  return search_names
+
+
+def _find_jax_jnp_fallback(
+  variants: dict[str, JsonValue],
+  fw_snap: typing.Mapping[str, RuntimeTensorOrValue],
+) -> tuple[str, dict[str, JsonValue]] | None:
+  """Look up a JAX snapshot API match from ``paxml`` or ``flax_nnx`` ``jnp.*`` variants.
+
+  Args:
+      variants: Existing variants mapping on the ODL dictionary.
+      fw_snap: Flattened JAX snapshot lookup dictionary.
+
+  Returns:
+      Matched ``(api_path, api_data)`` tuple if found, otherwise ``None``.
+  """
+  for source_framework in ("paxml", "flax_nnx"):
+    src_var = variants.get(source_framework)
+    src_api = src_var.get("api", "") if isinstance(src_var, dict) else ""
+    if isinstance(src_api, str) and src_api.startswith("jnp."):
+      match = find_snapshot_api_match(src_api.split(".")[-1], fw_snap)
+      if match:
+        return match
+  return None
+
+
+def _expand_from_snapshots(
+  variants: dict[str, JsonValue],
+  search_names: list[str],
+  snapshots: typing.Mapping[str, typing.Mapping[str, RuntimeTensorOrValue]],
+) -> int:
+  """Populate missing ``jax``, ``mlx``, and ``keras`` variants from snapshots.
+
+  Args:
+      variants: Mutable variants dictionary on the ODL operation.
+      search_names: Candidate symbol names to search.
+      snapshots: Ground-truth framework snapshots.
+
+  Returns:
+      Count of newly added framework variants.
+  """
+  added = 0
+  for fw in ("jax", "mlx", "keras"):
+    if fw in variants or fw not in snapshots:
+      continue
+    fw_snap = snapshots[fw]
+    match: tuple[str, dict[str, JsonValue]] | None = None
+    for candidate in search_names:
+      match = find_snapshot_api_match(candidate, fw_snap)
+      if match:
+        break
+    if not match and fw == "jax":
+      match = _find_jax_jnp_fallback(variants, fw_snap)
+    if match:
+      api_path, api_data = match
+      variants[fw] = build_variant_entry(api_path, api_data)
+      added += 1
+  return added
+
+
+def _lookup_case_insensitive_map(
+  table: dict[str, dict[str, str]],
+  clean_candidates: set[str],
+) -> dict[str, str] | None:
+  """Find the first entry in ``table`` whose lowercased key is in ``clean_candidates``.
+
+  Args:
+      table: Mapping of canonical operation names to framework API dictionaries.
+      clean_candidates: Lowercased candidate operation stems.
+
+  Returns:
+      Matched framework API dictionary or ``None``.
+  """
+  for key, val in table.items():
+    if key.lower() in clean_candidates:
+      return val
+  return None
+
+
 def expand_op_variants(
   odl_data: dict[str, JsonValue],
   snapshots: typing.Mapping[str, typing.Mapping[str, RuntimeTensorOrValue]],
@@ -113,69 +217,19 @@ def expand_op_variants(
 
   raw_op_name = odl_data.get("operation", "")
   op_name = str(raw_op_name) if isinstance(raw_op_name, str) else ""
+  search_names = _collect_search_names(op_name, stem_name, variants)
 
-  added_count = 0
+  added_count = _expand_from_snapshots(variants, search_names, snapshots)
 
-  # Candidate search names: op_name and function name from torch variant
-  search_names: list[str] = [op_name]
-  if stem_name and stem_name not in search_names:
-    search_names.append(stem_name)
-  torch_var = variants.get("torch")
-  torch_api = torch_var.get("api") if isinstance(torch_var, dict) else None
-  if isinstance(torch_api, str) and torch_api:
-    fn_name = torch_api.split(".")[-1]
-    if fn_name not in search_names:
-      search_names.append(fn_name)
-
-  # 1. Expand JAX, MLX, Keras from snapshots
-  for fw in ("jax", "mlx", "keras"):
-    if fw not in variants and fw in snapshots:
-      fw_snap = snapshots[fw]
-      match: tuple[str, dict[str, JsonValue]] | None = None
-      for candidate in search_names:
-        match = find_snapshot_api_match(candidate, fw_snap)
-        if match:
-          break
-
-      # Fallback for JAX from paxml or flax_nnx jnp references
-      if not match and fw == "jax":
-        for source_framework in ("paxml", "flax_nnx"):
-          src_var = variants.get(source_framework)
-          src_api = src_var.get("api", "") if isinstance(src_var, dict) else ""
-          if isinstance(src_api, str) and src_api.startswith("jnp."):
-            jnp_fn = src_api.split(".")[-1]
-            match = find_snapshot_api_match(jnp_fn, fw_snap)
-            if match:
-              break
-
-      if match:
-        api_path, api_data = match
-        variants[fw] = build_variant_entry(api_path, api_data)
+  clean_candidates = {c.rstrip("_").lower() for c in search_names if c}
+  isa_entry = _lookup_case_insensitive_map(ISA_ALU_MACRO_MAP, clean_candidates)
+  if isa_entry:
+    for isa_fw in ("rdna", "nvidia_sass"):
+      if isa_fw not in variants and isa_fw in isa_entry:
+        variants[isa_fw] = {"api": isa_entry[isa_fw], "args": {}}
         added_count += 1
 
-  # 2. Expand RDNA and NVIDIA SASS from catalog-derived ISA map (case-insensitive, strip trailing _)
-  clean_candidates = {c.rstrip("_").lower() for c in search_names if c}
-  isa_entry = None
-  for k, v in ISA_ALU_MACRO_MAP.items():
-    if k.lower() in clean_candidates:
-      isa_entry = v
-      break
-
-  if isa_entry:
-    if "rdna" not in variants and "rdna" in isa_entry:
-      variants["rdna"] = {"api": isa_entry["rdna"], "args": {}}
-      added_count += 1
-    if "nvidia_sass" not in variants and "nvidia_sass" in isa_entry:
-      variants["nvidia_sass"] = {"api": isa_entry["nvidia_sass"], "args": {}}
-      added_count += 1
-
-  # 3. Expand missing high-level frameworks from catalog-derived math map
-  math_entry = None
-  for k, v in CANONICAL_MATH_MAP.items():
-    if k.lower() in clean_candidates:
-      math_entry = v
-      break
-
+  math_entry = _lookup_case_insensitive_map(CANONICAL_MATH_MAP, clean_candidates)
   if math_entry:
     for fw, api_call in math_entry.items():
       if fw not in variants:

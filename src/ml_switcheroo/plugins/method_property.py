@@ -79,8 +79,7 @@ def transform_method_to_property(node: cst.Call, ctx: HookContext) -> cst.Attrib
         value=prop_node,
         slice=[cst.SubscriptElement(slice=cst.Index(value=idx_val))],
       )
-    else:
-      # If multiple args (unlikely for simple prop mapping), preserve call or fail safe
-      return node
+    # If multiple args (unlikely for simple prop mapping), preserve call or fail safe
+    return node
 
   return prop_node

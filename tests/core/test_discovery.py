@@ -1,111 +1,129 @@
-"""Unit tests for the SimulatedReflection engine.
+"""Unit tests for `SimulatedReflection` and `is_inspection_object` (`ml_switcheroo.core.discovery`)."""
 
-This test suite ensures that the `SimulatedReflection` engine correctly resolves
-abstract API names to framework-specific API paths. It tests initialization, name
-normalization, exact matching against exported public members, fuzzy matching using
-similarity metrics, and error boundary handling when modules cannot be imported.
-"""
+import importlib
+import math
 
-from unittest.mock import Mock, patch
+import pytest
 
+import ml_switcheroo.core.discovery as discovery_mod
 from ml_switcheroo.core.discovery import SimulatedReflection
+from ml_switcheroo.discovery.inspector import is_inspection_object
 
 
-def test_discovery_init() -> None:
-  """Tests the initialization of the SimulatedReflection class.
+class _AdapterWithModules:
+  """Typed adapter stub carrying `search_modules`."""
 
-  Verifies that when SimulatedReflection is instantiated with a framework name,
-  it correctly sets the framework attribute and falls back to a list containing
-  only that framework name in search_modules when no specialized adapter is found.
+  def __init__(self, search_modules: list[str]) -> None:
+    """Initialize `search_modules` list.
 
-  Args:
-      None
-
-  Returns:
-      None
-  """
-  reflection = SimulatedReflection("torch")
-  assert reflection.framework == "torch"
-  assert reflection.search_modules == ["torch"]
+    Args:
+        search_modules: Module names searched during reflection.
+    """
+    self.search_modules = search_modules
 
 
-def test_discovery_normalize() -> None:
-  """Tests the normalization method of the SimulatedReflection class.
+class _AdapterWithoutModules:
+  """Typed adapter stub omitting `search_modules`."""
 
-  Verifies that `_normalize` correctly maps typical API names to their canonical,
-  case-insensitive, underscore-stripped representation (e.g., converting 'LogSoftmax'
-  to 'logsoftmax', and 'abs_' to 'abs').
+
+def test_simulated_reflection_initialization_and_normalization(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `SimulatedReflection` module fallback resolution and `_normalize` canonicalization.
 
   Args:
-      None
-
-  Returns:
-      None
+      monkeypatch: Pytest monkeypatch fixture.
   """
-  reflection = SimulatedReflection("torch")
-  assert reflection._normalize("LogSoftmax") == "logsoftmax"
-  assert reflection._normalize("abs_") == "abs"
+  monkeypatch.setattr("ml_switcheroo.core.discovery.get_adapter", lambda _fw: _AdapterWithModules(["mod1", "mod2"]))
+  assert SimulatedReflection("custom_fw").search_modules == ["mod1", "mod2"]
+
+  monkeypatch.setattr("ml_switcheroo.core.discovery.get_adapter", lambda _fw: _AdapterWithoutModules())
+  assert SimulatedReflection("custom_fw").search_modules == ["custom_fw"]
+
+  monkeypatch.setattr("ml_switcheroo.core.discovery.get_adapter", lambda _fw: None)
+  ref = SimulatedReflection("custom_fw")
+  assert ref.framework == "custom_fw"
+  assert ref.search_modules == ["custom_fw"]
+  assert ref._normalize("Log_Softmax") == "logsoftmax"
+  assert ref._normalize("abs_") == "abs"
 
 
-def test_discovery_exact_match() -> None:
-  """Tests exact-matching/normalization-matching in SimulatedReflection discovery.
+def test_simulated_reflection_exact_fuzzy_and_import_error_paths(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify exact normalized matching, fuzzy fallback, private skipping, and `ImportError` handling.
 
-  This test mocks the framework's internal structure to simulate the presence of public
-  members and private members. It verifies that `discover` successfully locates and
-  returns the exact (normalized) matching API path (e.g., matching 'LogSoftmax' to
-  'log_softmax') from the search modules while correctly ignoring private members (starting with '_').
-
-  Returns:
-      None
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
   """
-  # Mock importlib to return a fake module
-  mock_mod = Mock()
-  mock_mod.log_softmax = Mock()
-  # Also add a private member to ensure it's skipped
-  mock_mod._private = Mock()
 
-  with (
-    patch("inspect.getmembers", return_value=[("log_softmax", mock_mod.log_softmax), ("_private", mock_mod._private)]),
-    patch("importlib.import_module", return_value=mock_mod),
-  ):
-    reflection = SimulatedReflection("torch")
-    reflection.search_modules = ["torch.nn.functional"]
-    result: str | None = reflection.discover("LogSoftmax")
-    assert result == "torch.nn.functional.log_softmax"
+  class _FakeModNamespace:
+    """Simulated module namespace exposing `_private`, `log_softmax`, and `absolute`."""
+
+    @staticmethod
+    def _private() -> None:
+      """Private attribute skipped by `SimulatedReflection`."""
+
+    @staticmethod
+    def log_softmax() -> None:
+      """Exact-normalized candidate attribute."""
+
+    @staticmethod
+    def absolute() -> None:
+      """Fuzzy-matched candidate attribute."""
+
+  fake_mod = _FakeModNamespace()
+
+  def _fake_import(name: str) -> _FakeModNamespace:
+    """Resolve `'fake_mod'` in memory and raise `ImportError` for `'broken_mod'`.
+
+    Args:
+        name: Module path string.
+
+    Returns:
+        In-memory `_FakeModNamespace` for `'fake_mod'`.
+
+    Raises:
+        ImportError: When `name != 'fake_mod'`.
+    """
+    if name == "fake_mod":
+      return fake_mod
+    raise ImportError(name)
+
+  monkeypatch.setattr(
+    discovery_mod,
+    "get_adapter",
+    lambda _fw: _AdapterWithModules(["broken_mod", "fake_mod"]),
+  )
+  monkeypatch.setattr(importlib, "import_module", _fake_import)
+
+  ref = SimulatedReflection("custom_fw")
+  assert ref.discover("Log_Softmax") == "fake_mod.log_softmax"
+  assert ref.discover("absolut") == "fake_mod.absolute"
+  assert ref.discover("completely_unrelated_op_name") is None
+
+  # All modules raising ImportError returns None cleanly
+  monkeypatch.setattr(
+    discovery_mod,
+    "get_adapter",
+    lambda _fw: _AdapterWithModules(["broken_mod"]),
+  )
+  assert SimulatedReflection("custom_fw").discover("op") is None
 
 
-def test_discovery_fuzzy_match() -> None:
-  """Tests fuzzy-matching fallbacks in SimulatedReflection discovery.
+def test_is_inspection_object_classifications() -> None:
+  """Verify `is_inspection_object` recognizes modules, classes, functions, builtins, and properties."""
 
-  This test mocks the framework's module contents and verifies that when an exact match is
-  not found, the discovery engine falls back to a fuzzy search using close string matching
-  (e.g., matching 'absolut' to 'numpy.absolute').
+  def _prop_getter(_self: _AdapterWithoutModules) -> int:
+    """Property getter stub.
 
-  Returns:
-      None
-  """
-  mock_mod = Mock()
-  mock_mod.abs = Mock()
+    Args:
+        _self: Receiver instance.
 
-  with patch("inspect.getmembers", return_value=[("absolute", mock_mod.abs)]):
-    with patch("importlib.import_module", return_value=mock_mod):
-      reflection = SimulatedReflection("numpy")
-      result: str | None = reflection.discover("absolut")
-      assert result == "numpy.absolute"
+    Returns:
+        Constant `1`.
+    """
+    return 1
 
-
-def test_discovery_no_match() -> None:
-  """Tests discovery behavior when no matching API endpoint is found.
-
-  This test simulates import failures when trying to load framework modules,
-  verifying that `discover` handles these exceptions gracefully and returns `None`
-  instead of propagating the error or returning an incorrect match.
-
-  Returns:
-      None
-  """
-  patch("importlib.import_module", side_effect=ImportError)
-
-  reflection = SimulatedReflection("torch")
-  result: str | None = reflection.discover("NonExistent")
-  assert result is None
+  assert is_inspection_object(math) is True
+  assert is_inspection_object(_AdapterWithoutModules) is True
+  assert is_inspection_object(test_is_inspection_object_classifications) is True
+  assert is_inspection_object(math.sin) is True
+  assert is_inspection_object(property(_prop_getter)) is True
+  assert is_inspection_object(42) is False

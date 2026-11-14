@@ -10,25 +10,25 @@ Supports optional **Graph-Guided Rewriting** (Loopback).
 """
 
 import typing
+from dataclasses import dataclass, field
 
 import libcst as cst
-from pydantic import JsonValue
 
+from ml_switcheroo.analysis.linter import StructuralLinter
 from ml_switcheroo.config import (
-  ConversionMode,
-  ExecutionBackend,
-  OptimizationLevel,
   RuntimeConfig,
+  RuntimeConfigOverrides,
+  validate_intermediate_format,
 )
 from ml_switcheroo.core.compiler.backend import CompilerBackend
-from ml_switcheroo.core.compiler.frontends.nvidia_sass import NvidiaSassLifter, NvidiaSassParser
 from ml_switcheroo.core.compiler.frontends.python import PythonFrontend
-from ml_switcheroo.core.compiler.frontends.rdna import RdnaLifter, RdnaParser
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 # Compiler Components
 from ml_switcheroo.core.compiler.registry import (
   _FRONTENDS,
+  FrontendSpec,
+  IsaFrontendProtocol,
   get_backend_class,
   instantiate_backend,
   is_isa_source,
@@ -36,7 +36,7 @@ from ml_switcheroo.core.compiler.registry import (
 from ml_switcheroo.core.conversion_result import ConversionResult as ConversionResult
 from ml_switcheroo.core.escape_hatch import EscapeHatch
 from ml_switcheroo.core.graph import GraphExtractor
-from ml_switcheroo.core.hooks import load_plugins
+from ml_switcheroo.core.hooks import HookRegistry, bind_hook_registry, get_default_hook_registry
 from ml_switcheroo.core.import_fixer import ImportFixer, ImportResolver
 from ml_switcheroo.core.ingestion import ingest_code
 
@@ -57,13 +57,24 @@ from ml_switcheroo.core.runtime_tracer import (
   run_on_device_trace,
 )
 from ml_switcheroo.core.scanners import GlobalUsageScanner
-from ml_switcheroo.core.tracer import TraceLogger, get_tracer, reset_tracer
+from ml_switcheroo.core.tracer import TraceLogger, bind_tracer
+from ml_switcheroo.exceptions import MLSwitcherooError, TranslationError
 from ml_switcheroo.frameworks.base import get_adapter
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.testing.linter import StructuralLinter
 
 # Visualization
 from ml_switcheroo.utils.visualizer import MermaidGenerator
+
+
+@dataclass
+class EngineExecutionContext:
+  """Execution-scoped state shared across a single ``ASTEngine.run`` invocation (including multi-hop bridges).
+
+  Attributes:
+      tracer: Scoped ``TraceLogger`` accumulating nested phase events without mutating global tracer state.
+  """
+
+  tracer: TraceLogger = field(default_factory=TraceLogger)
 
 
 @typing.runtime_checkable
@@ -76,7 +87,20 @@ class _GraphFrontendProtocol(typing.Protocol):
     Returns:
         Constructed `LogicalGraph`.
     """
-    ...
+
+
+def _is_graph_frontend_factory(
+  entry: FrontendSpec | None,
+) -> typing.TypeGuard[typing.Callable[[str], _GraphFrontendProtocol]]:
+  """Check whether a `_FRONTENDS` entry instantiates a `_GraphFrontendProtocol`.
+
+  Args:
+      entry: Candidate frontend specification from `_FRONTENDS`.
+
+  Returns:
+      True when `entry` is a class exposing `parse_to_graph`.
+  """
+  return callable(entry) and isinstance(entry, _GraphFrontendProtocol)
 
 
 class ASTEngine:
@@ -86,120 +110,192 @@ class ASTEngine:
     self,
     semantics: SemanticsManager | None = None,
     config: RuntimeConfig | None = None,
-    source: str | None = None,
-    target: str | None = None,
-    strict_mode: bool = False,
-    enable_graph_optimization: bool = False,
-    plugin_config: dict[str, JsonValue] | None = None,
-    intermediate: str | None = None,
-    mode: str | ConversionMode | None = None,
-    opt_level: str | OptimizationLevel | None = None,
-    execution_backend: str | ExecutionBackend | None = None,
+    *,
+    hook_registry: HookRegistry | None = None,
   ) -> None:
-    """Initialize the engine with semantics and configuration.
+    """Initialize the engine with semantics and runtime configuration.
 
     Args:
-        semantics: Valid SemanticsManager instance.
-        config: Runtime configuration object.
-        source: Source framework key override.
-        target: Target framework key override.
-        strict_mode: Whether to fail on unmapped operations.
-        enable_graph_optimization: Whether to run fusion pass.
-        plugin_config: Dictionary of settings for plugins.
-        intermediate: Intermediate generation format.
-        mode: Conversion mode override ('preserve_trivia' or 'optimized').
-        opt_level: Optimization level override ('O0', 'O1', 'O2', 'O3').
-        execution_backend: Execution backend override (defaults to 'webgpu').
+        semantics: Optional ``SemanticsManager`` instance (defaults to ``SemanticsManager()``).
+        config: Optional ``RuntimeConfig`` object (defaults to ``RuntimeConfig.load()``).
+        hook_registry: Optional isolated ``HookRegistry`` instance for plugin hooks.
 
+    Raises:
+        ConfigurationError: If ``config.intermediate`` specifies an unsupported intermediate format.
     """
     self.semantics: SemanticsManager = semantics or SemanticsManager()
-    if config:
+    if config is not None:
       self.config = config
-      if intermediate is not None:
-        self.config.intermediate = intermediate
-      if mode is not None:
-        self.config.mode = ConversionMode(mode)
-        self.config.enable_graph_optimization = self.config.mode == ConversionMode.OPTIMIZED
-      if opt_level is not None:
-        self.config.opt_level = OptimizationLevel(opt_level)
-      if execution_backend is not None:
-        self.config.execution_backend = ExecutionBackend(execution_backend)
+      validate_intermediate_format(self.config.intermediate)
     else:
-      self.config = RuntimeConfig.load(
-        source=source,
-        target=target,
-        strict_mode=strict_mode,
-        intermediate=intermediate,
-        enable_graph_optimization=enable_graph_optimization if mode is None else None,
-        plugin_settings=plugin_config or {},
-        mode=mode,
-        opt_level=opt_level,
-        execution_backend=execution_backend,
-      )
+      self.config = RuntimeConfig.load()
     if self.config.validation_report:
       self.semantics.load_validation_report(self.config.validation_report)
 
     self.source = self.config.effective_source
     self.target = self.config.effective_target
-    load_plugins()
+    self.hook_registry: HookRegistry = hook_registry if hook_registry is not None else get_default_hook_registry()
+    self.hook_registry.ensure_loaded()
 
-  def run(self, code: str) -> ConversionResult:
+  @classmethod
+  def from_options(
+    cls,
+    overrides: RuntimeConfigOverrides | None = None,
+    *,
+    semantics: SemanticsManager | None = None,
+    source: str | None = None,
+    target: str | None = None,
+    strict_mode: bool | None = None,
+    enable_graph_optimization: bool | None = None,
+    hook_registry: HookRegistry | None = None,
+  ) -> "ASTEngine":
+    """Construct an ``ASTEngine`` from convenience keyword options or ``RuntimeConfigOverrides``.
+
+    Args:
+        overrides: Optional ``RuntimeConfigOverrides`` bundle for extended settings.
+        semantics: Optional ``SemanticsManager`` instance.
+        source: Optional source framework key override.
+        target: Optional target framework key override.
+        strict_mode: Optional strict mode override.
+        enable_graph_optimization: Optional graph optimization pass override.
+        hook_registry: Optional isolated ``HookRegistry`` instance.
+
+    Returns:
+        Configured ``ASTEngine`` instance.
+    """
+    ov = overrides if overrides is not None else RuntimeConfigOverrides()
+    merged = RuntimeConfigOverrides(
+      source=source if source is not None else ov.source,
+      target=target if target is not None else ov.target,
+      source_flavour=ov.source_flavour,
+      target_flavour=ov.target_flavour,
+      strict_mode=strict_mode if strict_mode is not None else (ov.strict_mode if ov.strict_mode is not None else False),
+      intermediate=ov.intermediate,
+      enable_graph_optimization=(
+        enable_graph_optimization if enable_graph_optimization is not None else ov.enable_graph_optimization
+      ),
+      enable_sharding=ov.enable_sharding,
+      plugin_settings=ov.plugin_settings,
+      validation_report=ov.validation_report,
+      search_path=ov.search_path,
+      mode=ov.mode,
+      opt_level=ov.opt_level,
+      execution_backend=ov.execution_backend,
+      enable_on_device_execution=ov.enable_on_device_execution,
+      emit_backward_code=ov.emit_backward_code,
+    )
+    cfg = RuntimeConfig.load(merged)
+    return cls(semantics=semantics, config=cfg, hook_registry=hook_registry)
+
+  def run(
+    self,
+    code: str,
+    *,
+    execution_context: EngineExecutionContext | None = None,
+  ) -> ConversionResult:
     """Execute the complete conversion pipeline on the input code.
 
     Args:
         code: Input source code string to convert.
+        execution_context: Optional parent ``EngineExecutionContext`` to attach nested child sub-traces.
 
     Returns:
         ConversionResult containing the transpiled code, diagnostics, and trace events.
+
+    Raises:
+        ConfigurationError: If ``self.config.intermediate`` was mutated to an unsupported value.
     """
-    reset_tracer()
-    tracer = get_tracer()
-    tracer.start_phase("Pipeline Start", f"{self.source} -> {self.target}")
+    validate_intermediate_format(self.config.intermediate)
+    exec_ctx = execution_context if execution_context is not None else EngineExecutionContext()
+    tracer = exec_ctx.tracer
 
-    try:
-      if self.config.intermediate in ["ir", "ml_switcheroo_ir"]:
-        tracer.start_phase("Intermediate Pipeline", f"{self.source} -> IR -> {self.target}")
-        engine_to_ir = ASTEngine(
-          semantics=self.semantics,
-          source=self.source,
-          target="ir",
-          strict_mode=self.strict_mode,
-        )
-        ir_result = engine_to_ir.run(code)
-        if not ir_result.success:
+    with bind_tracer(tracer), bind_hook_registry(self.hook_registry):
+      tracer.start_phase("Pipeline Start", f"{self.source} -> {self.target}")
+
+      try:
+        if self.config.intermediate in ["ir", "ml_switcheroo_ir"]:
+          tracer.start_phase("Intermediate Pipeline", f"{self.source} -> IR -> {self.target}")
+          engine_to_ir = ASTEngine.from_options(
+            semantics=self.semantics,
+            source=self.source,
+            target="ir",
+            strict_mode=self.strict_mode,
+            hook_registry=self.hook_registry,
+          )
+          ir_result = engine_to_ir.run(code, execution_context=exec_ctx)
+          if not ir_result.success:
+            tracer.end_phase()
+            tracer.end_phase()
+            return ConversionResult(
+              code=ir_result.code,
+              errors=ir_result.errors,
+              warnings=ir_result.warnings,
+              success=False,
+              trace_events=tracer.export(),
+            )
+
+          engine_from_ir = ASTEngine.from_options(
+            semantics=self.semantics,
+            source="ir",
+            target=self.target,
+            strict_mode=self.strict_mode,
+            hook_registry=self.hook_registry,
+          )
+          final_result = engine_from_ir.run(ir_result.code, execution_context=exec_ctx)
           tracer.end_phase()
-          return ir_result
+          tracer.end_phase()
+          return ConversionResult(
+            code=final_result.code,
+            errors=final_result.errors,
+            warnings=final_result.warnings,
+            success=final_result.success,
+            trace_events=tracer.export(),
+            runtime_trace=final_result.runtime_trace,
+          )
 
-        engine_from_ir = ASTEngine(
-          semantics=self.semantics,
-          source="ir",
-          target=self.target,
-          strict_mode=self.strict_mode,
-        )
-        final_result = engine_from_ir.run(ir_result.code)
+        from ml_switcheroo.core.strategies import STRATEGY_REGISTRY
+
+        result: ConversionResult | None = None
+        for strategy in STRATEGY_REGISTRY:
+          if strategy.can_handle(self):
+            result = strategy.execute(self, code, tracer)
+            break
+
+        if result is None:
+          raise TranslationError(f"No conversion strategy available for '{self.source}' -> '{self.target}'.")
+
         tracer.end_phase()
-        return final_result
+        return ConversionResult(
+          code=result.code,
+          errors=result.errors,
+          warnings=result.warnings,
+          success=result.success,
+          trace_events=tracer.export(),
+          runtime_trace=result.runtime_trace,
+        )
+      except (
+        MLSwitcherooError,
+        NotImplementedError,
+        SyntaxError,
+        cst.ParserSyntaxError,
+        OSError,
+        ValueError,
+        TypeError,
+        KeyError,
+        IndexError,
+        AttributeError,
+        RuntimeError,
+      ) as e:
+        import logging
 
-      from ml_switcheroo.core.strategies import STRATEGY_REGISTRY
-
-      for strategy in STRATEGY_REGISTRY:
-        if strategy.can_handle(self):
-          result = strategy.execute(self, code, tracer)
-          break
-
-      tracer.end_phase()
-      return result
-    except Exception as e:
-      import logging
-
-      logging.error(f"ASTEngine Error: {e}", exc_info=True)
-      tracer.end_phase()
-      return ConversionResult(
-        code=code,
-        errors=[f"Critical Failure: {str(e)}"],
-        success=False,
-        trace_events=tracer.export(),
-      )
+        logging.error(f"ASTEngine Error: {e}", exc_info=True)
+        tracer.end_phase()
+        return ConversionResult(
+          code=code,
+          errors=[f"Critical Failure: {e!s}"],
+          success=False,
+          trace_events=tracer.export(),
+        )
 
   def parse(self, code: str) -> cst.Module:
     """Parse a Python source code string into a LibCST Module.
@@ -298,20 +394,11 @@ class ASTEngine:
 
     else:
       # ISA / Graph Source logic via Compiler Registry _FRONTENDS
-      isa_overrides = {
-        "nvidia_sass": (NvidiaSassParser, NvidiaSassLifter),
-        "rdna": (RdnaParser, RdnaLifter),
-      }
-      frontend_entry = isa_overrides.get(self.source) or _FRONTENDS.get(self.source)
-      if isinstance(frontend_entry, tuple) and len(frontend_entry) == 2:
-        parser_cls, lifter_cls = frontend_entry
-        isa_parser = parser_cls(code)
-        isa_nodes = isa_parser.parse().statements
-        isa_lifter = lifter_cls()
-        graph = isa_lifter.lift(isa_nodes)
-      elif callable(frontend_entry) and isinstance(frontend_entry, _GraphFrontendProtocol):
+      frontend_entry = _FRONTENDS.get(self.source)
+      if isinstance(frontend_entry, IsaFrontendProtocol):
+        graph = frontend_entry.lift_code(code)
+      elif _is_graph_frontend_factory(frontend_entry):
         graph_frontend = frontend_entry(code)
-        assert isinstance(graph_frontend, _GraphFrontendProtocol)
         graph = graph_frontend.parse_to_graph()
       elif frontend_entry is not None:
         source_adapter = get_adapter(self.source)
@@ -322,7 +409,8 @@ class ASTEngine:
       else:
         raise NotImplementedError(f"No frontend for {self.source}")
 
-    assert graph is not None
+    if graph is None:
+      raise TranslationError(f"Frontend for '{self.source}' failed to produce a LogicalGraph.")
 
     if self.config.enable_graph_optimization:
       from ml_switcheroo.core.compiler.compiler_passes import run_multi_pass_optimizer
@@ -380,12 +468,8 @@ class ASTEngine:
       hydrate_graph_with_runtime_trace(graph, runtime_trace)
       tracer.end_phase()
 
-    from ml_switcheroo.core.compiler.isa.synthesizer import IsaSynthesizer
-    from ml_switcheroo.core.rewriter.calls.pre import _resolve_attr
-
-    synth = _resolve_attr(backend, "synthesizer")
-    if isinstance(synth, IsaSynthesizer) and (self.config.enable_on_device_execution or not is_isa_source(self.source)):
-      synth.emit_trivia_comments = True
+    if self.config.enable_on_device_execution or not is_isa_source(self.source):
+      backend.configure_emission(emit_trivia_comments=True)
 
     output_code = backend.compile(graph)
 
@@ -523,6 +607,7 @@ class ASTEngine:
       # Symbol table logic can be injected here if analysis passes are added to engine
       symbol_table=None,
       runtime_trace=runtime_trace,
+      hook_registry=self.hook_registry,
     )
 
     # Construct Pipeline

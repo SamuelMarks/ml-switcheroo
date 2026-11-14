@@ -1,0 +1,565 @@
+"""Tests for scripts/build_docs.py."""
+
+import subprocess
+import sys
+import types
+import typing
+from pathlib import Path
+from unittest import mock
+
+import pytest
+
+import scripts.build_docs as build_docs
+
+scripts_dir: Path = Path(__file__).parent.parent.parent / "scripts"
+
+
+@pytest.fixture
+def mock_env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> tuple[Path, Path, Path]:
+  """Sets up mock project environment.
+
+  Args:
+      tmp_path (Path): Tmp path pytest fixture.
+      monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
+
+  Returns:
+      Tuple[Path, Path, Path]: Environment paths.
+  """
+  project_root: Path = tmp_path / "project"
+  docs_dir: Path = project_root / "docs"
+  build_dir: Path = docs_dir / "_build"
+
+  monkeypatch.setattr(build_docs, "PROJECT_ROOT", project_root)
+  monkeypatch.setattr(build_docs, "DOCS_DIR", docs_dir)
+  monkeypatch.setattr(build_docs, "BUILD_DIR", build_dir)
+
+  project_root.mkdir()
+  docs_dir.mkdir()
+
+  return project_root, docs_dir, build_dir
+
+
+def test_clean(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
+  """Tests cleaning of build directories and copied root files.
+
+  Args:
+      mock_env (Tuple[Path, Path, Path]): Mock environment.
+      monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
+  """
+  _project_root, docs_dir, build_dir = mock_env
+
+  build_dir.mkdir()
+  api_dir: Path = docs_dir / "api"
+  api_dir.mkdir()
+  ops_dir: Path = docs_dir / "ops"
+  ops_dir.mkdir()
+
+  dest: Path = docs_dir / "README.md"
+  dest.write_text("test")
+  static_dir: Path = docs_dir / "_static"
+  static_dir.mkdir(exist_ok=True)
+  (static_dir / "old.whl").write_text("whl")
+  (static_dir / "wheels.json").write_text("{}")
+
+  monkeypatch.setattr(build_docs, "ROOT_FILES", ("README.md",))
+
+  build_docs.clean()
+
+  assert not build_dir.exists()
+  assert not api_dir.exists()
+  assert not ops_dir.exists()
+  assert not dest.exists()
+  assert not (static_dir / "old.whl").exists()
+  assert not (static_dir / "wheels.json").exists()
+
+
+def test_clean_no_dirs(mock_env: tuple[Path, Path, Path]) -> None:
+  """Tests clean when directories do not exist.
+
+  Args:
+      mock_env (Tuple[Path, Path, Path]): Mock environment.
+  """
+  repo_root, _, _ = mock_env
+  docs_dir = repo_root / "docs"
+  if (docs_dir / "api").exists():
+    import shutil
+
+    shutil.rmtree(docs_dir / "api")
+  if (docs_dir / "operations").exists():
+    import shutil
+
+    shutil.rmtree(docs_dir / "operations")
+  if (docs_dir / "_static" / "css").exists():
+    import shutil
+
+    shutil.rmtree(docs_dir / "_static" / "css")
+
+  build_docs.clean()  # static_dir does not exist
+  (docs_dir / "_static").mkdir(exist_ok=True)
+  build_docs.clean()  # static_dir exists without wheels.json
+  assert not (docs_dir / "api").exists()
+
+
+def test_copy_root_files(
+  mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+  """Tests copying root files.
+
+  Args:
+      mock_env (Tuple[Path, Path, Path]): Mock environment.
+      monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
+      capsys (pytest.CaptureFixture[str]): Pytest capsys fixture.
+  """
+  project_root, docs_dir, _ = mock_env
+
+  (project_root / "README.md").write_text("test")
+  monkeypatch.setattr(build_docs, "ROOT_FILES", ("README.md", "MISSING.md"))
+
+  build_docs.copy_root_files()
+
+  assert (docs_dir / "README.md").exists()
+  out, _ = capsys.readouterr()
+  assert "Warning: MISSING.md not found" in out
+
+
+def test_build_wheel_success(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
+  """Tests successful wheel build.
+
+  Args:
+      mock_env (Tuple[Path, Path, Path]): Mock environment.
+      monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
+  """
+  project_root, docs_dir, _ = mock_env
+  dist_dir: Path = project_root / "dist"
+  dist_dir.mkdir()
+
+  def side_effect(
+    cmd: list[str],
+    cwd: Path | None = None,
+    check: bool = False,
+    capture_output: bool = False,
+  ) -> None:
+    """Mock subprocess side effect creating a dist wheel.
+
+    Args:
+        cmd: Command arguments.
+        cwd: Working directory.
+        check: Whether to check return code.
+        capture_output: Whether to capture output.
+    """
+    dist_dir.mkdir(exist_ok=True)
+    (dist_dir / "ml_switcheroo-0.0.6-py3-none-any.whl").touch()
+
+  mock_run: mock.MagicMock = mock.Mock(side_effect=side_effect)
+  monkeypatch.setattr(subprocess, "run", mock_run)
+
+  build_docs.build_wheel()
+
+  assert (docs_dir / "_static" / "ml_switcheroo-0.0.6-py3-none-any.whl").exists()
+  mock_run.assert_called_once_with(["uv", "build", "--wheel"], cwd=project_root, check=True, capture_output=True)
+
+  # Also cover branch where dist_dir is not created by subprocess.run
+  monkeypatch.setattr(subprocess, "run", mock.Mock())
+  build_docs.build_wheel()
+
+
+def test_copy_external_wheels_no_reqs(mock_env: tuple[Path, Path, Path]) -> None:
+  """Tests copy_external_wheels when requirements.txt does not exist.
+
+  Args:
+      mock_env (Tuple[Path, Path, Path]): Mock environment.
+  """
+  repo_root, docs_dir, _ = mock_env
+  (repo_root / "docs" / "requirements.txt").unlink(missing_ok=True)
+  build_docs.copy_external_wheels()
+  assert list((docs_dir / "_static").glob("*.whl")) == []
+
+
+def test_copy_external_wheels_local(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
+  """Tests copy_external_wheels with sibling local wheel.
+
+  Args:
+      mock_env (Tuple[Path, Path, Path]): Mock environment.
+      monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
+  """
+  project_root, docs_dir, _ = mock_env
+  reqs: Path = project_root / "requirements.txt"
+  reqs.write_text(
+    "# comment\n\nother-pkg>=1.0\ngitpkg @ git+https://example.com/repo.git\nfoo @ https://github.com/foo/foo/releases/download/v1.0/foo-1.0-py3-none-any.whl\n"
+  )
+
+  local_whl: Path = project_root.parent / "foo-1.0-py3-none-any.whl"
+  local_whl.touch()
+
+  monkeypatch.setattr(
+    "ml_switcheroo.sphinx_ext.hooks.find_local_wheel",
+    lambda root, pkg: local_whl if pkg == "foo" else None,
+  )
+
+  build_docs.copy_external_wheels()
+  target = docs_dir / "_static" / "foo-1.0-py3-none-any.whl"
+  assert target.exists()
+
+  # Test second run where target exists and is newer
+  import os
+
+  os.utime(target, (local_whl.stat().st_atime + 100, local_whl.stat().st_mtime + 100))
+  build_docs.copy_external_wheels()
+
+  # Test third run where target exists and is older
+  os.utime(target, (10, 10))
+  build_docs.copy_external_wheels()
+
+  # Test when local_wheel is not None but does not exist
+  non_existent = project_root.parent / "non_existent.whl"
+  monkeypatch.setattr(
+    "ml_switcheroo.sphinx_ext.hooks.find_local_wheel",
+    lambda root, pkg: non_existent if pkg == "foo" else None,
+  )
+  target.unlink()
+  with mock.patch("urllib.request.urlopen") as mock_open:
+    build_docs.copy_external_wheels()
+    mock_open.assert_called_once()
+
+
+def test_copy_external_wheels_download(
+  mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+  """Tests copy_external_wheels downloading from github.
+
+  Args:
+      mock_env (Tuple[Path, Path, Path]): Mock environment.
+      monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
+      capsys (pytest.CaptureFixture[str]): Pytest capsys fixture.
+  """
+  project_root, docs_dir, _ = mock_env
+  reqs: Path = project_root / "requirements.txt"
+  reqs.write_text(
+    "bar @ https://github.com/bar/bar/releases/download/v2.0/bar-2.0-py3-none-any.whl?rev=main ; platform_system=='Emscripten'\n"
+  )
+
+  monkeypatch.setattr("ml_switcheroo.sphinx_ext.hooks.find_local_wheel", lambda root, pkg: None)
+
+  import io
+
+  class MockResponse(io.BytesIO):
+    """Mock HTTP response."""
+
+    def __enter__(self) -> "MockResponse":
+      """Enter context manager.
+
+      Returns:
+          MockResponse: Self instance.
+      """
+      return self
+
+    def __exit__(self, *args: type[BaseException] | BaseException | types.TracebackType | None) -> None:
+      """Exit context manager.
+
+      Args:
+          *args: Variable positional arguments.
+      """
+
+  with mock.patch("urllib.request.urlopen", return_value=MockResponse(b"wheel_content")):
+    build_docs.copy_external_wheels()
+
+  target = docs_dir / "_static" / "bar-2.0-py3-none-any.whl"
+  assert target.exists()
+  out, _ = capsys.readouterr()
+  assert "Downloaded bar-2.0-py3-none-any.whl" in out
+
+  # Second run when already exists: skips downloading
+  with mock.patch("urllib.request.urlopen") as mock_open:
+    build_docs.copy_external_wheels()
+    mock_open.assert_not_called()
+
+
+def test_copy_external_wheels_download_error(
+  mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+  """Tests copy_external_wheels handles download errors gracefully.
+
+  Args:
+      mock_env (Tuple[Path, Path, Path]): Mock environment.
+      monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
+      capsys (pytest.CaptureFixture[str]): Pytest capsys fixture.
+  """
+  project_root, _, _ = mock_env
+  reqs: Path = project_root / "requirements.txt"
+  reqs.write_text("baz @ https://github.com/baz/baz/releases/download/v3.0/baz-3.0-py3-none-any.whl\n")
+
+  monkeypatch.setattr("ml_switcheroo.sphinx_ext.hooks.find_local_wheel", lambda root, pkg: None)
+
+  with mock.patch("urllib.request.urlopen", side_effect=OSError("Network error")):
+    build_docs.copy_external_wheels()
+
+  out, _ = capsys.readouterr()
+  assert "Warning: Failed to download" in out
+
+
+def test_build_wheel_failure(
+  mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+  """Tests failed wheel build.
+
+  Args:
+      mock_env (Tuple[Path, Path, Path]): Mock environment.
+      monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
+      capsys (pytest.CaptureFixture[str]): Pytest capsys fixture.
+  """
+  _project_root, _, _ = mock_env
+
+  error: subprocess.CalledProcessError = subprocess.CalledProcessError(1, ["uv", "build"], stderr=b"error message")
+  mock_run: mock.MagicMock = mock.Mock(side_effect=error)
+  monkeypatch.setattr(subprocess, "run", mock_run)
+
+  with pytest.raises(SystemExit) as exc:
+    build_docs.build_wheel()
+
+  assert exc.value.code == 1
+  out, _ = capsys.readouterr()
+  assert "Failed to build wheel" in out
+  assert "error message" in out
+
+
+def test_calculate_unique_variants_success(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
+  """Tests variant calculation success.
+
+  Args:
+      monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
+      capsys (pytest.CaptureFixture[str]): Pytest capsys fixture.
+  """
+
+  class MockManager:
+    """Mock manager."""
+
+    _reverse_index: typing.ClassVar[list[int]] = [1, 2, 3]
+
+  # Create a dummy module to avoid importing the real SemanticsManager which could fail or change
+  import sys
+
+  mock_module = type(sys)("ml_switcheroo.semantics.manager")
+  monkeypatch.setattr(
+    mock_module,
+    "SemanticsManager",
+    MockManager,
+    raising=False,
+  )
+  monkeypatch.setitem(sys.modules, "ml_switcheroo.semantics.manager", mock_module)
+  monkeypatch.setenv("CI", "false")
+
+  build_docs.calculate_unique_variants()
+  out, _ = capsys.readouterr()
+  assert "Calculated unique cross-framework variants: 3" in out
+
+
+def test_calculate_unique_variants_ci_fail(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
+  """Tests variant calculation failure in CI.
+
+  Args:
+      monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
+      capsys (pytest.CaptureFixture[str]): Pytest capsys fixture.
+  """
+
+  class MockManager:
+    """Mock manager."""
+
+    _reverse_index: typing.ClassVar[list[int]] = [1, 2, 3]  # Below 1860
+
+  import sys
+
+  mock_module = type(sys)("ml_switcheroo.semantics.manager")
+  monkeypatch.setattr(
+    mock_module,
+    "SemanticsManager",
+    MockManager,
+    raising=False,
+  )
+  monkeypatch.setitem(sys.modules, "ml_switcheroo.semantics.manager", mock_module)
+  monkeypatch.setenv("CI", "true")
+
+  with pytest.raises(SystemExit):
+    build_docs.calculate_unique_variants()
+
+
+def test_calculate_unique_variants_exception(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
+  """Tests variant calculation handles exceptions.
+
+  Args:
+      monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
+      capsys (pytest.CaptureFixture[str]): Pytest capsys fixture.
+  """
+  import sys
+
+  monkeypatch.setitem(sys.modules, "ml_switcheroo.semantics.manager", None)
+
+  build_docs.calculate_unique_variants()
+  out, _ = capsys.readouterr()
+  assert "Failed to calculate variants" in out
+
+
+def test_build_not_all(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
+  """Tests sphinx build (not all).
+
+  Args:
+      mock_env (Tuple[Path, Path, Path]): Mock environment.
+      monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
+  """
+  _, docs_dir, build_dir = mock_env
+
+  mock_calc: mock.MagicMock = mock.Mock()
+  monkeypatch.setattr(build_docs, "calculate_unique_variants", mock_calc)
+  mock_wheel: mock.MagicMock = mock.Mock()
+  monkeypatch.setattr(build_docs, "build_wheel", mock_wheel)
+
+  mock_run: mock.MagicMock = mock.Mock()
+  mock_run.return_value.returncode = 0
+  monkeypatch.setattr(subprocess, "run", mock_run)
+  monkeypatch.delenv("BUILD_ALL_DOCS", raising=False)
+
+  ret: int = build_docs.build(build_all=False)
+
+  assert ret == 0
+  mock_calc.assert_called_once()
+  mock_wheel.assert_called_once()
+
+  cmd = mock_run.call_args[0][0]
+  assert cmd == [
+    sys.executable,
+    "-m",
+    "sphinx",
+    "-j",
+    "auto",
+    "-b",
+    "html",
+    str(docs_dir),
+    str(build_dir / "html"),
+    str(docs_dir / "index.md"),
+  ]
+  env = mock_run.call_args[1]["env"]
+  assert env["BUILD_ALL_DOCS"] == "0"
+
+
+def test_build_all(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
+  """Tests full sphinx build.
+
+  Args:
+      mock_env (Tuple[Path, Path, Path]): Mock environment.
+      monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
+  """
+  _, docs_dir, build_dir = mock_env
+
+  monkeypatch.setattr(build_docs, "calculate_unique_variants", mock.Mock())
+  monkeypatch.setattr(build_docs, "build_wheel", mock.Mock())
+
+  mock_run: mock.MagicMock = mock.Mock()
+  mock_run.return_value.returncode = 0
+  monkeypatch.setattr(subprocess, "run", mock_run)
+  monkeypatch.setenv("BUILD_ALL_DOCS", "1")
+
+  build_docs.build(build_all=True)
+
+  cmd = mock_run.call_args[0][0]
+  assert cmd == [
+    sys.executable,
+    "-m",
+    "sphinx",
+    "-j",
+    "auto",
+    "-b",
+    "html",
+    str(docs_dir),
+    str(build_dir / "html"),
+  ]
+
+
+def test_main_success(
+  mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+  """Tests main execution block.
+
+  Args:
+      mock_env (Tuple[Path, Path, Path]): Mock environment.
+      monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
+      capsys (pytest.CaptureFixture[str]): Pytest capsys fixture.
+  """
+  _project_root, docs_dir, _build_dir = mock_env
+
+  mock_clean: mock.MagicMock = mock.Mock()
+  monkeypatch.setattr(build_docs, "clean", mock_clean)
+  mock_copy: mock.MagicMock = mock.Mock()
+  monkeypatch.setattr(build_docs, "copy_root_files", mock_copy)
+  mock_build: mock.MagicMock = mock.Mock(return_value=0)
+  monkeypatch.setattr(build_docs, "build", mock_build)
+
+  monkeypatch.setattr(build_docs, "ROOT_FILES", ("README.md",))
+  (docs_dir / "README.md").write_text("test")  # To test finally block cleanup
+
+  test_args = ["build_docs.py", "--build-all"]
+  with mock.patch.object(sys, "argv", test_args), pytest.raises(SystemExit) as exc:
+    build_docs.main()
+
+  assert exc.value.code == 0
+  mock_clean.assert_called_once()
+  mock_copy.assert_called_once()
+  mock_build.assert_called_once_with(build_all=True)
+
+  assert not (docs_dir / "README.md").exists()  # Cleaned up
+
+  out, _ = capsys.readouterr()
+  assert "Documentation built successfully" in out
+
+
+def test_main_failure(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
+  """Tests main when build fails.
+
+  Args:
+      mock_env (Tuple[Path, Path, Path]): Mock environment.
+      monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
+  """
+  monkeypatch.setattr(build_docs, "clean", mock.Mock())
+  monkeypatch.setattr(build_docs, "copy_root_files", mock.Mock())
+  monkeypatch.setattr(build_docs, "build", mock.Mock(return_value=1))
+
+  test_args = ["build_docs.py"]
+  with mock.patch.object(sys, "argv", test_args), pytest.raises(SystemExit) as exc:
+    build_docs.main()
+
+  assert exc.value.code == 1
+
+
+def test_main_clean_exception(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
+  """Tests main when clean throws an exception.
+
+  Args:
+      mock_env (Tuple[Path, Path, Path]): Mock environment.
+      monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
+  """
+  _project_root, docs_dir, _ = mock_env
+
+  monkeypatch.setattr(build_docs, "ROOT_FILES", ("README.md",))
+  (docs_dir / "README.md").write_text("test")  # To test finally block cleanup
+
+  mock_clean: mock.MagicMock = mock.Mock(side_effect=RuntimeError("Failed to clean"))
+  monkeypatch.setattr(build_docs, "clean", mock_clean)
+
+  test_args = ["build_docs.py"]
+  with mock.patch.object(sys, "argv", test_args), pytest.raises(RuntimeError, match="Failed to clean"):
+    build_docs.main()
+
+  assert not (docs_dir / "README.md").exists()  # Cleaned up in finally block
+
+
+def test_main_sys_exit_mocked(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
+  """Tests main execution block with runpy without mutating the real repository.
+
+  Args:
+      mock_env (Tuple[Path, Path, Path]): Mock environment.
+      monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
+  """
+  import runpy
+
+  test_args = ["build_docs.py", "--help"]
+  with mock.patch.object(sys, "argv", test_args), pytest.raises(SystemExit) as exc:
+    runpy.run_path(str(scripts_dir / "build_docs.py"), run_name="__main__")
+  assert exc.value.code == 0

@@ -4,12 +4,12 @@ import jax.numpy as jnp
 
 
 def causal_mask_fill(scores: jnp.ndarray, mask: jnp.ndarray, value: float = -1000000000.0) -> jnp.ndarray:
-  """Helper to causal mask fill.
+  """Execute `jnp.where` to support causal mask fill in flax NNX tests.
 
   Args:
-      mask: The mask (jnp.ndarray) for causal mask fill.
-      scores: The scores (jnp.ndarray) for causal mask fill.
-      value: The value (float) for causal mask fill.
+      mask: Input `mask` parameter value (`jnp.ndarray`).
+      scores: Input `scores` parameter value (`jnp.ndarray`).
+      value: Input `value` parameter value (`float`).
 
   Returns:
       Resulting `jnp.ndarray` from causal mask fill.

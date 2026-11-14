@@ -11,6 +11,7 @@ if typing.TYPE_CHECKING:
   pass
 
 import json
+import logging
 import os
 import shutil
 from pathlib import Path
@@ -36,30 +37,53 @@ ON_DEVICE_WHEEL_PACKAGES: tuple[str, ...] = (
 
 
 class _SphinxConfigProtocol(typing.Protocol):
-  """Protocol for Sphinx config object exposing `html_static_path`."""
+  """Protocol for Sphinx config object exposing `html_static_path`.
+
+  Attributes:
+      html_static_path: The html static path (`list[str]`).
+  """
 
   html_static_path: list[str]
 
 
 class _SphinxBuilderProtocol(typing.Protocol):
-  """Protocol for Sphinx builder object exposing `outdir`."""
+  """Protocol for Sphinx builder object exposing `outdir`.
+
+  Attributes:
+      outdir: The outdir (`str | Path`).
+  """
 
   outdir: str | Path
 
 
+@typing.runtime_checkable
 class SphinxAppConfigProtocol(typing.Protocol):
-  """Protocol for Sphinx application exposing `config`."""
+  """Protocol for Sphinx application exposing `config`.
+
+  Attributes:
+      config: The config (`_SphinxConfigProtocol`).
+  """
 
   config: _SphinxConfigProtocol
 
 
+@typing.runtime_checkable
 class SphinxAppBuilderProtocol(typing.Protocol):
-  """Protocol for Sphinx application exposing `builder`."""
+  """Protocol for Sphinx application exposing `builder`.
+
+  Attributes:
+      builder: The builder (`_SphinxBuilderProtocol`).
+  """
 
   builder: _SphinxBuilderProtocol
 
 
-SphinxAppUnion: typing.TypeAlias = SphinxAppConfigProtocol | SphinxAppBuilderProtocol | typing.Hashable | None
+@typing.runtime_checkable
+class SphinxBareAppProtocol(typing.Protocol):
+  """Minimal structural protocol for stub or mock Sphinx application instances."""
+
+
+SphinxAppUnion: typing.TypeAlias = SphinxAppConfigProtocol | SphinxAppBuilderProtocol | SphinxBareAppProtocol | None
 
 
 def _has_sphinx_config(app: SphinxAppUnion) -> typing.TypeGuard[SphinxAppConfigProtocol]:
@@ -71,9 +95,7 @@ def _has_sphinx_config(app: SphinxAppUnion) -> typing.TypeGuard[SphinxAppConfigP
   Returns:
       True if `app.config` exists.
   """
-  from ml_switcheroo.core.rewriter.calls.pre import _resolve_attr
-
-  return _resolve_attr(app, "config") is not None
+  return isinstance(app, SphinxAppConfigProtocol)
 
 
 def _has_sphinx_builder(app: SphinxAppUnion) -> typing.TypeGuard[SphinxAppBuilderProtocol]:
@@ -85,9 +107,7 @@ def _has_sphinx_builder(app: SphinxAppUnion) -> typing.TypeGuard[SphinxAppBuilde
   Returns:
       True if `app.builder` exists.
   """
-  from ml_switcheroo.core.rewriter.calls.pre import _resolve_attr
-
-  return _resolve_attr(app, "builder") is not None
+  return isinstance(app, SphinxAppBuilderProtocol)
 
 
 def add_static_path(app: SphinxAppUnion) -> None:
@@ -101,6 +121,85 @@ def add_static_path(app: SphinxAppUnion) -> None:
   static_path = Path(__file__).parent / "static"
   if static_path.exists() and _has_sphinx_config(app):
     app.config.html_static_path.append(str(static_path.resolve()))
+
+
+def _candidate_repo_names(pkg: str, clean_pkg: str) -> list[str]:
+  """Return ordered sibling directory name candidates for ``pkg``.
+
+  Args:
+      pkg: Raw package name.
+      clean_pkg: Lowercased stripped package name.
+
+  Returns:
+      List of candidate sibling folder names.
+  """
+  if clean_pkg in ("cdd", "python-cdd", "cdd-python"):
+    return ["python-cdd", "cdd-python", "cdd"]
+  if clean_pkg in ("zero_pytorch", "zero-pytorch", "zero_torch", "zero-torch"):
+    return ["zero-pytorch", "zero_pytorch", "zero-torch", "zero_torch"]
+  return [pkg, pkg.replace("-", "_"), pkg.replace("_", "-")]
+
+
+def _select_matching_wheel(wheels: list[Path], clean_pkg: str) -> Path | None:
+  """Select the newest exact or prefix-matching wheel file from ``wheels``.
+
+  Args:
+      wheels: Candidate ``.whl`` paths found in a sibling repository.
+      clean_pkg: Lowercased stripped package name.
+
+  Returns:
+      Newest matching ``Path``, or ``None`` if no wheel matches ``clean_pkg``.
+  """
+  matching: list[Path] = []
+  exact_matching: list[Path] = []
+  prefix = clean_pkg.replace("-", "_")
+
+  for whl in wheels:
+    whl_name = whl.name.lower()
+    norm_whl_name = whl_name.replace("-", "_")
+    if clean_pkg in ("cdd", "python-cdd", "cdd-python"):
+      if whl_name.startswith(("cdd-", "cdd_", "python_cdd")):
+        matching.append(whl)
+        exact_matching.append(whl)
+    elif clean_pkg in ("zero_pytorch", "zero-pytorch", "zero_torch", "zero-torch"):
+      if norm_whl_name.startswith(("zero_torch_", "zero_pytorch_")):
+        matching.append(whl)
+        exact_matching.append(whl)
+    elif prefix in norm_whl_name:
+      matching.append(whl)
+      if whl_name.startswith((f"{prefix}-", f"{clean_pkg}-")):
+        exact_matching.append(whl)
+
+  if exact_matching:
+    return sorted(exact_matching, key=os.path.getmtime)[-1]
+  if matching:
+    return sorted(matching, key=os.path.getmtime)[-1]
+  return None
+
+
+def _try_build_candidate_wheel(candidate_dir: Path, dist_dir: Path) -> Path | None:
+  """Attempt to build a wheel via ``uv build --wheel`` inside ``candidate_dir`` when project metadata exists.
+
+  Args:
+      candidate_dir: Sibling repository directory.
+      dist_dir: Expected ``dist/`` subdirectory inside ``candidate_dir``.
+
+  Returns:
+      Newest built wheel ``Path`` if build succeeded, otherwise ``None``.
+  """
+  if not ((candidate_dir / "pyproject.toml").exists() or (candidate_dir / "setup.py").exists()):
+    return None
+  import subprocess
+
+  try:
+    subprocess.run(["uv", "build", "--wheel"], cwd=candidate_dir, check=True, capture_output=True)
+    if dist_dir.is_dir():
+      built = list(dist_dir.glob("*.whl"))
+      if built:
+        return sorted(built, key=os.path.getmtime)[-1]
+  except (OSError, subprocess.SubprocessError, ValueError, RuntimeError) as exc:
+    logging.getLogger(__name__).debug("Wheel build candidate failed: %s", exc)
+  return None
 
 
 def find_local_wheel(root_dir: Path, pkg: str) -> Path | None:
@@ -117,65 +216,35 @@ def find_local_wheel(root_dir: Path, pkg: str) -> Path | None:
       Path to the newest matching wheel file if found, otherwise None.
   """
   clean_pkg = pkg.strip().lower()
-  candidate_names: list[str]
-  if clean_pkg in ("cdd", "python-cdd", "cdd-python"):
-    candidate_names = ["python-cdd", "cdd-python", "cdd"]
-  elif clean_pkg in ("zero_pytorch", "zero-pytorch", "zero_torch", "zero-torch"):
-    candidate_names = ["zero-pytorch", "zero_pytorch", "zero-torch", "zero_torch"]
-  else:
-    candidate_names = [pkg, pkg.replace("-", "_"), pkg.replace("_", "-")]
-
-  for name in candidate_names:
+  for name in _candidate_repo_names(pkg, clean_pkg):
     candidate_dir = root_dir.parent / name
     if not candidate_dir.is_dir():
       continue
 
-    # Look in candidate_dir/dist and candidate_dir
     dist_dir = candidate_dir / "dist"
-    wheels: list[Path] = []
-    if dist_dir.is_dir():
-      wheels.extend(dist_dir.glob("*.whl"))
+    wheels = list(dist_dir.glob("*.whl")) if dist_dir.is_dir() else []
     wheels.extend(candidate_dir.glob("*.whl"))
 
-    # Filter matching wheels
-    matching: list[Path] = []
-    exact_matching: list[Path] = []
-    prefix = clean_pkg.replace("-", "_")
-    for whl in wheels:
-      whl_name = whl.name.lower()
-      norm_whl_name = whl_name.replace("-", "_")
-      if clean_pkg in ("cdd", "python-cdd", "cdd-python"):
-        if whl_name.startswith("cdd-") or whl_name.startswith("cdd_") or whl_name.startswith("python_cdd"):
-          matching.append(whl)
-          exact_matching.append(whl)
-      elif clean_pkg in ("zero_pytorch", "zero-pytorch", "zero_torch", "zero-torch"):
-        if norm_whl_name.startswith("zero_torch_") or norm_whl_name.startswith("zero_pytorch_"):
-          matching.append(whl)
-          exact_matching.append(whl)
-      elif prefix in norm_whl_name:
-        matching.append(whl)
-        if whl_name.startswith(f"{prefix}-") or whl_name.startswith(f"{clean_pkg}-"):
-          exact_matching.append(whl)
+    selected = _select_matching_wheel(wheels, clean_pkg)
+    if selected is not None:
+      return selected
 
-    if exact_matching:
-      return sorted(exact_matching, key=os.path.getmtime)[-1]
-    if matching:
-      return sorted(matching, key=os.path.getmtime)[-1]
-
-    # Try building wheel if repository exists without pre-built wheels
-    if (candidate_dir / "pyproject.toml").exists() or (candidate_dir / "setup.py").exists():
-      try:
-        import subprocess
-
-        subprocess.run(["uv", "build", "--wheel"], cwd=candidate_dir, check=True, capture_output=True)
-        if dist_dir.is_dir():
-          built = list(dist_dir.glob("*.whl"))
-          if built:
-            return sorted(built, key=os.path.getmtime)[-1]
-      except Exception:
-        pass
+    built = _try_build_candidate_wheel(candidate_dir, dist_dir)
+    if built is not None:
+      return built
 
   return None
+
+
+def _copy_if_newer(src: Path, dst: Path) -> None:
+  """Copy ``src`` to ``dst`` when ``dst`` is missing or older than ``src``.
+
+  Args:
+      src: Source artifact path.
+      dst: Target artifact path.
+  """
+  if not dst.exists() or dst.stat().st_mtime < src.stat().st_mtime:
+    shutil.copy2(src, dst)
 
 
 def bundle_on_device_wheels(
@@ -199,9 +268,7 @@ def bundle_on_device_wheels(
   for pkg in ON_DEVICE_WHEEL_PACKAGES:
     local_whl = find_local_wheel(root_dir, pkg)
     if local_whl is not None and local_whl.exists():
-      target_path = static_dst / local_whl.name
-      if not target_path.exists() or target_path.stat().st_mtime < local_whl.stat().st_mtime:
-        shutil.copy2(local_whl, target_path)
+      _copy_if_newer(local_whl, static_dst / local_whl.name)
       bundled.append(local_whl.name)
 
   if main_wheel_name and main_wheel_name not in bundled:
@@ -210,6 +277,69 @@ def bundle_on_device_wheels(
   wheels_manifest = static_dst / "wheels.json"
   wheels_manifest.write_text(json.dumps({"wheels": bundled}, indent=2) + "\n", encoding="utf-8")
   return bundled
+
+
+def _stage_github_release_wheel(url_or_spec: str, root_dir: Path, static_dst: Path) -> str:
+  """Stage a GitHub release ``.whl`` into ``static_dst`` from cache or HTTPS download.
+
+  Args:
+      url_or_spec: Direct GitHub wheel URL.
+      root_dir: Project root directory.
+      static_dst: Destination ``_static`` directory.
+
+  Returns:
+      Staged wheel filename.
+  """
+  import urllib.request
+
+  filename = url_or_spec.split("/")[-1].split("?")[0]
+  target_path = static_dst / filename
+  if not target_path.exists():
+    src_static = root_dir / "docs" / "_static" / filename
+    if src_static.exists():
+      shutil.copy2(src_static, target_path)
+    else:
+      print(f"Downloading {url_or_spec} for WASM demo...")
+      try:
+        req = urllib.request.Request(url_or_spec, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req) as response, open(target_path, "wb") as out_file:
+          shutil.copyfileobj(response, out_file)
+      except (OSError, ValueError, TypeError, RuntimeError) as e:
+        print(f"Warning: Failed to download {url_or_spec}: {e}")
+  return filename
+
+
+def _rewrite_requirement_line(line: str, root_dir: Path, static_dst: Path) -> str | None:
+  """Rewrite a single ``requirements.txt`` line for Pyodide/WASM consumption.
+
+  Args:
+      line: Stripped non-comment requirement line.
+      root_dir: Project root directory.
+      static_dst: Destination ``_static`` directory.
+
+  Returns:
+      Rewritten requirement specifier string, or ``None`` if omitted for WASM.
+  """
+  if " @ " not in line:
+    return line
+
+  pkg_raw, url_raw = line.split(" @ ", 1)
+  pkg = pkg_raw.strip()
+  url_or_spec = url_raw.strip().split(";")[0].strip()
+  if "git+" in url_or_spec:
+    return None
+
+  local_wheel = find_local_wheel(root_dir, pkg)
+  if local_wheel is not None:
+    _copy_if_newer(local_wheel, static_dst / local_wheel.name)
+    print(f"Grabbed {local_wheel.name} from {local_wheel.parent} for WASM demo...")
+    return f"{pkg} @ {local_wheel.name}"
+
+  if url_or_spec.startswith(("http://", "https://")) and "github.com" in url_or_spec and ".whl" in url_or_spec:
+    filename = _stage_github_release_wheel(url_or_spec, root_dir, static_dst)
+    return f"{pkg} @ {filename}"
+
+  return line
 
 
 def copy_wheel_and_reqs(app: SphinxAppUnion, exception: Exception | None) -> None:
@@ -225,72 +355,22 @@ def copy_wheel_and_reqs(app: SphinxAppUnion, exception: Exception | None) -> Non
   if exception or not _has_sphinx_builder(app):
     return
 
-  # Resolve relative to this file inside 'src/ml_switcheroo/sphinx_ext'
-  # Project root is 3 levels up
-  here = Path(__file__).parent
-  root_dir = here.parents[2]
+  root_dir = Path(__file__).parent.parents[2]
   dist_dir = root_dir / "dist"
-
   static_dst = Path(str(app.builder.outdir)) / "_static"
   static_dst.mkdir(exist_ok=True, parents=True)
 
   reqs_file = root_dir / "requirements.txt"
   if reqs_file.exists():
-    import urllib.request
-
-    with open(reqs_file, "r", encoding="utf-8") as f:
-      lines = f.readlines()
-
     new_lines: list[str] = []
-    for raw_line in lines:
+    for raw_line in reqs_file.read_text(encoding="utf-8").splitlines():
       line = raw_line.strip()
       if not line or line.startswith("#"):
         continue
-      if " @ " in line:
-        pkg, url_or_spec = line.split(" @ ", 1)
-        pkg = pkg.strip()
-        url_or_spec = url_or_spec.strip().split(";")[0].strip()
-
-        if "git+" in url_or_spec:
-          # Git sources are omitted for browser WASM environments (Pyodide cannot clone git repos)
-          continue
-
-        # Check for local sibling repository first (e.g. ../python-cdd or ../cdd-python)
-        local_wheel = find_local_wheel(root_dir, pkg)
-        if local_wheel is not None:
-          target_path = static_dst / local_wheel.name
-          if not target_path.exists() or target_path.stat().st_mtime < local_wheel.stat().st_mtime:
-            shutil.copy2(local_wheel, target_path)
-          new_lines.append(f"{pkg} @ {local_wheel.name}")
-          print(f"Grabbed {local_wheel.name} from {local_wheel.parent} for WASM demo...")
-        elif (
-          ("http://" in url_or_spec or "https://" in url_or_spec)
-          and "github.com" in url_or_spec
-          and ".whl" in url_or_spec
-        ):
-          # On ghpages or when local repo is not available: download from GitHub releases
-          filename = url_or_spec.split("/")[-1].split("?")[0]
-          target_path = static_dst / filename
-          if not target_path.exists():
-            src_static = root_dir / "docs" / "_static" / filename
-            if src_static.exists():
-              shutil.copy2(src_static, target_path)
-            else:
-              print(f"Downloading {url_or_spec} for WASM demo...")
-              try:
-                req = urllib.request.Request(url_or_spec, headers={"User-Agent": "Mozilla/5.0"})
-                with urllib.request.urlopen(req) as response, open(target_path, "wb") as out_file:
-                  shutil.copyfileobj(response, out_file)
-              except Exception as e:
-                print(f"Warning: Failed to download {url_or_spec}: {e}")
-          new_lines.append(f"{pkg} @ {filename}")
-        else:
-          new_lines.append(line)
-      else:
-        new_lines.append(line)
-
-    with open(static_dst / "requirements.txt", "w", encoding="utf-8") as f:
-      f.write("\n".join(new_lines))
+      rewritten = _rewrite_requirement_line(line, root_dir, static_dst)
+      if rewritten is not None:
+        new_lines.append(rewritten)
+    (static_dst / "requirements.txt").write_text("\n".join(new_lines), encoding="utf-8")
 
   main_wheel_name: str | None = None
   if dist_dir.exists():
@@ -298,9 +378,6 @@ def copy_wheel_and_reqs(app: SphinxAppUnion, exception: Exception | None) -> Non
     if wheels:
       latest = sorted(wheels, key=os.path.getmtime)[-1]
       main_wheel_name = latest.name
-      target_file = static_dst / latest.name
-      # Copy if newer or missing
-      if not target_file.exists() or target_file.stat().st_mtime < latest.stat().st_mtime:
-        shutil.copy2(latest, target_file)
+      _copy_if_newer(latest, static_dst / latest.name)
 
   bundle_on_device_wheels(root_dir, static_dst, main_wheel_name)

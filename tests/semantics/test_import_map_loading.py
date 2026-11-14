@@ -1,15 +1,13 @@
 """Test suite for the Import Map Loading module."""
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
-
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockSemantics(SemanticsManager):
-  """Test helper class MockSemantics."""
+  """Minimal `SemanticsManager` test double used in import map loading tests."""
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
@@ -22,19 +20,19 @@ class MockSemantics(SemanticsManager):
 
 
 def test_no_hardcoded_defaults() -> None:
-  """Verifies the behavior of no hardcoded defaults."""
+  """Verify `MockSemantics` handles no hardcoded defaults as expected."""
   mgr: MockSemantics = MockSemantics()
   assert "torch.nn" not in mgr._source_registry
 
 
 def test_merged_json_data() -> None:
-  """Verifies the behavior of merged JSON data."""
+  """Verify `SemanticsManager` emits `torch.custom_sub` for merged JSON data."""
   mgr: SemanticsManager = SemanticsManager()
   mgr._source_registry["torch.custom_sub"] = ("torch", SemanticTier.EXTRAS)
   mgr._providers["jax"] = {SemanticTier.EXTRAS: {"root": "my_lib", "sub": "mod", "alias": "cust"}}
   mapping: dict[str, tuple[str, str | None, str | None]] = mgr.get_import_map(target_framework="jax")
   assert "torch.custom_sub" in mapping
-  (root, sub, alias) = mapping["torch.custom_sub"]
+  (root, _sub, alias) = mapping["torch.custom_sub"]
   assert root == "my_lib"
   assert alias == "cust"
 

@@ -16,6 +16,8 @@ Operations:
 - `sw.import`: Represents import statements.
 """
 
+import typing
+
 import pydantic
 
 # We reuse the CST nodes but wrap them in semantic validators
@@ -83,13 +85,9 @@ class OpSchema(pydantic.BaseModel):
       if req not in found_attrs:
         return False
 
-    if self.has_results and not node.results:
-      return False
-
     # results checking is loose (if has_results=False, it can still have 0 results)
     # but if has_results=True, it MUST have >0.
-
-    return True
+    return not (self.has_results and not node.results)
 
 
 # --- Dialect Definitions ---
@@ -138,7 +136,7 @@ class DialectRegistry:
   operation types.
   """
 
-  _OPS = {
+  _OPS: typing.ClassVar[dict[str, OpSchema]] = {
     "sw.module": SW_MODULE,
     "sw.func": SW_FUNC,
     "sw.op": SW_OP,
@@ -167,9 +165,7 @@ class DialectRegistry:
     if not schema:
       # Allow unknown ops for resilience? Or strict?
       # For this core dialect definition, we are strict about 'sw.*' namespace.
-      if node.name.startswith("sw."):
-        return False
-      return True  # Allow other dialects
+      return not node.name.startswith("sw.")  # Allow other dialects
 
     return schema.validate_node(node)
 

@@ -1,19 +1,18 @@
 """Test suite for the Paxml module."""
 
-from praxis import base_layer
 import jax.numpy as jnp
-
+from praxis import base_layer
 from praxis.layers import poolings
 
 
 class MaxPoolModel(base_layer.BaseLayer):
-  """Test helper class MaxPoolModel."""
+  """Stub `base_layer.BaseLayer` subclass implementing `setup` for PaxML tests."""
 
   kernel_size = 2
   stride = 2
 
   def setup(self) -> None:
-    """Helper to setup."""
+    """Execute `create_child` to support setup in PaxML tests."""
     self.create_child(
       "pool",
       poolings.Pooling.HParams(

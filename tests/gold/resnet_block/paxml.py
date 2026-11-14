@@ -1,20 +1,17 @@
 """Test suite for the Paxml module."""
 
-from praxis import base_layer
 import jax.numpy as jnp
-
-from praxis.layers import activations
-from praxis.layers import convolutions
-from praxis.layers import normalizations
+from praxis import base_layer
+from praxis.layers import activations, convolutions, normalizations
 
 
 class ResidualBlock(base_layer.BaseLayer):
-  """Test helper class ResidualBlock."""
+  """Stub `base_layer.BaseLayer` subclass implementing `setup` for PaxML tests."""
 
   channels = 0
 
   def setup(self) -> None:
-    """Helper to setup."""
+    """Execute `create_child` to support setup in PaxML tests."""
     self.create_child(
       "conv1", convolutions.Conv2D.HParams(filter_shape=(3, 3, self.channels, self.channels), padding="SAME")
     )
@@ -42,5 +39,4 @@ class ResidualBlock(base_layer.BaseLayer):
     out = self.conv2(out)
     out = self.bn2(out)
     out = out + residual
-    out = self.relu2(out)
-    return out
+    return self.relu2(out)

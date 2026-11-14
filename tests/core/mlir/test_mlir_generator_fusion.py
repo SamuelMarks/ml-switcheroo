@@ -5,10 +5,10 @@ from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
 
 
 def gen_code(ops: list[OperationNode]) -> str:
-  """Helper to generation code.
+  """Execute `ModuleNode` to support gen code in MLIR generator fusion tests.
 
   Args:
-      ops: The ops (list[OperationNode]) for gen code.
+      ops: Input `ops` parameter value (`list[OperationNode]`).
 
   Returns:
       Resulting `str` from gen code.
@@ -19,7 +19,7 @@ def gen_code(ops: list[OperationNode]) -> str:
 
 
 def test_fusion_return() -> None:
-  """Verifies the behavior of fusion return."""
+  """Verify `OperationNode` emits `return _fn()` for fusion return."""
   op_call = OperationNode(name="sw.call", results=[ValueNode(name="%0")], operands=[ValueNode(name="%fn")])
   op_return = OperationNode(name="sw.return", operands=[ValueNode(name="%0")])
   code: str = gen_code([op_call, op_return])
@@ -28,7 +28,7 @@ def test_fusion_return() -> None:
 
 
 def test_fusion_setattr() -> None:
-  """Verifies the behavior of fusion setattr."""
+  """Verify `OperationNode` emits `_self.layer = layer(_x)` for fusion setattr."""
   op_create = OperationNode(
     name="sw.op",
     results=[ValueNode(name="%res")],
@@ -46,7 +46,7 @@ def test_fusion_setattr() -> None:
 
 
 def test_fusion_no_fuse_if_multicount() -> None:
-  """Verifies the behavior of fusion no fuse if multicount."""
+  """Verify `OperationNode` emits `_op = op(_x)` for fusion no fuse if multicount."""
   op_create = OperationNode(
     name="sw.op",
     results=[ValueNode(name="%res")],
@@ -66,7 +66,7 @@ def test_fusion_no_fuse_if_multicount() -> None:
 
 
 def test_atom_inlining_getattr() -> None:
-  """Verifies the behavior of atom inlining getattr."""
+  """Verify `OperationNode` emits `_self.conv(_x)` for atom inlining getattr."""
   op_get = OperationNode(
     name="sw.getattr",
     results=[ValueNode(name="%attr")],
@@ -83,7 +83,7 @@ def test_atom_inlining_getattr() -> None:
 
 
 def test_atom_inlining_constant() -> None:
-  """Verifies the behavior of atom inlining constant."""
+  """Verify `OperationNode` emits `op(1)` for atom inlining constant."""
   op_c = OperationNode(
     name="sw.constant", results=[ValueNode(name="%c")], attributes=[AttributeNode(name="value", value="1")]
   )

@@ -160,5 +160,5 @@ class MlirBackend(CompilerBackend):
         attributes=attributes or {},
       )
       return report
-    except Exception:
+    except (ImportError, OSError, SyntaxError, ValueError, TypeError, KeyError, AttributeError, RuntimeError):
       return None

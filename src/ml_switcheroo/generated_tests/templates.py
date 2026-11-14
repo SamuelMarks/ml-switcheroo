@@ -4,9 +4,10 @@ This module stores default code templates for supported frameworks and
 provides utilities to determine properties of test arguments (e.g., static JIT args).
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
+import logging
 import typing
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 
 if typing.TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
@@ -52,8 +53,8 @@ def get_template(manager: "SemanticsManager | None", framework: str) -> dict[str
   if manager:
     try:
       tmpl = manager.get_test_template(framework)
-    except Exception:
-      pass
+    except (AttributeError, KeyError, TypeError, ValueError, RuntimeError) as exc:
+      logging.getLogger(__name__).debug("Custom test template lookup failed for %s: %s", framework, exc)
 
   if tmpl:
     return tmpl
@@ -76,9 +77,6 @@ def is_static_arg(arg_info: typing.Mapping[str, RuntimeTensorOrValue]) -> bool:
   """
   t = str(arg_info.get("type", ""))
   # Heuristic: primitives are usually static in JAX JIT context for shapes/axes
-  if t.lower() in ("int", "bool", "str", "list[int]", "tuple[int]"):
-    return True
-  elif arg_info.get("name") in ("axis", "dim", "keepdims"):
-    return True
-  else:
-    return False
+  return bool(
+    t.lower() in ("int", "bool", "str", "list[int]", "tuple[int]") or arg_info.get("name") in ("axis", "dim", "keepdims")
+  )

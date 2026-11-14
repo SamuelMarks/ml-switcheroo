@@ -1,103 +1,99 @@
-"""Test suite for the Rewriter Context module."""
+"""Unit tests for `RewriterContext` (`ml_switcheroo.core.rewriter.context`)."""
 
 from unittest.mock import MagicMock
 
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.core.rewriter.context import RewriterContext, SignatureContext
+from ml_switcheroo.core.rewriter.context import RewriterContext
+from ml_switcheroo.core.rewriter.types import SignatureContext
+from ml_switcheroo.exceptions import ConfigurationError
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-def test_rewriter_context_inject_argument() -> None:
-  """Verifies inject_argument correctly uses the signature stack."""
-  semantics = MagicMock(spec=SemanticsManager)
-  config = RuntimeConfig(target_framework="jax")
-  ctx = RewriterContext(semantics=semantics, config=config)
+def test_rewriter_context_rejects_null_semantics() -> None:
+  """Verify `RewriterContext` raises `ConfigurationError` when `semantics` is `None`."""
+  with pytest.raises(ConfigurationError, match="non-None SemanticsManager"):
+    RewriterContext(semantics=None)
 
-  # No stack
+
+def test_rewriter_context_properties_and_default_injectors() -> None:
+  """Verify framework properties, `plugin_traits`, argument injection, and preamble deduplication."""
+  semantics = SemanticsManager()
+  ctx_default = RewriterContext(semantics=semantics, config=None)
+  assert ctx_default.config is not None
+
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
+  ctx = RewriterContext(semantics=semantics, config=config)
+  assert ctx.source_framework == "torch"
+  assert ctx.target_framework == "jax"
+  assert ctx.plugin_traits == ctx.hook_context.plugin_traits
+
+  # Argument injection without active signature stack is a no-op
   ctx._default_arg_injector("device", "str")
 
-  # With stack
   sig_ctx = SignatureContext()
   ctx.signature_stack.append(sig_ctx)
-
   ctx._default_arg_injector("device", "str")
-  assert len(sig_ctx.injected_args) == 1
-  assert sig_ctx.injected_args[0] == ("device", "str")
+  ctx._default_arg_injector("device", "int")
+  assert sig_ctx.injected_args == [("device", "str")]
 
-  # Duplicate argument
-  ctx._default_arg_injector("device", "str")
-  assert len(sig_ctx.injected_args) == 1
+  # Preamble injection outside function vs inside function vs import statements
+  ctx.signature_stack.pop()
+  ctx._default_preamble_injector("x = 1")
+  ctx._default_preamble_injector("x = 1")
+  assert ctx.module_preamble == ["x = 1"]
+  assert "x = 1" in ctx._satisfied_preamble_injections
 
+  ctx.signature_stack.append(sig_ctx)
+  ctx._default_preamble_injector("y = 2")
+  ctx._default_preamble_injector("y = 2")
+  assert sig_ctx.preamble_stmts == ["y = 2"]
 
-def test_rewriter_context_preamble_injector() -> None:
-  """Verifies _default_preamble_injector."""
-  semantics = MagicMock(spec=SemanticsManager)
-  config = RuntimeConfig(target_framework="jax")
-  ctx = RewriterContext(semantics=semantics, config=config)
-
-  # No stack -> module preamble
+  ctx._default_preamble_injector("import os")
   ctx._default_preamble_injector("import os")
   assert "import os" in ctx.module_preamble
 
-  # Duplicate -> no op
-  ctx._default_preamble_injector("import os")
-  assert len(ctx.module_preamble) == 1
 
-  # With stack
-  sig_ctx = SignatureContext()
-  ctx.signature_stack.append(sig_ctx)
+def test_hydrate_source_aliases_variants_and_errors() -> None:
+  """Verify `_hydrate_source_aliases` handles dicts, `model_dump` objects, empty configs, and exceptions."""
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
 
-  # Not an import -> preamble_stmts
-  ctx._default_preamble_injector("x = 1")
-  assert len(sig_ctx.preamble_stmts) == 1
-  assert sig_ctx.preamble_stmts[0] == "x = 1"
+  # Dict with `name`
+  sm_dict = MagicMock(spec=SemanticsManager)
+  sm_dict.get_framework_config.return_value = {"alias": {"name": "th"}}
+  assert RewriterContext(semantics=sm_dict, config=config).alias_map == {"th": "th"}
 
-  # Duplicate inside function -> no op
-  ctx._default_preamble_injector("x = 1")
-  assert len(sig_ctx.preamble_stmts) == 1
-
-  # An import with stack -> module preamble
-  ctx._default_preamble_injector("import sys")
-  assert "import sys" in ctx.module_preamble
-
-
-def test_rewriter_context_hydrate_aliases() -> None:
-  """Verifies _hydrate_aliases exception and model_dump branches."""
-  semantics = MagicMock(spec=SemanticsManager)
-
-  # Provide an object with model_dump
-  class MockAliasInfo:
-    """Mock alias info."""
+  # Object with `model_dump()`
+  class _AliasModelStub:
+    """Typed alias config stub providing `model_dump()`."""
 
     def model_dump(self) -> dict[str, str]:
-      """Model dump.
+      """Serialize alias dictionary.
 
       Returns:
-          Resulting `dict[str, str]` from model dump.
+          Alias dictionary with `name`.
       """
       return {"name": "my_alias"}
 
-  semantics.get_framework_config.return_value = {"alias": MockAliasInfo()}
+  sm_model = MagicMock(spec=SemanticsManager)
+  sm_model.get_framework_config.return_value = {"alias": _AliasModelStub()}
+  assert RewriterContext(semantics=sm_model, config=config).alias_map == {"my_alias": "my_alias"}
 
-  config = RuntimeConfig(target_framework="jax")
-  ctx = RewriterContext(semantics=semantics, config=config)
+  from pydantic import JsonValue
 
-  assert ctx.alias_map["my_alias"] == "my_alias"
+  # Empty dict, missing `name`, non-dict `alias`, `None` config, and raised exceptions
+  empty_cfgs: list[dict[str, JsonValue] | None] = [
+    {"alias": {}},
+    {"alias": {"other": "v"}},
+    {"alias": "just_str"},
+    None,
+  ]
+  for cfg_val in empty_cfgs:
+    sm_empty = MagicMock(spec=SemanticsManager)
+    sm_empty.get_framework_config.return_value = cfg_val
+    assert RewriterContext(semantics=sm_empty, config=config).alias_map == {}
 
-  # Exception case: trigger exception in _hydrate_aliases
-  semantics.get_framework_config.return_value = {"alias": {"name": "bad"}}
-
-  class FailingAliasMap(dict[str, str]):
-    """Failing alias map."""
-
-    def __setitem__(self, key: str, value: str) -> None:
-      """Setitem.
-
-      Args:
-          key: The key (str) for   setitem  .
-          value: The value (str) for   setitem  .
-      """
-      raise ValueError("Test Error")
-
-  ctx.alias_map = FailingAliasMap()
-  ctx._hydrate_source_aliases()  # Should swallow exception
+  sm_err = MagicMock(spec=SemanticsManager)
+  sm_err.get_framework_config.side_effect = KeyError("missing")
+  assert RewriterContext(semantics=sm_err, config=config).alias_map == {}

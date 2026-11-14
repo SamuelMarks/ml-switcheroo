@@ -1,18 +1,17 @@
 """Test suite for the Mlx module."""
 
 import mlx.core as mx
-
 import mlx.nn as nn
 
 
 class ResidualBlock:
-  """Test helper class ResidualBlock."""
+  """Sentinel `ResidualBlock` fixture class used in MLX tests."""
 
   def __init__(self, channels: mx.array):
     """Initializes the ResidualBlock instance.
 
     Args:
-        channels: The channels (mx.array) for   init  .
+        channels: Input `channels` parameter value (`mx.array`).
     """
     super().__init__()
     self.conv1 = nn.Conv2d(channels, channels, kernel_size=3, padding=1)
@@ -36,5 +35,4 @@ class ResidualBlock:
     out = self.conv2(out)
     out = self.bn2(out)
     out = out + residual
-    out = nn.relu(out)
-    return out
+    return nn.relu(out)

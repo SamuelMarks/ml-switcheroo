@@ -1,12 +1,10 @@
 """Test suite for the Arg Packing module."""
 
-from tests.conftest import _test_getattr
-
-from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
 import pytest
+from pydantic import JsonValue
 
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.config import RuntimeConfig
@@ -35,21 +33,22 @@ def get_rewriter_for_target(target_framework: str, pack_kw: str, pack_as: str | 
   """Gets rewriter for target.
 
   Args:
-      target_framework: The target framework (str) for get rewriter for target.
-      pack_kw: The pack kw (str) for get rewriter for target.
-      pack_as: The pack as (str | None) for get rewriter for target.
+      target_framework: Input `target_framework` parameter value (`str`).
+      pack_kw: Input `pack_kw` parameter value (`str`).
+      pack_as: Input `pack_as` parameter value (`str | None`).
 
   Returns:
       Resulting `PivotRewriter` from get rewriter for target.
   """
-  hooks._PLUGINS_LOADED = True
+  hooks.set_plugins_loaded(True)
   mgr = MagicMock()
-  variant = {"api": "target.transpose", "pack_to_tuple": pack_kw}
+  variant: dict[str, JsonValue] = {"api": "target.transpose", "pack_to_tuple": pack_kw}
   if pack_as:
     variant["pack_as"] = pack_as
-  permute_def = {
+  torch_variant: dict[str, JsonValue] = {"api": "torch.permute"}
+  permute_def: dict[str, JsonValue] = {
     "std_args": ["x", {"name": "axes", "is_variadic": True}],
-    "variants": {"torch": {"api": "torch.permute"}, target_framework: variant},
+    "variants": {"torch": torch_variant, target_framework: variant},
   }
 
   def get_def_side_effect(name: str) -> tuple[str, dict[str, JsonValue]] | None:
@@ -62,16 +61,7 @@ def get_rewriter_for_target(target_framework: str, pack_kw: str, pack_as: str | 
         Resulting `tuple[str, dict[str, JsonValue]] | None` from get def side effect.
     """
     if name == "torch.permute":
-      _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
-        {
-          "v": (
-            _test_getattr({"v": "permute_dims"}, "__getitem__")("v"),
-            _test_getattr({"v": permute_def}, "__getitem__")("v"),
-          )
-        },
-        "__getitem__",
-      )("v")
-      return _ret_v
+      return ("permute_dims", permute_def)
     return None
 
   mgr.get_definition.side_effect = get_def_side_effect
@@ -83,22 +73,14 @@ def get_rewriter_for_target(target_framework: str, pack_kw: str, pack_as: str | 
     """Resolves variant.
 
     Args:
-        abstract_id: The abstract id (str) for resolve variant.
-        framework: The framework (str) for resolve variant.
+        abstract_id: Canonical abstract operation identifier (`str`).
+        framework: Target or source framework identifier (`str`).
 
     Returns:
         Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     if abstract_id == "permute_dims" and framework == target_framework:
-      res = _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": permute_def}, "__getitem__")("v")["variants"]}, "__getitem__")(
-            "v"
-          )[target_framework]
-        },
-        "__getitem__",
-      )("v")
-      return res if isinstance(res, dict) else {}
+      return variant
     return None
 
   mgr.resolve_variant.side_effect = resolve_variant
@@ -108,7 +90,7 @@ def get_rewriter_for_target(target_framework: str, pack_kw: str, pack_as: str | 
 
 
 def test_generic_axis_packing_tuple() -> None:
-  """Verifies the behavior of generic axis packing tuple."""
+  """Verify `get_rewriter_for_target` emits `target.transpose` for generic axis packing tuple."""
   rewriter = get_rewriter_for_target("jax", pack_kw="axes")
   code: str = "y = torch.permute(x, 2, 0, 1)"
   result: str = rewrite_code(rewriter, code)
@@ -118,7 +100,7 @@ def test_generic_axis_packing_tuple() -> None:
 
 
 def test_custom_perm_packing_list() -> None:
-  """Verifies the behavior of custom perm packing list."""
+  """Verify `get_rewriter_for_target` emits `perm=[0,2,1]` for custom perm packing list."""
   rewriter = get_rewriter_for_target("tensorflow", pack_kw="perm", pack_as="List")
   code: str = "y = torch.permute(x, 0, 2, 1)"
   result: str = rewrite_code(rewriter, code)
@@ -127,7 +109,7 @@ def test_custom_perm_packing_list() -> None:
 
 
 def test_pack_single_dim_list() -> None:
-  """Verifies the behavior of pack single dim list."""
+  """Verify `get_rewriter_for_target` emits `axes=[0]` for pack single dim list."""
   rewriter = get_rewriter_for_target("jax", pack_kw="axes", pack_as="List")
   code: str = "y = torch.permute(x, 0)"
   result: str = rewrite_code(rewriter, code)

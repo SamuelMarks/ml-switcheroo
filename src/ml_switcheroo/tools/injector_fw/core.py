@@ -50,9 +50,8 @@ class FrameworkInjector:
         bool: True if the operation was successful.
 
     """
-    if not self.json_path.parent.exists():
-      if not dry_run:
-        self.json_path.parent.mkdir(parents=True, exist_ok=True)
+    if not self.json_path.parent.exists() and not dry_run:
+      self.json_path.parent.mkdir(parents=True, exist_ok=True)
 
     data = self._load_current()
 

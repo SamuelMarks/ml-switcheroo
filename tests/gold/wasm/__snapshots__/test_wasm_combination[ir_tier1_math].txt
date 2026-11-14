@@ -1,0 +1,70 @@
+--- Forward ---
+"""Auto-generated LogicalGraph definition."""
+
+import ml_switcheroo_ir as sw_ir
+
+def build_graph() -> sw_ir.LogicalGraph:
+    """Construct and return the LogicalGraph."""
+    mesh = None
+    nodes = {
+        'x': sw_ir.LogicalNode(
+            id='x',
+            op_type='Input',
+            domain='ai.onnx',
+            version=1,
+            attributes={},
+            sharding=None,
+        ),
+        'relu1': sw_ir.LogicalNode(
+            id='relu1',
+            op_type='Relu',
+            domain='ai.onnx',
+            version=1,
+            attributes={},
+            sharding=None,
+        ),
+    }
+    edges = [
+        sw_ir.LogicalEdge(source='x', target='relu1'),
+    ]
+    return sw_ir.LogicalGraph(
+        name='SampleModel',
+        nodes=nodes,
+        edges=edges,
+        mesh=mesh,
+    )
+
+--- Backward ---
+{
+  "edges": [
+    {
+      "source": "x",
+      "target": "relu1"
+    }
+  ],
+  "name": "SampleModel",
+  "nodes": [
+    {
+      "attributes": {},
+      "domain": "ai.onnx",
+      "id": "x",
+      "inputs": [],
+      "kind": "Input",
+      "metadata": {},
+      "op_type": "Input",
+      "version": 1
+    },
+    {
+      "attributes": {},
+      "domain": "ai.onnx",
+      "id": "relu1",
+      "inputs": [
+        "x"
+      ],
+      "kind": "Relu",
+      "metadata": {},
+      "op_type": "Relu",
+      "version": 1
+    }
+  ]
+}

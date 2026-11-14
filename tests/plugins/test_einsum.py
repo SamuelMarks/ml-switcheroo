@@ -1,7 +1,5 @@
 """Test suite for the Einsum module."""
 
-from tests.conftest import _test_getattr
-
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -28,13 +26,13 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Execute rewriter helper logic.
+  """Create a configured `PivotRewriter` fixture for einsum tests.
 
   Returns:
       Configured `rewriter` fixture value (PivotRewriter).
   """
-  _test_getattr(hooks._HOOKS, "__setitem__")("einsum_normalizer", normalize_einsum)
-  hooks._PLUGINS_LOADED = True
+  hooks.register_hook("einsum_normalizer")(normalize_einsum)
+  hooks.set_plugins_loaded(True)
   mgr = MagicMock()
   einsum_def = {"variants": {"jax": {"api": "jax.numpy.einsum", "requires_plugin": "einsum_normalizer"}}}
   mgr.get_definition.return_value = ("einsum", einsum_def)
@@ -45,7 +43,7 @@ def rewriter() -> PivotRewriter:
 
 
 def test_standard_order_unchanged(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of standard order unchanged.
+  """Verify `rewrite_code` emits `jax.numpy.einsum` for standard order unchanged.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -56,7 +54,7 @@ def test_standard_order_unchanged(rewriter: PivotRewriter) -> None:
 
 
 def test_swap_operand_and_equation(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of swap operand and equation.
+  """Verify `rewrite_code` emits `jax.numpy.einsum` for swap operand and equation.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -67,7 +65,7 @@ def test_swap_operand_and_equation(rewriter: PivotRewriter) -> None:
 
 
 def test_multiple_operands_swap(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of multiple operands swap.
+  """Verify `rewrite_code` handles multiple operands swap as expected.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -77,7 +75,7 @@ def test_multiple_operands_swap(rewriter: PivotRewriter) -> None:
 
 
 def test_interleaved_operands_unsupported_heuristic(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of interleaved operands unsupported heuristic.
+  """Verify `rewrite_code` handles interleaved operands unsupported heuristic as expected.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -88,7 +86,7 @@ def test_interleaved_operands_unsupported_heuristic(rewriter: PivotRewriter) -> 
 
 
 def test_variable_equation_ignored(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of variable equation ignored.
+  """Verify `rewrite_code` emits `(x, eq)` for variable equation ignored.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.

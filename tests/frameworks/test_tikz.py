@@ -1,18 +1,14 @@
 """Test suite for the Tikz module."""
 
-from tests.conftest import _test_getattr
-
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
-
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
 
 from ml_switcheroo.frameworks.base import InitMode
 from ml_switcheroo.frameworks.tikz import TikzAdapter
 
 
 def test_tikz_adapter_init() -> None:
-  """Verifies the behavior of TikZ adapter initialization."""
+  """Verify `TikzAdapter` returns `1000` for TikZ adapter init."""
   adapter = TikzAdapter()
   assert adapter.display_name == "TikZ (LaTeX)"
   assert adapter.ui_priority == 1000
@@ -21,7 +17,7 @@ def test_tikz_adapter_init() -> None:
 
 
 def test_tikz_properties() -> None:
-  """Verifies the behavior of TikZ properties."""
+  """Verify `TikzAdapter` emits `% latex package imports here` for TikZ properties."""
   adapter = TikzAdapter()
   assert adapter.import_alias == ("tikz", "tikz")
   assert adapter.import_namespaces == {}
@@ -39,10 +35,8 @@ def test_tikz_properties() -> None:
   assert isinstance(defs, dict)
   specs = adapter.specifications
   assert specs == {}
-  snapshot: dict[str, RuntimeTensorOrValue] = {}
-  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    _test_getattr({"v": snapshot}, "__getitem__")("v")
-  )
+  snapshot: dict[str, dict[str, JsonValue]] = {}
+  adapter.apply_wiring(snapshot)
   assert snapshot == {}
   assert adapter.get_doc_url("anything") is None
   examples: dict[str, str] = adapter.get_tiered_examples()
@@ -51,7 +45,7 @@ def test_tikz_properties() -> None:
 
 
 def test_tikz_missing_coverage() -> None:
-  """Verify tikz missing coverage behavior."""
+  """Verify `TikzAdapter` handles TikZ missing coverage as expected."""
   adapter = TikzAdapter()
 
   # Traits

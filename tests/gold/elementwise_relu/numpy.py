@@ -5,7 +5,7 @@ import numpy.typing
 
 
 def relu_activation(x: np.typing.NDArray[np.float64]) -> np.typing.NDArray[np.float64]:
-  """Helper to relu activation.
+  """Execute `np.maximum` to support relu activation in numpy tests.
 
   Args:
       x: Primary input tensor or array operand.

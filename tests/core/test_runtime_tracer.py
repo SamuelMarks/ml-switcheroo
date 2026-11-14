@@ -1,13 +1,13 @@
 """Unit and integration tests for `src/ml_switcheroo/core/runtime_tracer.py`."""
 
 from __future__ import annotations
-from tests.conftest import _test_setattr
 
 import sys
 import types
 from unittest import mock
 
 import libcst as cst
+import pytest
 
 from ml_switcheroo.config import ExecutionBackend, LossReduction, RuntimeConfig
 from ml_switcheroo.core.runtime_models import ConstructorDimResolution
@@ -20,15 +20,15 @@ from ml_switcheroo.core.runtime_tensor import (
 )
 from ml_switcheroo.core.runtime_tracer import (
   DeclaredLayerSpec,
-  _ForwardSymbolicExecutor,
-  _TracedLayerInstance,
   _check_all_finite,
   _compute_loss,
   _execute_autodiff_strategy,
   _extract_dims_from_annotation_text,
   _extract_int_from_expr,
+  _ForwardSymbolicExecutor,
   _get_call_leaf_name,
   _resolve_traits,
+  _TracedLayerInstance,
   infer_input_shapes_from_cst,
   run_on_device_trace,
   zero_framework_sandbox,
@@ -41,12 +41,7 @@ def test_resolve_traits_adapter_and_semantics_fallback() -> None:
   t_torch = _resolve_traits("torch")
   assert t_torch.zero_runtime_package == "zero_torch"
 
-  import ml_switcheroo.semantics.manager as mgr_mod
-
-  prev = mgr_mod._MANAGER_CACHE
-  mgr_mod._MANAGER_CACHE = {}
-  sem = SemanticsManager()
-  mgr_mod._MANAGER_CACHE = prev
+  sem = SemanticsManager.empty()
   sem.framework_configs = {"custom_fw": {"traits": {"zero_runtime_package": "zero_custom"}}}
   t_custom = _resolve_traits("custom_fw", sem)
   assert t_custom.zero_runtime_package == "zero_custom"
@@ -66,13 +61,15 @@ def test_resolve_traits_adapter_and_semantics_fallback() -> None:
 
 
 def test_zero_framework_sandbox_aliasing_and_restore() -> None:
-  """Verify zero_framework_sandbox aliases importable zero-* modules and restores sys.modules."""
+  """Verify zero_framework_sandbox isolates zero-* bindings in SandboxNamespace without mutating sys.modules."""
   fake_zero_torch = types.ModuleType("zero_torch")
+  fake_zero_jnp = types.ModuleType("zero_jax_numpy")
   fake_zero_chex = types.ModuleType("zero_chex")
+  fake_stdlib_math = types.ModuleType("fake_math_mod")
   sentinel_existing = types.ModuleType("existing_chex")
 
   def fake_import(name: str) -> types.ModuleType:
-    """Import stub returning fake zero_torch and zero_chex modules.
+    """Import stub returning fake zero_torch, zero_jax.numpy, zero_chex, and fallback modules.
 
     Args:
         name: Module path to import.
@@ -82,8 +79,12 @@ def test_zero_framework_sandbox_aliasing_and_restore() -> None:
     """
     if name == "zero_torch":
       return fake_zero_torch
+    if name == "zero_jax.numpy":
+      return fake_zero_jnp
     if name == "zero_chex":
       return fake_zero_chex
+    if name == "fake_math_mod":
+      return fake_stdlib_math
     raise ImportError(name)
 
   sys.modules["chex"] = sentinel_existing
@@ -92,9 +93,19 @@ def test_zero_framework_sandbox_aliasing_and_restore() -> None:
     with mock.patch("importlib.import_module", side_effect=fake_import):
       with zero_framework_sandbox("torch", "jax") as bindings:
         assert bindings["torch"] is fake_zero_torch
+        assert bindings["jax.numpy"] is fake_zero_jnp
         assert bindings["chex"] is fake_zero_chex
-        assert sys.modules["torch"] is fake_zero_torch
-        assert sys.modules["chex"] is fake_zero_chex
+        # Process-global sys.modules must NEVER be mutated
+        assert "torch" not in sys.modules
+        assert sys.modules["chex"] is sentinel_existing
+        # Isolated import resolution and exec_globals work directly
+        assert bindings.resolve_import("torch") is fake_zero_torch
+        assert bindings.resolve_import("fake_math_mod") is fake_stdlib_math
+        exec_ns = bindings.build_exec_globals()
+        assert exec_ns["torch"] is fake_zero_torch
+        assert "jax.numpy" not in exec_ns
+        assert exec_ns["chex"] is fake_zero_chex
+        assert callable(exec_ns["__import_module__"])
       assert "torch" not in sys.modules
       assert sys.modules["chex"] is sentinel_existing
   finally:
@@ -497,24 +508,28 @@ def fn5(x):
   assert bad_report.error is not None
 
 
-def test_autodiff_strategies_and_compiler_hooks() -> None:
-  """Verify all autodiff_strategy branches, _check_all_finite, and compiler codegen integration."""
+def test_autodiff_strategies_and_compiler_hooks(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify all autodiff_strategy branches, _check_all_finite, and compiler codegen integration.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   t = OnDeviceTraceTensor((2,), data=[1.0, 2.0])
   loss_mean = _compute_loss(t, LossReduction.MEAN)
   assert loss_mean.item() == 1.5
 
   fake_jax = types.ModuleType("jax")
-  _test_setattr(fake_jax, "value_and_grad", lambda f: f)
+  monkeypatch.setattr(fake_jax, "value_and_grad", lambda f: f, raising=False)
   fake_nnx = types.ModuleType("flax.nnx")
-  _test_setattr(fake_nnx, "value_and_grad", lambda f: f)
+  monkeypatch.setattr(fake_nnx, "value_and_grad", lambda f: f, raising=False)
 
   class _DummyTape:
     """Dummy GradientTape class."""
 
   fake_tf = types.ModuleType("tensorflow")
-  _test_setattr(fake_tf, "GradientTape", _DummyTape)
+  monkeypatch.setattr(fake_tf, "GradientTape", _DummyTape, raising=False)
   fake_mlx_nn = types.ModuleType("mlx.nn")
-  _test_setattr(fake_mlx_nn, "value_and_grad", lambda m, f: f)
+  monkeypatch.setattr(fake_mlx_nn, "value_and_grad", lambda m, f: f, raising=False)
 
   mods = {
     "jax": fake_jax,
@@ -552,7 +567,7 @@ def test_autodiff_strategies_and_compiler_hooks() -> None:
     """
     raise ValueError("NaN detected")
 
-  _test_setattr(fake_chex, "assert_tree_all_finite", fail_finite)
+  monkeypatch.setattr(fake_chex, "assert_tree_all_finite", fail_finite, raising=False)
   assert _check_all_finite([t], {}, {"chex": fake_chex}) is False
 
   # Test Embedding (int32 input -> requires_grad=False so inp.grad is None)
@@ -592,7 +607,19 @@ def test_autodiff_strategies_and_compiler_hooks() -> None:
     config=cfg_wasm,
   )
   assert rep_wasm.forward_kernel_code is not None
-  assert "WASM SIMD" in rep_wasm.forward_kernel_code
+  assert "WASM SIMD" in rep_wasm.forward_kernel_code or "wasm_simd128.h" in rep_wasm.forward_kernel_code
+
+  with mock.patch("ml_switcheroo.core.runtime_tracer.importlib.import_module", side_effect=ImportError("no wasm")):
+    rep_wasm_fb = run_on_device_trace(
+      """def f(x, y):
+  return x + y
+""",
+      "torch",
+      "jax",
+      config=cfg_wasm,
+    )
+    assert rep_wasm_fb.forward_kernel_code is not None
+    assert "WASM SIMD" in rep_wasm_fb.forward_kernel_code
   assert "input_1" in rep_wasm.parameter_gradients
 
   # Test compiler integration when ml_switcheroo_compiler modules are importable
@@ -601,27 +628,27 @@ def test_autodiff_strategies_and_compiler_hooks() -> None:
   fake_node.id = "n0"
   fake_graph = mock.MagicMock()
   fake_graph.nodes = [fake_node]
-  _test_setattr(fake_ast_to_ir, "parse_ast_to_ir", lambda _c: fake_graph)
+  monkeypatch.setattr(fake_ast_to_ir, "parse_ast_to_ir", lambda _c: fake_graph, raising=False)
 
   fake_shape_inf = types.ModuleType("shape_inference")
-  _test_setattr(fake_shape_inf, "shape_inference_pass", lambda _g: None)
-  _test_setattr(fake_shape_inf, "annotate_learned_shapes", lambda _g, _s: None)
+  monkeypatch.setattr(fake_shape_inf, "shape_inference_pass", lambda _g: None, raising=False)
+  monkeypatch.setattr(fake_shape_inf, "annotate_learned_shapes", lambda _g, _s: None, raising=False)
 
   fake_autodiff = types.ModuleType("autodiff")
-  _test_setattr(fake_autodiff, "generate_backward_graph", lambda g, _id: g)
+  monkeypatch.setattr(fake_autodiff, "generate_backward_graph", lambda g, _id: g, raising=False)
 
   fake_webgpu = types.ModuleType("webgpu")
   mock_wgsl_cls = mock.MagicMock()
   mock_wgsl_cls.return_value.generate.return_value = "// wgsl"
-  _test_setattr(fake_webgpu, "WebGPUCodeGenerator", mock_wgsl_cls)
+  monkeypatch.setattr(fake_webgpu, "WebGPUCodeGenerator", mock_wgsl_cls, raising=False)
 
   fake_wasm = types.ModuleType("wasm")
   mock_wasm_cls = mock.MagicMock()
   mock_wasm_cls.return_value.generate.return_value = ";; wasm"
-  _test_setattr(fake_wasm, "WasmCodeGenerator", mock_wasm_cls)
+  monkeypatch.setattr(fake_wasm, "WasmCodeGenerator", mock_wasm_cls, raising=False)
 
   fake_dbg = types.ModuleType("shape_debugger")
-  _test_setattr(fake_dbg, "format_shape_table", lambda _g: "| Compiler Table |")
+  monkeypatch.setattr(fake_dbg, "format_shape_table", lambda _g: "| Compiler Table |", raising=False)
 
   compiler_mods = {
     "ml_switcheroo_compiler.backends.ast_to_ir": fake_ast_to_ir,

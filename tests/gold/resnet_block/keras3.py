@@ -4,13 +4,13 @@ import keras
 
 
 class ResidualBlock:
-  """Test helper class ResidualBlock."""
+  """Test double `ResidualBlock` implementing `call` for keras3 tests."""
 
   def __init__(self, channels: int) -> None:
     """Initializes the ResidualBlock instance.
 
     Args:
-        channels: The channels (int) for   init  .
+        channels: Input `channels` parameter value (`int`).
     """
     super().__init__()
     self.conv1 = keras.layers.Conv2D(channels, kernel_size=3, padding="same")
@@ -19,11 +19,11 @@ class ResidualBlock:
     self.bn2 = keras.layers.BatchNormalization()
 
   def call(self, x: keras.KerasTensor, training: bool | None = None) -> keras.KerasTensor:
-    """Helper to call.
+    """Execute `conv1` to support call in keras3 tests.
 
     Args:
         x: Primary input tensor or array operand.
-        training: The training (bool | None) for call.
+        training: Input `training` parameter value (`bool | None`).
 
     Returns:
         Resulting `keras.KerasTensor` from call.
@@ -35,5 +35,4 @@ class ResidualBlock:
     out = self.conv2(out)
     out = self.bn2(out, training=training)
     out = out + residual
-    out = keras.activations.relu(out)
-    return out
+    return keras.activations.relu(out)

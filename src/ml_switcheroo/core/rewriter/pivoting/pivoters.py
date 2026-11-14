@@ -107,7 +107,7 @@ class FunctionalToOOPPivoter(cst.CSTTransformer):
     """
     if self.drop_rng:
       new_params = []
-      for i, p in enumerate(updated_node.params.params):
+      for _i, p in enumerate(updated_node.params.params):
         if p.name.value != "rng":
           # Keep comma unless it's the last element we are keeping
           new_params.append(p)

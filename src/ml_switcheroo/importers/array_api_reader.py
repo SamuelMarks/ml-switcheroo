@@ -8,7 +8,6 @@ Feature 027 Update:
 Now extracts type hints (e.g. ``x: Array``, ``axis: int``) to support Better Fuzzing.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
 import ast
 import json
 import typing
@@ -16,6 +15,8 @@ from pathlib import Path
 
 from pydantic import JsonValue
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+from ml_switcheroo.exceptions import SnapshotLoadError
 from ml_switcheroo.semantics.paths import resolve_snapshots_dir
 from ml_switcheroo.utils.console import log_info, log_warning
 
@@ -24,6 +25,73 @@ ArrayApiOpDef = dict[str, str | list[tuple[str, str]] | list[str] | dict[str, Js
 
 class ArrayApiSpecImporter:
   """Parse Python stub files (``*.py``) using the built-in ``ast`` module."""
+
+  @staticmethod
+  def _collect_snapshot_items(raw: dict[str, JsonValue]) -> list[dict[str, JsonValue]]:
+    """Collect dictionary entries from ``categories`` and ``operations`` sections of a snapshot JSON.
+
+    Args:
+        raw: Top-level parsed snapshot JSON dictionary.
+
+    Returns:
+        Flattened list of operation entry dictionaries.
+    """
+    all_items: list[dict[str, JsonValue]] = []
+    categories = raw.get("categories", {})
+    if isinstance(categories, dict):
+      for cat_items in categories.values():
+        if isinstance(cat_items, list):
+          all_items.extend([it for it in cat_items if isinstance(it, dict)])
+
+    ops = raw.get("operations", {})
+    if isinstance(ops, dict):
+      all_items.extend([it for it in ops.values() if isinstance(it, dict)])
+    return all_items
+
+  @staticmethod
+  def _extract_snapshot_params(
+    name: str,
+    raw_params: JsonValue,
+  ) -> tuple[list[tuple[str, str]], list[str], list[str]]:
+    """Extract standard, positional-only, and keyword-only parameter specs for ``name``.
+
+    Args:
+        name: Operation identifier for error reporting.
+        raw_params: Raw ``params`` JSON value from the snapshot entry.
+
+    Returns:
+        Tuple of ``(std_args, posonly_args, kwonly_args)``.
+
+    Raises:
+        SnapshotLoadError: If ``raw_params`` is not a list.
+    """
+    if not isinstance(raw_params, list):
+      raise SnapshotLoadError(f"Expected list for 'params' on '{name}', got {type(raw_params).__name__}.")
+
+    std_args: list[tuple[str, str]] = []
+    posonly_args: list[str] = []
+    kwonly_args: list[str] = []
+
+    for p in raw_params:
+      if not isinstance(p, dict):
+        continue
+      raw_p_name = p.get("name", "")
+      p_name = str(raw_p_name) if isinstance(raw_p_name, str) else ""
+      if not p_name:
+        continue
+      raw_p_kind = p.get("kind", "")
+      p_kind = str(raw_p_kind) if isinstance(raw_p_kind, str) else ""
+      raw_p_annot = p.get("annotation")
+      p_annot = str(raw_p_annot) if isinstance(raw_p_annot, str) and raw_p_annot else "Any"
+
+      if p_kind == "POSITIONAL_ONLY":
+        posonly_args.append(p_name)
+      elif p_kind == "KEYWORD_ONLY":
+        kwonly_args.append(p_name)
+      if p_kind not in ("VAR_POSITIONAL", "VAR_KEYWORD"):
+        std_args.append((p_name, p_annot))
+
+    return std_args, posonly_args, kwonly_args
 
   def parse_snapshot(self, snapshot_path: Path | None = None) -> dict[str, ArrayApiOpDef]:
     """Parse Array API specifications from a serialized snapshot JSON.
@@ -37,7 +105,7 @@ class ArrayApiSpecImporter:
 
     Raises:
         FileNotFoundError: If the snapshot file does not exist.
-        ValueError: If the snapshot JSON is corrupt or not a dictionary.
+        SnapshotLoadError: If the snapshot JSON is corrupt, not a dictionary, or has malformed params.
     """
     if snapshot_path is None:
       snapshot_path = resolve_snapshots_dir() / "array_api_v2024.12.json"
@@ -47,26 +115,14 @@ class ArrayApiSpecImporter:
 
     try:
       raw = json.loads(snapshot_path.read_text(encoding="utf-8"))
-    except Exception as e:
-      raise ValueError(f"Corrupt snapshot JSON at {snapshot_path}: {e}") from e
+    except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as e:
+      raise SnapshotLoadError(f"Corrupt snapshot JSON at {snapshot_path}: {e}") from e
 
     if not isinstance(raw, dict):
-      raise ValueError("Corrupt snapshot: top-level JSON must be an object.")
+      raise SnapshotLoadError("Corrupt snapshot: top-level JSON must be an object.")
 
     semantics: dict[str, ArrayApiOpDef] = {}
-    categories = raw.get("categories", {})
-    all_items: list[dict[str, JsonValue]] = []
-
-    if isinstance(categories, dict):
-      for cat_items in categories.values():
-        if isinstance(cat_items, list):
-          all_items.extend([it for it in cat_items if isinstance(it, dict)])
-
-    ops = raw.get("operations", {})
-    if isinstance(ops, dict):
-      all_items.extend([it for it in ops.values() if isinstance(it, dict)])
-
-    for entry in all_items:
+    for entry in self._collect_snapshot_items(raw):
       raw_api_path = entry.get("api_path", "")
       api_path = str(raw_api_path) if isinstance(raw_api_path, str) else ""
       raw_name = entry.get("name")
@@ -75,34 +131,8 @@ class ArrayApiSpecImporter:
         continue
 
       raw_doc = entry.get("docstring")
-      doc = str(raw_doc) if isinstance(raw_doc, str) else ""
-      summary = self._clean_docstring(doc)
-
-      std_args: list[tuple[str, str]] = []
-      posonly_args: list[str] = []
-      kwonly_args: list[str] = []
-
-      raw_params = entry.get("params", [])
-      assert isinstance(raw_params, list)
-      for p in raw_params:
-        if not isinstance(p, dict):
-          continue
-        raw_p_name = p.get("name", "")
-        p_name = str(raw_p_name) if isinstance(raw_p_name, str) else ""
-        if not p_name:
-          continue
-        raw_p_kind = p.get("kind", "")
-        p_kind = str(raw_p_kind) if isinstance(raw_p_kind, str) else ""
-        raw_p_annot = p.get("annotation")
-        p_annot = str(raw_p_annot) if isinstance(raw_p_annot, str) and raw_p_annot else "Any"
-
-        if p_kind == "POSITIONAL_ONLY":
-          posonly_args.append(p_name)
-        elif p_kind == "KEYWORD_ONLY":
-          kwonly_args.append(p_name)
-
-        if p_kind not in ("VAR_POSITIONAL", "VAR_KEYWORD"):
-          std_args.append((p_name, p_annot))
+      summary = self._clean_docstring(str(raw_doc) if isinstance(raw_doc, str) else "")
+      std_args, posonly_args, kwonly_args = self._extract_snapshot_params(name, entry.get("params", []))
 
       raw_ret = entry.get("returns_type")
       raw_kind = entry.get("kind")
@@ -115,11 +145,9 @@ class ArrayApiSpecImporter:
         "returns_type": str(raw_ret) if isinstance(raw_ret, str) else "Any",
         "kind": str(raw_kind) if isinstance(raw_kind, str) else "function",
       }
-
       self.validate_function_signature(name, defn)
       semantics[name] = defn
 
-    assert isinstance(semantics, dict)
     return semantics
 
   def validate_function_signature(self, op_name: str, defn: typing.Mapping[str, RuntimeTensorOrValue]) -> bool:
@@ -209,7 +237,7 @@ class ArrayApiSpecImporter:
 
       try:
         tree = ast.parse(fpath.read_text(encoding="utf-8"))
-      except Exception as e:
+      except (OSError, UnicodeError, SyntaxError, ValueError, RuntimeError) as e:
         log_warning(f"Failed to parse {fpath.name}: {e}")
         continue
 
@@ -242,9 +270,12 @@ class ArrayApiSpecImporter:
           summary = f"Constant: {name}"
           if i + 1 < len(tree.body):
             next_node = tree.body[i + 1]
-            if isinstance(next_node, ast.Expr) and isinstance(next_node.value, ast.Constant):
-              if isinstance(next_node.value.value, str):
-                summary = self._clean_docstring(next_node.value.value)
+            if (
+              isinstance(next_node, ast.Expr)
+              and isinstance(next_node.value, ast.Constant)
+              and isinstance(next_node.value.value, str)
+            ):
+              summary = self._clean_docstring(next_node.value.value)
 
           semantics[name] = {
             "from": rel_path,
@@ -253,7 +284,6 @@ class ArrayApiSpecImporter:
             "variants": {},
           }
 
-    assert isinstance(semantics, dict)
     return semantics
 
   def _extract_args(self, args: ast.arguments) -> list[tuple[str, str]]:
@@ -310,10 +340,10 @@ class ArrayApiSpecImporter:
     if isinstance(annotation, ast.Name):
       return annotation.id
 
-    elif isinstance(annotation, ast.Constant):
+    if isinstance(annotation, ast.Constant):
       return str(annotation.value)
 
-    elif isinstance(annotation, ast.Subscript):
+    if isinstance(annotation, ast.Subscript):
       # e.g. Optional[int] or Tuple[int, int]
       val = self._parse_annotation(annotation.value)
       try:
@@ -330,7 +360,7 @@ class ArrayApiSpecImporter:
         return f"{val}[{inner}]"
       return val
 
-    elif isinstance(annotation, ast.BinOp):
+    if isinstance(annotation, ast.BinOp):
       # e.g. int | float (Python 3.10+ Union style)
       if isinstance(annotation.op, ast.BitOr):
         left = self._parse_annotation(annotation.left)
@@ -356,9 +386,8 @@ class ArrayApiSpecImporter:
     if isinstance(node, ast.Assign):
       if node.targets and isinstance(node.targets[0], ast.Name):
         return node.targets[0].id
-    elif isinstance(node, ast.AnnAssign):
-      if isinstance(node.target, ast.Name):
-        return node.target.id
+    elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+      return node.target.id
     return None
 
   def _clean_docstring(self, doc: str | None) -> str:
@@ -388,8 +417,8 @@ class ArrayApiSpecImporter:
         Formatted Markdown report summarizing Array API conformance.
     """
     total = len(semantics)
-    with_args = sum(1 for d in semantics.values() if d.get("std_args"))
-    with_docs = sum(1 for d in semantics.values() if d.get("description"))
+    with_args = sum(1 for d in semantics.values() if isinstance(sa := d.get("std_args"), (list, tuple)) and len(sa) > 0)
+    with_docs = sum(1 for d in semantics.values() if isinstance(desc := d.get("description"), str) and bool(desc))
 
     lines = [
       "# Python Array API Standard Conformance Report",

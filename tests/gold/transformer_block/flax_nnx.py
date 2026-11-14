@@ -6,7 +6,7 @@ from flax import nnx
 
 
 class TransformerBlock(nnx.Module):
-  """Test helper class TransformerBlock."""
+  """Minimal `nnx.Module` test double used in flax NNX tests."""
 
   def __init__(
     self,
@@ -19,10 +19,10 @@ class TransformerBlock(nnx.Module):
     """Initializes the TransformerBlock instance.
 
     Args:
-        embed_dim: The embed dim (int) for   init  .
-        num_heads: The num heads (int) for   init  .
-        ff_dim: The ff dim (int) for   init  .
-        dropout: The dropout (float) for   init  .
+        embed_dim: Input `embed_dim` parameter value (`int`).
+        num_heads: Input `num_heads` parameter value (`int`).
+        ff_dim: Input `ff_dim` parameter value (`int`).
+        dropout: Input `dropout` parameter value (`float`).
         rngs: Flax NNX Rngs container for stochastic parameter initialization.
     """
     self.attn = nnx.MultiHeadAttention(num_heads=num_heads, in_features=embed_dim, dropout_rate=dropout, rngs=rngs)
@@ -37,8 +37,8 @@ class TransformerBlock(nnx.Module):
 
     Args:
         x: Primary input tensor or array operand.
-        attn_mask: The attn mask (jnp.ndarray | None) for   call  .
-        deterministic: The deterministic (bool) for   call  .
+        attn_mask: Input `attn_mask` parameter value (`jnp.ndarray | None`).
+        deterministic: Input `deterministic` parameter value (`bool`).
 
     Returns:
         Output tensor or value computed by the forward pass.
@@ -50,5 +50,4 @@ class TransformerBlock(nnx.Module):
     ffn_out = self.dropout(ffn_out, deterministic=deterministic)
     ffn_out = self.ffn_proj2(ffn_out)
     ffn_out = self.dropout(ffn_out, deterministic=deterministic)
-    x = self.norm2(x + ffn_out)
-    return x
+    return self.norm2(x + ffn_out)

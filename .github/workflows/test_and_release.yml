@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v10.1.0
+        uses: astral-sh/setup-uv@v10.3.3
         with:
           enable-cache: true
           cache-dependency-glob: "pyproject.toml"
@@ -51,20 +51,26 @@ jobs:
         if: matrix.python-version == '3.14'
         run: |
           source .venv/bin/activate
-          pytest -n auto --durations=10 --cov=src --cov-fail-under=100 tests
+          pytest -n auto --durations=10 --cov=src --cov=scripts --cov=docs --cov-fail-under=100 --cov-branch --cov-report=json -W error::DeprecationWarning tests
+          python scripts/check_function_coverage.py
 
       - name: Run Pytest (fast, no coverage)
         if: matrix.python-version != '3.14'
         run: |
           source .venv/bin/activate
-          pytest -n auto --durations=10 tests
+          pytest -n auto --durations=10 -W error::DeprecationWarning tests
 
-      - name: Run mypy and interrogate
+      - name: Run mypy, typing linter, docstring checks, and guardrails
         if: matrix.python-version == '3.12'
         run: |
           source .venv/bin/activate
+          python scripts/lint_typing.py src scripts docs tests
           mypy --strict src scripts docs tests
-          interrogate -c pyproject.toml --fail-under 100
+          interrogate -c pyproject.toml --fail-under 100 src scripts docs tests
+          python scripts/check_docstrings.py src scripts docs tests
+          bash scripts/check_python_loc.sh $(find src scripts docs tests -name "*.py")
+          python scripts/lint_architecture.py src scripts
+          python scripts/compile_odl_catalog.py --verify-only
 
       - name: Run Snapshot Audit & Anti-Hallucination Check
         if: matrix.python-version == '3.12'

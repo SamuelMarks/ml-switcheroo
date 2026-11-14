@@ -4,11 +4,11 @@ This module provides the `InputFuzzer` facade which now delegates generation log
 to Hypothesis Strategies. It maintains backward compatibility for casual usage via `generate_inputs`.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 
 import hypothesis.strategies as st
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.frameworks import get_adapter
 from ml_switcheroo.testing.fuzzer.heuristics import guess_dtype_by_name
 from ml_switcheroo.testing.fuzzer.strategies import strategies_from_spec
@@ -82,6 +82,25 @@ class InputFuzzer:
 
     return strategies
 
+  @staticmethod
+  def _convert_value(
+    convert_fn: typing.Callable[[RuntimeTensorOrValue], RuntimeTensorOrValue],
+    val: RuntimeTensorOrValue,
+  ) -> RuntimeTensorOrValue:
+    """Convert a single input value via ``convert_fn``, falling back to ``val`` on failure.
+
+    Args:
+        convert_fn: Adapter conversion callable accepting a runtime value.
+        val: Raw input value to convert.
+
+    Returns:
+        Converted framework tensor/value, or the original ``val`` if conversion fails.
+    """
+    try:
+      return convert_fn(val)
+    except (ImportError, AttributeError, ValueError, TypeError, RuntimeError):
+      return val
+
   def adapt_to_framework(
     self, kwargs: typing.Mapping[str, RuntimeTensorOrValue], framework: str
   ) -> dict[str, RuntimeTensorOrValue]:
@@ -99,10 +118,4 @@ class InputFuzzer:
     if not adapter:
       return dict(kwargs)
 
-    converted: dict[str, RuntimeTensorOrValue] = {}
-    for k, v in kwargs.items():
-      try:
-        converted[k] = adapter.convert(v)
-      except Exception:
-        converted[k] = v
-    return converted
+    return {k: self._convert_value(adapter.convert, v) for k, v in kwargs.items()}

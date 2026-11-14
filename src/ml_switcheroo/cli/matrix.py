@@ -16,6 +16,7 @@ from rich.console import Console
 from rich.table import Table
 
 from ml_switcheroo.config import get_framework_priority_order
+from ml_switcheroo.core.dsl import FrameworkVariant
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -70,34 +71,38 @@ class CompatibilityMatrix:
     """
     rows = []
     engines = self._get_sorted_engines()
+    import types
+
     data = self.semantics.get_known_apis()
-    sorted_keys = sorted(data.keys())
+    gka_fn = self.semantics.get_known_apis
+    is_default_gka = isinstance(gka_fn, types.MethodType) and gka_fn.__func__ is SemanticsManager.get_known_apis
+    typed_ops = self.semantics.operations if is_default_gka else {}
+    use_typed = bool(typed_ops) and set(typed_ops.keys()) == set(data.keys())
+    sorted_keys = sorted(typed_ops.keys() if use_typed else data.keys())
 
     # Determine Origin/Tier for operations (heuristic or metadata)
     raw_origins = self.semantics._key_origins
     origins = raw_origins or {}
 
     for op_name in sorted_keys:
-      details = data[op_name]
-      raw_vars = details.get("variants", {})
-      variants = raw_vars if isinstance(raw_vars, dict) else {}
-
-      # Resolve Tier Name
       tier_raw = origins.get(op_name, "Standard")
-      # Clean up tier string (e.g. 'array' -> 'Array')
       tier_label = tier_raw.replace("_", " ").title()
-
-      # Base Row
       row_dict = {
         "operation": op_name,
         "tier": tier_label,
       }
 
-      # Populate status for each registered engine
-      for engine in engines:
-        v_entry = variants.get(engine)
-        status = self._get_status_icon(v_entry if isinstance(v_entry, dict) else None)
-        row_dict[engine] = status
+      op_model = typed_ops.get(op_name) if use_typed else None
+      if op_model is not None:
+        for engine in engines:
+          row_dict[engine] = self._get_status_icon(op_model.variants.get(engine))
+      else:
+        details = data[op_name]
+        raw_vars = details.get("variants", {})
+        variants = raw_vars if isinstance(raw_vars, dict) else {}
+        for engine in engines:
+          v_entry = variants.get(engine)
+          row_dict[engine] = self._get_status_icon(v_entry if isinstance(v_entry, dict) else None)
 
       rows.append(row_dict)
 
@@ -126,18 +131,17 @@ class CompatibilityMatrix:
     for row_data in matrix_data:
       # Build list of values matching the column order defined above
       row_values = [row_data["operation"], row_data["tier"]]
-      for engine in engines:
-        row_values.append(row_data[engine])
+      row_values.extend(row_data[engine] for engine in engines)
 
       table.add_row(*row_values)
 
     self.console.print(table)
 
-  def _get_status_icon(self, variant_info: typing.Mapping[str, JsonValue] | None) -> str:
+  def _get_status_icon(self, variant_info: FrameworkVariant | typing.Mapping[str, JsonValue] | None) -> str:
     """Determine the visual status icon for a mapping entry.
 
     Args:
-        variant_info (Optional[Dict]): The dictionary describing the variant's implementation.
+        variant_info: Validated ``FrameworkVariant`` or raw variant mapping dictionary.
 
     Returns:
         str: Status emoji/character.
@@ -146,13 +150,13 @@ class CompatibilityMatrix:
              ❌ = Not mapped / Missing.
 
     """
-    # If None, explicit failure. If missing, missing.
     if not variant_info:
       return "❌"
 
-    # If a plugin is required, it's supported but complex.
+    if isinstance(variant_info, FrameworkVariant):
+      return "🧩" if variant_info.requires_plugin else "✅"
+
     if "requires_plugin" in variant_info:
       return "🧩"
 
-    # Otherwise assumed direct API mapping
     return "✅"

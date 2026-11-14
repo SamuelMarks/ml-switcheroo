@@ -19,29 +19,35 @@ import typing
 import libcst as cst
 
 from ml_switcheroo.core.tracer import get_tracer
+from ml_switcheroo.frameworks.base import get_adapter
 from ml_switcheroo.utils.node_diff import diff_nodes
 
 if typing.TYPE_CHECKING:
-  from ml_switcheroo.core.rewriter.calls.pre import PreRewriterProtocol
   from ml_switcheroo.core.rewriter.interface import RewriterHost
   from ml_switcheroo.core.rewriter.types import SignatureContext
   from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-_PURE_MATH_BACKENDS = {"NumPy", "numpy", "jax"}
-
-
 def is_neural_on_math_backend(tier: str | None, target_framework: str) -> bool:
   """Check if a neural network operation tier is being mapped directly to a pure math backend.
 
+  Queries the registered ``FrameworkAdapter`` for ``target_framework`` (case-insensitively)
+  and inspects ``StructuralTraits.module_base`` to determine whether the target lacks
+  a stateful neural module hierarchy.
+
   Args:
-      tier: Origin semantic tier string (e.g., 'neural', 'neural_ops').
+      tier: Origin semantic tier string (e.g., ``'neural'``, ``'neural_ops'``).
       target_framework: Target framework identifier string.
 
   Returns:
-      True if the operation belongs to a neural tier and the target is a pure math backend.
+      bool: ``True`` if the operation belongs to a neural tier and the target is a pure math backend.
   """
-  return bool(tier in ("neural", "neural_ops") and target_framework in _PURE_MATH_BACKENDS)
+  if tier not in ("neural", "neural_ops"):
+    return False
+  adapter = get_adapter(target_framework) or get_adapter(target_framework.lower())
+  if adapter is None:
+    return False
+  return adapter.structural_traits.module_base is None
 
 
 def is_functional_apply(node: cst.Call, method_name: str | None = "apply") -> bool:
@@ -63,10 +69,7 @@ def is_functional_apply(node: cst.Call, method_name: str | None = "apply") -> bo
   if not method_name:
     return False
 
-  if isinstance(node.func, cst.Attribute):
-    if node.func.attr.value == method_name:
-      return True
-  return False
+  return bool(isinstance(node.func, cst.Attribute) and node.func.attr.value == method_name)
 
 
 @typing.runtime_checkable
@@ -79,7 +82,6 @@ class _WarningReporterProtocol(typing.Protocol):
     Args:
         msg: Warning message.
     """
-    ...
 
 
 @typing.runtime_checkable
@@ -95,11 +97,47 @@ class _DottedNameCreatorProtocol(typing.Protocol):
     Returns:
         Created CST expression.
     """
-    ...
+
+
+@typing.runtime_checkable
+class _SignatureStackContextProtocol(typing.Protocol):
+  """Protocol for rewriter contexts exposing `signature_stack`.
+
+  Attributes:
+      signature_stack: Stack of active function signature contexts.
+  """
+
+  signature_stack: list["SignatureContext"]
+
+
+@typing.runtime_checkable
+class _ContextOwnerProtocol(typing.Protocol):
+  """Protocol for rewriters exposing `context`.
+
+  Attributes:
+      context: Active rewriter context containing `signature_stack`.
+  """
+
+  context: _SignatureStackContextProtocol
+
+
+@typing.runtime_checkable
+class _LegacySignatureStackProtocol(typing.Protocol):
+  """Protocol for legacy rewriter shims exposing `_signature_stack`.
+
+  Attributes:
+      _signature_stack: Legacy stack of active function signature contexts.
+  """
+
+  _signature_stack: list["SignatureContext"]
+
+
+class StatefulCallRewriterProtocol(typing.Protocol):
+  """Protocol for rewriter shims passed to rewrite_stateful_call."""
 
 
 def _has_create_dotted_name(
-  obj: "RewriterHost | PreRewriterProtocol | StatefulCallRewriterProtocol | _DottedNameCreatorProtocol | None",
+  obj: "RewriterHost | StatefulCallRewriterProtocol | _DottedNameCreatorProtocol | None",
 ) -> typing.TypeGuard[_DottedNameCreatorProtocol]:
   """Check if `obj` exposes `_create_dotted_name`.
 
@@ -109,30 +147,11 @@ def _has_create_dotted_name(
   Returns:
       True if `_create_dotted_name` is available.
   """
-  if isinstance(obj, _DottedNameCreatorProtocol):
-    return True
-  try:
-    import inspect
-
-    mock_children = inspect.getattr_static(obj, "_mock_children") if obj is not None else None
-  except AttributeError:
-    mock_children = None
-  return isinstance(mock_children, dict) and callable(mock_children.get("_create_dotted_name"))
-
-
-@typing.runtime_checkable
-class _LegacySignatureStackProtocol(typing.Protocol):
-  """Protocol for legacy rewriter shims exposing `_signature_stack`."""
-
-  _signature_stack: list["SignatureContext"]
-
-
-class StatefulCallRewriterProtocol(typing.Protocol):
-  """Protocol for rewriter shims passed to rewrite_stateful_call."""
+  return isinstance(obj, _DottedNameCreatorProtocol)
 
 
 def rewrite_stateful_call(
-  rewriter: "RewriterHost | PreRewriterProtocol | StatefulCallRewriterProtocol",
+  rewriter: "RewriterHost | StatefulCallRewriterProtocol",
   node: cst.Call,
   instance_name: str,
   config: dict[str, str],
@@ -158,16 +177,12 @@ def rewrite_stateful_call(
 
   # Track injection requirement in the enclosing function signature
   sig_stack: list["SignatureContext"] | None = None
-  from ml_switcheroo.core.rewriter.calls.pre import _resolve_attr
-
-  ctx_obj = _resolve_attr(rewriter, "context")
-  raw_stack = _resolve_attr(ctx_obj, "signature_stack")
-  if isinstance(raw_stack, list):
-    sig_stack = raw_stack
+  if isinstance(rewriter, _ContextOwnerProtocol) and isinstance(rewriter.context, _SignatureStackContextProtocol):
+    sig_stack = rewriter.context.signature_stack
   elif isinstance(rewriter, _LegacySignatureStackProtocol):
     sig_stack = rewriter._signature_stack
 
-  if isinstance(sig_stack, list) and sig_stack:
+  if sig_stack:
     sig_ctx = sig_stack[-1]
     if target_arg_name not in sig_ctx.existing_args:
       found = any(n == target_arg_name for n, _ in sig_ctx.injected_args)
@@ -281,9 +296,8 @@ def is_super_call(node: cst.CSTNode) -> bool:
   if isinstance(node.func, cst.Attribute):
     # Case: super().method()
     receiver = node.func.value
-    if isinstance(receiver, cst.Call) and isinstance(receiver.func, cst.Name):
-      if receiver.func.value == "super":
-        return True
+    if isinstance(receiver, cst.Call) and isinstance(receiver.func, cst.Name) and receiver.func.value == "super":
+      return True
   elif isinstance(node.func, cst.Name):
     # Case: super()
     if node.func.value == "super":
@@ -421,14 +435,13 @@ def inject_permute_call(
 
   if pack_kw:
     # Keyword Tuple: .transpose(x, axes=(0, 2, 1))
-    elements = []
-    for idx_val in indices:
-      elements.append(
-        cst.Element(
-          value=cst.Integer(str(idx_val)),
-          comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
-        )
+    elements: list[cst.Element] = [
+      cst.Element(
+        value=cst.Integer(str(idx_val)),
+        comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
       )
+      for idx_val in indices
+    ]
     # Clean last comma for cleanliness
     if elements:
       elements[-1] = elements[-1].with_changes(comma=cst.MaybeSentinel.DEFAULT)

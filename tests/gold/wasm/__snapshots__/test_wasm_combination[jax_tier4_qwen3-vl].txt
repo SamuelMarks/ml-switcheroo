@@ -1,0 +1,37 @@
+--- Forward ---
+import numpy as np
+import jax.lax as lax
+
+# Pure JAX representation of VisionFrontEnd
+class VisionFrontEnd:
+    def __init__(self, kernel):
+        self.patch_conv_w = kernel
+
+    def __call__(self, x):
+        # Vision Patch Embedding Extraction
+        return lax.conv_general_dilated(
+            lhs=x,
+            rhs=self.patch_conv_w,
+            window_strides=(2, 14, 14),
+            padding='VALID',
+            dimension_numbers=('NCDHW', 'OIDHW', 'NCDHW')
+        )
+
+--- Backward ---
+import jax.numpy as jnp
+import jax.lax as lax
+
+# Pure JAX representation of VisionFrontEnd
+class VisionFrontEnd:
+    def __init__(self, kernel):
+        self.patch_conv_w = kernel
+
+    def __call__(self, x):
+        # Vision Patch Embedding Extraction
+        return lax.conv_general_dilated(
+            lhs=x,
+            rhs=self.patch_conv_w,
+            window_strides=(2, 14, 14),
+            padding='VALID',
+            dimension_numbers=('NCDHW', 'OIDHW', 'NCDHW')
+        )

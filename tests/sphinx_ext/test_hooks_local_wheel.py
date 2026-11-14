@@ -1,10 +1,10 @@
 """Tests for local wheel resolution and requirements hooks."""
 
-from pydantic import JsonValue
-
 import os
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
+
+from pydantic import JsonValue
 
 from ml_switcheroo.sphinx_ext.hooks import (
   bundle_on_device_wheels,
@@ -122,7 +122,7 @@ def test_find_local_wheel_build_error(tmp_path: Path) -> None:
   cdd_dir.mkdir()
   (cdd_dir / "setup.py").write_text("setup()")
 
-  with patch("subprocess.run", side_effect=Exception("Build failed")):
+  with patch("subprocess.run", side_effect=RuntimeError("Build failed")):
     res = find_local_wheel(root_dir, "cdd")
     assert res is None
 
@@ -162,9 +162,30 @@ def test_copy_wheel_and_reqs_local_grab(tmp_path: Path) -> None:
   reqs_file = root_dir / "requirements.txt"
   reqs_file.write_text(reqs_content)
 
-  app = MagicMock()
+  class _BuilderStub:
+    """Typed Sphinx builder stub carrying `outdir`."""
+
+    def __init__(self, d: Path) -> None:
+      """Initialize builder output directory.
+
+      Args:
+          d: Output directory path.
+      """
+      self.outdir = str(d)
+
+  class _AppStub:
+    """Typed Sphinx app stub carrying `builder`."""
+
+    def __init__(self, d: Path) -> None:
+      """Initialize Sphinx app stub.
+
+      Args:
+          d: Output directory path.
+      """
+      self.builder = _BuilderStub(d)
+
   outdir = tmp_path / "out"
-  app.builder.outdir = str(outdir)
+  app = _AppStub(outdir)
 
   import ml_switcheroo.sphinx_ext.hooks
 
@@ -313,9 +334,30 @@ def test_copy_wheel_and_reqs_http_non_github_or_non_whl(tmp_path: Path) -> None:
   reqs_file = root_dir / "requirements.txt"
   reqs_file.write_text(reqs_content)
 
-  app = MagicMock()
+  class _BuilderStub:
+    """Typed Sphinx builder stub carrying `outdir`."""
+
+    def __init__(self, d: Path) -> None:
+      """Initialize builder output directory.
+
+      Args:
+          d: Output directory path.
+      """
+      self.outdir = str(d)
+
+  class _AppStub:
+    """Typed Sphinx app stub carrying `builder`."""
+
+    def __init__(self, d: Path) -> None:
+      """Initialize Sphinx app stub.
+
+      Args:
+          d: Output directory path.
+      """
+      self.builder = _BuilderStub(d)
+
   outdir = tmp_path / "out"
-  app.builder.outdir = str(outdir)
+  app = _AppStub(outdir)
 
   import ml_switcheroo.sphinx_ext.hooks
 

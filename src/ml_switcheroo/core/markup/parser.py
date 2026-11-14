@@ -28,7 +28,7 @@ class Token:
     Returns:
         str: Formatted Token representation string.
     """
-    return f"Token({self.type}, {repr(self.value)})"
+    return f"Token({self.type}, {self.value!r})"
 
 
 class BaseTokenizer:

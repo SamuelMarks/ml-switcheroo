@@ -6,11 +6,8 @@ backends like JAX). It tests detection of I/O, in-place mutations, global state 
 and interactions with the SemanticsManager for framework-specific impurity rules.
 """
 
-from tests.conftest import _test_getattr
-
-from pydantic import JsonValue
-
 import libcst as cst
+from pydantic import JsonValue
 
 from ml_switcheroo.analysis.purity import PurityScanner
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -203,88 +200,101 @@ def test_purity_missing_branches() -> None:
   - Unrecognized function call types (like lambda immediately invoked, or safe builtins) are parsed.
   """
 
-  # 73->77: semantics but no get_all_rng_methods
-  # We mock a semantics object that lacks it.
-  class FakeSemantics1:
-    """Mock SemanticsManager lacking rng methods mapping."""
+  # 73->77: semantics raises AttributeError on rng/framework lookups
+  class FakeSemantics1(SemanticsManager):
+    """SemanticsManager double raising AttributeError on dynamic lookup methods."""
 
-    pass
+    def __init__(self) -> None:
+      """Initialize empty semantics manager double."""
+      super().__init__(load_defaults=False)
 
-  _scanner = _test_getattr(
-    {
-      "v": _test_getattr({"v": PurityScanner}, "__getitem__")("v")(
-        semantics=_test_getattr({"v": _test_getattr({"v": FakeSemantics1}, "__getitem__")("v")()}, "__getitem__")("v"),
-        source_framework=_test_getattr({"v": "torch"}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
+    def get_all_rng_methods(self) -> set[str]:
+      """Raise AttributeError to exercise fallback branch.
+
+      Returns:
+          Never returns; raises AttributeError.
+      """
+      raise AttributeError("get_all_rng_methods unavailable")
+
+    def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
+      """Raise AttributeError to exercise config fallback branch.
+
+      Args:
+          framework: Framework identifier string.
+
+      Returns:
+          Never returns; raises AttributeError.
+      """
+      raise AttributeError("get_framework_config unavailable")
+
+  _scanner = PurityScanner(
+    semantics=FakeSemantics1(),
+    source_framework="torch",
+  )
 
   # 77->exit: semantics has get_framework_config but no source_framework
-  class FakeSemantics2:
-    """Mock SemanticsManager lacking source_framework resolution."""
+  class FakeSemantics2(SemanticsManager):
+    """SemanticsManager double returning empty config when source_framework is None."""
 
-    def get_all_rng_methods(self) -> list[str]:
-      """Mock returning empty rng methods.
+    def __init__(self) -> None:
+      """Initialize empty semantics manager double."""
+      super().__init__(load_defaults=False)
+
+    def get_all_rng_methods(self) -> set[str]:
+      """Return a single RNG method name.
 
       Returns:
-          Resulting `list[str]` from get all rng methods.
+          Set containing `"seed"`.
       """
-      return ["seed"]
+      return {"seed"}
 
-    def get_framework_config(self, fw: str) -> dict[str, JsonValue] | None:
-      """Mock returning None for framework config.
+    def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
+      """Return an empty framework config dictionary.
 
       Args:
-          fw: Framework identifier string (e.g., torch, jax, mlx).
+          framework: Framework identifier string.
 
       Returns:
-          Resulting `dict[str, JsonValue] | None` from get framework config.
+          Empty configuration dictionary.
       """
-      return None
+      return {}
 
-  _scanner2 = _test_getattr(
-    {
-      "v": _test_getattr({"v": PurityScanner}, "__getitem__")("v")(
-        semantics=_test_getattr({"v": _test_getattr({"v": FakeSemantics2}, "__getitem__")("v")()}, "__getitem__")("v"),
-        source_framework=_test_getattr({"v": None}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
+  _scanner2 = PurityScanner(
+    semantics=FakeSemantics2(),
+    source_framework=None,
+  )
 
   # 79->exit: conf is empty or missing "traits"
-  class FakeSemantics3:
-    """Mock SemanticsManager lacking traits."""
+  class FakeSemantics3(SemanticsManager):
+    """SemanticsManager double returning a config dictionary without traits."""
 
-    def get_all_rng_methods(self) -> list[str]:
-      """Mock returning empty rng methods.
+    def __init__(self) -> None:
+      """Initialize empty semantics manager double."""
+      super().__init__(load_defaults=False)
+
+    def get_all_rng_methods(self) -> set[str]:
+      """Return a single RNG method name.
 
       Returns:
-          Resulting `list[str]` from get all rng methods.
+          Set containing `"seed"`.
       """
-      return ["seed"]
+      return {"seed"}
 
-    def get_framework_config(self, fw: str) -> dict[str, JsonValue]:
-      """Mock returning incomplete config.
+    def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
+      """Return an incomplete framework config lacking a traits key.
 
       Args:
-          fw: Framework identifier string (e.g., torch, jax, mlx).
+          framework: Framework identifier string.
 
       Returns:
-          Resulting `dict[str, JsonValue]` from get framework config.
+          Configuration dictionary missing `"traits"`.
       """
       return {"other": 1}
 
-  _scanner3 = _test_getattr(
-    {
-      "v": _test_getattr({"v": PurityScanner}, "__getitem__")("v")(
-        semantics=_test_getattr({"v": _test_getattr({"v": FakeSemantics3}, "__getitem__")("v")()}, "__getitem__")("v"),
-        source_framework=_test_getattr({"v": "torch"}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
+  _scanner3 = PurityScanner(
+    semantics=FakeSemantics3(),
+    source_framework="torch",
+  )
 
   # AST node tests for 164->187, 168->187, 184->187
   scanner4 = PurityScanner()

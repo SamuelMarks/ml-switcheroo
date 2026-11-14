@@ -22,6 +22,7 @@ from ml_switcheroo.core.compiler.backends.cpp.cst import (
   TypeIdentifier,
   VariableDeclaration,
 )
+from ml_switcheroo.exceptions import DialectLoweringError
 
 NodeSubT = typing.TypeVar("NodeSubT", bound=CppNode)
 
@@ -30,7 +31,7 @@ class CppCSTTransformer:
   """Base visitor/transformer for CppNode trees."""
 
   def visit(self, node: CppNode) -> CppNode:
-    """Visit a node and dispatches to the correct visit_* method.
+    """Visit a node and dispatch to the corresponding ``visit_*`` method.
 
     Args:
         node (CppNode): The concrete syntax tree node to visit.
@@ -39,17 +40,23 @@ class CppCSTTransformer:
         CppNode: The visited/transformed concrete syntax tree node.
 
     """
-    import inspect
-
-    method_name = f"visit_{type(node).__name__}"
-    try:
-      raw_visitor = inspect.getattr_static(self, method_name)
-    except AttributeError:
-      return self.generic_visit(node)
-    assert callable(raw_visitor)
-    res = raw_visitor(self, node)
-    assert isinstance(res, CppNode)
-    return res
+    if isinstance(node, CppModule):
+      return self.visit_CppModule(node)
+    if isinstance(node, FunctionDefinition):
+      return self.visit_FunctionDefinition(node)
+    if isinstance(node, VariableDeclaration):
+      return self.visit_VariableDeclaration(node)
+    if isinstance(node, ReturnStatement):
+      return self.visit_ReturnStatement(node)
+    if isinstance(node, BinaryExpression):
+      return self.visit_BinaryExpression(node)
+    if isinstance(node, MethodCall):
+      return self.visit_MethodCall(node)
+    if isinstance(node, Identifier):
+      return self.visit_Identifier(node)
+    if isinstance(node, TypeIdentifier):
+      return self.visit_TypeIdentifier(node)
+    return self.generic_visit(node)
 
   def _visit_typed(self, node: CppNode, expected_cls: type[NodeSubT]) -> NodeSubT:
     """Visit a child node and verify its returned CppNode subtype.
@@ -60,9 +67,13 @@ class CppCSTTransformer:
 
     Returns:
         Transformed child node narrowed to ``expected_cls``.
+
+    Raises:
+        DialectLoweringError: If the transformed node is not an instance of ``expected_cls``.
     """
     res = self.visit(node)
-    assert isinstance(res, expected_cls)
+    if not isinstance(res, expected_cls):
+      raise DialectLoweringError(f"Expected {expected_cls.__name__}, got {type(res).__name__}.")
     return res
 
   def generic_visit(self, node: CppNode) -> CppNode:

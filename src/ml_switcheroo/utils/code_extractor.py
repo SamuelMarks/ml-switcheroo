@@ -58,7 +58,7 @@ class CodeExtractor:
     try:
       source = inspect.getsource(cls_obj)
     except OSError as e:
-      raise OSError(f"Could not get source for {cls_obj.__name__}: {e}")
+      raise OSError(f"Could not get source for {cls_obj.__name__}: {e}") from e
 
     # Clean indentation if it's extensive (e.g. nested class definition)
     return textwrap.dedent(source)
@@ -76,9 +76,11 @@ class CodeExtractor:
 
     Raises:
         OSError: If source code cannot be retrieved.
+        TypeError: If ``func_obj`` is not an inspectable Python object.
         ValueError: If the extracted source does not define a function.
     """
-    assert not isinstance(func_obj, (str, int))
+    if isinstance(func_obj, (str, int)):
+      raise TypeError(f"Expected callable or inspectable object, got {type(func_obj).__name__}.")
     raw_source: str = inspect.getsource(func_obj)
     source = textwrap.dedent(raw_source)
     module = cst.parse_module(source)

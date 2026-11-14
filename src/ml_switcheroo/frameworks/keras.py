@@ -11,17 +11,18 @@ It handles:
 5.  **Weight Migration**: Loading/saving .h5 or .keras files via h5py.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
 import logging
 from types import ModuleType
 
 from ml_switcheroo_ir.schema.ghost import GhostRef, SemanticTier
 from pydantic import JsonValue
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.frameworks.base import (
+  FrameworkSnapshot,
   ImportConfig,
   InitMode,
+  SnapshotBackedAdapter,
   StandardMap,
   StructuralTraits,
   load_snapshot_for_adapter,
@@ -33,6 +34,7 @@ from ml_switcheroo.semantics.schema import PluginTraits
 
 try:
   import importlib
+
   import keras as _keras_mod
 
   for _submod in ("activations", "layers", "losses", "ops", "optimizers", "random"):
@@ -49,6 +51,11 @@ class KerasAdapter(KerasIOMixin):
   """Adapter for Keras v3 (Multi-backend).
 
   Provides definitions for Keras Core Ops, Layers, and Models.
+
+  Attributes:
+      display_name: The display name (`str`).
+      inherits_from: The inherits from (`str | None`).
+      ui_priority: The ui priority (`int`).
   """
 
   display_name: str = "Keras"
@@ -65,13 +72,14 @@ class KerasAdapter(KerasIOMixin):
         None
 
     """
-    self._mode = InitMode.LIVE
-    self._snapshot_data = {}
-    if keras is None:
-      self._mode = InitMode.GHOST
-      self._snapshot_data = load_snapshot_for_adapter("keras")
-      if not self._snapshot_data:
-        logging.debug("Keras not installed and no snapshot found. Adapter disabled.")
+    self._snapshot = SnapshotBackedAdapter(
+      "keras",
+      is_live_available=keras is not None,
+      loader=load_snapshot_for_adapter,
+      missing_message="Keras not installed and no snapshot found. Adapter disabled.",
+    )
+    self._mode: InitMode = self._snapshot.mode
+    self._snapshot_data: FrameworkSnapshot | None = self._snapshot.snapshot
 
   @property
   def import_alias(self) -> tuple[str, str]:
@@ -273,12 +281,7 @@ class KerasAdapter(KerasIOMixin):
         List[GhostRef]: Hydrated references.
 
     """
-    if not self._snapshot_data:
-      return []
-    raw_cats = self._snapshot_data.get("categories", {})
-    raw_list = raw_cats.get(category.value, []) if isinstance(raw_cats, dict) else []
-    assert isinstance(raw_list, list)
-    return [GhostRef.model_validate(item) for item in raw_list]
+    return SnapshotBackedAdapter.collect_ghost_from(self._snapshot_data, category)
 
   def _scan_module(
     self,
@@ -412,7 +415,6 @@ class KerasAdapter(KerasIOMixin):
         None
 
     """
-    pass
 
   def get_doc_url(self, api_name: str) -> str | None:
     """Provide a search URL for Keras documentation as direct API mapping is non-trivial.

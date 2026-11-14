@@ -83,7 +83,7 @@ def transform_scheduler_init(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
   if "StepLR" in op_id:
     return _transform_step_lr(node, ctx, target_api)
-  elif "CosineAnnealingLR" in op_id:
+  if "CosineAnnealingLR" in op_id:
     return _transform_cosine_lr(node, ctx, target_api)
 
   return node

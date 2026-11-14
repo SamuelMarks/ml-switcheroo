@@ -4,10 +4,10 @@ import tensorflow as tf
 
 
 class GAPModel:
-  """Test helper class GAPModel."""
+  """Test double `GAPModel` implementing `call` for tensorflow tests."""
 
   def call(self, x: tf.Tensor) -> tf.Tensor:
-    """Helper to call.
+    """Execute `reduce_mean` to support call in tensorflow tests.
 
     Args:
         x: Primary input tensor or array operand.

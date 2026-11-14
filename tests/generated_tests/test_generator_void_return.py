@@ -1,0 +1,69 @@
+"""Test suite for the Generator Void Return module."""
+
+from pathlib import Path
+from unittest.mock import MagicMock
+
+import pytest
+
+from ml_switcheroo.generated_tests.generator import TestCaseGenerator
+from ml_switcheroo.semantics.manager import SemanticsManager
+
+
+@pytest.fixture
+def generator(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestCaseGenerator:
+  """Create a configured `TestCaseGenerator` fixture for generator void return tests.
+
+  Args:
+      tmp_path: Pytest temporary directory path fixture.
+      monkeypatch: Pytest monkeypatch fixture.
+
+  Returns:
+      Configured `generator` fixture value (TestCaseGenerator).
+  """
+  mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
+  mock_templates: dict[str, dict[str, str]] = {
+    "torch": {"import": "import torch", "convert_input": "{np_var}", "to_numpy": "{res_var}"},
+    "jax": {"import": "import jax", "convert_input": "{np_var}", "to_numpy": "{res_var}"},
+  }
+  monkeypatch.setattr(mgr, "get_test_template", MagicMock(side_effect=lambda fw: mock_templates.get(fw)), raising=False)
+  monkeypatch.setattr(mgr, "test_templates", mock_templates, raising=False)
+  monkeypatch.setattr(mgr, "get_framework_config", MagicMock(return_value={}), raising=False)
+  return TestCaseGenerator(semantics_mgr=mgr)
+
+
+def test_void_return_logic(generator: TestCaseGenerator, tmp_path: Path) -> None:
+  """Verify `generator.generate` emits `assert len(results) >= 2` for void return logic.
+
+  Args:
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
+  """
+  semantics = {
+    "Save": {
+      "std_args": ["obj"],
+      "return_type": "None",
+      "variants": {"torch": {"api": "torch.save"}, "jax": {"api": "jax.save"}},
+    }
+  }
+  out_file: Path = tmp_path / "test_save.py"
+  generator.generate(semantics, out_file)
+  content: str = out_file.read_text()
+  assert "Operation expected to return None / Void" in content
+  assert "verify_results" not in content
+  assert "assert len(results) >= 2" in content
+  assert "try:" in content
+  assert "results['torch'] =" in content
+
+
+def test_standard_return_logic(generator: TestCaseGenerator, tmp_path: Path) -> None:
+  """Verify `generator.generate` emits `verify_results(ref, val` for standard return logic.
+
+  Args:
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
+  """
+  semantics = {"Add": {"std_args": ["x"], "variants": {"torch": {"api": "torch.add"}, "jax": {"api": "jax.add"}}}}
+  out_file: Path = tmp_path / "test_add.py"
+  generator.generate(semantics, out_file)
+  content: str = out_file.read_text()
+  assert "verify_results(ref, val" in content

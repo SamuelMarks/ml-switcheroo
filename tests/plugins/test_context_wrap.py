@@ -1,12 +1,10 @@
 """Test suite for the Context Wrap module."""
 
-from tests.conftest import _test_getattr
-
-from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
 import pytest
+from pydantic import JsonValue
 
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.config import RuntimeConfig
@@ -34,29 +32,31 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Execute rewriter helper logic.
+  """Create a configured `PivotRewriter` fixture for context wrap tests.
 
   Returns:
       Configured `rewriter` fixture value (PivotRewriter).
   """
-  _test_getattr(
-    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
-  )("context_to_function_wrap", _test_getattr({"v": transform_context_manager}, "__getitem__")("v"))
-  hooks._PLUGINS_LOADED = True
+  hooks.register_hook("context_to_function_wrap")(transform_context_manager)
+  hooks.set_plugins_loaded(True)
   mgr = MagicMock()
-  no_grad_def = {
+  jax_variant: dict[str, JsonValue] = {
+    "api": "contextlib.nullcontext",
+    "requires_plugin": "context_to_function_wrap",
+  }
+  no_grad_def: dict[str, JsonValue] = {
     "requires_plugin": "context_to_function_wrap",
     "std_args": ["block"],
     "variants": {
       "torch": {"api": "torch.no_grad"},
-      "jax": {"api": "contextlib.nullcontext", "requires_plugin": "context_to_function_wrap"},
+      "jax": jax_variant,
     },
   }
   mgr.get_definition.side_effect = lambda name: ("no_grad_op", no_grad_def) if name == "torch.no_grad" else None
   mgr.get_known_apis.return_value = {"no_grad_op": no_grad_def}
 
   def resolve(aid: str, fw: str) -> dict[str, JsonValue] | None:
-    """Resolves .
+    """Execute `resolve` helper in context wrap tests.
 
     Args:
         aid: Abstract operation identifier string.
@@ -66,15 +66,7 @@ def rewriter() -> PivotRewriter:
         Resulting `dict[str, JsonValue] | None` from resolve.
     """
     if aid == "no_grad_op" and fw == "jax":
-      res = _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": no_grad_def}, "__getitem__")("v")["variants"]}, "__getitem__")(
-            "v"
-          )["jax"]
-        },
-        "__getitem__",
-      )("v")
-      return res if isinstance(res, dict) else {}
+      return jax_variant
     return None
 
   mgr.resolve_variant.side_effect = resolve
@@ -84,7 +76,7 @@ def rewriter() -> PivotRewriter:
 
 
 def test_no_grad_transformation(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of no grad transformation.
+  """Verify `rewrite_code` emits `import contextlib` for no grad transformation.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -96,7 +88,7 @@ def test_no_grad_transformation(rewriter: PivotRewriter) -> None:
 
 
 def test_no_grad_as_decorator(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of no grad as decorator.
+  """Verify `rewrite_code` emits `@contextlib.nullcontext()` for no grad as decorator.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -107,7 +99,7 @@ def test_no_grad_as_decorator(rewriter: PivotRewriter) -> None:
 
 
 def test_argument_cleaning(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of argument cleaning.
+  """Verify `rewrite_code` emits `contextlib.nullcontext():` for argument cleaning.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -119,7 +111,7 @@ def test_argument_cleaning(rewriter: PivotRewriter) -> None:
 
 
 def test_plugin_not_triggered_for_others(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of plugin not triggered for others.
+  """Verify `rewrite_code` emits `torch.other_op` for plugin not triggered for others.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.

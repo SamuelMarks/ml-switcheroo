@@ -1,7 +1,5 @@
 """Integration tests for the compiler roundtrip."""
 
-from tests.conftest import _test_getattr
-
 from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticCommentParser
 from ml_switcheroo.core.html.parser import HtmlParser
 from ml_switcheroo.core.mlir.parser import MlirParser
@@ -9,7 +7,7 @@ from ml_switcheroo.core.tikz.parser import TikzParser
 
 
 def test_mlir_roundtrip() -> None:
-  """Verify mlir roundtrip behavior."""
+  """Verify `MlirParser` handles MLIR roundtrip as expected."""
   code: str = "sw.func { sw.return %1 }\n"
   parser = MlirParser(code)
   module = parser.parse()
@@ -20,7 +18,7 @@ def test_mlir_roundtrip() -> None:
 
 
 def test_tikz_roundtrip() -> None:
-  """Verify tikz roundtrip behavior."""
+  """Verify `TikzParser` handles TikZ roundtrip as expected."""
   code: str = "\\begin{tikzpicture}\n    \\node (node1) at (0.0, 0.0) {Text 1};\n\\end{tikzpicture}\n"
   parser = TikzParser(code)
   graph = parser.parse()
@@ -33,7 +31,7 @@ def test_tikz_roundtrip() -> None:
     """Execute normalize test helper.
 
     Args:
-        s: The s (str) for normalize.
+        s: Input `s` parameter value (`str`).
 
     Returns:
         Resulting `str` from normalize.
@@ -44,7 +42,7 @@ def test_tikz_roundtrip() -> None:
 
 
 def test_html_roundtrip() -> None:
-  """Verify html roundtrip behavior."""
+  """Verify `HtmlParser` handles HTML roundtrip as expected."""
   code: str = """
 <html>
   <body>
@@ -62,12 +60,10 @@ def test_html_roundtrip() -> None:
 
 
 def test_semantic_roundtrip() -> None:
-  """Verify semantic roundtrip behavior."""
+  """Verify `SemanticCommentParser` handles semantic roundtrip as expected."""
   code: str = "  BEGIN   Add ( node_1 ) // ok  "
   parser = SemanticCommentParser()
   marker = parser.parse(code)
-  out: str = _test_getattr(
-    {"v": _test_getattr({"v": _test_getattr({"v": marker}, "__getitem__")("v").to_text}, "__getitem__")("v")()},
-    "__getitem__",
-  )("v")
+  assert marker is not None
+  out: str = marker.to_text()
   assert out == code

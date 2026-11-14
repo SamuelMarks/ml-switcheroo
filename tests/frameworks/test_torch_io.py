@@ -4,7 +4,7 @@ from ml_switcheroo.frameworks.torch_io import TorchIOMixin
 
 
 def test_torch_io_methods() -> None:
-  """Verifies the behavior of all PyTorch I/O mixin methods."""
+  """Verify `TorchIOMixin` emits `loaded['state_dict']` for torch I/O methods."""
   mixin = TorchIOMixin()
 
   # Test get_serialization_imports

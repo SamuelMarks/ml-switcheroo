@@ -41,13 +41,7 @@ def _lightweight_semantics() -> SemanticsManager:
   Returns:
       Lightweight `SemanticsManager`.
   """
-  import ml_switcheroo.semantics.manager as mgr_mod
-
-  prev = mgr_mod._MANAGER_CACHE
-  mgr_mod._MANAGER_CACHE = {}
-  sem = SemanticsManager()
-  mgr_mod._MANAGER_CACHE = prev
-  return sem
+  return SemanticsManager.empty()
 
 
 def test_lazy_linear_to_flax_nnx_concretization() -> None:
@@ -179,6 +173,7 @@ def test_annotation_helpers_and_edge_branches() -> None:
   # _attach_comment_to_line when line already has a comment
   line_with_comment = cst.parse_statement("""x = 1  # existing
 """)
+  assert isinstance(line_with_comment, cst.SimpleStatementLine)
   assert isinstance(line_with_comment, cst.SimpleStatementLine)
   updated_line = _attach_comment_to_line(line_with_comment, "# added")
   assert "existing  # added" in cst.Module([updated_line]).code

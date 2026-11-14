@@ -1,12 +1,10 @@
 """Test suite for the Inplace Unroll module."""
 
-from tests.conftest import _test_getattr
-
-from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
 import pytest
+from pydantic import JsonValue
 
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.config import RuntimeConfig
@@ -32,13 +30,13 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Execute rewriter helper logic.
+  """Create a configured `PivotRewriter` fixture for inplace unroll tests.
 
   Returns:
       Configured `rewriter` fixture value (PivotRewriter).
   """
-  hooks._HOOKS["unroll_inplace_ops"] = unroll_inplace_ops
-  hooks._PLUGINS_LOADED = True
+  hooks.register_hook("unroll_inplace_ops")(unroll_inplace_ops)
+  hooks.set_plugins_loaded(True)
   mgr = MagicMock()
 
   def get_def(name: str) -> tuple[str, dict[str, JsonValue]] | None:
@@ -65,7 +63,7 @@ def rewriter() -> PivotRewriter:
 
 
 def test_strip_inplace_underscore(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of strip inplace underscore.
+  """Verify `rewrite_code` handles strip inplace underscore as expected.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -76,20 +74,20 @@ def test_strip_inplace_underscore(rewriter: PivotRewriter) -> None:
 
 
 def test_metadata_trigger_implicit(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of metadata trigger implicit.
+  """Verify `rewrite_code` handles metadata trigger implicit as expected.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
   """
   mock_hook = MagicMock(return_value=cst.Name("HookRan"))
-  hooks._HOOKS["unroll_inplace_ops"] = mock_hook
+  hooks.get_default_hook_registry().hooks["unroll_inplace_ops"] = mock_hook
   code: str = "x.assign_add(y)"
   rewrite_code(rewriter, code)
   mock_hook.assert_called_once()
 
 
 def test_fallback_non_math_unroll(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of fallback non math unroll.
+  """Verify `rewrite_code` emits `x.custom(y)` for fallback non math unroll.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -100,7 +98,7 @@ def test_fallback_non_math_unroll(rewriter: PivotRewriter) -> None:
 
 
 def test_ignore_standard_calls(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of ignore standard calls.
+  """Verify `rewrite_code` handles ignore standard calls as expected.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -111,77 +109,35 @@ def test_ignore_standard_calls(rewriter: PivotRewriter) -> None:
 
 
 def test_ignore_dunders(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of ignore dunders.
+  """Verify `Call` handles ignore dunders as expected.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
   """
   hook = unroll_inplace_ops
   node = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("__init__")))
-  res = _test_getattr(
-    {
-      "v": _test_getattr({"v": hook}, "__getitem__")("v")(
-        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": None}, "__getitem__")("v")
-      )
-    },
-    "__getitem__",
-  )("v")
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-            _test_getattr(
-              {"v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v").func}, "__getitem__")("v").attr},
-              "__getitem__",
-            )("v"),
-            _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
-          )
-        },
-        "__getitem__",
-      )("v").value
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "__init__"}, "__getitem__")("v")
+  res = hook(node, rewriter.ctx)
+  assert isinstance(res, cst.Call)
+  assert isinstance(res.func, cst.Attribute)
+  assert cst.ensure_type(res.func.attr, cst.Name).value == "__init__"
 
 
 def test_ignore_single_underscore(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of ignore single underscore.
+  """Verify `Call` handles ignore single underscore as expected.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
   """
   hook = unroll_inplace_ops
   node = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("_")))
-  res = _test_getattr(
-    {
-      "v": _test_getattr({"v": hook}, "__getitem__")("v")(
-        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": None}, "__getitem__")("v")
-      )
-    },
-    "__getitem__",
-  )("v")
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-            _test_getattr(
-              {"v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v").func}, "__getitem__")("v").attr},
-              "__getitem__",
-            )("v"),
-            _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
-          )
-        },
-        "__getitem__",
-      )("v").value
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "_"}, "__getitem__")("v")
+  res = hook(node, rewriter.ctx)
+  assert isinstance(res, cst.Call)
+  assert isinstance(res.func, cst.Attribute)
+  assert cst.ensure_type(res.func.attr, cst.Name).value == "_"
 
 
 def test_inplace_unroll_not_attribute() -> None:
-  """Verify inplace unroll not attribute behavior."""
+  """Verify `RuntimeConfig` handles inplace unroll not attribute as expected."""
   node = cst.parse_expression("add_(x)")
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   semantics_mock = MagicMock()
@@ -192,19 +148,19 @@ def test_inplace_unroll_not_attribute() -> None:
 
 
 def test_get_receiver_name_not_attribute() -> None:
-  """Verify get receiver name not attribute behavior."""
+  """Verify `_get_receiver_name` handles not attribute as expected."""
   node = cst.parse_expression("add_(x)")
   assert _get_receiver_name(cst.ensure_type(node, cst.Call)) is None
 
 
 def test_get_method_name_not_attribute() -> None:
-  """Verify get method name not attribute behavior."""
+  """Verify `_get_method_name` handles not attribute as expected."""
   node = cst.parse_expression("add_(x)")
   assert _get_method_name(cst.ensure_type(node, cst.Call)) is None
 
 
 def test_inplace_unroll_just_underscore() -> None:
-  """Verify inplace unroll just underscore behavior."""
+  """Verify `RuntimeConfig` handles inplace unroll just underscore as expected."""
   node = cst.parse_expression("x._(y)")
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   semantics_mock = MagicMock()
@@ -215,7 +171,7 @@ def test_inplace_unroll_just_underscore() -> None:
 
 
 def test_inplace_unroll_no_underscore() -> None:
-  """Verify inplace unroll no underscore behavior."""
+  """Verify `RuntimeConfig` handles inplace unroll no underscore as expected."""
   node = cst.parse_expression("x.add(y)")
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   semantics_mock = MagicMock()

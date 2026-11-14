@@ -1,17 +1,15 @@
 """Test suite for the Dsl Output Cast module."""
 
-from tests.conftest import _test_getattr
-
 from ml_switcheroo.core.dsl import FrameworkVariant
 
 
 def test_variant_output_cast_defaults_none() -> None:
-  """Verifies the behavior of variant output cast defaults none."""
+  """Verify `FrameworkVariant` handles variant output cast defaults none as expected."""
   v: FrameworkVariant = FrameworkVariant(api="foo")
-  assert _test_getattr(v, "output_cast") is None
+  assert v.output_cast is None
 
 
 def test_variant_output_cast_explicit() -> None:
-  """Verifies the behavior of variant output cast explicit."""
+  """Verify `FrameworkVariant` handles variant output cast explicit as expected."""
   v: FrameworkVariant = FrameworkVariant(api="argmax", output_cast="jnp.int64")
-  assert _test_getattr(v, "output_cast") == "jnp.int64"
+  assert v.output_cast == "jnp.int64"

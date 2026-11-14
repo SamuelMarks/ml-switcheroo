@@ -7,7 +7,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_paxml_alias_loaded_from_adapter() -> None:
-  """Verifies the behavior of Paxml alias loaded from adapter."""
+  """Verify `SemanticsManager` emits `paxml` for PaxML alias loaded from adapter."""
   mgr: SemanticsManager = SemanticsManager()
   mgr._reverse_index = {}
   aliases: dict[str, tuple[str, str]] = mgr.get_framework_aliases()
@@ -18,7 +18,7 @@ def test_paxml_alias_loaded_from_adapter() -> None:
 
 
 def test_import_fixer_injects_pl_alias() -> None:
-  """Verifies the behavior of import fixer injects pl alias."""
+  """Verify `SemanticsManager` emits `import praxis.layers as pl` for import fixer injects pl alias."""
   mgr: SemanticsManager = SemanticsManager()
   mgr._reverse_index = {}
   resolver: ImportResolver = ImportResolver(mgr)

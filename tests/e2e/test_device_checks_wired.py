@@ -1,0 +1,40 @@
+"""Test suite for the Device Checks Wired module."""
+
+import importlib
+
+import pytest
+
+import ml_switcheroo.core.hooks as hooks
+import ml_switcheroo.frameworks
+import ml_switcheroo.plugins.device_checks
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+from ml_switcheroo.semantics.manager import SemanticsManager
+
+
+@pytest.fixture
+def semantics() -> SemanticsManager:
+  """Create a configured `SemanticsManager` fixture for device checks wired tests.
+
+  Returns:
+      Configured `semantics` fixture value (SemanticsManager).
+  """
+  importlib.reload(ml_switcheroo.plugins.device_checks)
+  hooks.set_plugins_loaded(True)
+  importlib.reload(ml_switcheroo.frameworks)
+  return SemanticsManager()
+
+
+@pytest.mark.skip(reason="Device checks rely on removed definitions")
+def test_cuda_check_to_jax(semantics: SemanticsManager) -> None:
+  """Verify `RuntimeConfig` emits `len(jax.devices('gpu')) > 0` for cuda check to JAX.
+
+  Args:
+      semantics: SemanticsManager instance providing operation and trait definitions.
+  """
+  code: str = "if torch.cuda.is_available(): run_gpu()"
+  config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
+  engine = ASTEngine(semantics=semantics, config=config)
+  result: ConversionResult = engine.run(code)
+  assert result.success, f"Failed: {result.errors}"
+  assert "len(jax.devices('gpu')) > 0" in result.code

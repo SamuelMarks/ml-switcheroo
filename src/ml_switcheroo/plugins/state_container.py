@@ -34,7 +34,7 @@ def _create_node(code: str) -> cst.BaseExpression:
   """
   try:
     return cst.parse_expression(code)
-  except Exception:
+  except (cst.ParserSyntaxError, ValueError, TypeError):
     # Fallback for simple identifiers if expression parsing fails
     return cst.Name(code)
 
@@ -89,7 +89,7 @@ def convert_register_buffer(node: cst.Call, ctx: HookContext) -> cst.Call:
   wrapper_call = cst.Call(func=_create_node(wrapper_api), args=[cst.Arg(value=tensor_arg)])
 
   # 2. Construct setattr(receiver, name, wrapper_call)
-  new_call = cst.Call(
+  return cst.Call(
     func=cst.Name("setattr"),
     args=[
       cst.Arg(value=receiver, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))),
@@ -97,8 +97,6 @@ def convert_register_buffer(node: cst.Call, ctx: HookContext) -> cst.Call:
       cst.Arg(value=wrapper_call),
     ],
   )
-
-  return new_call
 
 
 @register_hook("torch_register_parameter_to_nnx")
@@ -135,7 +133,7 @@ def convert_register_parameter(node: cst.Call, ctx: HookContext) -> cst.Call:
   # Wrapper(tensor)
   param_call = cst.Call(func=_create_node(wrapper_api), args=[cst.Arg(value=tensor_arg)])
 
-  new_call = cst.Call(
+  return cst.Call(
     func=cst.Name("setattr"),
     args=[
       cst.Arg(value=receiver, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))),
@@ -143,7 +141,6 @@ def convert_register_parameter(node: cst.Call, ctx: HookContext) -> cst.Call:
       cst.Arg(value=param_call),
     ],
   )
-  return new_call
 
 
 @register_hook("torch_state_dict_to_nnx")
@@ -175,8 +172,7 @@ def convert_state_dict(node: cst.Call, ctx: HookContext) -> cst.Call:
   inner_call = cst.Call(func=_create_node(state_api), args=[cst.Arg(value=receiver)])
 
   # 2. .to_pure_dict()
-  outer_call = cst.Call(func=cst.Attribute(value=inner_call, attr=cst.Name("to_pure_dict")), args=[])
-  return outer_call
+  return cst.Call(func=cst.Attribute(value=inner_call, attr=cst.Name("to_pure_dict")), args=[])
 
 
 @register_hook("torch_load_state_dict_to_nnx")
@@ -209,14 +205,13 @@ def convert_load_state_dict(node: cst.Call, ctx: HookContext) -> cst.Call:
     return node
 
   # UpdateFunc(model, state)
-  new_call = cst.Call(
+  return cst.Call(
     func=_create_node(update_api),
     args=[
       cst.Arg(value=receiver, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))),
       cst.Arg(value=state_arg),
     ],
   )
-  return new_call
 
 
 @register_hook("torch_parameters_to_nnx")
@@ -256,5 +251,4 @@ def convert_parameters(node: cst.Call, ctx: HookContext) -> cst.Call:
   )
 
   # .values()
-  final_call = cst.Call(func=cst.Attribute(value=state_call, attr=cst.Name("values")), args=[])
-  return final_call
+  return cst.Call(func=cst.Attribute(value=state_call, attr=cst.Name("values")), args=[])

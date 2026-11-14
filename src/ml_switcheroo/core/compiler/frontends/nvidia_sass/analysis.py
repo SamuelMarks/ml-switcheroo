@@ -12,7 +12,13 @@ from ml_switcheroo.core.compiler.isa.analysis import IsaAnalyzer
 
 
 class NvidiaSassAnalyzer(IsaAnalyzer):
-  """Analyze sequences of NVIDIA_SASS instructions to reverse-engineer high-level parameters."""
+  """Analyze sequences of NVIDIA_SASS instructions to reverse-engineer high-level parameters.
+
+  Attributes:
+      CMP_OPCODE: The cmp opcode (`str`).
+      IMMEDIATE_TYPE: The immediate type (`type[NvidiaSassImmediate]`).
+      LOOP_PARAMETER_RULES: The loop parameter rules (`typing.Mapping[str, tuple[str, str]]`).
+  """
 
   CMP_OPCODE: str = "ISETP.LT.AND"
   IMMEDIATE_TYPE: type[NvidiaSassImmediate] = NvidiaSassImmediate

@@ -1,7 +1,6 @@
 """Test suite for the Mlx module."""
 
 import mlx.core as mx
-
 import mlx.nn as nn
 
 
@@ -10,7 +9,7 @@ def create_sequential(in_features: int, hidden: mx.array, out_features: int) -> 
 
   Args:
       in_features: Number of input linear features.
-      hidden: The hidden (mx.array) for create sequential.
+      hidden: Input `hidden` parameter value (`mx.array`).
       out_features: Number of output linear features.
 
   Returns:

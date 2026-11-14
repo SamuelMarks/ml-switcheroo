@@ -5,19 +5,19 @@ import torch.nn as nn
 
 
 class FlattenModel(nn.Module):
-  """Test helper class FlattenModel."""
+  """Stub `nn.Module` subclass implementing `forward` for pytorch tests."""
 
   def __init__(self, start_dim: int = 1):
     """Initializes the FlattenModel instance.
 
     Args:
-        start_dim: The start dim (int) for   init  .
+        start_dim: Input `start_dim` parameter value (`int`).
     """
     super().__init__()
     self.flatten = nn.Flatten(start_dim=start_dim)
 
   def forward(self, x: torch.Tensor) -> torch.Tensor:
-    """Helper to forward.
+    """Compute the forward pass of `FlattenModel` on input tensors.
 
     Args:
         x: Primary input tensor or array operand.

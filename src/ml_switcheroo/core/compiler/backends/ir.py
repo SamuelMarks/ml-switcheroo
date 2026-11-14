@@ -189,12 +189,12 @@ class IrBackend(CompilerBackend):
       meta_str = repr(clean_attrs)
       sharding_str = "None"
       if node.sharding is not None:
-        sharding_str = f"sw_ir.PartitionSpec(axes={repr(node.sharding.axes)})"
+        sharding_str = f"sw_ir.PartitionSpec(axes={node.sharding.axes!r})"
 
-      lines.append(f"        {repr(node.id)}: sw_ir.LogicalNode(")
-      lines.append(f"            id={repr(node.id)},")
-      lines.append(f"            op_type={repr(op_type)},")
-      lines.append(f"            domain={repr(node.domain)},")
+      lines.append(f"        {node.id!r}: sw_ir.LogicalNode(")
+      lines.append(f"            id={node.id!r},")
+      lines.append(f"            op_type={op_type!r},")
+      lines.append(f"            domain={node.domain!r},")
       lines.append(f"            version={node.version},")
       lines.append(f"            attributes={meta_str},")
       lines.append(f"            sharding={sharding_str},")
@@ -202,12 +202,14 @@ class IrBackend(CompilerBackend):
     lines.append("    }")
 
     lines.append("    edges = [")
-    for edge in sorted(graph.edges, key=lambda e: (e.source, e.target)):
-      lines.append(f"        sw_ir.LogicalEdge(source={repr(edge.source)}, target={repr(edge.target)}),")
+    lines.extend(
+      f"        sw_ir.LogicalEdge(source={edge.source!r}, target={edge.target!r}),"
+      for edge in sorted(graph.edges, key=lambda e: (e.source, e.target))
+    )
     lines.append("    ]")
 
     lines.append("    return sw_ir.LogicalGraph(")
-    lines.append(f"        name={repr(graph.name)},")
+    lines.append(f"        name={graph.name!r},")
     lines.append("        nodes=nodes,")
     lines.append("        edges=edges,")
     lines.append("        mesh=mesh,")
@@ -241,5 +243,5 @@ class IrBackend(CompilerBackend):
         attributes=attributes,
       )
       return report
-    except Exception:
+    except (ImportError, OSError, SyntaxError, ValueError, TypeError, KeyError, AttributeError, RuntimeError):
       return None

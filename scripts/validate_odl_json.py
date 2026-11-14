@@ -6,12 +6,13 @@ import sys
 import typing
 from pathlib import Path
 
-# Add src to sys.path to import ml_switcheroo
-src_path = Path(__file__).parent.parent / "src"
-if str(src_path.resolve()) not in sys.path:
-  sys.path.insert(0, str(src_path.resolve()))
+from pydantic import ValidationError
 
-from ml_switcheroo.semantics.schema import SemanticsFile  # noqa: E402
+sys.path.insert(0, str((Path(__file__).parent.parent / "src").resolve()))
+
+from ml_switcheroo.semantics.schema import SemanticsFile
+
+src_path = Path(__file__).parent.parent / "src"
 
 
 def validate_file(filepath: Path) -> bool:
@@ -28,7 +29,7 @@ def validate_file(filepath: Path) -> bool:
       content = json.load(f)
     SemanticsFile.model_validate(content)
     return True
-  except Exception as e:
+  except (OSError, json.JSONDecodeError, ValidationError, ValueError, TypeError) as e:
     print(f"Validation failed for {filepath}: {e}")
     return False
 
@@ -47,18 +48,17 @@ def main(argv: typing.Sequence[str] | None = None) -> int:
       Exit code (0 for success, 1 for failure).
   """
   cli_args = list(sys.argv[1:] if argv is None else argv)
-  files_to_check: list[Path] = []
 
   if len(cli_args) > 0:
-    for arg in cli_args:
-      filepath = Path(arg)
-      if filepath.suffix == ".json" and "semantics" in filepath.parts:
-        files_to_check.append(filepath)
+    candidates = [Path(arg) for arg in cli_args]
+    files_to_check = [fp for fp in candidates if fp.suffix == ".json" and "semantics" in fp.parts]
   else:
     sem_dir = src_path / "ml_switcheroo" / "semantics"
-    for jf in sem_dir.glob("*.json"):
-      if jf.name not in ("priority_scores.json", "nvidia_sass_isa.json", "rdna_isa.json"):
-        files_to_check.append(jf)
+    files_to_check = [
+      jf
+      for jf in sem_dir.glob("*.json")
+      if jf.name not in ("priority_scores.json", "nvidia_sass_isa.json", "rdna_isa.json")
+    ]
 
   failed = False
   for filepath in files_to_check:

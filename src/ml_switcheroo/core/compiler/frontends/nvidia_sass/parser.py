@@ -1,14 +1,13 @@
 """NVIDIA_SASS Parser Implementation.
 
-This module provides the `NvidiaSassParser`, a pure Python Lark-based parser
-that converts a stream of characters into a Concrete Syntax Tree defined in `cst.py`.
+Provides ``NvidiaSassParser``, built on the table-driven :mod:`ml_switcheroo.core.compiler.isa.parser`
+infrastructure to convert NVIDIA SASS assembly text into a Concrete Syntax Tree.
 """
 
-import re
 import typing
 
-from lark import Lark, Transformer, Tree, v_args
-from lark.lexer import Lexer, Token
+from lark import Transformer, Tree, v_args
+from lark.lexer import Token
 
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
@@ -23,161 +22,49 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassPredicate,
   NvidiaSassRegister,
 )
+from ml_switcheroo.core.compiler.isa.parser import (
+  IsaChild,
+  IsaDialectSpec,
+  IsaLexer,
+  IsaParser,
+  IsaToken,
+  IsaTransformerBase,
+)
+from ml_switcheroo.core.compiler.isa.parser import (
+  get_trivia as _get_trivia,
+)
+from ml_switcheroo.core.compiler.isa.parser import (
+  tok_val as _tok_val,
+)
 from ml_switcheroo.core.cst.base import Trivia
+from ml_switcheroo.exceptions import SyntaxParseError
 
-TOKEN_REGEX = [
-  ("COMMENT", r"//[^\n]*"),
-  ("WS", r"[ \t\f\r\n]+"),
+TOKEN_REGEX: tuple[tuple[str, str], ...] = (
+  ("COMMENT", "//[^\x0a]*"),
+  ("WS", "[\x20\x09\x0c\x0d\x0a]+"),
   ("HEX_NUMBER", r"-?0x[0-9a-fA-F]+"),
   ("NUMBER", r"-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?"),
-  ("STRING", r'"(?:[^"\\]|\\.)*"'),
+  ("STRING", '"(?:[^"\\x5c]|\\x5c.)*"'),
   ("REG_IDENTIFIER", r"[-|]*[RU]?[RZS]\d+\|?|PT|RZ|RZS"),
   ("IDENTIFIER", r"[a-zA-Z_][a-zA-Z0-9_\.]*"),
   ("PUNCTUATION", r"[;:,\.\[\]\+\-!@]"),
   ("MISMATCH", r"."),
-]
-tok_regex = "|".join("(?P<%s>%s)" % pair for pair in TOKEN_REGEX)
-
-
-@typing.runtime_checkable
-class _LexerTextProtocol(typing.Protocol):
-  """Protocol for Lark LexerState exposing `text`."""
-
-  text: str
-
-
-class _SassTextProtocol(typing.Protocol):
-  """Protocol for Lark lexer/parser inputs and nodes."""
-
-  def __str__(self) -> str:
-    """Return string representation.
-
-    Returns:
-        String representation.
-    """
-    ...
-
-
-SassChild: typing.TypeAlias = (
-  Token | Tree[Token] | NvidiaSassNode | typing.Sequence[_SassTextProtocol] | _SassTextProtocol | str | None
 )
 
+PUNCTUATION_MAP: dict[str, str] = {
+  ";": "SEMI",
+  ":": "COLON",
+  ",": "COMMA",
+  ".": "DOT",
+  "[": "LBRACK",
+  "]": "RBRACK",
+  "+": "PLUS",
+  "-": "MINUS",
+  "!": "BANG",
+  "@": "AT",
+}
 
-def _tok_val(node: SassChild) -> str:
-  """Extract string value from a Token or child node.
-
-  Args:
-      node: Token or AST child.
-
-  Returns:
-      Extracted string value.
-  """
-  return str(node.value) if isinstance(node, Token) else str(node)
-
-
-class NvidiaSassToken(Token):
-  """Custom token that carries its leading trivia."""
-
-  __slots__ = ("leading_trivia",)
-
-  leading_trivia: list[Trivia]
-
-
-class NvidiaSassLexer(Lexer):
-  """Custom Lexer preserving trivia and matching NVIDIA_SASS tokens."""
-
-  def __init__(self, lexer_conf: _SassTextProtocol | None) -> None:
-    """Initialize the NvidiaSassLexer.
-
-    Args:
-        lexer_conf: The Lark lexer configuration.
-    """
-    self.lexer_conf = lexer_conf
-
-  def lex(
-    self, lexer_state: _SassTextProtocol, parser_state: _SassTextProtocol | None = None
-  ) -> typing.Iterator[NvidiaSassToken]:
-    """Tokenize the input string and attach trivia.
-
-    Args:
-        lexer_state: The raw input NVIDIA_SASS string or lexer state to tokenize.
-        parser_state: Optional parser state.
-
-    Returns:
-        An iterator of NvidiaSassToken instances.
-    """
-    if isinstance(lexer_state, str):
-      data = lexer_state
-    elif isinstance(lexer_state, _LexerTextProtocol):
-      data = str(lexer_state.text)
-    else:
-      data = str(lexer_state)
-    leading: list[Trivia] = []
-    for mo in re.finditer(tok_regex, data):
-      kind = mo.lastgroup
-      val = mo.group()
-      if kind == "MISMATCH":
-        raise ValueError(f"Unexpected '{val}'")
-      if kind == "WS":
-        assert val is not None
-        leading.append(Trivia(val))
-      elif kind == "COMMENT":
-        assert val is not None
-        t = NvidiaSassToken("COMMENT", val)
-        t.leading_trivia = list(leading)
-        leading.clear()
-        yield t
-      else:
-        if kind == "PUNCTUATION":
-          punct_map = {
-            ";": "SEMI",
-            ":": "COLON",
-            ",": "COMMA",
-            ".": "DOT",
-            "[": "LBRACK",
-            "]": "RBRACK",
-            "+": "PLUS",
-            "-": "MINUS",
-            "!": "BANG",
-            "@": "AT",
-          }
-          assert val is not None
-          kind = punct_map[val]
-
-        assert kind is not None
-        assert val is not None
-        t2 = NvidiaSassToken(kind, val)
-        t2.leading_trivia = list(leading)
-        leading.clear()
-        yield t2
-
-
-@typing.runtime_checkable
-class _LeadingTriviaProtocol(typing.Protocol):
-  """Protocol for AST nodes exposing `leading_trivia`."""
-
-  leading_trivia: list[Trivia]
-
-
-def _get_trivia(node: SassChild | _LeadingTriviaProtocol | typing.Hashable | None) -> list[Trivia]:
-  """Extract leading trivia from a token or the first token in a tree.
-
-  Args:
-      node: The Lark AST Node or Token.
-
-  Returns:
-      A list of trivia items.
-  """
-  if isinstance(node, _LeadingTriviaProtocol):
-    res = list(node.leading_trivia)
-    node.leading_trivia = []
-    return res
-  if isinstance(node, Tree) and node.children:
-    return _get_trivia(node.children[0])
-  return []
-
-
-GRAMMAR = r"""
+GRAMMAR: str = r"""
     ?start: module
     module: statement*
 
@@ -239,140 +126,197 @@ GRAMMAR = r"""
     COMMENT: /.+/
 """
 
+NVIDIA_SASS_SPEC = IsaDialectSpec(
+  token_regex=TOKEN_REGEX,
+  punctuation_map=PUNCTUATION_MAP,
+  grammar=GRAMMAR,
+  emit_eof_trivia=False,
+  line_by_line=False,
+)
 
-class NvidiaSassTransformer(Transformer[Token, NvidiaSassNode]):
-  """Transform parsed AST nodes into NvidiaSassNode classes."""
+tok_regex: str = NVIDIA_SASS_SPEC.compiled_regex
+SassChild: typing.TypeAlias = IsaChild
 
-  @v_args(inline=False)
-  def module(self, children: typing.Sequence[SassChild]) -> NvidiaSassModule:
-    """Transform the top-level module rule.
+
+class NvidiaSassToken(IsaToken):
+  """Custom NVIDIA SASS token carrying leading trivia."""
+
+  __slots__ = ()
+
+
+class NvidiaSassLexer(IsaLexer[NvidiaSassToken]):
+  """Table-driven Lark lexer for NVIDIA SASS preserving trivia.
+
+  Attributes:
+      SPEC: NVIDIA SASS lexical and grammar dialect specification.
+  """
+
+  SPEC: typing.ClassVar[IsaDialectSpec] = NVIDIA_SASS_SPEC
+
+  def _make_token(self, kind: str, value: str, leading: list[Trivia]) -> NvidiaSassToken:
+    """Create a ``NvidiaSassToken`` with attached ``leading`` trivia.
 
     Args:
-        children: Parsed children.
+        kind: Token terminal type name.
+        value: Matched token substring.
+        leading: Leading trivia items.
 
     Returns:
-        The NvidiaSassModule.
+        NvidiaSassToken: Constructed token instance.
     """
-    leading = _get_trivia(children[0]) if children else []
-    mod = NvidiaSassModule(statements=[c for c in children if isinstance(c, NvidiaSassNode)])
-    mod.leading_trivia = leading
-    return mod
+    tok = NvidiaSassToken(kind, value)
+    tok.leading_trivia = list(leading)
+    return tok
+
+
+class NvidiaSassTransformer(
+  IsaTransformerBase[
+    NvidiaSassNode,
+    NvidiaSassOperand,
+    NvidiaSassModule,
+    NvidiaSassComment,
+    NvidiaSassDirective,
+    NvidiaSassLabel,
+    NvidiaSassImmediate,
+  ]
+):
+  """Transform parsed Lark trees into ``NvidiaSassNode`` CST instances.
+
+  Attributes:
+      COMMENT_PREFIX_LEN: Comment prefix character count (``2`` for ``//``).
+      STRIP_COMMENT_TEXT: Whether to strip leading/trailing whitespace from comment text.
+      HOIST_FIRST_STMT_TRIVIA: Whether to hoist first-statement leading trivia onto the module.
+  """
+
+  COMMENT_PREFIX_LEN: typing.ClassVar[int] = 2
+  STRIP_COMMENT_TEXT: typing.ClassVar[bool] = True
+  HOIST_FIRST_STMT_TRIVIA: typing.ClassVar[bool] = True
+
+  def _is_statement_node(self, value: IsaChild) -> typing.TypeGuard[NvidiaSassNode]:
+    """Check whether ``value`` is a ``NvidiaSassNode``.
+
+    Args:
+        value: Candidate parse child.
+
+    Returns:
+        bool: ``True`` if ``value`` is a ``NvidiaSassNode``.
+    """
+    return isinstance(value, NvidiaSassNode)
+
+  def _is_operand_node(self, value: IsaChild) -> typing.TypeGuard[NvidiaSassOperand]:
+    """Check whether ``value`` is a ``NvidiaSassOperand``.
+
+    Args:
+        value: Candidate parse child.
+
+    Returns:
+        bool: ``True`` if ``value`` is a ``NvidiaSassOperand``.
+    """
+    return isinstance(value, NvidiaSassOperand)
+
+  def _create_module(self, statements: list[NvidiaSassNode], leading: list[Trivia]) -> NvidiaSassModule:
+    """Construct ``NvidiaSassModule`` with ``statements`` and ``leading`` trivia.
+
+    Args:
+        statements: Parsed statement nodes.
+        leading: Module leading trivia.
+
+    Returns:
+        NvidiaSassModule: Constructed module node.
+    """
+    return NvidiaSassModule(statements=statements, leading_trivia=leading)
+
+  def _create_comment(self, text: str, leading: list[Trivia]) -> NvidiaSassComment:
+    """Construct ``NvidiaSassComment`` with ``text`` and ``leading`` trivia.
+
+    Args:
+        text: Stripped comment text.
+        leading: Leading trivia items.
+
+    Returns:
+        NvidiaSassComment: Constructed comment node.
+    """
+    return NvidiaSassComment(text=text, leading_trivia=leading)
+
+  def _create_directive(self, name: str, params: list[str], leading: list[Trivia]) -> NvidiaSassDirective:
+    """Construct ``NvidiaSassDirective`` with ``name``, ``params``, and ``leading`` trivia.
+
+    Args:
+        name: Directive identifier.
+        params: Directive parameter strings.
+        leading: Leading trivia items.
+
+    Returns:
+        NvidiaSassDirective: Constructed directive node.
+    """
+    return NvidiaSassDirective(name=name, params=params, leading_trivia=leading)
+
+  def _create_label(self, name: str, leading: list[Trivia]) -> NvidiaSassLabel:
+    """Construct ``NvidiaSassLabel`` with ``name`` and ``leading`` trivia.
+
+    Args:
+        name: Label identifier.
+        leading: Leading trivia items.
+
+    Returns:
+        NvidiaSassLabel: Constructed label node.
+    """
+    return NvidiaSassLabel(name=name, leading_trivia=leading)
+
+  def _create_immediate(self, value: int | float, is_hex: bool, leading: list[Trivia]) -> NvidiaSassImmediate:
+    """Construct ``NvidiaSassImmediate`` with ``value``, ``is_hex``, and ``leading`` trivia.
+
+    Args:
+        value: Numeric immediate value.
+        is_hex: Hexadecimal formatting flag.
+        leading: Leading trivia items.
+
+    Returns:
+        NvidiaSassImmediate: Constructed immediate node.
+    """
+    return NvidiaSassImmediate(value=value, is_hex=is_hex, leading_trivia=leading)
 
   @v_args(inline=False)
   def empty_statement(self, children: typing.Sequence[SassChild]) -> None:
-    """Transform an empty statement into None.
+    """Discard standalone semicolon empty statements.
 
     Args:
-        children: Parsed children.
+        children: Semicolon token list.
 
     Returns:
-        None.
+        None: Empty statements produce no CST node.
     """
-    return None
-
-  @v_args(inline=False)
-  def comment_stmt(self, children: typing.Sequence[SassChild]) -> NvidiaSassComment:
-    """Transform a comment into a NvidiaSassComment.
-
-    Args:
-        children: Parsed children.
-
-    Returns:
-        The parsed NvidiaSassComment.
-    """
-    tok_val = _tok_val(children[0])
-    c = NvidiaSassComment(text=tok_val[2:].strip())
-    c.leading_trivia = _get_trivia(children[0])
-    return c
-
-  @v_args(inline=False)
-  def directive(self, children: typing.Sequence[SassChild]) -> NvidiaSassDirective:
-    """Transform a directive into a NvidiaSassDirective.
-
-    Args:
-        children: Parsed children.
-
-    Returns:
-        The parsed NvidiaSassDirective.
-    """
-    name = _tok_val(children[1])
-    params: list[str] = []
-    if len(children) > 2 and children[2] is not None:
-      c2 = children[2]
-      param_list = c2.children[0] if isinstance(c2, Tree) and c2.data == "directive_params" and c2.children else c2
-      if isinstance(param_list, list):
-        for p in param_list:
-          if isinstance(p, Token) and p.type == "COMMA":
-            continue
-          if isinstance(p, Tree) and p.data == "at_string":
-            params.append("".join(_tok_val(x) for x in p.children))
-          elif isinstance(p, list):
-            params.append("".join(_tok_val(x) for x in p))
-          elif isinstance(p, Token):
-            params.append(p.value)
-          else:
-            params.append(str(p))
-      else:
-        params.append(str(param_list))
-    d = NvidiaSassDirective(name=name, params=params)
-    d.leading_trivia = _get_trivia(children[0])
-    return d
+    return
 
   @v_args(inline=False)
   def at_string(self, children: list[SassChild]) -> list[SassChild]:
-    """Transform an AT STRING into a list of Tokens.
+    """Pass through ``@"..."`` directive parameter tokens.
 
     Args:
-        children: Parsed children.
+        children: ``AT`` and ``STRING`` tokens.
 
     Returns:
-        The children list.
+        list[SassChild]: Unmodified token list.
     """
     return children
-
-  @v_args(inline=False)
-  def param_list(self, children: list[SassChild]) -> list[SassChild]:
-    """Transform a parameter list.
-
-    Args:
-        children: Parsed children.
-
-    Returns:
-        The children list.
-    """
-    return children
-
-  @v_args(inline=False)
-  def label(self, children: typing.Sequence[SassChild]) -> NvidiaSassLabel:
-    """Transform a label into a NvidiaSassLabel.
-
-    Args:
-        children: Parsed children.
-
-    Returns:
-        The parsed NvidiaSassLabel.
-    """
-    lbl = NvidiaSassLabel(name=_tok_val(children[0]))
-    lbl.leading_trivia = _get_trivia(children[0])
-    return lbl
 
   @v_args(inline=False)
   def instruction(self, children: typing.Sequence[SassChild]) -> NvidiaSassInstruction:
-    """Transform an instruction.
+    """Transform an instruction line into a ``NvidiaSassInstruction``.
 
     Args:
-        children: Parsed children.
+        children: Optional predicate guard, opcode token, operand list, and semicolon.
 
     Returns:
-        The parsed NvidiaSassInstruction.
+        NvidiaSassInstruction: Constructed instruction CST node.
     """
     predicate: NvidiaSassPredicate | None = None
     opcode = ""
     operands: list[NvidiaSassOperand] = []
 
-    leading: list[Trivia] | None = None
+    leading: list[Trivia] = []
     for c in children:
-      if c is not None and leading is None:
+      if c is not None:
         leading = _get_trivia(c)
         break
 
@@ -381,24 +325,20 @@ class NvidiaSassTransformer(Transformer[Token, NvidiaSassNode]):
         predicate = c
       elif isinstance(c, Token) and c.type == "IDENTIFIER":
         opcode = c.value
-      elif isinstance(c, Token) and c.type == "SEMI":
-        pass
       elif isinstance(c, list):
         operands = [op for op in c if isinstance(op, NvidiaSassOperand)]
 
-    i = NvidiaSassInstruction(opcode=opcode, operands=operands, predicate=predicate)
-    i.leading_trivia = leading if leading else []
-    return i
+    return NvidiaSassInstruction(opcode=opcode, operands=operands, predicate=predicate, leading_trivia=leading)
 
   @v_args(inline=False)
   def predicate(self, children: typing.Sequence[SassChild]) -> NvidiaSassPredicate:
-    """Transform a predicate.
+    """Transform an ``@P0`` / ``@!P0`` instruction guard predicate.
 
     Args:
-        children: Parsed children.
+        children: ``AT``, optional ``BANG``, and predicate identifier tokens.
 
     Returns:
-        The parsed NvidiaSassPredicate.
+        NvidiaSassPredicate: Guard predicate CST node.
     """
     negated = False
     name = ""
@@ -406,300 +346,282 @@ class NvidiaSassTransformer(Transformer[Token, NvidiaSassNode]):
     for c in children:
       if isinstance(c, Token) and c.type == "BANG":
         negated = True
-      elif isinstance(c, Token) and c.type in ["IDENTIFIER", "REG_IDENTIFIER"]:
+      elif isinstance(c, Token) and c.type in ("IDENTIFIER", "REG_IDENTIFIER"):
         name = str(c.value)
-    p = NvidiaSassPredicate(name=name, negated=negated, is_guard=True)
-    p.leading_trivia = leading
-    return p
-
-  @v_args(inline=False)
-  def operands(self, children: typing.Sequence[SassChild]) -> list[NvidiaSassOperand]:
-    """Transform an operands list.
-
-    Args:
-        children: Parsed children.
-
-    Returns:
-        The children list.
-    """
-    return [c for c in children if isinstance(c, NvidiaSassOperand)]
+    return NvidiaSassPredicate(name=name, negated=negated, is_guard=True, leading_trivia=leading)
 
   @v_args(inline=False)
   def mem_bank(self, children: typing.Sequence[SassChild]) -> NvidiaSassMemory:
-    """Transform a memory bank access.
+    """Transform constant bank memory access ``c[0x0][0x4]``.
 
     Args:
-        children: Parsed children.
+        children: Bank identifier and hex index tokens.
 
     Returns:
-        The parsed NvidiaSassMemory.
+        NvidiaSassMemory: Constant bank memory operand CST node.
     """
     leading = _get_trivia(children[0])
     bank = int(_tok_val(children[2]), 16)
     offset = int(_tok_val(children[5]), 16)
     base_name = _tok_val(children[0])
-    m = NvidiaSassMemory(base=f"{base_name}[{hex(bank)}]", offset=offset)
-    m.leading_trivia = leading
-    return m
+    return NvidiaSassMemory(base=f"{base_name}[{hex(bank)}]", offset=offset, leading_trivia=leading)
 
   @v_args(inline=False)
   def mem_bank_single(self, children: typing.Sequence[SassChild]) -> NvidiaSassMemory:
-    """Transform a memory bank access without offset.
+    """Transform single-bracket bank memory access ``c[0x0]``.
 
     Args:
-        children: Parsed children.
+        children: Bank identifier and hex index tokens.
 
     Returns:
-        The parsed NvidiaSassMemory.
+        NvidiaSassMemory: Single-bracket memory operand CST node.
     """
     leading = _get_trivia(children[0])
     bank = int(_tok_val(children[2]), 16)
     base_name = _tok_val(children[0])
-    m = NvidiaSassMemory(base=f"{base_name}[{hex(bank)}]", offset=None)
-    m.leading_trivia = leading
-    return m
+    return NvidiaSassMemory(base=f"{base_name}[{hex(bank)}]", offset=None, leading_trivia=leading)
 
   @v_args(inline=False)
   def mem_reg(self, children: typing.Sequence[SassChild]) -> NvidiaSassMemory:
-    """Transform a memory register access.
+    """Transform register-indirect memory access ``[R0]``.
 
     Args:
-        children: Parsed children.
+        children: Bracket and base register children.
 
     Returns:
-        The parsed NvidiaSassMemory.
+        NvidiaSassMemory: Register memory operand CST node.
     """
     leading = _get_trivia(children[0])
     base = children[1]
     base_reg: str | NvidiaSassRegister = base if isinstance(base, NvidiaSassRegister) else str(base)
-    m = NvidiaSassMemory(base=base_reg, offset=None)
-    m.leading_trivia = leading
-    return m
+    return NvidiaSassMemory(base=base_reg, offset=None, leading_trivia=leading)
+
+  def _mem_reg_with_signed_offset(self, children: typing.Sequence[SassChild], sign: int) -> NvidiaSassMemory:
+    """Construct a register-indirect memory operand with signed byte offset.
+
+    Args:
+        children: Bracket, register, sign, and immediate offset children.
+        sign: ``1`` for positive offset or ``-1`` for negative offset.
+
+    Returns:
+        NvidiaSassMemory: Constructed memory operand CST node.
+    """
+    leading = _get_trivia(children[0])
+    c3 = children[3]
+    offset_tok = c3.children[0] if isinstance(c3, Tree) and c3.children else c3
+    raw_offset = _tok_val(offset_tok)
+    offset = sign * int(raw_offset, 16 if "0x" in raw_offset.lower() else 10)
+    base = children[1]
+    base_reg: str | NvidiaSassRegister = base if isinstance(base, NvidiaSassRegister) else str(base)
+    return NvidiaSassMemory(base=base_reg, offset=offset, leading_trivia=leading)
 
   @v_args(inline=False)
   def mem_reg_offset(self, children: typing.Sequence[SassChild]) -> NvidiaSassMemory:
-    """Transform a memory register access with offset.
+    """Transform register memory access with positive offset ``[R0 + 0x4]``.
 
     Args:
-        children: Parsed children.
+        children: Bracket, register, plus, and offset children.
 
     Returns:
-        The parsed NvidiaSassMemory.
+        NvidiaSassMemory: Memory operand CST node.
     """
-    leading = _get_trivia(children[0])
-    c3 = children[3]
-    offset_tok = c3.children[0] if isinstance(c3, Tree) and c3.children else c3
-    tok_val = _tok_val(offset_tok)
-    offset = int(tok_val, 16 if "0x" in tok_val.lower() else 10)
-    base = children[1]
-    base_reg: str | NvidiaSassRegister = base if isinstance(base, NvidiaSassRegister) else str(base)
-    m = NvidiaSassMemory(base=base_reg, offset=offset)
-    m.leading_trivia = leading
-    return m
+    return self._mem_reg_with_signed_offset(children, sign=1)
 
   @v_args(inline=False)
   def mem_reg_neg_offset(self, children: typing.Sequence[SassChild]) -> NvidiaSassMemory:
-    """Transform a memory register access with negative offset.
+    """Transform register memory access with negative offset ``[R0 - 0x4]``.
 
     Args:
-        children: Parsed children.
+        children: Bracket, register, minus, and offset children.
 
     Returns:
-        The parsed NvidiaSassMemory.
+        NvidiaSassMemory: Memory operand CST node.
     """
-    leading = _get_trivia(children[0])
-    c3 = children[3]
-    offset_tok = c3.children[0] if isinstance(c3, Tree) and c3.children else c3
-    tok_val = _tok_val(offset_tok)
-    offset = -int(tok_val, 16 if "0x" in tok_val.lower() else 10)
-    base = children[1]
-    base_reg: str | NvidiaSassRegister = base if isinstance(base, NvidiaSassRegister) else str(base)
-    m = NvidiaSassMemory(base=base_reg, offset=offset)
-    m.leading_trivia = leading
-    return m
+    return self._mem_reg_with_signed_offset(children, sign=-1)
 
   @v_args(inline=False)
   def register(self, children: typing.Sequence[SassChild]) -> NvidiaSassRegister:
-    """Transform a register.
+    """Transform a SASS register token (supporting ``-`` negation and ``|...|`` abs modifiers).
 
     Args:
-        children: Parsed children.
+        children: Register identifier token list.
 
     Returns:
-        The parsed NvidiaSassRegister.
+        NvidiaSassRegister: Constructed register operand CST node.
     """
     leading = _get_trivia(children[0])
     val = _tok_val(children[0])
-    negated = val.startswith("-") or val.startswith("|-")
+    negated = val.startswith(("-", "|-"))
     absolute = "|" in val
-
     name = val.replace("-", "").replace("|", "")
-    r = NvidiaSassRegister(name=name, negated=negated, absolute=absolute)
-    r.leading_trivia = leading
-    return r
+    return NvidiaSassRegister(name=name, negated=negated, absolute=absolute, leading_trivia=leading)
+
+  def _operand_predicate(
+    self,
+    children: typing.Sequence[SassChild],
+    *,
+    name_idx: int,
+    negated: bool,
+  ) -> NvidiaSassPredicate:
+    """Construct a non-guard ``NvidiaSassPredicate`` operand.
+
+    Args:
+        children: Matched predicate operand tokens.
+        name_idx: Index of the identifier/register token in ``children``.
+        negated: Whether ``!`` negation was matched.
+
+    Returns:
+        NvidiaSassPredicate: Predicate operand CST node.
+    """
+    return NvidiaSassPredicate(
+      name=_tok_val(children[name_idx]),
+      negated=negated,
+      is_guard=False,
+      leading_trivia=_get_trivia(children[0]),
+    )
 
   @v_args(inline=False)
   def pred_at_bang_id(self, children: typing.Sequence[SassChild]) -> NvidiaSassPredicate:
-    """Transform a @!identifier predicate.
+    """Transform an ``@!identifier`` predicate operand.
 
     Args:
-        children: Parsed children.
+        children: Matched tokens.
 
     Returns:
-        The parsed NvidiaSassPredicate.
+        NvidiaSassPredicate: Negated predicate operand.
     """
-    leading = _get_trivia(children[0])
-    p = NvidiaSassPredicate(name=_tok_val(children[2]), negated=True, is_guard=False)
-    p.leading_trivia = leading
-    return p
+    return self._operand_predicate(children, name_idx=2, negated=True)
 
   @v_args(inline=False)
   def pred_at_bang_reg(self, children: typing.Sequence[SassChild]) -> NvidiaSassPredicate:
-    """Transform a @!register predicate.
+    """Transform an ``@!register`` predicate operand.
 
     Args:
-        children: Parsed children.
+        children: Matched tokens.
 
     Returns:
-        The parsed NvidiaSassPredicate.
+        NvidiaSassPredicate: Negated predicate operand.
     """
-    leading = _get_trivia(children[0])
-    p = NvidiaSassPredicate(name=_tok_val(children[2]), negated=True, is_guard=False)
-    p.leading_trivia = leading
-    return p
+    return self._operand_predicate(children, name_idx=2, negated=True)
 
   @v_args(inline=False)
   def pred_at_id(self, children: typing.Sequence[SassChild]) -> NvidiaSassPredicate:
-    """Transform a @identifier predicate.
+    """Transform an ``@identifier`` predicate operand.
 
     Args:
-        children: Parsed children.
+        children: Matched tokens.
 
     Returns:
-        The parsed NvidiaSassPredicate.
+        NvidiaSassPredicate: Predicate operand.
     """
-    leading = _get_trivia(children[0])
-    p = NvidiaSassPredicate(name=_tok_val(children[1]), negated=False, is_guard=False)
-    p.leading_trivia = leading
-    return p
+    return self._operand_predicate(children, name_idx=1, negated=False)
 
   @v_args(inline=False)
   def pred_at_reg(self, children: typing.Sequence[SassChild]) -> NvidiaSassPredicate:
-    """Transform a @register predicate.
+    """Transform an ``@register`` predicate operand.
 
     Args:
-        children: Parsed children.
+        children: Matched tokens.
 
     Returns:
-        The parsed NvidiaSassPredicate.
+        NvidiaSassPredicate: Predicate operand.
     """
-    leading = _get_trivia(children[0])
-    p = NvidiaSassPredicate(name=_tok_val(children[1]), negated=False, is_guard=False)
-    p.leading_trivia = leading
-    return p
+    return self._operand_predicate(children, name_idx=1, negated=False)
 
   @v_args(inline=False)
   def pred_bang_id(self, children: typing.Sequence[SassChild]) -> NvidiaSassPredicate:
-    """Transform a !identifier predicate.
+    """Transform a ``!identifier`` predicate operand.
 
     Args:
-        children: Parsed children.
+        children: Matched tokens.
 
     Returns:
-        The parsed NvidiaSassPredicate.
+        NvidiaSassPredicate: Negated predicate operand.
     """
-    leading = _get_trivia(children[0])
-    p = NvidiaSassPredicate(name=_tok_val(children[1]), negated=True, is_guard=False)
-    p.leading_trivia = leading
-    return p
+    return self._operand_predicate(children, name_idx=1, negated=True)
 
   @v_args(inline=False)
   def pred_bang_reg(self, children: typing.Sequence[SassChild]) -> NvidiaSassPredicate:
-    """Transform a !register predicate.
+    """Transform a ``!register`` predicate operand.
 
     Args:
-        children: Parsed children.
+        children: Matched tokens.
 
     Returns:
-        The parsed NvidiaSassPredicate.
+        NvidiaSassPredicate: Negated predicate operand.
     """
-    leading = _get_trivia(children[0])
-    p = NvidiaSassPredicate(name=_tok_val(children[1]), negated=True, is_guard=False)
-    p.leading_trivia = leading
-    return p
+    return self._operand_predicate(children, name_idx=1, negated=True)
 
   @v_args(inline=False)
   def immediate(self, children: typing.Sequence[SassChild]) -> NvidiaSassImmediate:
-    """Transform an immediate value.
+    """Transform a decimal, float, or hexadecimal immediate literal.
 
     Args:
-        children: Parsed children.
+        children: Immediate literal token.
 
     Returns:
-        The parsed NvidiaSassImmediate.
+        NvidiaSassImmediate: Constructed immediate operand CST node.
     """
-    leading = _get_trivia(children[0])
-    val_str = _tok_val(children[0])
-    is_hex = "0x" in val_str.lower()
-    if is_hex:
-      val: int | float = int(val_str, 16)
-    else:
-      val = float(val_str) if "." in val_str else int(val_str, 10)
-    i = NvidiaSassImmediate(value=val, is_hex=is_hex)
-    i.leading_trivia = leading
-    return i
+    return self._parse_immediate(_tok_val(children[0]), leading=_get_trivia(children[0]))
 
   @v_args(inline=False)
   def identifier(self, children: typing.Sequence[SassChild]) -> NvidiaSassLabel:
-    """Transform an identifier operand.
+    """Transform a branch/symbol identifier operand into ``NvidiaSassLabel``.
 
     Args:
-        children: Parsed children.
+        children: Identifier token.
 
     Returns:
-        The parsed NvidiaSassLabel.
+        NvidiaSassLabel: Constructed label operand CST node.
     """
-    leading = _get_trivia(children[0])
-    lbl = NvidiaSassLabel(name=_tok_val(children[0]))
-    lbl.leading_trivia = leading
-    return lbl
+    return NvidiaSassLabel(name=_tok_val(children[0]), leading_trivia=_get_trivia(children[0]))
 
 
-_CACHED_PARSER = None
+class NvidiaSassParser(IsaParser[NvidiaSassModule, NvidiaSassNode]):
+  """Facade for parsing NVIDIA SASS source text into ``NvidiaSassModule`` CSTs.
 
+  Attributes:
+      SPEC: NVIDIA SASS lexical and grammar dialect specification.
+      LEXER_CLS: Lexer class bound to Lark Earley construction.
+  """
 
-class NvidiaSassParser:
-  """Facade for parsing NVIDIA_SASS strings into CST modules."""
+  SPEC: typing.ClassVar[IsaDialectSpec] = NVIDIA_SASS_SPEC
+  LEXER_CLS: typing.ClassVar[type[NvidiaSassLexer]] = NvidiaSassLexer
 
-  def __init__(self, code: str) -> None:
-    """Initialize the parser with the NVIDIA_SASS source code.
+  def _build_transformer(self) -> Transformer[Token, NvidiaSassNode]:
+    """Instantiate ``NvidiaSassTransformer``.
+
+    Returns:
+        Transformer[Token, NvidiaSassNode]: Dialect transformer instance.
+    """
+    return NvidiaSassTransformer()
+
+  def _empty_module(self, statements: list[NvidiaSassNode] | None = None) -> NvidiaSassModule:
+    """Construct a ``NvidiaSassModule``.
 
     Args:
-        code: The raw NVIDIA_SASS string.
-    """
-    self.code = code
-    global _CACHED_PARSER
-    if _CACHED_PARSER is None:
-      _CACHED_PARSER = Lark(GRAMMAR, parser="earley", lexer=NvidiaSassLexer)
-    self.parser = _CACHED_PARSER
-    self.transformer = NvidiaSassTransformer()
-
-  def parse(self) -> NvidiaSassModule:
-    """Parse the entire code block.
+        statements: Optional parsed statements.
 
     Returns:
-        NvidiaSassModule: The root CST node.
+        NvidiaSassModule: Constructed module node.
     """
-    if not self.code.strip():
-      return NvidiaSassModule()
+    return NvidiaSassModule(statements=statements)
 
-    try:
-      tree = self.parser.parse(self.code)
-      node = self.transformer.transform(tree)
-      assert isinstance(node, NvidiaSassModule)
-      return node
-    except Exception as e:
-      raise ValueError(f"Unexpected token: {e}")
+  def _validate_module(self, node: NvidiaSassNode | Tree[Token]) -> tuple[NvidiaSassModule, list[NvidiaSassNode]]:
+    """Validate that Lark reduction produced a ``NvidiaSassModule``.
+
+    Args:
+        node: Root object produced by ``NvidiaSassTransformer``.
+
+    Returns:
+        tuple[NvidiaSassModule, list[NvidiaSassNode]]: Validated module and its statement list.
+
+    Raises:
+        SyntaxParseError: If ``node`` is not a ``NvidiaSassModule``.
+    """
+    if not isinstance(node, NvidiaSassModule):
+      raise SyntaxParseError(f"Expected NvidiaSassModule root, got {type(node).__name__}")
+    return node, list(node.statements)
 
 
 __all__ = [

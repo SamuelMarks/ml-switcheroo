@@ -1,18 +1,17 @@
 """Test suite for the Mlx module."""
 
 import mlx.core as mx
-
 import mlx.nn as nn
 
 
 class LayerNormModel:
-  """Test helper class LayerNormModel."""
+  """Sentinel `LayerNormModel` fixture class used in MLX tests."""
 
   def __init__(self, normalized_shape: int):
     """Initializes the LayerNormModel instance.
 
     Args:
-        normalized_shape: The normalized shape (int) for   init  .
+        normalized_shape: Input `normalized_shape` parameter value (`int`).
     """
     super().__init__()
     self.ln = nn.LayerNorm(normalized_shape)

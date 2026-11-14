@@ -5,10 +5,12 @@ implemented operations to identify and output missing ones.
 """
 
 import json
+import logging
 import os
 import re
 import sys
 import tempfile
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -26,7 +28,7 @@ def get_pip_cache_dir() -> Path:
     return Path(env_cache)
   try:
     home = Path.home()
-  except Exception:
+  except (RuntimeError, OSError, KeyError):
     return Path(tempfile.gettempdir()) / "pip"
 
   plat: str = sys.platform
@@ -110,29 +112,29 @@ def download_spec(
       cached_content = target_cache.read_text(encoding="utf-8")
       if cached_content.strip():
         return cached_content
-    except Exception:
-      pass
+    except (OSError, UnicodeError, ValueError, RuntimeError) as exc:
+      logging.getLogger(__name__).debug("Cached StableHLO spec read failed (%s): %s", target_cache, exc)
 
   last_error: Exception | None = None
   downloaded_content: str | None = None
 
   try:
     downloaded_content = fetch_raw_https(url)
-  except Exception as primary_err:
+  except (OSError, urllib.error.URLError, ValueError, RuntimeError) as primary_err:
     last_error = primary_err
     fallback_url = get_fallback_raw_url(url)
     if fallback_url:
       try:
         downloaded_content = fetch_raw_https(fallback_url)
-      except Exception as fallback_err:
+      except (OSError, urllib.error.URLError, ValueError, RuntimeError) as fallback_err:
         last_error = fallback_err
 
   if downloaded_content is not None:
     try:
       target_cache.parent.mkdir(parents=True, exist_ok=True)
       target_cache.write_text(downloaded_content, encoding="utf-8")
-    except Exception:
-      pass
+    except (OSError, ValueError, RuntimeError) as exc:
+      logging.getLogger(__name__).debug("StableHLO spec cache write skipped (%s): %s", target_cache, exc)
     return downloaded_content
 
   if target_cache.exists():
@@ -140,8 +142,8 @@ def download_spec(
       fallback_content = target_cache.read_text(encoding="utf-8")
       if fallback_content.strip():
         return fallback_content
-    except Exception:
-      pass
+    except (OSError, UnicodeError, ValueError, RuntimeError) as exc:
+      logging.getLogger(__name__).debug("Fallback StableHLO spec cache read failed (%s): %s", target_cache, exc)
 
   raise RuntimeError(f"Failed to download spec: {last_error}") from last_error
 
@@ -163,6 +165,31 @@ def parse_stablehlo_ops(content: str) -> list[str]:
   return ops
 
 
+def _extract_stablehlo_op_from_file(yaml_path: Path) -> str | None:
+  """Extract an implemented StableHLO operation name from a single ODL YAML file.
+
+  Args:
+      yaml_path: Path to a discrete ODL ``*.yaml`` file.
+
+  Returns:
+      StableHLO operation name without ``stablehlo.`` prefix if found, otherwise ``None``.
+  """
+  try:
+    with open(yaml_path, "r", encoding="utf-8") as f:
+      data = yaml.safe_load(f)
+      if isinstance(data, dict):
+        variants = data.get("variants")
+        if isinstance(variants, dict) and "stablehlo" in variants:
+          shlo_var = variants["stablehlo"]
+          if isinstance(shlo_var, dict):
+            api = shlo_var.get("api", "")
+            if api.startswith("stablehlo."):
+              return str(api[len("stablehlo.") :])
+  except (OSError, yaml.YAMLError, ValueError, TypeError, AttributeError, RuntimeError) as exc:
+    logging.getLogger(__name__).debug("Skipping unreadable ODL file %s: %s", yaml_path, exc)
+  return None
+
+
 def load_implemented_stablehlo_ops(odl_dir: Path) -> set[str]:
   """Load implemented StableHLO ops from ODL yaml files.
 
@@ -177,19 +204,9 @@ def load_implemented_stablehlo_ops(odl_dir: Path) -> set[str]:
     return implemented
 
   for p in odl_dir.glob("*.yaml"):
-    try:
-      with open(p, "r", encoding="utf-8") as f:
-        data = yaml.safe_load(f)
-        if isinstance(data, dict):
-          variants = data.get("variants")
-          if isinstance(variants, dict) and "stablehlo" in variants:
-            shlo_var = variants["stablehlo"]
-            if isinstance(shlo_var, dict):
-              api = shlo_var.get("api", "")
-              if api.startswith("stablehlo."):
-                implemented.add(api[len("stablehlo.") :])
-    except Exception:
-      pass
+    op_name = _extract_stablehlo_op_from_file(p)
+    if op_name is not None:
+      implemented.add(op_name)
 
   return implemented
 

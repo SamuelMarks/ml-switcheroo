@@ -1,51 +1,36 @@
-"""Test suite for scaffold."""
+"""Unit tests for `handle_scaffold` (`ml_switcheroo.cli.handlers.scaffold`)."""
 
+import json
+from argparse import Namespace
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from ml_switcheroo.cli.handlers.scaffold import handle_scaffold
 
 
-def test_handle_scaffold(tmp_path: Path) -> None:
-  """Verify handle scaffold behavior.
+def test_handle_scaffold_writes_skeleton_and_skips_empty_clusters(
+  tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+  """Verify `handle_scaffold` writes `<framework>_skeleton.json` and skips empty cluster entries.
 
   Args:
-      tmp_path: Pytest temporary directory path fixture.
+      tmp_path: Pytest temporary directory fixture.
+      monkeypatch: Pytest monkeypatch fixture.
   """
-  args: MagicMock = MagicMock()
-  args.framework = "test_fw"
+  monkeypatch.chdir(tmp_path)
 
-  with patch("ml_switcheroo.cli.handlers.scaffold.ConsensusEngine") as MockEngine:
-    engine: MagicMock = MockEngine.return_value
-    engine.cluster.return_value = {"std_name": ["test_fw.path"]}
+  with patch("ml_switcheroo.cli.handlers.scaffold.ConsensusEngine") as mock_engine_cls:
+    mock_engine: MagicMock = mock_engine_cls.return_value
+    mock_engine.cluster.return_value = {"add": ["mock.add"], "empty_op": []}
 
-    # We need to mock open to not write to current dir
-    import builtins
+    handle_scaffold(Namespace(framework="mock_fw"))
+    mock_engine.ingest.assert_called_once()
+    mock_engine.cluster.assert_called_once_with(threshold=0.8)
 
-    mock_open: MagicMock = MagicMock()
-    mock_file: MagicMock = MagicMock()
-    mock_open.return_value.__enter__.return_value = mock_file
-
-    with patch.object(builtins, "open", mock_open):
-      with patch("ml_switcheroo.cli.handlers.scaffold.json.dump") as mock_dump:
-        handle_scaffold(args)
-        mock_dump.assert_called_once()
-
-
-def test_handle_scaffold_empty_paths() -> None:
-  """Verify handle scaffold empty paths behavior."""
-  args = MagicMock()
-  args.framework = "test_fw_empty"
-
-  with patch("ml_switcheroo.cli.handlers.scaffold.ConsensusEngine") as MockEngine:
-    engine = MockEngine.return_value
-    engine.cluster.return_value = {"std_name": []}
-
-    import builtins
-
-    mock_open = MagicMock()
-    with patch.object(builtins, "open", mock_open):
-      with patch("ml_switcheroo.cli.handlers.scaffold.json.dump"):
-        handle_scaffold(args)
-        res = None
-  assert res is None
+  out_file = tmp_path / "mock_fw_skeleton.json"
+  assert out_file.exists()
+  data = json.loads(out_file.read_text(encoding="utf-8"))
+  assert data["framework"] == "mock_fw"
+  assert data["mappings"] == [{"operation": "add", "api": "mock.add"}]

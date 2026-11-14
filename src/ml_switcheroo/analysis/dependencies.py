@@ -26,7 +26,11 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @typing.runtime_checkable
 class _ImportDataProtocol(typing.Protocol):
-  """Protocol for semantics managers exposing ``import_data``."""
+  """Protocol for semantics managers exposing ``import_data``.
+
+  Attributes:
+      import_data: The import data (`dict[str, tuple[str, str | None, str | None]]`).
+  """
 
   import_data: dict[str, tuple[str, str | None, str | None]]
 
@@ -51,7 +55,7 @@ class DependencyScanner(cst.CSTVisitor):
     # Logic: Semantics import_data keys are "source.module". We want the roots.
     self._known_semantic_roots = set()
     if isinstance(semantics, _ImportDataProtocol) and isinstance(semantics.import_data, dict):
-      for key in semantics.import_data.keys():
+      for key in semantics.import_data:
         root = str(key).split(".")[0]
         self._known_semantic_roots.add(root)
 

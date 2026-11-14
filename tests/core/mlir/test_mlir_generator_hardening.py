@@ -5,10 +5,10 @@ from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
 
 
 def gen_code(op: OperationNode) -> str:
-  """Helper to generation code.
+  """Execute `ModuleNode` to support gen code in MLIR generator hardening tests.
 
   Args:
-      op: The op (OperationNode) for gen code.
+      op: Input `op` parameter value (`OperationNode`).
 
   Returns:
       Resulting `str` from gen code.
@@ -19,7 +19,7 @@ def gen_code(op: OperationNode) -> str:
 
 
 def test_sw_op_attribute_hardening() -> None:
-  """Verifies the behavior of sw op attribute hardening."""
+  """Verify `OperationNode` emits `torch.nn.Conv2d(_arg)` for sw operation attribute hardening."""
   op = OperationNode(
     name="sw.op",
     results=[ValueNode(name="%res")],
@@ -32,7 +32,7 @@ def test_sw_op_attribute_hardening() -> None:
 
 
 def test_sw_call_method_chain_hardening() -> None:
-  """Verifies the behavior of sw call method chain hardening."""
+  """Verify `MlirToPythonGenerator` emits `self.conv(_x)` for sw call method chain hardening."""
   gen = MlirToPythonGenerator()
   gen.ctx._map["%self_conv"] = "self.conv"
   op = OperationNode(
@@ -45,7 +45,7 @@ def test_sw_call_method_chain_hardening() -> None:
 
 
 def test_sw_op_void_return() -> None:
-  """Verifies the behavior of sw op void return."""
+  """Verify `OperationNode` emits `print(_arg)` for sw operation void return."""
   op = OperationNode(
     name="sw.op", results=[], attributes=[AttributeNode(name="type", value='"print"')], operands=[ValueNode(name="%arg")]
   )
@@ -55,14 +55,14 @@ def test_sw_op_void_return() -> None:
 
 
 def test_naming_context_reserved_words() -> None:
-  """Verifies the behavior of naming context reserved words."""
+  """Verify `MlirToPythonGenerator` handles naming context reserved words as expected."""
   gen = MlirToPythonGenerator()
   name: str = gen.ctx.register("%0", hint="for")
   assert name == "_for" or name == "v_for"
 
 
 def test_naming_context_global_symbol() -> None:
-  """Verifies the behavior of naming context global symbol."""
+  """Verify `MlirToPythonGenerator` handles naming context global symbol as expected."""
   gen = MlirToPythonGenerator()
   name: str = gen.ctx.lookup("@my_global_func")
   assert name == "my_global_func"

@@ -6,7 +6,7 @@ from ml_switcheroo.cli.matrix import CompatibilityMatrix
 
 
 def test_compatibility_matrix() -> None:
-  """Verifies the behavior of compatibility matrix."""
+  """Verify `CompatibilityMatrix` returns `2` for compatibility matrix."""
   with patch("ml_switcheroo.cli.matrix.SemanticsManager") as MockSemantics:
     semantics: MagicMock = MockSemantics()
     semantics.get_known_apis.return_value = {

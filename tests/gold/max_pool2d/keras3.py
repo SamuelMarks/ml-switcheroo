@@ -4,20 +4,20 @@ import keras
 
 
 class MaxPoolModel:
-  """Test helper class MaxPoolModel."""
+  """Test double `MaxPoolModel` implementing `call` for keras3 tests."""
 
   def __init__(self, pool_size: int = 2, strides: int = 2) -> None:
     """Initializes the MaxPoolModel instance.
 
     Args:
-        pool_size: The pool size (int) for   init  .
-        strides: The strides (int) for   init  .
+        pool_size: Input `pool_size` parameter value (`int`).
+        strides: Input `strides` parameter value (`int`).
     """
     super().__init__()
     self.pool = keras.layers.MaxPooling2D(pool_size=pool_size, strides=strides)
 
   def call(self, x: keras.KerasTensor) -> keras.KerasTensor:
-    """Helper to call.
+    """Execute `pool` to support call in keras3 tests.
 
     Args:
         x: Primary input tensor or array operand.

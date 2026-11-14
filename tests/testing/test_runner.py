@@ -1,212 +1,285 @@
-"""Test suite for the Runner Missing module."""
+"""Unit tests for `EquivalenceRunner` and `_evaluate_shape_calc` (`ml_switcheroo.testing.runner`)."""
 
-from unittest import mock
-from tests.conftest import _test_setattr
+import sys
+import typing
+from unittest.mock import MagicMock, patch
 
+import hypothesis.strategies as st
+import numpy as np
+import pytest
 from pydantic import JsonValue
 
+from ml_switcheroo.frameworks.numpy import NumpyAdapter
+from ml_switcheroo.testing.runner import EquivalenceRunner, _evaluate_shape_calc
 
-def test_runner_run_exceptions() -> None:
-  """Verifies the behavior of runner run exceptions."""
-  from ml_switcheroo.testing.runner import EquivalenceRunner
 
-  sr = EquivalenceRunner()
-  variants = {"jax": "bad"}
-  res, msg = sr.verify(variants, [], {}, {})
-  assert res is True
-  with mock.patch.object(sr, "_execute_api", return_value=1):
-    res, msg = sr.verify(variants, [], {}, {})
+@pytest.fixture
+def mock_frameworks(monkeypatch: pytest.MonkeyPatch) -> dict[str, MagicMock]:
+  """Register lightweight `torch` and `jax.numpy` stubs returning `np.array(5.0)` in `sys.modules`.
 
-  def force_fail(*args: JsonValue, **kwargs: JsonValue) -> None:
-    """Helper to force fail.
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+
+  Returns:
+      Dictionary of registered framework module mocks.
+  """
+
+  def _make_mod(name: str) -> MagicMock:
+    """Create a non-iterable `MagicMock` module stub.
 
     Args:
-        args: Positional arguments tuple or list.
-        kwargs: Keyword arguments mapping.
+        name: Module name string.
+
+    Returns:
+        Configured `MagicMock`.
     """
-    raise ValueError("hypothesis failed")
+    m = MagicMock(name=name)
+    m.__iter__.side_effect = TypeError(f"'{name}' object is not iterable")
+    return m
 
-  with mock.patch(
-    "ml_switcheroo.testing.runner.EquivalenceRunner._compare_results", side_effect=ValueError("fail hypothesis")
-  ):
-    res, msg = sr.verify(variants, [], {}, {})
-    assert "Verification Failed" in msg
+  mock_torch = _make_mod("torch")
+  mock_torch.sum.return_value = np.array(5.0)
+  mock_jax = _make_mod("jax")
+  mock_jnp = _make_mod("jax.numpy")
+  mock_jax.numpy = mock_jnp
+  mock_jnp.sum.return_value = np.array(5.0)
 
-
-def test_runner_execute_api() -> None:
-  """Verifies the behavior of runner execute API."""
-  from ml_switcheroo.testing.runner import EquivalenceRunner
-
-  sr = EquivalenceRunner()
-  assert sr._execute_api("no_dot", {}) is None
-
-
-def test_runner_compare() -> None:
-  """Verifies the behavior of runner compare."""
-  from ml_switcheroo.testing.runner import EquivalenceRunner
-
-  sr = EquivalenceRunner()
-  err_box: list[str] = []
-  import pytest
-
-  with pytest.raises(AssertionError):
-    sr._compare_results({"jax": 1, "torch": 2}, 0.001, 0.0001, err_box)
-  assert len(err_box) == 1
-  with pytest.raises(AssertionError):
-    sr._compare_results({"jax": [1], "torch": [1, 2]}, 0.001, 0.0001, [])
+  overrides = {"torch": mock_torch, "jax": mock_jax, "jax.numpy": mock_jnp}
+  for mod_name, mod_obj in overrides.items():
+    monkeypatch.setitem(sys.modules, mod_name, mod_obj)
+  return overrides
 
 
-def test_runner_deep_compare_exceptions() -> None:
-  """Verifies the behavior of runner deep compare exceptions."""
-  from ml_switcheroo.testing.runner import EquivalenceRunner
+def test_equivalence_flow_and_adapter_normalization(mock_frameworks: dict[str, MagicMock]) -> None:
+  """Verify `EquivalenceRunner.verify` across matching variants, shape checks, crashes, and `NumpyAdapter`.
 
-  sr = EquivalenceRunner()
+  Args:
+      mock_frameworks: Stubbed `torch` and `jax` module dictionary.
+  """
+  runner = EquivalenceRunner()
+  ok, msg = runner.verify({"torch": {"api": "torch.sum"}, "jax": {"api": "jax.numpy.sum"}}, params=["x"])
+  assert ok is True
+  assert "Verified" in msg
 
-  class BadNumpy:
-    """Test helper class BadNumpy."""
+  mock_adapter = MagicMock()
+  mock_adapter.convert.return_value = np.array(5.0)
+  with patch("ml_switcheroo.testing.runner.get_adapter", return_value=mock_adapter) as mock_get:
+    runner.verify({"torch": {"api": "torch.sum"}}, params=["x"])
+    mock_get.assert_called_with("numpy")
+    mock_adapter.convert.assert_called()
 
-    def __array__(self, *args: JsonValue, **kwargs: JsonValue) -> None:
-      """Helper to   array  .
+  # Shape calculations: exact match, mismatch, syntax error, runtime ZeroDivisionError, and `get_adapter=None`
+  assert runner.verify({"torch": {"api": "torch.sum"}}, params=["x"], shape_calc="lambda x: ()")[0] is True
+  ok_mis, msg_mis = runner.verify({"torch": {"api": "torch.sum"}}, params=["x"], shape_calc="lambda x: (1, 2)")
+  assert ok_mis is False
+  assert "Shape Mismatch" in msg_mis
 
-      Args:
-          args: Positional arguments tuple or list.
-          kwargs: Keyword arguments mapping.
+  ok_syn, msg_syn = runner.verify({"torch": {"api": "torch.sum"}}, params=["x"], shape_calc="lambda x:")
+  assert ok_syn is False
+  assert "Shape Calculation Error" in msg_syn
+
+  mock_frameworks["torch"].bad_api.side_effect = RuntimeError("Mock Crash")
+  ok_crash, msg_crash = runner.verify({"torch": {"api": "torch.bad_api"}}, params=["x"])
+  assert ok_crash is False
+  assert "Crash in torch" in msg_crash
+
+  class _DetachableTensorStub:
+    """Typed tensor stub implementing `detach().cpu().numpy()`."""
+
+    def detach(self) -> "_DetachableTensorStub":
+      """Return self.
 
       Returns:
-          Resulting `None` from array  .
+          `_DetachableTensorStub` instance.
       """
-      raise TypeError("fail")
+      return self
 
-  assert sr._deep_compare(1, BadNumpy()) is False
-  import numpy as np
+    def cpu(self) -> "_DetachableTensorStub":
+      """Return self.
 
-  assert sr._deep_compare(np.array(["a"]), np.array(["a"])) is True
-  assert sr._deep_compare(np.array(["a"]), np.array(["b"])) is False
+      Returns:
+          `_DetachableTensorStub` instance.
+      """
+      return self
+
+    def numpy(self) -> np.ndarray[tuple[int, ...], np.dtype[np.float64]]:
+      """Convert to scalar NumPy array `1.0`.
+
+      Returns:
+          Scalar float64 NumPy array.
+      """
+      return np.array(1.0)
+
+  np_adapter = NumpyAdapter()
+  stub = _DetachableTensorStub()
+  arr = np.array([1.0, 2.0])
+  assert np_adapter.convert(stub) == np.array(1.0)
+  conv_arr = np_adapter.convert(arr)
+  assert isinstance(conv_arr, np.ndarray)
+  assert np.allclose(conv_arr, arr)
+  converted_list = np_adapter.convert([stub, arr])
+  assert isinstance(converted_list, list)
+  assert converted_list[0] == np.array(1.0)
+  converted_dict = np_adapter.convert({"k": stub})
+  assert isinstance(converted_dict, dict)
+  assert converted_dict["k"] == np.array(1.0)
 
 
-def test_runner_run_details_not_dict() -> None:
-  """Verifies the behavior of runner run details not dictionary."""
-  from ml_switcheroo.testing.runner import EquivalenceRunner
+def test_runner_execute_compare_and_deep_compare_edge_cases(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `_execute_api`, `_compare_results`, `_deep_compare`, and Hypothesis mismatch reporting.
 
-  sr = EquivalenceRunner()
-  # Hit line 93: details is dict but missing "api" key
-  variants = {"jax": "string", "torch": {"api": "torch.add"}, "mlx": {"not_api": "something"}}
-  with mock.patch.object(sr, "_execute_api", return_value=1):
-    res, msg = sr.verify(variants, [], {}, {})
-    assert "Verified" in msg or "Failures" in msg
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
+  runner = EquivalenceRunner()
+  assert runner._execute_api("no_dots", {}) is None
+  with pytest.raises(TypeError, match="not callable"):
+    runner._execute_api("math.pi", {})
 
+  # Non-dict / missing-api variants and optional-import skips
+  assert runner.verify({"bad1": "not_a_dict", "bad2": {}}, [])[0] is True
+  assert runner.verify({"missing_fw": {"api": "missing_fw_pkg_xyz.op"}}, [])[0] is True
 
-def test_runner_deep_compare_shape_mismatch() -> None:
-  """Verifies behavior when arrays have different shapes."""
-  import numpy as np
+  with patch.object(runner, "_execute_api", side_effect=ImportError("optional missing")):
+    assert runner.verify({"torch": {"api": "torch.sum"}, "jax": {"api": "jax.sum"}}, ["x"])[0] is True
 
-  from ml_switcheroo.testing.runner import EquivalenceRunner
+  with patch.object(runner, "_execute_api", return_value=42):
+    assert runner.verify({"torch": {"api": "torch.sum"}}, ["x"], shape_calc="lambda x: (1,)")[0] is True
+    assert runner.verify({"torch": {"api": "torch.sum"}}, ["y"], shape_calc="lambda y: (1,)")[0] is True
 
-  sr = EquivalenceRunner()
-  # Hit line 228
-  assert sr._deep_compare(np.array([1, 2]), np.array([1, 2, 3])) is False
-
-
-def test_runner_run_shape_calculation_error() -> None:
-  """Verifies the behavior of runner run shape calculation correctly handling an error."""
-  import hypothesis.strategies as st
-  import numpy as np
-
-  from ml_switcheroo.testing.runner import EquivalenceRunner
-
-  sr = EquivalenceRunner()
-  variants = {"jax": {"api": "jax.add"}}
-
-  class DummyFuzzer:
-    """Test helper class DummyFuzzer."""
+  class _FixedFuzzer:
+    """Deterministic fuzzer stub yielding `x = np.array([1])`."""
 
     def build_strategies(
       self,
-      p: list[str],
-      h: dict[str, str] | None = None,
-      c: dict[str, dict[str, JsonValue]] | None = None,
+      _p: list[str],
+      _h: dict[str, str] | None = None,
+      _c: dict[str, dict[str, JsonValue]] | None = None,
     ) -> dict[str, st.SearchStrategy[np.ndarray[tuple[int, ...], np.dtype[np.int64]]]]:
-      """Mock implementation of build strategies.
+      """Build constant search strategy for `x`.
 
       Args:
-          p: The p (list[str]) for build strategies.
-          h: The h (dict[str, str] | None) for build strategies.
-          c: The c (dict[str, dict[str, JsonValue]] | None) for build strategies.
+          _p: Parameter names.
+          _h: Parameter type hints.
+          _c: Parameter constraints.
 
       Returns:
-          Resulting `dict[str, st.SearchStrategy[np.ndarray[tuple[int, ...], np.dtype[np.int64]]]]` from build strategies.
+          Strategy mapping for `x`.
       """
       return {"x": st.just(np.array([1]))}
 
     def adapt_to_framework(
       self,
       args: dict[str, np.ndarray[tuple[int, ...], np.dtype[np.int64]]],
-      fw: str,
+      _fw: str,
     ) -> dict[str, np.ndarray[tuple[int, ...], np.dtype[np.int64]]]:
-      """Mock implementation of adapt to framework.
+      """Return `args` unchanged.
 
       Args:
-          args: Positional arguments tuple or list.
-          fw: Framework identifier string (e.g., torch, jax, mlx).
+          args: Generated inputs.
+          _fw: Target framework name.
 
       Returns:
-          Resulting `dict[str, np.ndarray[tuple[int, ...], np.dtype[np.int64]]]` from adapt to framework.
+          Unchanged `args` dictionary.
       """
       return args
 
-  _test_setattr(
-    sr,
-    "fuzzer",
-    DummyFuzzer(),
-  )
-  with mock.patch.object(sr, "_execute_api", return_value=1):
-    res, msg = sr.verify(variants, ["x"], {"x": "Array"}, {}, shape_calc="lambda y: 1/0")
-    assert res is False
-    assert "Shape Calculation Error" in msg
+  monkeypatch.setattr(runner, "fuzzer", _FixedFuzzer())
+  with patch.object(runner, "_execute_api", side_effect=lambda api, _a: 1 if "tf" in api else 2):
+    ok_hyp, msg_hyp = runner.verify({"tf": {"api": "tf.add"}, "torch": {"api": "torch.add"}}, ["x"])
+    assert ok_hyp is False
+    assert "Verification Failed" in msg_hyp
 
-    with mock.patch("ml_switcheroo.testing.runner.get_adapter", return_value=None):
-      res_ok, _ = sr.verify(variants, ["x"], {"x": "Array"}, {}, shape_calc="lambda x: (1,)")
-      assert res_ok is True
+  with (
+    patch.object(runner, "_execute_api", return_value=np.array([1])),
+    patch("ml_switcheroo.testing.runner.get_adapter", return_value=None),
+  ):
+    assert runner.verify({"jax": {"api": "jax.add"}}, ["x"], {"x": "Array"}, {}, shape_calc="lambda x: (1,)")[0] is True
+
+  # `_compare_results` and `_deep_compare` across scalars, sequences, object arrays, and broken objects
+  err_box: list[str] = []
+  runner._compare_results({"fw1": 1, "fw2": 1}, 1e-5, 1e-5, err_box)
+  with pytest.raises(AssertionError):
+    runner._compare_results({"fw1": 1, "fw2": 2}, 1e-5, 1e-5, err_box)
+  assert len(err_box) == 1
+
+  assert runner._deep_compare("s", "s") is True
+  assert runner._deep_compare(1, 2) is False
+  assert runner._deep_compare([1, 2], [1, 2]) is True
+  assert runner._deep_compare([1], [1, 2]) is False
+  assert runner._deep_compare(np.array([1.0]), np.array([1.000001])) is True
+  assert runner._deep_compare(np.array([1.0]), np.array([2.0])) is False
+  assert runner._deep_compare(np.array([1, 2]), np.array([1, 2, 3])) is False
+  assert runner._deep_compare(np.array(["a", "b"]), np.array(["a", "b"])) is True
+  assert runner._deep_compare(np.array(["a", "b"]), np.array(["a", "c"])) is False
+
+  class _DistinctObj:
+    """Distinct object instance for object-dtype array inequality."""
+
+  assert runner._deep_compare(np.array([_DistinctObj()]), np.array([_DistinctObj()])) is False
+
+  class _BadIter:
+    """Iterable raising `RuntimeError` during iteration."""
+
+    def __len__(self) -> int:
+      """Return length `1`.
+
+      Returns:
+          Constant `1`.
+      """
+      return 1
+
+    def __iter__(self) -> typing.Iterator[int]:
+      """Raise `RuntimeError`.
+
+      Returns:
+          Never returns; raises `RuntimeError`.
+
+      Raises:
+          RuntimeError: Always raised.
+      """
+      raise RuntimeError("bad iter")
+
+  class _BadNumpyMethod:
+    """Object whose `.numpy()` raises `RuntimeError`."""
+
+    def numpy(self) -> typing.Never:
+      """Raise `RuntimeError`.
+
+      Returns:
+          Never returns; raises `RuntimeError`.
+
+      Raises:
+          RuntimeError: Always raised.
+      """
+      raise RuntimeError("bad numpy")
+
+  class _BadArrayProtocol:
+    """Object whose `__array__` raises `ValueError`."""
+
+    def __array__(self, *args: JsonValue, **kwargs: JsonValue) -> typing.Never:
+      """Raise `ValueError` on NumPy array coercion.
+
+      Args:
+          *args: Positional arguments.
+          **kwargs: Keyword arguments.
+
+      Returns:
+          Never returns; raises `ValueError`.
+
+      Raises:
+          ValueError: Always raised.
+      """
+      _ = (args, kwargs)
+      raise ValueError("cannot convert")
+
+  assert runner._deep_compare(_BadIter(), [1]) is False
+  assert runner._deep_compare(_BadNumpyMethod(), 1) is False
+  assert runner._deep_compare(np.array([1]), _BadArrayProtocol()) is False
 
 
-def test_runner_deep_compare_kind_o() -> None:
-  """Verifies the behavior of runner deep compare kind o."""
-  import numpy as np
-
-  from ml_switcheroo.testing.runner import EquivalenceRunner
-
-  class _DummyItem:
-    """Dummy distinct object for object-dtype array comparison."""
-
-  sr = EquivalenceRunner()
-  assert sr._deep_compare(np.array([_DummyItem()]), np.array([_DummyItem()])) is False
-
-
-def test_runner_deep_compare_kind_o_match() -> None:
-  """Verifies the behavior of runner deep compare kind o match."""
-  import numpy as np
-
-  from ml_switcheroo.testing.runner import EquivalenceRunner
-
-  sr = EquivalenceRunner()
-  assert sr._deep_compare(np.array(["a", "b"]), np.array(["a", "b"])) is True
-
-
-def test_runner_deep_compare_fallback() -> None:
-  """Verifies the behavior of runner deep compare fallback."""
-  from ml_switcheroo.testing.runner import EquivalenceRunner
-
-  sr = EquivalenceRunner()
-  assert sr._deep_compare("string", "string") is True
-
-
-def test_evaluate_shape_calc_ast_branches() -> None:
-  """Verify `_evaluate_shape_calc` supports safe AST nodes and rejects unsafe expressions."""
-  import numpy as np
-  import pytest
-
-  from ml_switcheroo.testing.runner import _evaluate_shape_calc
-
+def test_evaluate_shape_calc_supported_and_rejected_ast_nodes() -> None:
+  """Verify `_evaluate_shape_calc` supports safe arithmetic/slice ASTs and rejects unsafe constructs."""
   arr = np.zeros((4, 8))
   assert _evaluate_shape_calc("lambda x: x.shape", arr) == (4, 8)
   assert _evaluate_shape_calc("lambda x: [x.shape[0] + 1, x.shape[1] - 2]", arr) == [5, 6]
@@ -217,32 +290,28 @@ def test_evaluate_shape_calc_ast_branches() -> None:
     2,
   )
   assert _evaluate_shape_calc("lambda x: tuple(x.shape[:1])", arr) == (4,)
+  assert _evaluate_shape_calc("lambda x: list(x.shape)", arr) == [4, 8]
+  assert _evaluate_shape_calc("lambda x: (int(x.shape[0]), max(x.shape[0], 6), min(x.shape[0], 2.5))", arr) == (
+    4,
+    6,
+    2.5,
+  )
   assert _evaluate_shape_calc("lambda x: (-1, len(x.shape))", arr) == (-1, 2)
 
-  with pytest.raises(ValueError, match="Expected single-argument lambda"):
-    _evaluate_shape_calc("x.shape", arr)
-  with pytest.raises(ValueError, match="Unknown identifier"):
-    _evaluate_shape_calc("lambda x: unknown_var", arr)
-  with pytest.raises(ValueError, match="Private attribute"):
-    _evaluate_shape_calc("lambda x: x.__class__", arr)
-  with pytest.raises(ValueError, match="Unsupported AST node"):
-    _evaluate_shape_calc("lambda x: {1: 2}", arr)
-  with pytest.raises(ValueError, match="Unsupported AST node"):
-    _evaluate_shape_calc("lambda x: x.shape[0] ** 2", arr)
-
-
-def test_runner_import_error_ignored_and_runtime_error_recorded() -> None:
-  """Verify `EquivalenceRunner.verify` ignores missing optional framework imports but records runtime errors."""
-  from unittest.mock import patch
-
-  from ml_switcheroo.testing.runner import EquivalenceRunner
-
-  sr = EquivalenceRunner()
-  variants = {"missing_fw": {"api": "missing_fw_pkg_xyz.op"}}
-  ok, _ = sr.verify(variants, [])
-  assert ok is True
-
-  with patch.object(sr, "_execute_api", side_effect=TypeError("bad signature")):
-    ok_err, msg_err = sr.verify({"torch": {"api": "torch.add"}}, [])
-    assert ok_err is False
-    assert "Crash in torch: bad signature" in msg_err
+  for bad_expr, match_str in (
+    ("x.shape", "Expected single-argument lambda"),
+    ("lambda x: unknown_var", "Unknown identifier"),
+    ("lambda x: x.__class__", "Private attribute"),
+    ("lambda x: x.ndim", "Unsupported attribute"),
+    ("lambda x: x[0]", "must be a shape sequence"),
+    ("lambda x: x.shape['a':]", "Slice bounds"),
+    ("lambda x: x.shape['a']", "Subscript index"),
+    ("lambda x: -x.shape", "requires numeric operand"),
+    ("lambda x: max('bad')", "Unsupported call"),
+    ("lambda x: eval('1')", "Unsupported call"),
+    ("lambda x: (lambda y: y)(1)", "Unsupported AST node"),
+    ("lambda x: {1: 2}", "Unsupported AST node"),
+    ("lambda x: x.shape[0] ** 2", "Unsupported AST node"),
+  ):
+    with pytest.raises(ValueError, match=match_str):
+      _evaluate_shape_calc(bad_expr, arr)

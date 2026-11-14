@@ -5,7 +5,7 @@ import numpy.typing
 
 
 class GAPModel:
-  """Test helper class GAPModel."""
+  """Sentinel `GAPModel` fixture class used in numpy tests."""
 
   def __call__(self, x: np.typing.NDArray[np.float64]) -> np.typing.NDArray[np.float64]:
     """Executes the callable instance.

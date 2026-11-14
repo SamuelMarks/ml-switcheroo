@@ -1,0 +1,23 @@
+--- Forward ---
+import numpy as np
+
+def serialize_data(arr, filename):
+    # Tier 3: IO Persistence
+    # Use standard binary format (.npy)
+    np.save(file=filename, arr=arr)
+
+    # Reload
+    loaded = np.load(file=filename)
+    return loaded
+
+--- Backward ---
+import numpy as np
+
+def serialize_data(arr, filename):
+    # Tier 3: IO Persistence
+    # Use standard binary format (.npy)
+    np.save(file=filename, arr=arr)
+
+    # Reload
+    loaded = np.load(file=filename)
+    return loaded

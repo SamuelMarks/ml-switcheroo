@@ -1,0 +1,25 @@
+--- Forward ---
+import mlx.core as mx
+
+class Model(tf.Module):
+  # Tier 2: Low-level TF Module (Not Keras)
+  def __init__(self, in_features, out_features):
+    super().__init__()
+    self.w = tf.Variable(tf.random.normal([in_features, out_features]))
+    self.b = tf.Variable(tf.zeros([out_features]))
+
+  def __call__(self, x):
+    return tf.matmul(x, self.w) + self.b
+
+--- Backward ---
+import tensorflow as tf
+
+class Model(keras.Layer):
+  # Tier 2: Low-level TF Module (Not Keras)
+  def __init__(self, in_features, out_features):
+    super().__init__()
+    self.w = tf.Variable(tf.random.normal([in_features, out_features]))
+    self.b = tf.Variable(tf.zeros([out_features]))
+
+  def call(self, x):
+    return tf.matmul(x, self.w) + self.b

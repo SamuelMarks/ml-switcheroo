@@ -17,7 +17,7 @@ from ml_switcheroo.core.scanners import get_full_name
 from ml_switcheroo.semantics.schema import StructuralTraits
 from ml_switcheroo.utils.node_diff import capture_node_source
 
-__all__ = ["LogicalNode", "LogicalEdge", "LogicalGraph", "topological_sort", "GraphExtractor"]
+__all__ = ["GraphExtractor", "LogicalEdge", "LogicalGraph", "LogicalNode", "topological_sort"]
 
 
 @typing.runtime_checkable
@@ -83,11 +83,7 @@ class GraphExtractor(cst.CSTVisitor):
     Returns:
         True to continue visiting inner statements.
     """
-    leading: list[str] = []
-    for line in node.leading_lines:
-      if line.comment is not None:
-        leading.append(line.comment.value)
-    self._current_stmt_leading_trivia = leading
+    self._current_stmt_leading_trivia = [line.comment.value for line in node.leading_lines if line.comment is not None]
     if node.trailing_whitespace.comment is not None:
       self._current_stmt_trailing_trivia = node.trailing_whitespace.comment.value
     else:
@@ -247,17 +243,16 @@ class GraphExtractor(cst.CSTVisitor):
         and node.value.func.attr.value in self._child_registration_methods
       ):
         self._analyze_create_child(node.value, node)
-    elif self._scope_depth == 0 or self._in_forward:
-      if isinstance(node.value, cst.Call):
-        # Pass the expression statement as context to link provenance to the line not just the call
-        self._analyze_call_expression(node.value, output_vars=[], context_node=node)
+    elif (self._scope_depth == 0 or self._in_forward) and isinstance(node.value, cst.Call):
+      # Pass the expression statement as context to link provenance to the line not just the call
+      self._analyze_call_expression(node.value, output_vars=[], context_node=node)
     return True
 
   def visit_Return(self, node: cst.Return) -> bool | None:
     """Handle return statements to identify Output nodes.
 
     Constructs terminal LogicalEdges that connect the final output tensor(s) to
-    the Output node in the DAG.
+    the Output node in the DAG while preserving multi-output operand ordering.
 
     Args:
         node: The return statement node being visited.
@@ -266,30 +261,15 @@ class GraphExtractor(cst.CSTVisitor):
         False to halt deeper traversal of the return statement children.
     """
     if self._in_forward and node.value:
-      # 1. Check if returning a direct call
-      if isinstance(node.value, cst.Call):
-        self._analyze_call_expression(node.value, output_vars=[])
-        # The inner call registered a node. Link it to output.
-        layer_name = self._resolve_layer_or_func_name(node.value.func, context_node=node.value)
-        if layer_name:
-          out_id = "output"
-          if out_id not in self.layer_registry:
-            self.layer_registry[out_id] = LogicalNode(out_id, "Output", attributes={})
-            self.node_map[out_id] = node
-          self._attach_stmt_trivia(self.layer_registry[out_id])
-          self._edges.append(LogicalEdge(layer_name, out_id))
-        return False
-
-      # 2. Check if returning a variable
-      var_name = self._get_var_name(node.value)
-      if var_name and var_name in self.provenance:
-        source_id = self.provenance[var_name]
+      sources = self._analyze_expr_sources(node.value, context_node=node.value)
+      if sources:
         out_id = "output"
         if out_id not in self.layer_registry:
           self.layer_registry[out_id] = LogicalNode(out_id, "Output", attributes={})
           self.node_map[out_id] = node
         self._attach_stmt_trivia(self.layer_registry[out_id])
-        self._edges.append(LogicalEdge(source_id, out_id))
+        for target_idx, (src_id, val_name) in enumerate(sources):
+          self._edges.append(LogicalEdge(src_id, out_id, target_idx=target_idx, value_name=val_name))
 
     return False
 
@@ -421,18 +401,191 @@ class GraphExtractor(cst.CSTVisitor):
             self.node_map[input_id] = node
       return
 
-    if not isinstance(node.value, cst.Call):
-      return
-
     targets = []
     for target in node.targets:
       out_var_name = self._get_var_name(target.target)
       if out_var_name:
         targets.append(out_var_name)
 
-    # For data flow assignments, we pass the Assign statement as context
-    # so that if a functional op (F.relu) is created, it maps to this line.
-    self._analyze_call_expression(node.value, targets, context_node=node)
+    if isinstance(node.value, cst.Call):
+      # For data flow assignments, we pass the Assign statement as context
+      # so that if a functional op (F.relu) is created, it maps to this line.
+      self._analyze_call_expression(node.value, targets, context_node=node)
+    elif isinstance(node.value, cst.BinaryOperation):
+      sources = self._analyze_expr_sources(node.value, context_node=node)
+      if sources:
+        prod_id = sources[0][0]
+        for out_var in targets:
+          self.provenance[out_var] = prod_id
+
+  @staticmethod
+  def _resolve_binop_kind(operator: cst.BaseBinaryOp) -> str | None:
+    """Map a Python binary operator CST node to its canonical ``LogicalNode`` op kind.
+
+    Args:
+        operator: LibCST binary operator node.
+
+    Returns:
+        str | None: Canonical binary operation kind, or ``None`` if unsupported.
+    """
+    if isinstance(operator, cst.Add):
+      return "Add"
+    if isinstance(operator, cst.Subtract):
+      return "Sub"
+    if isinstance(operator, cst.Multiply):
+      return "Mul"
+    if isinstance(operator, cst.Divide):
+      return "Div"
+    if isinstance(operator, cst.MatrixMultiply):
+      return "MatMul"
+    return None
+
+  def _can_resolve_tensor_expr(self, expr: cst.BaseExpression) -> bool:
+    """Check without side effects whether ``expr`` represents a tensor variable, layer call, or binary tensor op.
+
+    Args:
+        expr: Candidate expression CST node.
+
+    Returns:
+        bool: ``True`` if ``expr`` can resolve to at least one graph producer node.
+    """
+    var_name = self._get_var_name(expr)
+    if var_name is not None:
+      return var_name in self.provenance or self._scope_depth == 0
+    if isinstance(expr, cst.Call):
+      # Method calls on local tensor variables (e.g. x.size(0)) inside args are scalar metadata, not layers
+      if (
+        isinstance(expr.func, cst.Attribute)
+        and isinstance(expr.func.value, cst.Name)
+        and expr.func.value.value in self.provenance
+      ):
+        return False
+      return get_full_name(expr.func) != ""
+    if isinstance(expr, cst.BinaryOperation):
+      return (
+        self._resolve_binop_kind(expr.operator) is not None
+        and self._can_resolve_tensor_expr(expr.left)
+        and self._can_resolve_tensor_expr(expr.right)
+      )
+    if isinstance(expr, (cst.Tuple, cst.List)):
+      return any(isinstance(el, cst.Element) and self._can_resolve_tensor_expr(el.value) for el in expr.elements)
+    return False
+
+  def _analyze_expr_sources(
+    self,
+    expr: cst.BaseExpression,
+    context_node: cst.CSTNode | None = None,
+    *,
+    in_call_arg: bool = False,
+  ) -> list[tuple[str, str | None]]:
+    """Resolve ``expr`` into ordered ``(producer_node_id, optional_var_name)`` pairs.
+
+    Supports simple variable names, nested calls, multi-branch binary tensor operations
+    (such as residual ``self.conv(x) + x``), and tuple/list argument sequences.
+
+    Args:
+        expr: Expression CST node to trace.
+        context_node: Optional enclosing statement or call context node.
+        in_call_arg: Whether ``expr`` appears directly as an argument to an outer call.
+
+    Returns:
+        list[tuple[str, str | None]]: Ordered upstream producer pairs.
+    """
+    var_name = self._get_var_name(expr)
+    if var_name is not None:
+      if var_name not in self.provenance and self._scope_depth == 0:
+        ext_id = f"Input_{var_name}"
+        if ext_id not in self.layer_registry:
+          self.layer_registry[ext_id] = LogicalNode(ext_id, "Input", attributes={"name": var_name})
+          self.node_map[ext_id] = context_node if context_node is not None else expr
+        self.provenance[var_name] = ext_id
+      if var_name in self.provenance:
+        return [(self.provenance[var_name], var_name)]
+      return []
+
+    if isinstance(expr, cst.Call):
+      if in_call_arg and not self._can_resolve_tensor_expr(expr):
+        return []
+      ctx = context_node if context_node is not None else expr
+      self._analyze_call_expression(expr, output_vars=[], context_node=ctx)
+      layer_name = self._resolve_layer_or_func_name(expr.func, context_node=ctx)
+      return [(layer_name, None)] if layer_name else []
+
+    if isinstance(expr, cst.BinaryOperation):
+      op_kind = self._resolve_binop_kind(expr.operator)
+      if op_kind is None or not self._can_resolve_tensor_expr(expr.left) or not self._can_resolve_tensor_expr(expr.right):
+        return []
+      left_srcs = self._analyze_expr_sources(expr.left, context_node=expr.left)
+      right_srcs = self._analyze_expr_sources(expr.right, context_node=expr.right)
+      base_id = f"func_{op_kind.lower()}"
+      bin_id = base_id
+      suffix = 1
+      while bin_id in self.layer_registry:
+        bin_id = f"{base_id}_{suffix}"
+        suffix += 1
+      metadata = {
+        "arg_0": capture_node_source(expr.left),
+        "arg_1": capture_node_source(expr.right),
+      }
+      self.layer_registry[bin_id] = LogicalNode(bin_id, op_kind, attributes=metadata)
+      self._attach_stmt_trivia(self.layer_registry[bin_id])
+      self.node_map[bin_id] = context_node if context_node is not None else expr
+      self._edges.append(LogicalEdge(left_srcs[0][0], bin_id, target_idx=0, value_name=left_srcs[0][1]))
+      self._edges.append(LogicalEdge(right_srcs[0][0], bin_id, target_idx=1, value_name=right_srcs[0][1]))
+      return [(bin_id, None)]
+
+    if isinstance(expr, (cst.Tuple, cst.List)):
+      seq_sources: list[tuple[str, str | None]] = []
+      for el in expr.elements:
+        if isinstance(el, cst.Element):
+          seq_sources.extend(self._analyze_expr_sources(el.value, context_node=el, in_call_arg=in_call_arg))
+      return seq_sources
+
+    return []
+
+  def _disambiguate_func_node_id(self, base_name: str, context_node: cst.CSTNode | None) -> str:
+    """Resolve or allocate a unique functional node identifier for ``base_name`` and ``context_node``.
+
+    Args:
+        base_name: Base functional node prefix (e.g. ``'func_relu'``).
+        context_node: Optional enclosing CST call, assignment, or expression statement.
+
+    Returns:
+        Matched existing node ID or newly suffixed node ID.
+    """
+    if base_name not in self.layer_registry or not isinstance(context_node, (cst.Call, cst.Assign, cst.Expr)):
+      return base_name
+
+    candidates = [base_name] + [k for k in self.layer_registry if k.startswith(f"{base_name}_")]
+    for cand in candidates:
+      ent_ctx = self.node_map.get(cand)
+      ent_val = ent_ctx.value if isinstance(ent_ctx, (cst.Assign, cst.Expr)) else None
+      if ent_ctx is None or ent_ctx is context_node or ent_val is context_node:
+        return cand
+    return f"{base_name}_{len(candidates)}"
+
+  @staticmethod
+  def _extract_call_metadata(context_node: cst.CSTNode | None) -> dict[str, str]:
+    """Extract serialized positional and keyword argument strings from a call ``context_node``.
+
+    Args:
+        context_node: Optional CST call, assignment, or expression statement.
+
+    Returns:
+        Dictionary mapping argument names or ``arg_<i>`` keys to source strings.
+    """
+    call_node: cst.Call | None = None
+    if isinstance(context_node, cst.Call):
+      call_node = context_node
+    elif isinstance(context_node, (cst.Assign, cst.Expr)) and isinstance(context_node.value, cst.Call):
+      call_node = context_node.value
+
+    if call_node is None:
+      return {}
+    return {
+      (arg.keyword.value if arg.keyword else f"arg_{i}"): capture_node_source(arg.value)
+      for i, arg in enumerate(call_node.args)
+    }
 
   def _resolve_layer_or_func_name(
     self, func_node: cst.BaseExpression, context_node: cst.CSTNode | None = None
@@ -458,66 +611,38 @@ class GraphExtractor(cst.CSTVisitor):
       return layer_id
 
     func_name = get_full_name(func_node)
-    if func_name:
-      base_name = f"func_{func_name.split('.')[-1].lower()}"
-      layer_name = base_name
-      if layer_name in self.layer_registry and isinstance(context_node, (cst.Call, cst.Assign, cst.Expr)):
-        candidates = [base_name] + [k for k in self.layer_registry if k.startswith(f"{base_name}_")]
-        matched = None
-        for cand in candidates:
-          ent_ctx = self.node_map.get(cand)
-          ent_val = ent_ctx.value if isinstance(ent_ctx, (cst.Assign, cst.Expr)) else None
-          if ent_ctx is None or ent_ctx is context_node or ent_val is context_node:
-            matched = cand
-            break
-        if matched is not None:
-          layer_name = matched
-        else:
-          layer_name = f"{base_name}_{len(candidates)}"
+    if not func_name:
+      return None
 
-      if layer_name not in self.layer_registry:
-        metadata = {}
-
-        # Identify the call node
-        call_node = None
-        if isinstance(context_node, cst.Call):
-          call_node = context_node
-        elif isinstance(context_node, cst.Assign) and isinstance(context_node.value, cst.Call):
-          call_node = context_node.value
-        elif isinstance(context_node, cst.Expr) and isinstance(context_node.value, cst.Call):
-          call_node = context_node.value
-
-        if call_node:
-          from ml_switcheroo.utils.node_diff import capture_node_source
-
-          for i, arg in enumerate(call_node.args):
-            key = f"arg_{i}"
-            if arg.keyword:
-              key = arg.keyword.value
-            metadata[key] = capture_node_source(arg.value)
-
-        self.layer_registry[layer_name] = LogicalNode(layer_name, func_name, attributes=metadata)
-        # Provenance: Map to the call/statement that triggered creation
-        if context_node:
-          self.node_map[layer_name] = context_node
-      return layer_name
-
-    return None
+    base_name = f"func_{func_name.split('.')[-1].lower()}"
+    layer_name = self._disambiguate_func_node_id(base_name, context_node)
+    if layer_name not in self.layer_registry:
+      metadata = self._extract_call_metadata(context_node)
+      self.layer_registry[layer_name] = LogicalNode(layer_name, func_name, attributes=metadata)
+      if context_node:
+        self.node_map[layer_name] = context_node
+    return layer_name
 
   def _analyze_call_expression(
     self, call: cst.Call, output_vars: list[str], context_node: cst.CSTNode | None = None
   ) -> None:
-    """Trace edges from call inputs to the layer node.
+    """Trace edges from call inputs to the layer node in exact operand order.
 
-    Examines call arguments to identify incoming data dependencies (edges) and maps
-    assigned output variables back to this node to register provenance.
+    Examines call arguments (including nested calls, binary residual expressions,
+    and list/tuple tensor sequences) to record ordered ``LogicalEdge`` dependencies
+    with ``target_idx`` and ``value_name``.
 
     Args:
         call: The function call node to analyze.
         output_vars: The variable names receiving the outputs of this call.
         context_node: The statement node containing this call, used for AST provenance.
     """
-    # Use call itself as context if no parent statement provided
+    # Evaluate nested argument expressions first so upstream producer nodes are registered
+    # in topological execution order before the consumer node.
+    resolved_arg_sources: list[tuple[str, str | None]] = []
+    for arg in call.args:
+      resolved_arg_sources.extend(self._analyze_expr_sources(arg.value, context_node=arg, in_call_arg=True))
+
     ctx = context_node if context_node else call
     layer_name = self._resolve_layer_or_func_name(call.func, context_node=ctx)
 
@@ -527,21 +652,8 @@ class GraphExtractor(cst.CSTVisitor):
     if layer_name in self.layer_registry:
       self._attach_stmt_trivia(self.layer_registry[layer_name])
 
-    for arg in call.args:
-      var_name = self._get_var_name(arg.value)
-
-      # Implicit external input handling
-      if var_name and var_name not in self.provenance:
-        if self._scope_depth == 0:
-          ext_id = f"Input_{var_name}"
-          if ext_id not in self.layer_registry:
-            self.layer_registry[ext_id] = LogicalNode(ext_id, "Input", attributes={"name": var_name})
-            self.node_map[ext_id] = arg
-          self.provenance[var_name] = ext_id
-
-      if var_name and var_name in self.provenance:
-        source_id = self.provenance[var_name]
-        self._edges.append(LogicalEdge(source_id, layer_name))
+    for target_idx, (source_id, val_name) in enumerate(resolved_arg_sources):
+      self._edges.append(LogicalEdge(source_id, layer_name, target_idx=target_idx, value_name=val_name))
 
     for out_var in output_vars:
       self.provenance[out_var] = layer_name
@@ -560,16 +672,21 @@ class GraphExtractor(cst.CSTVisitor):
     return None
 
   def _finalize_graph(self) -> None:
-    """Copy registry values to the graph object.
+    """Copy registry values to the graph object while preserving ``target_idx`` edge ordering.
 
     Constructs the final list of LogicalNode definitions in the graph and assigns
     the resolved model class name.
     """
     if self.layer_registry:
-      # Sort by definition order implicitly via dict preservation or explicitly if desired
       self.graph.nodes.clear()
       for k, v in self.layer_registry.items():
         self.graph.nodes[k] = v
       for edge in self._edges:
-        self.graph.add_edge(edge.source, edge.target)
+        self.graph.add_edge(
+          edge.source,
+          edge.target,
+          source_idx=edge.source_idx,
+          target_idx=edge.target_idx,
+          value_name=edge.value_name,
+        )
     self.graph.name = self.model_name

@@ -1,0 +1,10 @@
+--- Forward ---
+import numpy as np
+
+def predict(params, x):
+  return jnp.dot(x, params['w']) + params['b']
+--- Backward ---
+import jax.numpy as jnp
+
+def predict(params, x):
+  return jnp.dot(x, params['w']) + params['b']

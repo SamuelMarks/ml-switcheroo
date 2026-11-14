@@ -4,7 +4,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_manager_array_api() -> None:
-  """Verifies the behavior of manager array API."""
+  """Verify `SemanticsManager` handles manager array API as expected."""
   manager: SemanticsManager = SemanticsManager()
   manager.data = {"test_op": {"variants": {}}}
   manager._key_origins = {"test_op": "array_api"}

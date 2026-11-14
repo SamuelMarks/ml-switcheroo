@@ -1,23 +1,46 @@
 """Hook Registry Module.
 
-This module provides the global registry and dynamic loading mechanisms for
+This module provides an instantiable ``HookRegistry`` and lazy-loading mechanisms for
 translation hooks defined in plugins. It manages hook registration, metadata storage,
-lazy-loading of plugins, and retrieval of hooks for AST transformations.
+scoped registry binding, lazy plugin discovery, and retrieval of hooks for AST transformations.
 """
 
+import contextvars
 import importlib
 import importlib.util
 import logging
 import sys
 import typing
+from contextlib import contextmanager
+from functools import lru_cache
 from pathlib import Path
 
 import libcst as cst
-from pydantic import JsonValue
+from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
-from ml_switcheroo.core.hooks import AutoWireSpec, HookContext
+from ml_switcheroo.exceptions import PluginLoadError
 
-# Global registry
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.core.hooks import HookContext
+
+
+class AutoWireSpec(BaseModel):
+  """Schema for plugin self-registration metadata.
+
+  Allows a plugin to declare the semantic operations it satisfies.
+
+  Attributes:
+      ops: Dictionary of abstract operations to inject into ``SemanticsManager``.
+  """
+
+  model_config = ConfigDict(extra="allow")
+
+  ops: dict[str, JsonValue] | None = Field(
+    default_factory=dict,
+    description="Dictionary of Abstract Operations to inject into SemanticsManager.",
+  )
+
+
 HookReturn: typing.TypeAlias = cst.CSTNode | cst.RemovalSentinel | cst.FlattenSentinel[cst.BaseStatement]
 _NodeT_contra = typing.TypeVar("_NodeT_contra", bound=cst.CSTNode, contravariant=True)
 
@@ -25,7 +48,7 @@ _NodeT_contra = typing.TypeVar("_NodeT_contra", bound=cst.CSTNode, contravariant
 class HookCallableProtocol(typing.Protocol[_NodeT_contra]):
   """Protocol for registered AST hook callables."""
 
-  def __call__(self, node: _NodeT_contra, ctx: HookContext) -> HookReturn:
+  def __call__(self, node: _NodeT_contra, ctx: "HookContext") -> HookReturn:
     """Transform a CST node within the given hook context.
 
     Args:
@@ -47,11 +70,6 @@ HookInputCallable: typing.TypeAlias = (
   | HookCallableProtocol[cst.CSTNode]
 )
 _HOOKT = typing.TypeVar("_HOOKT")
-_HOOKS: dict[str, HookCallable] = {}
-_HOOK_METADATA: dict[str, AutoWireSpec] = {}
-
-
-_PLUGINS_LOADED: bool = False
 
 
 def _is_hook_callable(func: _HOOKT | HookCallable) -> typing.TypeGuard[HookCallable]:
@@ -66,136 +84,315 @@ def _is_hook_callable(func: _HOOKT | HookCallable) -> typing.TypeGuard[HookCalla
   return callable(func)
 
 
+HookRegistrySnapshot: typing.TypeAlias = tuple[
+  dict[str, HookCallable],
+  dict[str, AutoWireSpec],
+  bool,
+]
+
+
+class HookRegistry:
+  """Instantiable registry encapsulating registered plugin hooks, auto-wire specs, and lazy-load state.
+
+  Attributes:
+      hooks: Mapping from trigger identifiers to registered hook callables.
+      metadata: Mapping from trigger identifiers to ``AutoWireSpec`` declarations.
+      plugins_loaded: Whether built-in plugins have been loaded into this registry.
+  """
+
+  def __init__(self, *, plugins_loaded: bool = False) -> None:
+    """Initialize an isolated hook registry.
+
+    Args:
+        plugins_loaded: Initial flag indicating whether built-in plugin discovery is satisfied.
+    """
+    self.hooks: dict[str, HookCallable] = {}
+    self.metadata: dict[str, AutoWireSpec] = {}
+    self.plugins_loaded: bool = plugins_loaded
+
+  def register_callable(
+    self,
+    trigger: str,
+    func: HookCallable,
+    auto_wire: typing.Mapping[str, JsonValue] | None = None,
+  ) -> None:
+    """Register a validated hook callable and optional auto-wire metadata under ``trigger``.
+
+    Args:
+        trigger: Identifier of the operation or hook trigger.
+        func: Callable transforming a CST node within a ``HookContext``.
+        auto_wire: Optional mapping validated into ``AutoWireSpec``.
+    """
+    self.hooks[trigger] = func
+    if auto_wire:
+      self.metadata[trigger] = AutoWireSpec.model_validate(auto_wire)
+
+  def register(
+    self,
+    trigger: str,
+    auto_wire: typing.Mapping[str, JsonValue] | None = None,
+  ) -> typing.Callable[[_HOOKT], _HOOKT]:
+    """Create a decorator registering a hook callable into this registry instance.
+
+    Args:
+        trigger: Identifier of the operation or hook trigger.
+        auto_wire: Optional configuration dictionary validated against ``AutoWireSpec``.
+
+    Returns:
+        Decorator returning the original function unchanged.
+    """
+
+    def decorator(func: _HOOKT) -> _HOOKT:
+      """Register the decorated callable in this ``HookRegistry``.
+
+      Args:
+          func: Decorated hook callable.
+
+      Returns:
+          Unchanged ``func``.
+
+      Raises:
+          PluginLoadError: If ``func`` is not callable.
+      """
+      reg_func: _HOOKT | HookCallable = func
+      if not _is_hook_callable(reg_func):
+        raise PluginLoadError(f"Registered hook for trigger '{trigger}' must be callable.")
+      self.register_callable(trigger, reg_func, auto_wire=auto_wire)
+      return func
+
+    return decorator
+
+  def ensure_loaded(self) -> None:
+    """Lazily load built-in plugins into this registry if not already loaded."""
+    if not self.plugins_loaded:
+      self.plugins_loaded = True
+      self.load_plugins()
+
+  def get(self, trigger: str) -> HookCallable | None:
+    """Look up a hook callable by ``trigger``, lazily loading built-in plugins if needed.
+
+    Args:
+        trigger: Trigger identifier to resolve.
+
+    Returns:
+        Registered ``HookCallable`` if present, otherwise ``None``.
+    """
+    self.ensure_loaded()
+    return self.hooks.get(trigger)
+
+  def get_all_metadata(self) -> dict[str, AutoWireSpec]:
+    """Return auto-wire specifications registered in this registry.
+
+    Returns:
+        Mapping of trigger names to ``AutoWireSpec`` instances.
+    """
+    return self.metadata
+
+  def clear(self, *, mark_loaded: bool = False) -> None:
+    """Remove all hooks and metadata from this registry.
+
+    Args:
+        mark_loaded: Value assigned to ``self.plugins_loaded`` after clearing.
+    """
+    self.hooks.clear()
+    self.metadata.clear()
+    self.plugins_loaded = mark_loaded
+
+  def snapshot(self) -> HookRegistrySnapshot:
+    """Capture a shallow copy of this registry's hooks, metadata, and load state.
+
+    Returns:
+        Tuple of ``(hooks_copy, metadata_copy, plugins_loaded)``.
+    """
+    return (self.hooks.copy(), self.metadata.copy(), self.plugins_loaded)
+
+  def restore(self, state: HookRegistrySnapshot) -> None:
+    """Restore this registry from a snapshot previously returned by ``snapshot()``.
+
+    Args:
+        state: Snapshot tuple ``(hooks_copy, metadata_copy, plugins_loaded)``.
+    """
+    saved_hooks, saved_meta, saved_loaded = state
+    self.hooks.clear()
+    self.hooks.update(saved_hooks)
+    self.metadata.clear()
+    self.metadata.update(saved_meta)
+    self.plugins_loaded = saved_loaded
+
+  def load_plugins(
+    self,
+    plugins_dir: Path | None = None,
+    extra_dirs: typing.Sequence[str | Path] | None = None,
+  ) -> int:
+    """Discover and load plugin modules into this registry instance.
+
+    Args:
+        plugins_dir: Primary built-in plugins directory (defaults to ``ml_switcheroo/plugins``).
+        extra_dirs: Optional additional plugin directories to import.
+
+    Returns:
+        Total count of plugin modules imported or reloaded.
+    """
+    if plugins_dir is None:
+      plugins_dir = Path(__file__).parent.parent / "plugins"
+      self.plugins_loaded = True
+
+    count = 0
+    with bind_hook_registry(self):
+      if plugins_dir.exists():
+        count += _import_from_dir(plugins_dir, "ml_switcheroo.plugins")
+      if extra_dirs:
+        for edir in extra_dirs:
+          edir_path = Path(edir)
+          if edir_path.exists():
+            count += _import_from_dir(edir_path)
+    return count
+
+
+_ACTIVE_HOOK_REGISTRY: contextvars.ContextVar[HookRegistry | None] = contextvars.ContextVar(
+  "_ACTIVE_HOOK_REGISTRY",
+  default=None,
+)
+
+
+@lru_cache(maxsize=1)
+def get_default_hook_registry() -> HookRegistry:
+  """Return the lazily instantiated default ``HookRegistry``.
+
+  Returns:
+      Default ``HookRegistry`` instance.
+  """
+  return HookRegistry()
+
+
+def _current_hook_registry() -> HookRegistry:
+  """Return the scoped active ``HookRegistry``, falling back to ``get_default_hook_registry()``.
+
+  Returns:
+      Active ``HookRegistry`` instance.
+  """
+  scoped = _ACTIVE_HOOK_REGISTRY.get()
+  return scoped if scoped is not None else get_default_hook_registry()
+
+
+@contextmanager
+def bind_hook_registry(registry: HookRegistry) -> typing.Iterator[HookRegistry]:
+  """Temporarily bind ``registry`` as the active hook registry for the current execution context.
+
+  Args:
+      registry: ``HookRegistry`` to activate within the ``with`` block.
+
+  Yields:
+      The bound ``HookRegistry`` instance.
+  """
+  token = _ACTIVE_HOOK_REGISTRY.set(registry)
+  try:
+    yield registry
+  finally:
+    _ACTIVE_HOOK_REGISTRY.reset(token)
+
+
 def register_hook(
   trigger: str,
   auto_wire: typing.Mapping[str, JsonValue] | None = None,
 ) -> typing.Callable[[_HOOKT], _HOOKT]:
-  """Register a custom translation hook for a specific trigger.
+  """Register a custom translation hook for ``trigger`` in the active ``HookRegistry``.
 
   Args:
-      trigger (str): The name or identifier of the framework function/operation
-          that triggers this hook (e.g., 'jax.numpy.add').
-      auto_wire (Optional[Mapping[str, JsonValue]]): Optional configuration dictionary for
-          auto-wiring the hook, validated against `AutoWireSpec`.
+      trigger: Identifier of the framework function or plugin operation (e.g., ``'jax.numpy.add'``).
+      auto_wire: Optional configuration dictionary validated against ``AutoWireSpec``.
 
   Returns:
-      Callable[[_HOOKT], _HOOKT]: A decorator function that registers the target callable.
-
+      Decorator registering the target callable in the active ``HookRegistry``.
   """
 
   def decorator(func: _HOOKT) -> _HOOKT:
-    """Register the decorated function as a translation hook for the trigger.
+    """Register the decorated function as a translation hook for ``trigger``.
 
     Args:
-        func (_HOOKT): The hook function to be registered.
+        func: Hook function to be registered.
 
     Returns:
-        _HOOKT: The registered hook function, unchanged.
+        Unchanged hook function.
 
+    Raises:
+        PluginLoadError: If ``func`` is not callable.
     """
     reg_func: _HOOKT | HookCallable = func
-    assert _is_hook_callable(reg_func)
-    _HOOKS[trigger] = reg_func
-    if auto_wire:
-      spec = AutoWireSpec.model_validate(auto_wire)
-      _HOOK_METADATA[trigger] = spec
+    if not _is_hook_callable(reg_func):
+      raise PluginLoadError(f"Registered hook for trigger '{trigger}' must be callable.")
+    _current_hook_registry().register_callable(trigger, reg_func, auto_wire=auto_wire)
     return func
 
   return decorator
 
 
 def get_hook(trigger: str) -> HookCallable | None:
-  """Retrieve a registered translation hook for the given trigger, loading plugins if needed.
+  """Retrieve a registered translation hook for ``trigger`` from the active ``HookRegistry``.
 
-  If plugins have not been loaded yet, calling this function will automatically trigger
-  the loading of all plugins.
+  Lazily loads built-in plugins on first lookup if not yet loaded.
 
   Args:
-      trigger (str): The trigger identifier to search for.
+      trigger: Trigger identifier to look up.
 
   Returns:
-      Optional[HookCallable]: The registered hook function if found,
-          otherwise None.
-
+      Registered ``HookCallable`` if found, otherwise ``None``.
   """
-  global _PLUGINS_LOADED
-  if not _PLUGINS_LOADED:
-    load_plugins()
-    _PLUGINS_LOADED = True
-  return _HOOKS.get(trigger)
+  return _current_hook_registry().get(trigger)
 
 
 def get_all_hook_metadata() -> dict[str, AutoWireSpec]:
-  """Retrieve the metadata for all registered hooks.
+  """Retrieve auto-wire metadata for all hooks in the active ``HookRegistry``.
 
   Returns:
-      Dict[str, AutoWireSpec]: A dictionary mapping hook triggers to their corresponding
-          AutoWireSpec metadata.
-
+      Dictionary mapping hook triggers to ``AutoWireSpec`` metadata.
   """
-  return _HOOK_METADATA
+  return _current_hook_registry().get_all_metadata()
 
 
-def clear_hooks() -> None:
-  """Clear all registered hooks and their metadata from the global registry.
-
-  This also resets the internal plugin loading status, allowing plugins to be
-  reloaded on subsequent hook requests.
-
-  """
-  global _PLUGINS_LOADED
-  _HOOKS.clear()
-  _HOOK_METADATA.clear()
-  _PLUGINS_LOADED = False
-
-
-def load_plugins(plugins_dir: Path | None = None, extra_dirs: list[Path] | None = None) -> int:
-  """Dynamically loads plugin modules from the primary and optional extra directories.
-
-  If the primary `plugins_dir` is not specified, it defaults to the package's built-in
-  'plugins' directory relative to this file.
+def clear_hooks(*, mark_loaded: bool = False) -> None:
+  """Clear all registered hooks and metadata in the active ``HookRegistry``.
 
   Args:
-      plugins_dir (Optional[Path]): The primary directory to load plugins from.
-          Defaults to the package's built-in 'plugins' directory if None.
-      extra_dirs (Optional[List[Path]]): Additional directories to search and load
-          plugins from.
+      mark_loaded: Whether to mark plugins as already loaded after clearing.
+  """
+  _current_hook_registry().clear(mark_loaded=mark_loaded)
+
+
+def set_plugins_loaded(loaded: bool = True) -> None:
+  """Set ``plugins_loaded`` on the active ``HookRegistry``.
+
+  Args:
+      loaded: Desired plugin loaded state.
+  """
+  _current_hook_registry().plugins_loaded = loaded
+
+
+def load_plugins(
+  plugins_dir: Path | None = None,
+  extra_dirs: typing.Sequence[str | Path] | None = None,
+) -> int:
+  """Dynamically load plugin modules into the active ``HookRegistry``.
+
+  Args:
+      plugins_dir: Primary directory to load plugins from (defaults to built-in ``plugins``).
+      extra_dirs: Additional directories to search and load plugins from.
 
   Returns:
-      int: The total number of plugin modules successfully loaded or reloaded.
-
+      Total number of plugin modules successfully loaded or reloaded.
   """
-  global _PLUGINS_LOADED
-  if plugins_dir is None:
-    # Default to the src/ml_switcheroo/plugins directory relative to this file
-    plugins_dir = Path(__file__).parent.parent / "plugins"
-    _PLUGINS_LOADED = True
-
-  count = 0
-  if plugins_dir.exists():
-    count += _import_from_dir(plugins_dir, "ml_switcheroo.plugins")
-  if extra_dirs:
-    for edir in extra_dirs:
-      if edir.exists():
-        count += _import_from_dir(edir)
-  return count
+  return _current_hook_registry().load_plugins(plugins_dir=plugins_dir, extra_dirs=extra_dirs)
 
 
 def _import_from_dir(directory: Path, base_package: str | None = None) -> int:
-  """Support function to discover and import/reload all Python modules in a directory.
-
-  If `base_package` is specified, it performs a package-relative import. Otherwise,
-  it loads modules directly from their file location via `importlib.util.spec_from_file_location`
-  without mutating `sys.path`.
+  """Discover and import/reload all non-helper Python modules in ``directory``.
 
   Args:
-      directory (Path): The filesystem directory containing target Python files.
-      base_package (Optional[str]): The dot-separated base package path prefix
-          to use for the imported modules.
+      directory: Filesystem directory containing candidate plugin ``.py`` files.
+      base_package: Optional dot-separated package prefix for package-relative imports.
 
   Returns:
-      int: The count of successfully imported or reloaded plugin modules.
-
+      Count of successfully imported or reloaded plugin modules.
   """
   count = 0
 
@@ -212,12 +409,41 @@ def _import_from_dir(directory: Path, base_package: str | None = None) -> int:
           importlib.import_module(full_mod_name)
       else:
         spec = importlib.util.spec_from_file_location(full_mod_name, py_file)
-        assert spec is not None and spec.loader is not None
+        if spec is None or spec.loader is None:
+          raise PluginLoadError(f"Unable to build module spec for plugin '{py_file}'.")
         mod = importlib.util.module_from_spec(spec)
         sys.modules[full_mod_name] = mod
         spec.loader.exec_module(mod)
       count += 1
-    except (SyntaxError, ImportError, OSError, ValueError, TypeError, AttributeError, RuntimeError) as e:
+    except (
+      PluginLoadError,
+      SyntaxError,
+      ImportError,
+      OSError,
+      ValueError,
+      TypeError,
+      AttributeError,
+      RuntimeError,
+    ) as e:
       logging.getLogger("ml_switcheroo.hooks").warning(f"Failed to load plugin {py_file.name}: {e}")
 
   return count
+
+
+__all__ = [
+  "AutoWireSpec",
+  "HookCallable",
+  "HookCallableProtocol",
+  "HookInputCallable",
+  "HookRegistry",
+  "HookRegistrySnapshot",
+  "HookReturn",
+  "bind_hook_registry",
+  "clear_hooks",
+  "get_all_hook_metadata",
+  "get_default_hook_registry",
+  "get_hook",
+  "load_plugins",
+  "register_hook",
+  "set_plugins_loaded",
+]

@@ -11,7 +11,7 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 
 @pytest.fixture
 def synthesizer() -> PythonBackend:
-  """Execute synthesizer helper logic.
+  """Create a configured `PythonBackend` fixture for graph synthesizer tests.
 
   Returns:
       Configured `synthesizer` fixture value (PythonBackend).
@@ -32,10 +32,10 @@ def validate_python(code: str) -> None:
 
 
 def test_synthesize_simple_chain(synthesizer: PythonBackend) -> None:
-  """Verifies the behavior of synthesize simple chain.
+  """Verify `LogicalGraph` emits `class SimpleNet(nn.Module):` for synthesize simple chain.
 
   Args:
-      synthesizer: The synthesizer (PythonBackend) for test synthesize simple chain.
+      synthesizer: Input `synthesizer` parameter value (`PythonBackend`).
   """
   g = LogicalGraph(
     nodes={
@@ -53,10 +53,10 @@ def test_synthesize_simple_chain(synthesizer: PythonBackend) -> None:
 
 
 def test_synthesize_functional_mix(synthesizer: PythonBackend) -> None:
-  """Verifies the behavior of synthesize functional mix.
+  """Verify `LogicalGraph` emits `self.fc = nn.Linear()` for synthesize functional mix.
 
   Args:
-      synthesizer: The synthesizer (PythonBackend) for test synthesize functional mix.
+      synthesizer: Input `synthesizer` parameter value (`PythonBackend`).
   """
   g = LogicalGraph(
     nodes={
@@ -77,10 +77,10 @@ def test_synthesize_functional_mix(synthesizer: PythonBackend) -> None:
 
 
 def test_synthesize_metadata_args(synthesizer: PythonBackend) -> None:
-  """Verifies the behavior of synthesize metadata arguments.
+  """Verify `LogicalGraph` handles synthesize metadata args as expected.
 
   Args:
-      synthesizer: The synthesizer (PythonBackend) for test synthesize metadata args.
+      synthesizer: Input `synthesizer` parameter value (`PythonBackend`).
   """
   g = LogicalGraph(
     nodes={
@@ -95,10 +95,10 @@ def test_synthesize_metadata_args(synthesizer: PythonBackend) -> None:
 
 
 def test_synthesize_custom_input_name(synthesizer: PythonBackend) -> None:
-  """Verifies the behavior of synthesize custom input name.
+  """Verify `LogicalGraph` emits `def forward(self, img):` for synthesize custom input name.
 
   Args:
-      synthesizer: The synthesizer (PythonBackend) for test synthesize custom input name.
+      synthesizer: Input `synthesizer` parameter value (`PythonBackend`).
   """
   g = LogicalGraph(
     nodes={
@@ -115,10 +115,10 @@ def test_synthesize_custom_input_name(synthesizer: PythonBackend) -> None:
 
 
 def test_context_preservation(synthesizer: PythonBackend) -> None:
-  """Verifies the behavior of context preservation.
+  """Verify `LogicalGraph` emits `self.new_conv = nn.Conv2d` for context preservation.
 
   Args:
-      synthesizer: The synthesizer (PythonBackend) for test context preservation.
+      synthesizer: Input `synthesizer` parameter value (`PythonBackend`).
   """
   original_source = '\nimport torch\nimport torch.nn as nn\n\nclass MyNet(nn.Module):\n    """My Docstring."""\n    def __init__(self):\n        super().__init__()\n        self.old_layer = nn.Linear(1, 1)\n\n    def forward(self, x):\n        return self.old_layer(x)\n\n    def validation_step(self, batch):\n        print("I should survive")\n'
   original_tree = cst.parse_module(original_source)
@@ -135,10 +135,10 @@ def test_context_preservation(synthesizer: PythonBackend) -> None:
 
 
 def test_missing_class_fallback(synthesizer: PythonBackend) -> None:
-  """Verifies the behavior of missing class fallback.
+  """Verify `LogicalGraph` handles missing class fallback as expected.
 
   Args:
-      synthesizer: The synthesizer (PythonBackend) for test missing class fallback.
+      synthesizer: Input `synthesizer` parameter value (`PythonBackend`).
   """
   original_tree = cst.parse_module("class OtherClass: pass")
   g = LogicalGraph(
@@ -163,7 +163,7 @@ def test_is_stateful_layer_helper(synthesizer: PythonBackend) -> None:
   """Checks if is stateful layer helper.
 
   Args:
-      synthesizer: The synthesizer (PythonBackend) for test is stateful layer helper.
+      synthesizer: Input `synthesizer` parameter value (`PythonBackend`).
   """
   n1 = LogicalNode("f", "torch.flatten", attributes={})
   assert synthesizer._is_stateful_layer(n1) is False
@@ -176,10 +176,10 @@ def test_is_stateful_layer_helper(synthesizer: PythonBackend) -> None:
 
 
 def test_return_insertion(synthesizer: PythonBackend) -> None:
-  """Verifies the behavior of return insertion.
+  """Verify `LogicalGraph` emits `return y` for return insertion.
 
   Args:
-      synthesizer: The synthesizer (PythonBackend) for test return insertion.
+      synthesizer: Input `synthesizer` parameter value (`PythonBackend`).
   """
   g = LogicalGraph(
     nodes={n.id: n for n in [LogicalNode("x", "Input", attributes={"name": "y"}), LogicalNode("l1", "Linear")]},

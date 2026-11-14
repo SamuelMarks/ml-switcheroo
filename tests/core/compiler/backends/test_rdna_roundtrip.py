@@ -1,0 +1,88 @@
+"""Test suite for the Rdna Roundtrip module."""
+
+from unittest.mock import MagicMock
+
+import pytest
+from pydantic import JsonValue
+
+from ml_switcheroo.core.compiler.backends.rdna import RdnaBackend
+from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
+from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
+from ml_switcheroo.semantics.manager import SemanticsManager
+
+
+@pytest.fixture
+def semantics_mgr(monkeypatch: pytest.MonkeyPatch) -> SemanticsManager:
+  """Create a configured `SemanticsManager` fixture for RDNA roundtrip tests.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+
+  Returns:
+      Configured `semantics_mgr` fixture value (SemanticsManager).
+  """
+  mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
+
+  def get_def(kind: str) -> tuple[str, dict[str, JsonValue]] | None:
+    """Gets def.
+
+    Args:
+        kind: Logical operation kind or category identifier.
+
+    Returns:
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get def.
+    """
+    if kind == "Add":
+      return ("Add", {})
+    if "Conv2d" in kind:
+      return ("Conv2d", {})
+    return None
+
+  def resolve_var(aid: str, fw: str) -> dict[str, JsonValue] | None:
+    """Resolves variable.
+
+    Args:
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
+
+    Returns:
+        Resulting `dict[str, JsonValue] | None` from resolve var.
+    """
+    if fw == "rdna" and aid == "Add":
+      return {"api": "v_add_f32"}
+    return None
+
+  monkeypatch.setattr(mgr, "get_definition", MagicMock(side_effect=get_def), raising=False)
+  monkeypatch.setattr(mgr, "resolve_variant", MagicMock(side_effect=resolve_var), raising=False)
+  return mgr
+
+
+def test_rdna_roundtrip_macro(semantics_mgr: SemanticsManager) -> None:
+  """Verify `LogicalGraph` emits `BEGIN Conv2d` for RDNA roundtrip macro.
+
+  Args:
+      semantics_mgr: SemanticsManager fixture under test.
+  """
+  nodes = {
+    "img": LogicalNode("img", op_type="Input"),
+    "conv": LogicalNode("conv", op_type="Conv2d", attributes={"k": 3}),
+    "out": LogicalNode("out", op_type="Output"),
+  }
+  edges = [LogicalEdge("img", "conv"), LogicalEdge("conv", "out")]
+  g_in = LogicalGraph(nodes=nodes, edges=edges)
+  backend = RdnaBackend(semantics_mgr)
+  rdna_text: str = backend.compile(g_in)
+  assert "BEGIN Conv2d" in rdna_text
+  assert "L_KY_conv" in rdna_text
+  parser = RdnaParser(rdna_text)
+  ast_nodes = parser.parse().statements
+  lifter = RdnaLifter()
+  g_out: LogicalGraph = lifter.lift(ast_nodes)
+  assert len(g_out.nodes) == 3
+  node_ids: list[str] = list(g_out.nodes.keys())
+  assert "img" in node_ids
+  assert "conv" in node_ids
+  assert "output" in node_ids
+  conv_node: LogicalNode = g_out.nodes["conv"]
+  assert conv_node.attributes["k"] == 3

@@ -24,6 +24,7 @@ Process:
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
+from ml_switcheroo.exceptions import PreambleInjectionError
 
 
 class LoopVarReplacer(cst.CSTTransformer):
@@ -56,6 +57,64 @@ class LoopVarReplacer(cst.CSTTransformer):
     return updated_node
 
 
+def _extract_static_range_limit(iter_node: cst.BaseExpression) -> int | None:
+  """Extract bounded static integer limit ``N`` from ``range(N)`` if ``N <= 16``.
+
+  Args:
+      iter_node: ``For.iter`` expression node.
+
+  Returns:
+      Static range bound ``N`` when ``0 <= N <= 16``, otherwise ``None``.
+  """
+  if not isinstance(iter_node, cst.Call):
+    return None
+  func_name = iter_node.func.value if isinstance(iter_node.func, cst.Name) else ""
+  if func_name != "range" or len(iter_node.args) != 1 or not isinstance(iter_node.args[0].value, cst.Integer):
+    return None
+  try:
+    limit = int(iter_node.args[0].value.value)
+    return limit if limit <= 16 else None
+  except ValueError:
+    return None
+
+
+def _attach_iteration_leading_lines(
+  stmt: cst.BaseStatement,
+  node: cst.For,
+  header_comment: cst.Comment | None,
+  *,
+  iter_idx: int,
+  limit: int,
+  on_device: bool,
+) -> cst.BaseStatement:
+  """Prepend preserved loop comments and optional on-device telemetry markers to the first statement of an iteration.
+
+  Args:
+      stmt: First unrolled statement in iteration ``iter_idx``.
+      node: Original ``cst.For`` loop node.
+      header_comment: Optional trailing comment from the ``for ...:`` header line.
+      iter_idx: Current zero-based unroll iteration index.
+      limit: Total unrolled iteration count.
+      on_device: Whether on-device iteration comments are enabled.
+
+  Returns:
+      Updated ``cst.BaseStatement`` carrying combined leading lines.
+  """
+  extra_leading: list[cst.EmptyLine] = []
+  if iter_idx == 0:
+    extra_leading.extend(node.leading_lines)
+    if header_comment is not None:
+      extra_leading.append(cst.EmptyLine(comment=header_comment, newline=cst.Newline()))
+  if on_device:
+    extra_leading.append(
+      cst.EmptyLine(comment=cst.Comment(f"# [on-device unrolled iter={iter_idx}/{limit}]"), newline=cst.Newline())
+    )
+  existing_leading = (
+    list(stmt.leading_lines) if isinstance(stmt, (cst.SimpleStatementLine, cst.BaseCompoundStatement)) else []
+  )
+  return stmt.with_changes(leading_lines=[*extra_leading, *existing_leading])
+
+
 @register_hook("transform_for_loop_static")
 def unroll_static_loops(node: cst.For, ctx: HookContext) -> cst.For | cst.FlattenSentinel[cst.BaseStatement]:
   """Transform Unrolls loops with static ranges.
@@ -80,80 +139,32 @@ def unroll_static_loops(node: cst.For, ctx: HookContext) -> cst.For | cst.Flatte
           - ``FlattenSentinel`` containing unrolled statements if successful.
           - Original ``node`` if the loop is dynamic or too large.
 
+  Raises:
+      PreambleInjectionError: If loop statement expansion yields a non-statement CST node.
   """
-  # 1. Analyze Iterator: range(N)
-  # Must be a Call to 'range' with 1 arg which is Integer literal.
-  is_static_range = False
-  limit = 0
-
-  if isinstance(node.iter, cst.Call):
-    func_name = node.iter.func.value if isinstance(node.iter.func, cst.Name) else ""
-    if func_name == "range":
-      args = node.iter.args
-      if len(args) == 1 and isinstance(args[0].value, cst.Integer):
-        try:
-          limit = int(args[0].value.value)
-          # Safety Cap: Don't unroll huge loops logic
-          if limit <= 16:  # Arbitrary small constant for safety
-            is_static_range = True
-        except ValueError:
-          pass
-
-  if not is_static_range:
-    # Fallback to standard handler or return node
-    return node
-
-  # 2. Extract Loop Variable Name
-  # loop target must be a simple Name (e.g. 'i'), not Tuple unpacking (e.g. 'i, j')
-  if not isinstance(node.target, cst.Name):
+  limit = _extract_static_range_limit(node.iter)
+  if limit is None or not isinstance(node.target, cst.Name) or not isinstance(node.body, cst.IndentedBlock):
     return node
 
   loop_var = node.target.value
-
-  # 3. Unroll Generation
-  unrolled_stmts: list[cst.BaseStatement] = []
-
-  body_block = node.body
-  # Ensure it's an indented block to iterate statements
-  if not isinstance(body_block, cst.IndentedBlock):
-    return node
-
-  original_statements = body_block.body
+  original_statements = node.body.body
+  header_comment = node.body.header.comment
   try:
     on_device = bool(ctx._runtime_config.enable_on_device_execution)
   except AttributeError:
     on_device = False
-  header_comment = body_block.header.comment
 
+  unrolled_stmts: list[cst.BaseStatement] = []
   for i in range(limit):
-    # Create a replacer for this iteration index
     replacer = LoopVarReplacer(loop_var, i)
-
-    # Clone and Visit each statement
-    # Note: LibCST nodes are immutable, visiting returns new nodes
     for stmt_idx, stmt in enumerate(original_statements):
       new_stmt = stmt.visit(replacer)
-      assert isinstance(new_stmt, cst.BaseStatement)
+      if not isinstance(new_stmt, cst.BaseStatement):
+        raise PreambleInjectionError(f"Unrolled loop body expected BaseStatement, got {type(new_stmt).__name__}.")
       if stmt_idx == 0:
-        extra_leading: list[cst.EmptyLine] = []
-        if i == 0:
-          extra_leading.extend(node.leading_lines)
-          if header_comment is not None:
-            extra_leading.append(cst.EmptyLine(comment=header_comment, newline=cst.Newline()))
-        if on_device:
-          extra_leading.append(
-            cst.EmptyLine(
-              comment=cst.Comment(f"# [on-device unrolled iter={i}/{limit}]"),
-              newline=cst.Newline(),
-            )
-          )
-        existing_leading = (
-          list(new_stmt.leading_lines)
-          if isinstance(new_stmt, (cst.SimpleStatementLine, cst.BaseCompoundStatement))
-          else []
+        new_stmt = _attach_iteration_leading_lines(
+          new_stmt, node, header_comment, iter_idx=i, limit=limit, on_device=on_device
         )
-        new_stmt = new_stmt.with_changes(leading_lines=[*extra_leading, *existing_leading])
       unrolled_stmts.append(new_stmt)
 
-  # 4. Return Flattened List
   return cst.FlattenSentinel[cst.BaseStatement](unrolled_stmts)

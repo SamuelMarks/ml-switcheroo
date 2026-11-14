@@ -4,10 +4,10 @@ import keras
 
 
 class GAPModel:
-  """Test helper class GAPModel."""
+  """Test double `GAPModel` implementing `call` for keras3 tests."""
 
   def call(self, x: keras.KerasTensor) -> keras.KerasTensor:
-    """Helper to call.
+    """Execute `mean` to support call in keras3 tests.
 
     Args:
         x: Primary input tensor or array operand.

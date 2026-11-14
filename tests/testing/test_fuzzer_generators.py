@@ -1,7 +1,5 @@
 """Test suite for the Fuzzer Generators module."""
 
-from tests.conftest import _test_getattr
-
 
 def test_generate_scalar_int() -> None:
   """Generates scalar integer."""
@@ -44,11 +42,13 @@ def test_generate_array() -> None:
   assert arr.dtype == np.int16
   arr = generate_array("int", (2, 2), {"min": 5, "max": 10, "dtype": "int16"})
   assert arr.dtype == np.int16
-  assert (arr >= 5).all() and (arr <= 10).all()
+  assert (arr >= 5).all()
+  assert (arr <= 10).all()
   arr = generate_array("int", (2, 2), {"dtype": "float64"})
   assert arr.dtype == np.float64
   arr = generate_array("float", (2, 2), {"min": 5, "max": 10})
-  assert (arr >= 5).all() and (arr <= 10).all()
+  assert (arr >= 5).all()
+  assert (arr <= 10).all()
   arr = generate_array("float", (2, 2), {"min": 5})
   assert (arr >= 5).all()
   arr = generate_array("float", (2, 2), {"max": -5})
@@ -68,7 +68,7 @@ def test_get_random_shape() -> None:
 
 
 def test_make_broadcastable_shape() -> None:
-  """Verifies the behavior of make broadcastable shape."""
+  """Verify `make_broadcastable_shape` returns `3` across fuzzer generators inputs."""
   from ml_switcheroo.testing.fuzzer.generators import make_broadcastable_shape
 
   shape: tuple[int, ...] = make_broadcastable_shape((10, 10, 10))
@@ -78,18 +78,23 @@ def test_make_broadcastable_shape() -> None:
 
 def test_generate_symbolic_callable() -> None:
   """Generates symbolic callable."""
+  import typing
+
+  from pydantic import JsonValue
+
+  from ml_switcheroo.enums import CallableTargetProtocol
   from ml_switcheroo.testing.fuzzer.generators import generate_symbolic_callable
 
-  fn = generate_symbolic_callable({"return_type": "float", "signature": "a, b"})
+  fn: CallableTargetProtocol | typing.Callable[[JsonValue], JsonValue] = generate_symbolic_callable(
+    {"return_type": "float", "signature": "a, b"}
+  )
+  assert isinstance(fn, CallableTargetProtocol)
   assert fn(42) == 42
-  assert _test_getattr(
-    {
-      "v": _test_getattr({"v": fn}, "__getitem__")("v")(
-        _test_getattr({"v": 10.0}, "__getitem__")("v"), _test_getattr({"v": 5.0}, "__getitem__")("v")
-      )
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": 10.0}, "__getitem__")("v")
+  assert fn(10.0, 5.0) == 10.0
 
   fn2 = generate_symbolic_callable()
   assert fn2(42) == 42
+
+  from ml_switcheroo.testing.fuzzer.parser import _normalize_base_shape
+
+  assert _normalize_base_shape(None) == (2, 2)

@@ -46,7 +46,7 @@ class SignatureExtractor:
     """
     try:
       module = cst.parse_module(code)
-    except Exception:
+    except (cst.ParserSyntaxError, ValueError, TypeError):
       # Handle invalid syntax gracefully, returning None
       return None
 

@@ -15,6 +15,7 @@ import libcst as cst
 import pydantic
 
 from ml_switcheroo.core.compiler.ir import LogicalNode
+from ml_switcheroo.exceptions import DialectLoweringError
 
 
 class SnippetEmitterProtocol(typing.Protocol):
@@ -74,8 +75,6 @@ class DeleteAction(PatchAction):
 
   Used for nodes that have been fused into others or pruned.
   """
-
-  pass
 
 
 class ReplaceAction(PatchAction):
@@ -257,6 +256,9 @@ class GraphPatcher(cst.CSTTransformer):
 
     Returns:
         The newly generated CST structure, the original updated node, or a RemovalSentinel.
+
+    Raises:
+        DialectLoweringError: If a ``ReplaceAction`` does not carry a valid ``LogicalNode``.
     """
     oid = id(original)
     if oid not in self._action_map:
@@ -268,27 +270,26 @@ class GraphPatcher(cst.CSTTransformer):
       return cst.RemoveFromParent()
 
     if isinstance(action, ReplaceAction):
-      assert isinstance(action.new_node, LogicalNode)
+      if not isinstance(action.new_node, LogicalNode):
+        raise DialectLoweringError(f"ReplaceAction requires LogicalNode, got {type(action.new_node).__name__}.")
       if action.is_init:
         # Initialization (Statement) replacement
         new_stmt = self.emitter.emit_init(action.new_node)
         return self._unwrap_stmt_if_nested(original, new_stmt)
-      else:
-        # Execution logic
-        # Replacing Call/Expr/Assign
+      # Execution logic
+      # Replacing Call/Expr/Assign
 
-        # Check if context expects Expression or Statement
-        is_expr_context = isinstance(original, (cst.Call, cst.BaseExpression)) and not isinstance(
-          original, (cst.Expr, cst.Assign)
-        )
+      # Check if context expects Expression or Statement
+      is_expr_context = isinstance(original, (cst.Call, cst.BaseExpression)) and not isinstance(
+        original, (cst.Expr, cst.Assign)
+      )
 
-        if is_expr_context:
-          expr_res: cst.BaseExpression = self.emitter.emit_expression(action.new_node, action.input_vars)
-          return expr_res
-        else:
-          # Statement-like replacement
-          new_stmt = self.emitter.emit_call(action.new_node, action.input_vars, action.output_var)
-          return self._unwrap_stmt_if_nested(original, new_stmt)
+      if is_expr_context:
+        expr_res: cst.BaseExpression = self.emitter.emit_expression(action.new_node, action.input_vars)
+        return expr_res
+      # Statement-like replacement
+      new_stmt = self.emitter.emit_call(action.new_node, action.input_vars, action.output_var)
+      return self._unwrap_stmt_if_nested(original, new_stmt)
 
     return updated
 
@@ -307,9 +308,8 @@ class GraphPatcher(cst.CSTTransformer):
         A FlattenSentinel containing the unwrapped inner body nodes if applicable,
         or the original new_stmt object.
     """
-    if isinstance(context_node, (cst.Assign, cst.Expr)):
-      if new_stmt.body:
-        # Return FlattenSentinel of the inner nodes
-        return cst.FlattenSentinel(new_stmt.body)
+    if isinstance(context_node, (cst.Assign, cst.Expr)) and new_stmt.body:
+      # Return FlattenSentinel of the inner nodes
+      return cst.FlattenSentinel(new_stmt.body)
 
     return new_stmt

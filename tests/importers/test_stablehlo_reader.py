@@ -1,14 +1,12 @@
 """Test suite for stablehlo reader."""
 
-from tests.conftest import _test_getattr
-
 from pathlib import Path
 
 from ml_switcheroo.importers.stablehlo_reader import StableHloSpecImporter
 
 
 def test_stablehlo_reader_missing_file(tmp_path: Path) -> None:
-  """Verify stablehlo reader missing file behavior.
+  """Verify `StableHloSpecImporter` handles stablehlo reader missing file as expected.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
@@ -19,7 +17,7 @@ def test_stablehlo_reader_missing_file(tmp_path: Path) -> None:
 
 
 def test_stablehlo_reader_parse_markdown(tmp_path: Path) -> None:
-  """Verify stablehlo reader parse markdown behavior.
+  """Verify `StableHloSpecImporter` emits `Abs` for stablehlo reader parse markdown.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
@@ -91,145 +89,54 @@ stablehlo.broken_syntax ( ) [ ]
   assert "Abs" in res
   assert res["Abs"]["description"] == "Computes absolute value of `%operand`."
   assert res["Abs"]["std_args"] == ["operand"]
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr(
-            {
-              "v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v")["Abs"]}, "__getitem__")("v")[
-                "variants"
-              ]
-            },
-            "__getitem__",
-          )("v")["stablehlo"]
-        },
-        "__getitem__",
-      )("v")["api"]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "stablehlo.abs"}, "__getitem__")("v")
+  abs_variants = res["Abs"]["variants"]
+  assert isinstance(abs_variants, dict)
+  abs_shlo = abs_variants["stablehlo"]
+  assert isinstance(abs_shlo, dict)
+  assert abs_shlo["api"] == "stablehlo.abs"
 
   assert "Add" in res
   assert res["Add"]["std_args"] == ["lhs", "rhs"]
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr(
-            {
-              "v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v")["Add"]}, "__getitem__")("v")[
-                "variants"
-              ]
-            },
-            "__getitem__",
-          )("v")["stablehlo"]
-        },
-        "__getitem__",
-      )("v")["api"]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "stablehlo.add"}, "__getitem__")("v")
+  add_variants = res["Add"]["variants"]
+  assert isinstance(add_variants, dict)
+  add_shlo = add_variants["stablehlo"]
+  assert isinstance(add_shlo, dict)
+  assert add_shlo["api"] == "stablehlo.add"
 
   assert "Sub" in res
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr(
-            {
-              "v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v")["Sub"]}, "__getitem__")("v")[
-                "variants"
-              ]
-            },
-            "__getitem__",
-          )("v")["stablehlo"]
-        },
-        "__getitem__",
-      )("v")["api"]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "stablehlo.subtract"}, "__getitem__")("v")
+  sub_variants = res["Sub"]["variants"]
+  assert isinstance(sub_variants, dict)
+  sub_shlo = sub_variants["stablehlo"]
+  assert isinstance(sub_shlo, dict)
+  assert sub_shlo["api"] == "stablehlo.subtract"
 
   assert "Mul" in res
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr(
-            {
-              "v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v")["Mul"]}, "__getitem__")("v")[
-                "variants"
-              ]
-            },
-            "__getitem__",
-          )("v")["stablehlo"]
-        },
-        "__getitem__",
-      )("v")["api"]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "stablehlo.multiply"}, "__getitem__")("v")
+  mul_variants = res["Mul"]["variants"]
+  assert isinstance(mul_variants, dict)
+  mul_shlo = mul_variants["stablehlo"]
+  assert isinstance(mul_shlo, dict)
+  assert mul_shlo["api"] == "stablehlo.multiply"
 
   assert "Div" in res
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr(
-            {
-              "v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v")["Div"]}, "__getitem__")("v")[
-                "variants"
-              ]
-            },
-            "__getitem__",
-          )("v")["stablehlo"]
-        },
-        "__getitem__",
-      )("v")["api"]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "stablehlo.divide"}, "__getitem__")("v")
+  div_variants = res["Div"]["variants"]
+  assert isinstance(div_variants, dict)
+  div_shlo = div_variants["stablehlo"]
+  assert isinstance(div_shlo, dict)
+  assert div_shlo["api"] == "stablehlo.divide"
 
   assert "Pow" in res
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr(
-            {
-              "v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v")["Pow"]}, "__getitem__")("v")[
-                "variants"
-              ]
-            },
-            "__getitem__",
-          )("v")["stablehlo"]
-        },
-        "__getitem__",
-      )("v")["api"]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "stablehlo.power"}, "__getitem__")("v")
+  pow_variants = res["Pow"]["variants"]
+  assert isinstance(pow_variants, dict)
+  pow_shlo = pow_variants["stablehlo"]
+  assert isinstance(pow_shlo, dict)
+  assert pow_shlo["api"] == "stablehlo.power"
 
   assert "LogPlusOne" in res
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr(
-            {
-              "v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v")["LogPlusOne"]}, "__getitem__")("v")[
-                "variants"
-              ]
-            },
-            "__getitem__",
-          )("v")["stablehlo"]
-        },
-        "__getitem__",
-      )("v")["api"]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "stablehlo.logplusone"}, "__getitem__")("v")
+  lpo_variants = res["LogPlusOne"]["variants"]
+  assert isinstance(lpo_variants, dict)
+  lpo_shlo = lpo_variants["stablehlo"]
+  assert isinstance(lpo_shlo, dict)
+  assert lpo_shlo["api"] == "stablehlo.logplusone"
 
   assert "BrokenSyntax" in res
   assert res["BrokenSyntax"]["std_args"] == ["input"]  # Fallback
@@ -239,7 +146,7 @@ stablehlo.broken_syntax ( ) [ ]
 
 
 def test_stablehlo_long_summary(tmp_path: Path) -> None:
-  """Verify stablehlo long summary behavior.
+  """Verify `StableHloSpecImporter` emits `LongOp` for stablehlo long summary.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
@@ -258,25 +165,13 @@ def test_stablehlo_long_summary(tmp_path: Path) -> None:
 
   res = importer.parse_file(md_file)
   assert "LongOp" in res
-  assert _test_getattr(
-    {
-      "v": len(
-        _test_getattr(
-          {
-            "v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v")["LongOp"]}, "__getitem__")("v")[
-              "description"
-            ]
-          },
-          "__getitem__",
-        )("v")
-      )
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": 300}, "__getitem__")("v")
+  long_op_desc = res["LongOp"]["description"]
+  assert isinstance(long_op_desc, str)
+  assert len(long_op_desc) == 300
 
 
 def test_stablehlo_extra_coverage(tmp_path: Path) -> None:
-  """Verify stablehlo extra coverage behavior.
+  """Verify `StableHloSpecImporter` emits `ValidOp` for stablehlo extra coverage.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.

@@ -9,7 +9,7 @@ def create_sequential(in_features: int, hidden: int, out_features: int, rngs: nn
 
   Args:
       in_features: Number of input linear features.
-      hidden: The hidden (int) for create sequential.
+      hidden: Input `hidden` parameter value (`int`).
       out_features: Number of output linear features.
       rngs: Flax NNX Rngs container for stochastic parameter initialization.
 

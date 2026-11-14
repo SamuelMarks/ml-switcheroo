@@ -1,9 +1,7 @@
 """Test suite for the Manager Overlay Loading module."""
 
-from tests.conftest import _test_getattr
-
-import typing
 import json
+import typing
 from pathlib import Path
 from unittest.mock import patch
 
@@ -14,13 +12,13 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 @pytest.fixture
-def mock_root_tree(tmp_path: Path) -> typing.Generator[Path, None, None]:
+def mock_root_tree(tmp_path: Path) -> Path:
   """Provides a mock root tree for testing.
 
   Args:
       tmp_path (Path): Tmp path pytest fixture.
 
-  Yields:
+  Returns:
       Path: Tmp path.
   """
   semantics_dir: Path = tmp_path / "semantics"
@@ -47,7 +45,7 @@ def mock_root_tree(tmp_path: Path) -> typing.Generator[Path, None, None]:
     "mappings": {"Abs": {"api": "jax.numpy.abs"}, "Add": {"api": "jax.numpy.add"}},
   }
   (snapshots_dir / "jax_vlatest_map.json").write_text(json.dumps(jax_map))
-  yield semantics_dir
+  return semantics_dir
 
 
 @pytest.fixture
@@ -60,58 +58,36 @@ def manager(mock_root_tree: Path) -> typing.Generator[SemanticsManager, None, No
   Yields:
       SemanticsManager: Mock SemanticsManager.
   """
-  with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=mock_root_tree):
-    with patch(
-      "ml_switcheroo.semantics.file_loader.resolve_snapshots_dir", return_value=mock_root_tree.parent / "snapshots"
-    ):
-      with patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]):
-        yield SemanticsManager()
+  with (
+    patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=mock_root_tree),
+    patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir", return_value=mock_root_tree.parent / "snapshots"),
+    patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]),
+  ):
+    yield SemanticsManager()
 
 
 def test_overlay_merging_logic(manager: SemanticsManager) -> None:
-  """Verifies the behavior of overlay merging logic.
+  """Verify overlay merging logic produces the expected state.
 
   Args:
       manager (SemanticsManager): Manager fixture.
   """
   assert "Abs" in manager.data
   entry = manager.data["Abs"]
-  assert _test_getattr({"v": "torch"}, "__getitem__")("v") in _test_getattr(
-    {"v": _test_getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__"
-  )("v")
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
-            "torch"
-          ]
-        },
-        "__getitem__",
-      )("v")["api"]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "torch.abs"}, "__getitem__")("v")
-  assert _test_getattr({"v": "jax"}, "__getitem__")("v") in _test_getattr(
-    {"v": _test_getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__"
-  )("v")
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
-            "jax"
-          ]
-        },
-        "__getitem__",
-      )("v")["api"]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "jax.numpy.abs"}, "__getitem__")("v")
+  variants = entry["variants"]
+  assert isinstance(variants, dict)
+  assert "torch" in variants
+  torch_var = variants["torch"]
+  assert isinstance(torch_var, dict)
+  assert torch_var["api"] == "torch.abs"
+  assert "jax" in variants
+  jax_var = variants["jax"]
+  assert isinstance(jax_var, dict)
+  assert jax_var["api"] == "jax.numpy.abs"
 
 
 def test_overlay_missing_op_handling(manager: SemanticsManager) -> None:
-  """Verifies the behavior of overlay missing op handling.
+  """Verify overlay missing operation handling produces the expected state.
 
   Args:
       manager (SemanticsManager): Manager fixture.
@@ -119,26 +95,18 @@ def test_overlay_missing_op_handling(manager: SemanticsManager) -> None:
   assert "custom_op" in manager.data
   entry = manager.data["custom_op"]
   assert manager._key_origins["custom_op"] == SemanticTier.EXTRAS.value
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
-            "torch"
-          ]
-        },
-        "__getitem__",
-      )("v")["api"]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "torch.special"}, "__getitem__")("v")
-  assert _test_getattr({"v": "Auto-generated"}, "__getitem__")("v") in _test_getattr(
-    {"v": _test_getattr({"v": entry}, "__getitem__")("v")["description"]}, "__getitem__"
-  )("v")
+  variants = entry["variants"]
+  assert isinstance(variants, dict)
+  torch_var = variants["torch"]
+  assert isinstance(torch_var, dict)
+  assert torch_var["api"] == "torch.special"
+  desc = entry["description"]
+  assert isinstance(desc, str)
+  assert "Auto-generated" in desc
 
 
 def test_filename_framework_inference(tmp_path: Path) -> None:
-  """Verifies the behavior of filename framework inference.
+  """Verify `dumps` emits `Sin` for filename framework inference.
 
   Args:
       tmp_path (Path): Tmp path pytest fixture.
@@ -150,48 +118,24 @@ def test_filename_framework_inference(tmp_path: Path) -> None:
   (sem_dir / "k_math.json").write_text(json.dumps({"Sin": {}}))
   numpy_map = {"mappings": {"Sin": {"api": "numpy.sin"}}}
   (snap_dir / "numpy_vlatest_map.json").write_text(json.dumps(numpy_map))
-  with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=sem_dir):
-    with patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir", return_value=snap_dir):
-      with patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]):
-        mgr: SemanticsManager = SemanticsManager()
-        mgr._reverse_index = {}
-        assert "Sin" in mgr.data
-        assert _test_getattr({"v": "numpy"}, "__getitem__")("v") in _test_getattr(
-          {
-            "v": _test_getattr(
-              {"v": _test_getattr({"v": _test_getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v")["Sin"]},
-              "__getitem__",
-            )("v")["variants"]
-          },
-          "__getitem__",
-        )("v")
-        assert _test_getattr(
-          {
-            "v": _test_getattr(
-              {
-                "v": _test_getattr(
-                  {
-                    "v": _test_getattr(
-                      {
-                        "v": _test_getattr({"v": _test_getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v")[
-                          "Sin"
-                        ]
-                      },
-                      "__getitem__",
-                    )("v")["variants"]
-                  },
-                  "__getitem__",
-                )("v")["numpy"]
-              },
-              "__getitem__",
-            )("v")["api"]
-          },
-          "__getitem__",
-        )("v") == _test_getattr({"v": "numpy.sin"}, "__getitem__")("v")
+  with (
+    patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=sem_dir),
+    patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir", return_value=snap_dir),
+    patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]),
+  ):
+    mgr: SemanticsManager = SemanticsManager()
+    mgr._reverse_index = {}
+    assert "Sin" in mgr.data
+    sin_variants = mgr.data["Sin"]["variants"]
+    assert isinstance(sin_variants, dict)
+    assert "numpy" in sin_variants
+    numpy_var = sin_variants["numpy"]
+    assert isinstance(numpy_var, dict)
+    assert numpy_var["api"] == "numpy.sin"
 
 
 def test_reverse_index_integrity(manager: SemanticsManager) -> None:
-  """Verifies the behavior of reverse index integrity.
+  """Verify `manager.get_definition` handles reverse index integrity as expected.
 
   Args:
       manager (SemanticsManager): Manager fixture.
@@ -200,16 +144,8 @@ def test_reverse_index_integrity(manager: SemanticsManager) -> None:
   assert lookup is not None
   (abstract_id, data) = lookup
   assert abstract_id == "Abs"
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": data}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
-            "torch"
-          ]
-        },
-        "__getitem__",
-      )("v")["api"]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "torch.abs"}, "__getitem__")("v")
+  variants = data["variants"]
+  assert isinstance(variants, dict)
+  torch_var = variants["torch"]
+  assert isinstance(torch_var, dict)
+  assert torch_var["api"] == "torch.abs"

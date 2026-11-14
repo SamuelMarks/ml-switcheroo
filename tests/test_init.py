@@ -33,7 +33,7 @@ def test_convert_failure_reporting() -> None:
   # Syntax error to trigger the failure branch in ASTEngine
   input_code = "def my_func(x"
 
-  with pytest.raises(ValueError, match="Transpilation failed.*"):
+  with pytest.raises(ValueError, match=r"Transpilation failed.*"):
     ml_switcheroo.convert(input_code, source="torch", target="jax")
 
 

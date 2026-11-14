@@ -1,10 +1,7 @@
 """Test suite for the Runner Exec module."""
 
-from tests.conftest import _test_getattr
-
-import typing
-
 import sys
+import typing
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -16,9 +13,9 @@ from ml_switcheroo.testing.runner import EquivalenceRunner
 
 @pytest.fixture
 def mock_frameworks() -> typing.Generator[dict[str, MagicMock], None, None]:
-  """Execute mock frameworks helper logic.
+  """Create a configured `mock_frameworks` fixture for runner exec tests.
 
-  Returns:
+  Yields:
       Configured `mock_frameworks` fixture value (typing.Generator[dict[str, MagicMock], None, None]).
   """
 
@@ -27,7 +24,7 @@ def mock_frameworks() -> typing.Generator[dict[str, MagicMock], None, None]:
 
     Args:
         name: Identifier or operation name string.
-        ret_val: The ret val (float) for create safe mock.
+        ret_val: Input `ret_val` parameter value (`float`).
 
     Returns:
         Resulting `MagicMock` from create safe mock.
@@ -49,10 +46,10 @@ def mock_frameworks() -> typing.Generator[dict[str, MagicMock], None, None]:
 
 
 def test_runner_uses_adapter_registry_for_normalization(mock_frameworks: MagicMock) -> None:
-  """Verifies the behavior of runner uses adapter registry for normalization.
+  """Verify `EquivalenceRunner` handles runner uses adapter registry for normalization as expected.
 
   Args:
-      mock_frameworks: The mock frameworks (MagicMock) for test runner uses adapter registry for normalization.
+      mock_frameworks: Input `mock_frameworks` parameter value (`MagicMock`).
   """
   runner = EquivalenceRunner()
   variants = {"torch": {"api": "torch.sum"}}
@@ -66,10 +63,10 @@ def test_runner_uses_adapter_registry_for_normalization(mock_frameworks: MagicMo
 
 
 def test_equivalence_flow_integration(mock_frameworks: MagicMock) -> None:
-  """Verifies the behavior of equivalence flow integration.
+  """Verify `EquivalenceRunner` emits `✅ Verified` for equivalence flow integration.
 
   Args:
-      mock_frameworks: The mock frameworks (MagicMock) for test equivalence flow integration.
+      mock_frameworks: Input `mock_frameworks` parameter value (`MagicMock`).
   """
   runner = EquivalenceRunner()
   variants = {"torch": {"api": "torch.sum"}, "jax": {"api": "jax.numpy.sum"}}
@@ -79,44 +76,57 @@ def test_equivalence_flow_integration(mock_frameworks: MagicMock) -> None:
 
 
 def test_adapter_normalization_logic_real() -> None:
-  """Verifies the behavior of adapter normalization logic real."""
+  """Verify `NumpyAdapter` handles adapter normalization logic real as expected."""
+
+  class _DetachableTensorStub:
+    """Typed tensor stub implementing ``detach().cpu().numpy()``."""
+
+    def detach(self) -> "_DetachableTensorStub":
+      """Return detached tensor stub.
+
+      Returns:
+          Self instance.
+      """
+      return self
+
+    def cpu(self) -> "_DetachableTensorStub":
+      """Return CPU tensor stub.
+
+      Returns:
+          Self instance.
+      """
+      return self
+
+    def numpy(self) -> np.ndarray[tuple[int, ...], np.dtype[np.float64]]:
+      """Convert stub tensor to NumPy array.
+
+      Returns:
+          Scalar float64 array ``1.0``.
+      """
+      return np.array(1.0)
+
   adapter = NumpyAdapter()
-  mock_tensor = MagicMock()
-  mock_tensor.detach.return_value.cpu.return_value.numpy.return_value = np.array(1.0)
+  mock_tensor = _DetachableTensorStub()
   assert adapter.convert(mock_tensor) == np.array(1.0)
   arr = np.array([1, 2])
-  assert _test_getattr({"v": _test_getattr({"v": np}, "__getitem__")("v").allclose}, "__getitem__")("v")(
-    _test_getattr(
-      {
-        "v": _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").convert}, "__getitem__")("v")(
-          _test_getattr({"v": arr}, "__getitem__")("v")
-        )
-      },
-      "__getitem__",
-    )("v"),
-    _test_getattr({"v": arr}, "__getitem__")("v"),
-  )
+  conv_arr = adapter.convert(arr)
+  assert isinstance(conv_arr, np.ndarray)
+  assert np.allclose(conv_arr, arr)
   data = [mock_tensor, arr]
   converted = adapter.convert(data)
   assert isinstance(converted, list)
   assert converted[0] == np.array(1.0)
-  assert np.allclose(converted[1], arr)
+  conv_elem = converted[1]
+  assert isinstance(conv_elem, np.ndarray)
+  assert np.allclose(conv_elem, arr)
   data_dict = {"k": mock_tensor}
   converted_dict = adapter.convert(data_dict)
-  assert _test_getattr({"v": _test_getattr({"v": converted_dict}, "__getitem__")("v")["k"]}, "__getitem__")(
-    "v"
-  ) == _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": np}, "__getitem__")("v").array}, "__getitem__")("v")(
-        _test_getattr({"v": 1.0}, "__getitem__")("v")
-      )
-    },
-    "__getitem__",
-  )("v")
+  assert isinstance(converted_dict, dict)
+  assert converted_dict["k"] == np.array(1.0)
 
 
 def test_deep_compare_logic_robustness() -> None:
-  """Verifies the behavior of deep compare logic robustness."""
+  """Verify `EquivalenceRunner` handles deep compare logic robustness as expected."""
   runner = EquivalenceRunner()
   s1 = np.array(["a", "b"])
   s2 = np.array(["a", "b"])
@@ -131,7 +141,7 @@ def test_deep_compare_logic_robustness() -> None:
 
 
 def test_deep_compare_nan_handling() -> None:
-  """Verifies the behavior of deep compare nan handling."""
+  """Verify `EquivalenceRunner` handles deep compare nan handling as expected."""
   runner = EquivalenceRunner()
   a = np.array([1.0, np.nan])
   b = np.array([1.0, np.nan])
@@ -141,26 +151,26 @@ def test_deep_compare_nan_handling() -> None:
 
 
 def test_argument_renaming_application(mock_frameworks: MagicMock) -> None:
-  """Verifies the behavior of argument renaming application.
+  """Verify `EquivalenceRunner` emits `dim` for argument renaming application.
 
   Args:
-      mock_frameworks: The mock frameworks (MagicMock) for test argument renaming application.
+      mock_frameworks: Input `mock_frameworks` parameter value (`MagicMock`).
   """
   runner = EquivalenceRunner()
   variants = {"torch": {"api": "torch.sum", "args": {"axis": "dim"}}}
   with patch.object(runner, "_execute_api") as mock_exec:
     runner.verify(variants, params=["axis"], hints={"axis": "int"})
-    args, kwargs = mock_exec.call_args
+    args, _kwargs = mock_exec.call_args
     passed_kwargs = args[1]
     assert "dim" in passed_kwargs
     assert "axis" not in passed_kwargs
 
 
 def test_crash_reporting(mock_frameworks: MagicMock) -> None:
-  """Verifies the behavior of crash reporting.
+  """Verify `EquivalenceRunner` emits `Crash in torch` for crash reporting.
 
   Args:
-      mock_frameworks: The mock frameworks (MagicMock) for test crash reporting.
+      mock_frameworks: Input `mock_frameworks` parameter value (`MagicMock`).
   """
   runner = EquivalenceRunner()
   mock_frameworks["torch"].sum.side_effect = ValueError("Mock Crash")
@@ -175,7 +185,7 @@ def test_runner_skip_invalid_variants(mock_frameworks: MagicMock) -> None:
   """Verifies that invalid variants are skipped gracefully.
 
   Args:
-      mock_frameworks: The mock frameworks (MagicMock) for test runner skip invalid variants.
+      mock_frameworks: Input `mock_frameworks` parameter value (`MagicMock`).
   """
   runner = EquivalenceRunner()
   # Include invalid details that aren't dicts or lack 'api'

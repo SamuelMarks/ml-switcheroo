@@ -1,0 +1,64 @@
+"""Test suite for the Roundtrip Modulelist module."""
+
+import pytest
+
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.semantics.registry_loader import RegistryLoader
+
+
+@pytest.fixture
+def semantics_env() -> SemanticsManager:
+  """Create a configured `SemanticsManager` fixture for roundtrip modulelist tests.
+
+  Returns:
+      Configured `semantics_env` fixture value (SemanticsManager).
+  """
+  mgr = SemanticsManager()
+  RegistryLoader(mgr).hydrate()
+  return mgr
+
+
+def test_modulelist_container_flax_to_torch(semantics_env: SemanticsManager) -> None:
+  """Verify `RuntimeConfig` handles modulelist container flax to torch as expected.
+
+  Args:
+      semantics_env: Input `semantics_env` parameter value (`SemanticsManager`).
+  """
+  source: str = "layers = flax.nnx.List([layer1, layer2])"
+  config = RuntimeConfig(source_framework="flax_nnx", target_framework="torch")
+  engine = ASTEngine(semantics=semantics_env, config=config)
+  result: ConversionResult = engine.run(source)
+  assert result.success
+  assert "nn.ModuleList" in result.code or "torch.nn.ModuleList" in result.code
+  assert "[layer1, layer2]" in result.code
+
+
+def test_modulelist_container_torch_to_flax(semantics_env: SemanticsManager) -> None:
+  """Verify `RuntimeConfig` handles modulelist container torch to flax as expected.
+
+  Args:
+      semantics_env: Input `semantics_env` parameter value (`SemanticsManager`).
+  """
+  source: str = "layers = torch.nn.ModuleList([layer1, layer2])"
+  config = RuntimeConfig(source_framework="torch", target_framework="flax_nnx")
+  engine = ASTEngine(semantics=semantics_env, config=config)
+  result: ConversionResult = engine.run(source)
+  assert result.success
+  assert "nnx.List" in result.code or "flax.nnx.List" in result.code
+  assert "[layer1, layer2]" in result.code
+
+
+def test_modulelist_missing_support_check(semantics_env: SemanticsManager) -> None:
+  """Verify `RuntimeConfig` emits `Escape Hatches Detected` for modulelist missing support check.
+
+  Args:
+      semantics_env: Input `semantics_env` parameter value (`SemanticsManager`).
+  """
+  source: str = "l = torch.nn.ModuleList([])"
+  config = RuntimeConfig(source_framework="torch", target_framework="keras", strict_mode=True)
+  engine = ASTEngine(semantics=semantics_env, config=config)
+  result: ConversionResult = engine.run(source)
+  assert result.has_errors
+  assert "Escape Hatches Detected" in str(result.errors)

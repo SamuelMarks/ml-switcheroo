@@ -4,10 +4,10 @@ Supports checking off either all backtick-quoted dotted operator identifiers
 or an explicit subset passed via `--ops`.
 """
 
-import typing
 import argparse
 import re
 import sys
+import typing
 from pathlib import Path
 
 

@@ -9,7 +9,7 @@ from ml_switcheroo.frameworks.paxml import PaxmlAdapter
 
 @pytest.fixture
 def adapter() -> PaxmlAdapter:
-  """Execute adapter helper logic.
+  """Create a configured `PaxmlAdapter` fixture for PaxML examples tests.
 
   Returns:
       Configured `adapter` fixture value (PaxmlAdapter).
@@ -18,7 +18,7 @@ def adapter() -> PaxmlAdapter:
 
 
 def test_paxml_examples_structure(adapter: PaxmlAdapter) -> None:
-  """Verifies the behavior of Paxml examples structure.
+  """Verify `adapter.get_tiered_examples` emits `tier1_math` for PaxML examples structure.
 
   Args:
       adapter: FrameworkAdapter instance under test.
@@ -31,7 +31,7 @@ def test_paxml_examples_structure(adapter: PaxmlAdapter) -> None:
 
 
 def test_tier1_math_validity(adapter: PaxmlAdapter) -> None:
-  """Verifies the behavior of tier1 math validity.
+  """Verify `parse` emits `import jax.numpy as jnp` for tier1 math validity.
 
   Args:
       adapter: FrameworkAdapter instance under test.
@@ -42,7 +42,7 @@ def test_tier1_math_validity(adapter: PaxmlAdapter) -> None:
 
 
 def test_tier2_neural_validity(adapter: PaxmlAdapter) -> None:
-  """Verifies the behavior of tier2 neural validity.
+  """Verify `parse` emits `def setup(self):` for tier2 neural validity.
 
   Args:
       adapter: FrameworkAdapter instance under test.
@@ -55,7 +55,7 @@ def test_tier2_neural_validity(adapter: PaxmlAdapter) -> None:
 
 
 def test_tier3_extras_validity(adapter: PaxmlAdapter) -> None:
-  """Verify tier3 extras validity behavior.
+  """Verify `parse` emits `pax_fiddle.Config` for tier3 extras validity.
 
   Args:
       adapter: FrameworkAdapter instance under test.

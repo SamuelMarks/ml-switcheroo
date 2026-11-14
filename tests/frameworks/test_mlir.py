@@ -1,11 +1,7 @@
 """Test suite for the Mlir module."""
 
-from tests.conftest import _test_getattr
-
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
-
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
 
 from ml_switcheroo.frameworks.base import InitMode
 from ml_switcheroo.frameworks.mlir import MlirAdapter
@@ -13,7 +9,7 @@ from ml_switcheroo.semantics.schema import PluginTraits
 
 
 def test_mlir_adapter_init() -> None:
-  """Verifies the behavior of MLIR adapter initialization."""
+  """Verify `MlirAdapter` returns `90` for MLIR adapter init."""
   adapter = MlirAdapter()
   assert adapter.display_name == "MLIR (Intermediate)"
   assert adapter.ui_priority == 90
@@ -22,7 +18,7 @@ def test_mlir_adapter_init() -> None:
 
 
 def test_mlir_properties() -> None:
-  """Verifies the behavior of MLIR properties."""
+  """Verify `MlirAdapter` emits `// module attributes` for MLIR properties."""
   adapter = MlirAdapter()
   assert adapter.import_alias == ("mlir", "sw")
   assert adapter.import_namespaces == {}
@@ -41,10 +37,8 @@ def test_mlir_properties() -> None:
   assert isinstance(defs, dict)
   specs = adapter.specifications
   assert specs == {}
-  snapshot: dict[str, RuntimeTensorOrValue] = {}
-  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    _test_getattr({"v": snapshot}, "__getitem__")("v")
-  )
+  snapshot: dict[str, dict[str, JsonValue]] = {}
+  adapter.apply_wiring(snapshot)
   assert snapshot == {}
   assert adapter.get_doc_url("anything") is None
   examples: dict[str, str] = adapter.get_tiered_examples()
@@ -54,7 +48,7 @@ def test_mlir_properties() -> None:
 
 
 def test_mlir_adapter_missing_methods() -> None:
-  """Verify mlir adapter missing methods behavior."""
+  """Verify `MlirAdapter` emits `import` for MLIR adapter missing methods."""
   adapter = MlirAdapter()
 
   assert adapter.import_namespaces == {}

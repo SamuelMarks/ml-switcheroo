@@ -9,20 +9,22 @@ Migration Note:
     Compilation logic is now handled by `ml_switcheroo.core.compiler.backends.nvidia_sass.NvidiaSassBackend`.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
 import typing
 
 from ml_switcheroo_ir import LogicalGraph, LogicalNode
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.frameworks.base import (
   FrameworkAdapter,
+  FrameworkSnapshot,
   ImportConfig,
   InitMode,
   OperationDef,
+  SnapshotBackedAdapter,
   StandardMap,
+  load_snapshot_for_adapter,
   register_framework,
 )
 from ml_switcheroo.frameworks.loader import load_definitions
@@ -34,7 +36,13 @@ if typing.TYPE_CHECKING:
 
 @register_framework("nvidia_sass")
 class NvidiaSassAdapter(FrameworkAdapter):
-  """Adapter for NVIDIA SASS Assembly Generation."""
+  """Adapter for NVIDIA SASS Assembly Generation.
+
+  Attributes:
+      display_name: The display name (`str`).
+      inherits_from: The inherits from (`str | None`).
+      ui_priority: The ui priority (`int`).
+  """
 
   display_name: str = "NVIDIA SASS"
   inherits_from: str | None = None
@@ -49,6 +57,13 @@ class NvidiaSassAdapter(FrameworkAdapter):
                      Note: This property is primarily informational in the new architecture.
     """
     self.target_arch = target_arch
+    self._snapshot = SnapshotBackedAdapter(
+      "nvidia_sass",
+      is_live_available=False,
+      loader=load_snapshot_for_adapter,
+    )
+    self._mode: InitMode = self._snapshot.mode
+    self._snapshot_data: FrameworkSnapshot | None = self._snapshot.snapshot
 
   @property
   def import_alias(self) -> tuple[str, str]:
@@ -267,7 +282,6 @@ class NvidiaSassAdapter(FrameworkAdapter):
     Args:
         snapshot: A dictionary representing the framework state or snapshot.
     """
-    pass
 
   def get_doc_url(self, api_name: str) -> str | None:
     """Get official documentation URL for a given API method or instruction.
@@ -316,7 +330,7 @@ class NvidiaSassAdapter(FrameworkAdapter):
       if not line or line.startswith("//"):
         continue
 
-      if line.startswith("L_") or line.startswith("BB"):
+      if line.startswith(("L_", "BB")):
         # Label means new block
         label_name = line.strip(":")
         new_block = cfg.get_or_create_block(label_name)

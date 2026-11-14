@@ -29,9 +29,8 @@ def _analyze_range_iterator(node: cst.BaseExpression) -> tuple[bool, list[cst.Ar
       Tuple (bool, args): True if it's a range call, plus the arguments passed.
 
   """
-  if isinstance(node, cst.Call):
-    if isinstance(node.func, cst.Name) and node.func.value == "range":
-      return True, list(node.args)
+  if isinstance(node, cst.Call) and isinstance(node.func, cst.Name) and node.func.value == "range":
+    return True, list(node.args)
   return False, []
 
 

@@ -7,7 +7,7 @@ from ml_switcheroo.utils.visualizer import MermaidGenerator
 
 
 def test_visualizer_basic_flow() -> None:
-  """Verifies the behavior of visualizer basic flow."""
+  """Verify `MermaidGenerator` emits `graph TD` for visualizer basic flow."""
   code: str = "x = 1"
   tree: cst.Module = cst.parse_module(code)
   gen: MermaidGenerator = MermaidGenerator()
@@ -21,7 +21,7 @@ def test_visualizer_basic_flow() -> None:
 
 
 def test_visualizer_function_def() -> None:
-  """Verifies the behavior of visualizer function def."""
+  """Verify `MermaidGenerator` emits `Def: f` for visualizer function def."""
   code: str = "def f(a, b=2): pass"
   tree: cst.Module = cst.parse_module(code)
   gen: MermaidGenerator = MermaidGenerator()
@@ -32,7 +32,7 @@ def test_visualizer_function_def() -> None:
 
 
 def test_visualizer_call_structure() -> None:
-  """Verifies the behavior of visualizer call structure."""
+  """Verify `MermaidGenerator` emits `Call` for visualizer call structure."""
   code: str = "fn(x, y=z)"
   tree: cst.Module = cst.parse_module(code)
   gen: MermaidGenerator = MermaidGenerator()
@@ -44,7 +44,7 @@ def test_visualizer_call_structure() -> None:
 
 
 def test_visualizer_truncated_labels() -> None:
-  """Verifies the behavior of visualizer truncated labels."""
+  """Verify `MermaidGenerator` emits `...` for visualizer truncated labels."""
   long_str: str = "A" * 100
   code: str = f"x = '{long_str}'"
   tree: cst.Module = cst.parse_module(code)
@@ -54,7 +54,7 @@ def test_visualizer_truncated_labels() -> None:
 
 
 def test_visualizer_escapes_quotes() -> None:
-  """Verifies the behavior of visualizer escapes quotes."""
+  """Verify `MermaidGenerator` emits `quote` for visualizer escapes quotes."""
   code: str = 'x = "quote"'
   tree: cst.Module = cst.parse_module(code)
   gen: MermaidGenerator = MermaidGenerator()
@@ -63,7 +63,7 @@ def test_visualizer_escapes_quotes() -> None:
 
 
 def test_node_to_str_robustness() -> None:
-  """Verifies the behavior of node to string robustness."""
+  """Verify `MermaidGenerator` handles node to str robustness as expected."""
   gen: MermaidGenerator = MermaidGenerator()
   assert gen._node_to_str(cst.Name("x")) == "x"
   attr: cst.Attribute = cst.Attribute(value=cst.Name("a"), attr=cst.Name("b"))
@@ -76,7 +76,7 @@ def test_node_to_str_robustness() -> None:
 
 
 def test_visualizer_exceptions() -> None:
-  """Verifies the behavior of visualizer exceptions."""
+  """Verify `MermaidGenerator` emits `<BadNode>` for visualizer exceptions."""
   import libcst as cst
 
   from ml_switcheroo.utils.visualizer import MermaidGenerator
@@ -84,21 +84,21 @@ def test_visualizer_exceptions() -> None:
   gen: MermaidGenerator = MermaidGenerator()
 
   class BadNode(cst.CSTNode):
-    """Test helper class BadNode."""
+    """Test double `BadNode` used in visualizer tests."""
 
     def _codegen_impl(self, state: CodegenState) -> None:
-      """Helper to  codegen impl.
+      """Execute `RuntimeError` to support codegen impl in visualizer tests.
 
       Args:
-          state: The state (CodegenState) for  codegen impl.
+          state: Input `state` parameter value (`CodegenState`).
       """
-      raise Exception("fail")
+      raise RuntimeError("fail")
 
     def _visit_and_replace_children(self, v: cst.CSTVisitorT) -> "BadNode":
-      """Helper to  visit and replace children.
+      """Execute `_visit_and_replace_children` on `BadNode` for visualizer tests.
 
       Args:
-          v: The v (cst.CSTVisitorT) for  visit and replace children.
+          v: Input `v` parameter value (`cst.CSTVisitorT`).
 
       Returns:
           Resulting `'BadNode'` from visit and replace children.
@@ -108,10 +108,10 @@ def test_visualizer_exceptions() -> None:
   from unittest import mock
 
   assert "<BadNode>" in gen._node_to_str(BadNode())
-  with mock.patch.object(gen, "_node_to_str", side_effect=Exception("fail")):
+  with mock.patch.object(gen, "_node_to_str", side_effect=RuntimeError("fail")):
     call_node: cst.Call = cst.Call(func=cst.Name("foo"))
     gen.visit_Call(call_node)
-  with mock.patch.object(gen, "_node_to_str", side_effect=Exception("fail")):
+  with mock.patch.object(gen, "_node_to_str", side_effect=RuntimeError("fail")):
     arg_node: cst.Arg = cst.Arg(value=cst.Name("foo"))
     gen.visit_Arg(arg_node)
   gen.stack.clear()
@@ -121,7 +121,7 @@ def test_visualizer_exceptions() -> None:
 
 
 def test_visualizer_more_nodes() -> None:
-  """Verifies the behavior of visualizer more nodes."""
+  """Verify `MermaidGenerator` handles visualizer more nodes as expected."""
   import libcst as cst
 
   from ml_switcheroo.utils.visualizer import MermaidGenerator
@@ -149,7 +149,7 @@ def test_visualizer_more_nodes() -> None:
 
 
 def test_visualizer_more_fallbacks() -> None:
-  """Verifies the behavior of visualizer more fallbacks."""
+  """Verify `MermaidGenerator` handles visualizer more fallbacks as expected."""
   import libcst as cst
 
   from ml_switcheroo.utils.visualizer import MermaidGenerator
@@ -159,9 +159,7 @@ def test_visualizer_more_fallbacks() -> None:
   gen.visit_Call(call)
 
   class DummyImportAlias(cst.ImportAlias):
-    """Test helper class DummyImportAlias."""
-
-    pass
+    """Minimal `cst.ImportAlias` test double used in visualizer tests."""
 
   imp: cst.Import = cst.Import(names=[DummyImportAlias(name=cst.Attribute(cst.Name("a"), cst.Name("b")))])
   res = gen.visit_Import(imp)
@@ -170,7 +168,7 @@ def test_visualizer_more_fallbacks() -> None:
 
 
 def test_visualizer_complex_arg() -> None:
-  """Verifies the behavior of visualizer with complex argument expression."""
+  """Verify `MermaidGenerator` emits `sub_call()` for visualizer complex arg."""
   code: str = "fn(k=sub_call(1))"
   tree: cst.Module = cst.parse_module(code)
   gen: MermaidGenerator = MermaidGenerator()

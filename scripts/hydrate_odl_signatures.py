@@ -5,20 +5,21 @@ from ground-truth framework snapshots and hydrates `std_args` across ODL definit
 """
 
 import argparse
+import logging
 import sys
 import typing
 from pathlib import Path
 
-from pydantic import JsonValue
 import yaml
+from pydantic import JsonValue
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from ml_switcheroo.enums import RuntimeTensorOrValue
+from scripts.snapshots.loader import load_snapshots_multi
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-if str(REPO_ROOT) not in sys.path:
-  sys.path.insert(0, str(REPO_ROOT))
-
-from scripts.snapshots.loader import load_snapshots_multi  # noqa: E402
 
 
 def clean_variant_args(
@@ -116,11 +117,9 @@ def extract_std_args_from_params(
   Returns:
       List of standard argument dictionaries.
   """
-  rev_map: dict[str, str] = {}
-  if arg_map:
-    for std_name, fw_name in arg_map.items():
-      if isinstance(fw_name, str):
-        rev_map[fw_name] = std_name
+  rev_map: dict[str, str] = (
+    {fw_name: std_name for std_name, fw_name in arg_map.items() if isinstance(fw_name, str)} if arg_map else {}
+  )
 
   std_args: list[dict[str, JsonValue]] = []
   for p in params:
@@ -156,6 +155,91 @@ def extract_std_args_from_params(
   return std_args
 
 
+def _cleanse_variants_in_place(
+  variants: dict[str, JsonValue],
+  snapshots: typing.Mapping[str, typing.Mapping[str, typing.Mapping[str, RuntimeTensorOrValue]]],
+) -> bool:
+  """Cleanse variant ``args`` mappings against grounded snapshot parameters.
+
+  Args:
+      variants: Mutable variants dictionary on an ODL operation.
+      snapshots: Mapping of framework names to flattened snapshot dictionaries.
+
+  Returns:
+      True if any variant ``args`` mapping was modified.
+  """
+  modified = False
+  for fw, var_info in variants.items():
+    if not isinstance(var_info, dict) or "api" not in var_info or "args" not in var_info:
+      continue
+    api = var_info["api"]
+    raw_var_args = var_info["args"]
+    if not (isinstance(api, str) and isinstance(raw_var_args, dict) and fw in snapshots and api in snapshots[fw]):
+      continue
+    api_info = snapshots[fw][api]
+    params = api_info.get("params", api_info.get("args", []))
+    if isinstance(params, list) and params:
+      cleaned_args = clean_variant_args(raw_var_args, params)
+      if cleaned_args != raw_var_args:
+        var_info["args"] = cleaned_args
+        modified = True
+  return modified
+
+
+def _hydrate_std_args_in_place(
+  data: dict[str, JsonValue],
+  variants: dict[str, JsonValue],
+  snapshots: typing.Mapping[str, typing.Mapping[str, typing.Mapping[str, RuntimeTensorOrValue]]],
+  framework_priority: typing.Sequence[str],
+) -> bool:
+  """Populate missing rich ``std_args`` and ``description`` fields from snapshots.
+
+  Args:
+      data: Mutable ODL YAML operation dictionary.
+      variants: Variants dictionary on ``data``.
+      snapshots: Mapping of framework names to flattened snapshot dictionaries.
+      framework_priority: Priority order of frameworks for signature extraction.
+
+  Returns:
+      True if ``data`` was modified.
+  """
+  existing_std_args = data.get("std_args", [])
+  has_rich_args = (
+    isinstance(existing_std_args, list)
+    and bool(existing_std_args)
+    and all(isinstance(a, dict) and "name" in a and "type" in a for a in existing_std_args)
+  )
+  if has_rich_args:
+    return False
+
+  modified = False
+  extracted_args: list[dict[str, JsonValue]] | None = None
+  for fw in framework_priority:
+    var_entry = variants.get(fw)
+    if not isinstance(var_entry, dict):
+      continue
+    api = var_entry.get("api")
+    if not (isinstance(api, str) and api and fw in snapshots and api in snapshots[fw]):
+      continue
+    api_info = snapshots[fw][api]
+    raw_doc = api_info.get("docstring")
+    if not data.get("description") and isinstance(raw_doc, str) and raw_doc.strip():
+      data["description"] = raw_doc.strip().splitlines()[0].strip()
+      modified = True
+    params = api_info.get("params", api_info.get("args", []))
+    if isinstance(params, list) and params:
+      raw_arg_map = var_entry.get("args", {})
+      arg_map = raw_arg_map if isinstance(raw_arg_map, dict) else None
+      extracted_args = extract_std_args_from_params(params, arg_map)
+      break
+
+  if extracted_args:
+    std_args_json: list[JsonValue] = list(extracted_args)
+    data["std_args"] = std_args_json
+    modified = True
+  return modified
+
+
 def hydrate_odl_from_snapshots(
   odl_dir: Path,
   snapshots: typing.Mapping[str, typing.Mapping[str, typing.Mapping[str, RuntimeTensorOrValue]]],
@@ -175,65 +259,27 @@ def hydrate_odl_from_snapshots(
   Returns:
       The count of ODL files hydrated or modified.
   """
-  if framework_priority is None:
-    framework_priority = ("torch", "jax", "mlx", "keras", "stablehlo")
-
+  priority = framework_priority if framework_priority is not None else ("torch", "jax", "mlx", "keras", "stablehlo")
   hydrated_count = 0
 
   for yaml_path in sorted(odl_dir.glob("*.yaml")):
     try:
       with open(yaml_path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
-    except Exception:
+    except (OSError, yaml.YAMLError, ValueError, RuntimeError) as exc:
+      logging.getLogger(__name__).debug("Skipping unreadable ODL YAML %s: %s", yaml_path, exc)
       continue
 
     if not isinstance(data, dict):
       continue
 
-    modified = False
     variants = data.get("variants", {})
+    if not isinstance(variants, dict):
+      continue
 
-    if fix_args and isinstance(variants, dict):
-      for fw, var_info in variants.items():
-        if isinstance(var_info, dict) and "api" in var_info and "args" in var_info:
-          api = var_info["api"]
-          raw_var_args = var_info["args"]
-          if isinstance(api, str) and isinstance(raw_var_args, dict) and fw in snapshots and api in snapshots[fw]:
-            api_info = snapshots[fw][api]
-            params = api_info.get("params", api_info.get("args", []))
-            if params and isinstance(params, list):
-              cleaned_args = clean_variant_args(raw_var_args, params)
-              if cleaned_args != raw_var_args:
-                var_info["args"] = cleaned_args
-                modified = True
-
-    existing_std_args = data.get("std_args", [])
-    has_rich_args = (
-      isinstance(existing_std_args, list)
-      and bool(existing_std_args)
-      and all(isinstance(a, dict) and "name" in a and "type" in a for a in existing_std_args)
-    )
-    if not has_rich_args and isinstance(variants, dict):
-      extracted_args: list[dict[str, JsonValue]] | None = None
-      for fw in framework_priority:
-        if fw in variants and isinstance(variants[fw], dict):
-          api = variants[fw].get("api")
-          if isinstance(api, str) and api and fw in snapshots and api in snapshots[fw]:
-            api_info = snapshots[fw][api]
-            raw_doc = api_info.get("docstring")
-            if not data.get("description") and isinstance(raw_doc, str) and raw_doc.strip():
-              data["description"] = raw_doc.strip().splitlines()[0].strip()
-              modified = True
-            params = api_info.get("params", api_info.get("args", []))
-            if params and isinstance(params, list):
-              raw_arg_map = variants[fw].get("args", {})
-              arg_map = raw_arg_map if isinstance(raw_arg_map, dict) else None
-              extracted_args = extract_std_args_from_params(params, arg_map)
-              break
-
-      if extracted_args:
-        data["std_args"] = extracted_args
-        modified = True
+    modified = _cleanse_variants_in_place(variants, snapshots) if fix_args else False
+    if _hydrate_std_args_in_place(data, variants, snapshots, priority):
+      modified = True
 
     if modified:
       hydrated_count += 1

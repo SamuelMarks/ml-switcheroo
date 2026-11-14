@@ -1,8 +1,5 @@
 """Test suite for the Static Unroll module."""
 
-from tests.conftest import _test_getattr
-
-import typing
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -34,25 +31,23 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 
 @pytest.fixture
-def rewriter() -> typing.Generator[PivotRewriter, None, None]:
+def rewriter() -> PivotRewriter:
   """Provides a mock rewriter for testing.
 
-  Yields:
+  Returns:
       PivotRewriter: A mock rewriter instance.
   """
-  _test_getattr(
-    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
-  )("transform_for_loop", _test_getattr({"v": unroll_static_loops}, "__getitem__")("v"))
-  hooks._PLUGINS_LOADED = True
+  hooks.register_hook("transform_for_loop")(unroll_static_loops)
+  hooks.set_plugins_loaded(True)
   mgr: MagicMock = MagicMock()
   mgr.get_definition.return_value = None
   mgr.get_framework_config.return_value = {}
   cfg: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
-  yield PivotRewriter(mgr, cfg)
+  return PivotRewriter(mgr, cfg)
 
 
 def test_unroll_simple_range(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of unroll simple range.
+  """Verify `rewrite_code` emits `print(0)` for unroll simple range.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
@@ -65,7 +60,7 @@ def test_unroll_simple_range(rewriter: PivotRewriter) -> None:
 
 
 def test_unroll_dependency_replacement(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of unroll dependency replacement.
+  """Verify `rewrite_code` emits `x = x + 0` for unroll dependency replacement.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
@@ -77,7 +72,7 @@ def test_unroll_dependency_replacement(rewriter: PivotRewriter) -> None:
 
 
 def test_ignore_dynamic_range(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of ignore dynamic range.
+  """Verify `rewrite_code` emits `for i in range(N):` for ignore dynamic range.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
@@ -88,7 +83,7 @@ def test_ignore_dynamic_range(rewriter: PivotRewriter) -> None:
 
 
 def test_safety_limit(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of safety limit.
+  """Verify `rewrite_code` emits `range(100)` for safety limit.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
@@ -113,15 +108,10 @@ def test_unroll_value_error(rewriter: PivotRewriter) -> None:
 
   with patch.object(cst.Integer, "value", new_callable=PropertyMock) as mock_val:
     mock_val.return_value = "not an integer"
-    res: cst.CSTNode | cst.For = _test_getattr(
-      {
-        "v": _test_getattr({"v": unroll_static_loops}, "__getitem__")("v")(
-          _test_getattr({"v": node}, "__getitem__")("v"),
-          _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")("v"),
-        )
-      },
-      "__getitem__",
-    )("v")
+    res: cst.For | cst.FlattenSentinel[cst.BaseStatement] = unroll_static_loops(
+      node,
+      rewriter.ctx,
+    )
   assert res is node
 
 
@@ -147,37 +137,25 @@ def test_unroll_body_not_indented(rewriter: PivotRewriter) -> None:
     iter=cst.Call(func=cst.Name("range"), args=[cst.Arg(cst.Integer("2"))]),
     body=cst.SimpleStatementSuite(body=[cst.Pass()]),
   )
-  res: cst.CSTNode | cst.For = _test_getattr(
-    {
-      "v": _test_getattr({"v": unroll_static_loops}, "__getitem__")("v")(
-        _test_getattr({"v": node}, "__getitem__")("v"),
-        _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
+  res: cst.For | cst.FlattenSentinel[cst.BaseStatement] = unroll_static_loops(
+    node,
+    rewriter.ctx,
+  )
   assert res is node
 
 
 def test_static_unroll_iter_not_call() -> None:
-  """Verifies the behavior of static unroll iter not call."""
+  """Verify `For` handles static unroll iter not call as expected."""
   node: cst.For = cst.For(
     target=cst.Name("i"), iter=cst.List([]), body=cst.IndentedBlock(body=[cst.SimpleStatementLine(body=[cst.Pass()])])
   )
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  res: cst.CSTNode | cst.For = _test_getattr(
-    {
-      "v": _test_getattr({"v": unroll_static_loops}, "__getitem__")("v")(
-        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
-      )
-    },
-    "__getitem__",
-  )("v")
+  res: cst.For | cst.FlattenSentinel[cst.BaseStatement] = unroll_static_loops(node, ctx)
   assert res is node
 
 
 def test_static_unroll_iter_call_not_range() -> None:
-  """Verifies the behavior of static unroll iter call not range."""
+  """Verify `For` handles static unroll iter call not range as expected."""
   node: cst.For = cst.For(
     target=cst.Name("i"),
     iter=cst.Call(func=cst.Name("enumerate"), args=[]),
@@ -193,4 +171,6 @@ def test_static_unroll_empty_body() -> None:
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
   node = cst.ensure_type(cst.parse_statement("for i in range(1): pass"), cst.For)
   node_changed: cst.For = node.with_changes(body=cst.IndentedBlock(body=[]))
-  assert isinstance(unroll_static_loops(node_changed, ctx), cst.FlattenSentinel)
+  res = unroll_static_loops(node_changed, ctx)
+  assert isinstance(res, cst.FlattenSentinel)
+  assert list(res.nodes) == []

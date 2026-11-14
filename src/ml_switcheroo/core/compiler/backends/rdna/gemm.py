@@ -96,7 +96,7 @@ def expand_linear(
   nodes.append(RdnaInstruction(opcode="s_cmp_lt_i32", operands=[s_idx, RdnaImmediate(value=limit)]))
   nodes.append(RdnaInstruction(opcode="s_cbranch_scc1", operands=[RdnaLabelRef(name=l_gemm.name)]))
 
-  if "bias" in metadata and metadata["bias"]:
+  if metadata.get("bias"):
     nodes.append(RdnaComment(text="Add Bias"))
     v_bias = allocator.allocate_temp()
     nodes.append(RdnaInstruction(opcode="v_add_f32", operands=[v_acc, v_acc, v_bias]))

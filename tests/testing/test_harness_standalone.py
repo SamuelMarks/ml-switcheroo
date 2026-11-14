@@ -4,6 +4,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from typing import ClassVar
 
 from pydantic import JsonValue
 
@@ -12,10 +13,10 @@ from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
 
 class DynKerasAdapter:
-  """Test helper class DynKerasAdapter."""
+  """Test double `DynKerasAdapter` used in harness standalone tests."""
 
-  declared_magic_args: list[str] = []
-  harness_imports: list[str] = []
+  declared_magic_args: ClassVar[list[str]] = []
+  harness_imports: ClassVar[list[str]] = []
 
   def get_harness_init_code(self) -> str:
     """Gets harness initialization code.
@@ -26,7 +27,7 @@ class DynKerasAdapter:
     return ""
 
   def convert(self, data: JsonValue) -> str:
-    """Converts .
+    """Convert input payload in test stub.
 
     Args:
         data: Hypothesis DataObject or input tensor payload.
@@ -38,22 +39,21 @@ class DynKerasAdapter:
 
 
 def _run_harness(path: Path) -> subprocess.CompletedProcess[str]:
-  """Helper to  run harness.
+  """Execute `copy` to support run harness in harness standalone tests.
 
   Args:
-      path: The path (Path) for  run harness.
+      path: Filesystem path under test (`Path`).
 
   Returns:
       Resulting `subprocess.CompletedProcess[str]` from run harness.
   """
   env: dict[str, str] = os.environ.copy()
-  if "PYTHONPATH" in env:
-    del env["PYTHONPATH"]
+  env.pop("PYTHONPATH", None)
   return subprocess.run([sys.executable, str(path)], capture_output=True, text=True, env=env)
 
 
 def test_dynamic_shim_generation(tmp_path: Path) -> None:
-  """Verifies the behavior of dynamic shim generation.
+  """Verify `HarnessGenerator` handles dynamic shim generation as expected.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
@@ -68,7 +68,7 @@ def test_dynamic_shim_generation(tmp_path: Path) -> None:
 
 
 def test_harness_execution_match(tmp_path: Path) -> None:
-  """Verifies the behavior of harness execution match.
+  """Verify `HarnessGenerator` returns `0` for harness execution match.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.

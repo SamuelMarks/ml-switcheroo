@@ -1,13 +1,9 @@
-"""Test suite for utils.py"""
+"""Unit tests for call-rewriting utility helpers (`ml_switcheroo.core.rewriter.calls.utils`)."""
 
-from tests.conftest import _test_getattr
-
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
-from pydantic import JsonValue
 from unittest.mock import MagicMock, patch
 
-import libcst as _cst
+import libcst as cst
+from pydantic import JsonValue
 
 from ml_switcheroo.core.rewriter.calls.utils import (
   compute_permutation,
@@ -20,354 +16,229 @@ from ml_switcheroo.core.rewriter.calls.utils import (
   rewrite_stateful_call,
   strip_kwarg,
 )
+from ml_switcheroo.core.rewriter.types import SignatureContext
+from ml_switcheroo.semantics.manager import SemanticsManager
 
-cst = _cst
 
-
-def parse_call(code: str) -> cst.Call:
-  """Execute parse call helper logic.
+def _parse_call(code: str) -> cst.Call:
+  """Parse a Python call expression into a `cst.Call`.
 
   Args:
-      code: Python or DSL source code string to parse or transpile.
+      code: Python call expression string.
 
   Returns:
-      Resulting `cst.Call` from parse call.
+      Parsed `cst.Call` node.
   """
-  module = cst.parse_module(code)
-  expr = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
-  return cst.ensure_type(expr, cst.Call)
+  return cst.ensure_type(cst.parse_expression(code), cst.Call)
 
 
-def test_is_functional_apply() -> None:
-  """Verify is functional apply behavior."""
-  call = parse_call("layer.apply(vars, x)")
-  assert is_functional_apply(call, "apply")
-  assert not is_functional_apply(call, "call")
-  assert not is_functional_apply(parse_call("func(x)"), "apply")
-  assert not is_functional_apply(call, None)
-
-
-class MockSigCtx:
-  """Test helper class MockSigCtx."""
-
-  def __init__(self, existing: list[str]) -> None:
-    """Initialize test helper instance.
-
-    Args:
-        existing: The existing (list[str]) for init.
-    """
-    self.existing_args = existing
-    self.injected_args: list[RuntimeTensorOrValue] = []
-
-
-class MockContext:
-  """Test helper class MockContext."""
-
-  def __init__(self) -> None:
-    """Initialize test helper instance."""
-    self.signature_stack = [MockSigCtx(["x"])]
-
-
-class MockRewriter:
-  """Test helper class MockRewriter."""
-
-  def __init__(self) -> None:
-    """Initialize test helper instance."""
-    self.context = MockContext()
-    self._report_warning = MagicMock()
-
-  def _create_dotted_name(self, name: str) -> cst.BaseExpression:
-    """Execute create dotted name helper logic.
-
-    Returns:
-        Resulting `cst.BaseExpression` from create dotted name.
-    """
-    return cst.Name(name)
-
-
-def test_rewrite_stateful_call() -> None:
-  """Verify rewrite stateful call behavior."""
-  rewriter = MockRewriter()
-  node = parse_call("layer(x)")
-  config = {"prepend_arg": "variables", "method": "apply"}
-
-  result = rewrite_stateful_call(rewriter, node, "layer", config)
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-            _test_getattr(
-              {"v": _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr},
-              "__getitem__",
-            )("v"),
-            _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
-          )
-        },
-        "__getitem__",
-      )("v").value
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "apply"}, "__getitem__")("v")
-  assert cst.ensure_type(result.args[0].value, cst.Name).value == "variables"
-
-  assert len(rewriter.context.signature_stack[0].injected_args) == 1
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr(
-            {
-              "v": _test_getattr(
-                {
-                  "v": _test_getattr(
-                    {
-                      "v": _test_getattr(
-                        {"v": _test_getattr({"v": rewriter}, "__getitem__")("v").context}, "__getitem__"
-                      )("v").signature_stack
-                    },
-                    "__getitem__",
-                  )("v")[0]
-                },
-                "__getitem__",
-              )("v").injected_args
-            },
-            "__getitem__",
-          )("v")[0]
-        },
-        "__getitem__",
-      )("v")[0]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "variables"}, "__getitem__")("v")
-
-
-def test_rewrite_stateful_call_existing() -> None:
-  """Verify rewrite stateful call existing behavior."""
-  rewriter = MockRewriter()
-  # "variables" already exists in existing_args
-  rewriter.context.signature_stack = [MockSigCtx(["variables"])]
-  node = parse_call("layer(x)")
-  config = {"prepend_arg": "variables"}
-
-  rewrite_stateful_call(rewriter, node, "layer", config)
-  # Shouldn't inject to signature stack
-  assert len(rewriter.context.signature_stack[0].injected_args) == 0
-
-
-def test_rewrite_stateful_call_no_method() -> None:
-  """Verify rewrite stateful call no method behavior."""
-  rewriter = MockRewriter()
-  node = parse_call("layer(x)")
-  config = {"prepend_arg": "vars"}
-
-  result = rewrite_stateful_call(rewriter, node, "layer", config)
-  assert cst.ensure_type(result.func, cst.Name).value == "layer"
-
-
-def test_inject_kwarg() -> None:
-  """Verify inject kwarg behavior."""
-  node = parse_call("func(a=1)")
-  result = inject_kwarg(node, "b", "b_val")
-  assert len(result.args) == 2
-  assert cst.ensure_type(result.args[1].keyword, cst.Name).value == "b"
-  assert cst.ensure_type(result.args[1].value, cst.Name).value == "b_val"
-
-
-def test_inject_kwarg_existing() -> None:
-  """Verify inject kwarg existing behavior."""
-  node = parse_call("func(b=1)")
-  result = inject_kwarg(node, "b", "b_val")
-  assert result == node
-
-
-def test_strip_kwarg() -> None:
-  """Verify strip kwarg behavior."""
-  node = parse_call("func(a=1, b=2)")
-  result = strip_kwarg(node, "a")
-  assert len(result.args) == 1
-  assert cst.ensure_type(result.args[0].keyword, cst.Name).value == "b"
-
-
-def test_is_super_call() -> None:
-  """Verify is super call behavior."""
-  assert is_super_call(parse_call("super().foo()"))
-  assert is_super_call(parse_call("super()"))
-  assert not is_super_call(parse_call("foo()"))
-
-
-def test_is_builtin() -> None:
-  """Verify is builtin behavior."""
-  assert is_builtin("len")
-  assert not is_builtin("my_func")
-
-
-@patch("ml_switcheroo.core.rewriter.calls.utils.diff_nodes")
-@patch("ml_switcheroo.core.rewriter.calls.utils.get_tracer")
-def test_log_diff(mock_tracer: MagicMock, mock_diff: MagicMock) -> None:
-  """Verify log diff behavior.
+def _expr_code(node: cst.BaseExpression) -> str:
+  """Serialize a CST expression node to stripped Python source code.
 
   Args:
-      mock_tracer: The mock tracer (MagicMock) for test log diff.
-      mock_diff: The mock diff (MagicMock) for test log diff.
+      node: CST expression node.
+
+  Returns:
+      Formatted Python expression string.
   """
-  mock_diff.return_value = ("a", "b", True)
-  mock_tr = MagicMock()
-  mock_tracer.return_value = mock_tr
-
-  log_diff("label", cst.Pass(), cst.Pass())
-  mock_tr.log_mutation.assert_called_once()
-
-  # False case
-  mock_diff.return_value = ("a", "a", False)
-  mock_tr.reset_mock()
-  log_diff("label", cst.Pass(), cst.Pass())
-  mock_tr.log_mutation.assert_not_called()
+  return cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=node)])]).code.strip()
 
 
-def test_compute_permutation() -> None:
-  """Verify compute permutation behavior."""
+class _StatefulContextStub:
+  """Typed context stub carrying `signature_stack`."""
+
+  def __init__(self, existing: set[str] | None = None) -> None:
+    """Initialize `signature_stack` with a single `SignatureContext`.
+
+    Args:
+        existing: Existing parameter names on the enclosing function signature.
+    """
+    sig = SignatureContext(existing_args=existing or set())
+    self.signature_stack: list[SignatureContext] = [sig]
+
+
+class _StatefulRewriterStub:
+  """Typed rewriter host stub supporting `rewrite_stateful_call`."""
+
+  def __init__(self, existing: set[str] | None = None) -> None:
+    """Initialize context and warning log.
+
+    Args:
+        existing: Existing parameter names in scope.
+    """
+    self.context = _StatefulContextStub(existing)
+    self.warnings: list[str] = []
+
+  def _create_dotted_name(self, name: str) -> cst.BaseExpression:
+    """Parse `name` into a CST expression.
+
+    Args:
+        name: Dotted identifier string.
+
+    Returns:
+        Parsed `cst.BaseExpression`.
+    """
+    return cst.parse_expression(name)
+
+  def _report_warning(self, msg: str) -> None:
+    """Append `msg` to `self.warnings`.
+
+    Args:
+        msg: Warning message string.
+    """
+    self.warnings.append(msg)
+
+
+def test_is_functional_apply_is_super_call_and_is_builtin() -> None:
+  """Verify `is_functional_apply`, `is_super_call`, and `is_builtin` across call shapes."""
+  call_apply = _parse_call("layer.apply(vars, x)")
+  assert is_functional_apply(call_apply, "apply") is True
+  assert is_functional_apply(call_apply, "call") is False
+  assert is_functional_apply(call_apply, None) is False
+  assert is_functional_apply(_parse_call("apply(x)"), "apply") is False
+
+  assert is_super_call(_parse_call("super().__init__()")) is True
+  assert is_super_call(_parse_call("super()")) is True
+  assert is_super_call(_parse_call("foo.method()")) is False
+  assert is_super_call(_parse_call("obj.foo().method()")) is False
+  assert is_super_call(_parse_call("foo().method()")) is False
+  assert is_super_call(_parse_call("funcs[0]()")) is False
+  assert is_super_call(_parse_call("other()")) is False
+  assert is_super_call(cst.Name("not_a_call")) is False
+
+  assert is_builtin("len") is True
+  assert is_builtin("print") is True
+  assert is_builtin("custom_non_builtin") is False
+
+  from ml_switcheroo.core.rewriter.calls.utils import is_neural_on_math_backend
+
+  assert is_neural_on_math_backend("neural", "unknown_nonexistent_fw") is False
+
+
+def test_rewrite_stateful_call_variants() -> None:
+  """Verify `rewrite_stateful_call` handles `method`, `prepend_arg`, existing args, and legacy shims."""
+  rewriter = _StatefulRewriterStub(existing={"x"})
+  res = rewrite_stateful_call(
+    rewriter,
+    _parse_call("self.layer(x)"),
+    "self.layer",
+    {"prepend_arg": "variables", "method": "apply"},
+  )
+  assert _expr_code(res) == "self.layer.apply(variables, x)"
+  assert rewriter.context.signature_stack[0].injected_args == [("variables", None)]
+  assert len(rewriter.warnings) == 1
+
+  # Already present in `existing_args` -> not re-injected into `signature_stack`
+  existing_rewriter = _StatefulRewriterStub(existing={"variables"})
+  res_existing = rewrite_stateful_call(
+    existing_rewriter,
+    _parse_call("layer(x)"),
+    "layer",
+    {"prepend_arg": "variables"},
+  )
+  assert _expr_code(res_existing) == "layer(variables, x)"
+  assert existing_rewriter.context.signature_stack[0].injected_args == []
+
+  # No `method` and second call on same `rewriter` (already in `injected_args` -> not duplicated)
+  plain_res = rewrite_stateful_call(rewriter, _parse_call("layer(x)"), "layer", {})
+  assert _expr_code(plain_res) == "layer(variables, x)"
+  assert rewriter.context.signature_stack[0].injected_args == [("variables", None)]
+
+  # Host without `context`, `_signature_stack`, or `_report_warning`
+  class _ContextlessHost:
+    """Minimal stateful call rewriter lacking signature stack and warning reporter."""
+
+  ctxless_res = rewrite_stateful_call(_ContextlessHost(), _parse_call("layer(x)"), "layer", {})
+  assert _expr_code(ctxless_res) == "layer(variables, x)"
+
+  # Host with `context` but without `_report_warning`
+  class _SilentHost:
+    """Stateful call rewriter exposing `context` without `_report_warning`."""
+
+    def __init__(self) -> None:
+      """Initialize empty `SignatureContext`."""
+      self.context = _StatefulContextStub()
+
+  silent_res = rewrite_stateful_call(_SilentHost(), _parse_call("layer(x)"), "layer", {})
+  assert _expr_code(silent_res) == "layer(variables, x)"
+
+  # Host without `_create_dotted_name` and legacy `_signature_stack`
+  class _LegacyShim:
+    """Legacy rewriter stub exposing `_signature_stack` without `context` or `_create_dotted_name`."""
+
+    def __init__(self) -> None:
+      """Initialize `_signature_stack`."""
+      self._signature_stack = [SignatureContext()]
+      self.warned = False
+
+    def _report_warning(self, _msg: str) -> None:
+      """Mark warning flag.
+
+      Args:
+          _msg: Warning string.
+      """
+      self.warned = True
+
+  shim = _LegacyShim()
+  shim_res = rewrite_stateful_call(shim, _parse_call("inst(x)"), "my_inst", {"prepend_arg": "vars", "method": "apply"})
+  assert _expr_code(shim_res) == "my_inst.apply(vars, x)"
+  assert shim.warned is True
+
+
+def test_inject_kwarg_and_strip_kwarg() -> None:
+  """Verify `inject_kwarg` and `strip_kwarg` preserve existing args and clean trailing commas."""
+  assert _expr_code(inject_kwarg(_parse_call("fn()"), "k", "v")) == "fn(k=v)"
+  assert _expr_code(inject_kwarg(_parse_call("fn(a, b=1)"), "k", "v")) == "fn(a, b=1, k=v)"
+
+  existing = _parse_call("fn(k=1)")
+  assert inject_kwarg(existing, "k", "other") is existing
+
+  stripped = strip_kwarg(_parse_call("fn(a=1, b=2,)"), "b")
+  assert _expr_code(stripped) == "fn(a=1)"
+  assert stripped.args[0].comma == cst.MaybeSentinel.DEFAULT
+  assert _expr_code(strip_kwarg(_parse_call("fn(k=1)"), "k")) == "fn()"
+
+
+def test_compute_permutation_and_inject_permute_call() -> None:
+  """Verify `compute_permutation` and `inject_permute_call` for tuple-packed, positional, and missing APIs."""
   assert compute_permutation("NCHW", "NHWC") == (0, 2, 3, 1)
   assert compute_permutation("NC", "NCD") is None
   assert compute_permutation("NCD", "NCX") is None
 
+  x = cst.Name("x")
+  sem = MagicMock(spec=SemanticsManager)
 
-class MockSemantics:
-  """Test helper class MockSemantics."""
+  sem.resolve_variant.return_value = None
+  assert inject_permute_call(x, (0, 1), sem, "jax") is x
 
-  def __init__(self, variant: dict[str, JsonValue] | None) -> None:
-    """Initialize test helper instance.
+  no_api: dict[str, JsonValue] = {"pack_to_tuple": "axes"}
+  sem.resolve_variant.return_value = no_api
+  assert inject_permute_call(x, (0, 1), sem, "jax") is x
 
-    Args:
-        variant: The variant (dict[str, JsonValue] | None) for init.
-    """
-    self.variant = variant
+  sem.resolve_variant.return_value = {"api": "jnp.transpose", "pack_to_tuple": "axes"}
+  assert _expr_code(inject_permute_call(x, (1, 0), sem, "jax")) == "jnp.transpose(x, axes=(1, 0))"
+  assert _expr_code(inject_permute_call(x, (), sem, "jax")) == "jnp.transpose(x, axes=())"
 
-  def resolve_variant(self, name: str, fw: str) -> dict[str, JsonValue] | None:
-    """Execute resolve variant helper logic.
-
-    Args:
-        name: Identifier or operation name string.
-        fw: Framework identifier string (e.g., torch, jax, mlx).
-
-    Returns:
-        Resulting `dict[str, JsonValue] | None` from resolve variant.
-    """
-    return self.variant
+  sem.resolve_variant.return_value = {"api": "torch.permute"}
+  assert _expr_code(inject_permute_call(x, (0, 2, 1), sem, "torch")) == "torch.permute(x, 0, 2, 1)"
 
 
-def test_inject_permute_call_no_api() -> None:
-  """Verify inject permute call no api behavior."""
-  semantics = MockSemantics({})
-  node = cst.Name("x")
-  result = _test_getattr(
-    {
-      "v": _test_getattr({"v": inject_permute_call}, "__getitem__")("v")(
-        _test_getattr({"v": node}, "__getitem__")("v"),
-        _test_getattr(
-          {"v": (_test_getattr({"v": 0}, "__getitem__")("v"), _test_getattr({"v": 1}, "__getitem__")("v"))}, "__getitem__"
-        )("v"),
-        _test_getattr({"v": semantics}, "__getitem__")("v"),
-        _test_getattr({"v": "jax"}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
-  assert result == node
+def test_log_diff_records_only_changed_nodes() -> None:
+  """Verify `log_diff` emits a mutation trace event only when `diff_nodes` detects a change."""
+  with (
+    patch("ml_switcheroo.core.rewriter.calls.utils.diff_nodes", return_value=("a", "b", True)),
+    patch("ml_switcheroo.core.rewriter.calls.utils.get_tracer") as mock_get_tracer,
+  ):
+    tracer = MagicMock()
+    mock_get_tracer.return_value = tracer
+    log_diff("Rewrite", cst.Name("a"), cst.Name("b"))
+    tracer.log_mutation.assert_called_once_with("Rewrite", "a", "b")
 
-
-def test_inject_permute_call_kw() -> None:
-  """Verify inject permute call kw behavior."""
-  semantics = MockSemantics({"api": "jax.numpy.transpose", "pack_to_tuple": "axes"})
-  node = cst.Name("x")
-  result = _test_getattr(
-    {
-      "v": _test_getattr({"v": inject_permute_call}, "__getitem__")("v")(
-        _test_getattr({"v": node}, "__getitem__")("v"),
-        _test_getattr(
-          {"v": (_test_getattr({"v": 1}, "__getitem__")("v"), _test_getattr({"v": 0}, "__getitem__")("v"))}, "__getitem__"
-        )("v"),
-        _test_getattr({"v": semantics}, "__getitem__")("v"),
-        _test_getattr({"v": "jax"}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
-  assert isinstance(result, cst.Call)
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {"v": _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr},
-        "__getitem__",
-      )("v").value
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "transpose"}, "__getitem__")("v")
-  assert cst.ensure_type(result.args[1].keyword, cst.Name).value == "axes"
-  assert len(cst.ensure_type(result.args[1].value, cst.Tuple).elements) == 2
-
-
-def test_inject_permute_call_varargs() -> None:
-  """Verify inject permute call varargs behavior."""
-  semantics = MockSemantics({"api": "torch.permute"})
-  node = cst.Name("x")
-  result = _test_getattr(
-    {
-      "v": _test_getattr({"v": inject_permute_call}, "__getitem__")("v")(
-        _test_getattr({"v": node}, "__getitem__")("v"),
-        _test_getattr(
-          {"v": (_test_getattr({"v": 1}, "__getitem__")("v"), _test_getattr({"v": 0}, "__getitem__")("v"))}, "__getitem__"
-        )("v"),
-        _test_getattr({"v": semantics}, "__getitem__")("v"),
-        _test_getattr({"v": "torch"}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
-  assert isinstance(result, cst.Call)
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {"v": _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr},
-        "__getitem__",
-      )("v").value
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "permute"}, "__getitem__")("v")
-  assert len(result.args) == 3  # input + 2 axes
-  assert cst.ensure_type(result.args[1].value, cst.Integer).value == "1"
-  assert cst.ensure_type(result.args[2].value, cst.Integer).value == "0"
-
-
-def test_rewrite_stateful_call_legacy() -> None:
-  """Verify rewrite stateful call legacy behavior."""
-
-  class LegacyRewriter:
-    """Test helper class LegacyRewriter."""
-
-    def __init__(self) -> None:
-      """Initialize test helper instance."""
-      self._signature_stack = [MockSigCtx(["x"])]
-      self._report_warning = MagicMock()
-
-  rewriter = LegacyRewriter()
-  node = parse_call("layer(x)")
-  result = rewrite_stateful_call(rewriter, node, "layer", {"prepend_arg": "v"})
-  assert cst.ensure_type(result.func, cst.Name).value == "layer"
-
-
-def test_strip_kwarg_trailing_comma() -> None:
-  """Verify strip kwarg trailing comma behavior."""
-  node = parse_call("func(a=1, b=2,)")
-  result = strip_kwarg(node, "b")
-  assert len(result.args) == 1
-  assert result.args[0].comma == cst.MaybeSentinel.DEFAULT
-
-
-def test_rewrite_stateful_call_no_method_coverage() -> None:
-  """Verify rewrite stateful call no method coverage behavior."""
-  rewriter = MockRewriter()
-  node = cst.Call(func=cst.Name("func"), args=[])
-  result = rewrite_stateful_call(rewriter, node, "func", {})
-  assert cst.ensure_type(result.func, cst.Name).value == "func"
-  assert is_super_call(cst.Name("not_a_call")) is False
+  with (
+    patch("ml_switcheroo.core.rewriter.calls.utils.diff_nodes", return_value=("a", "a", False)),
+    patch("ml_switcheroo.core.rewriter.calls.utils.get_tracer") as mock_get_tracer,
+  ):
+    tracer2 = MagicMock()
+    mock_get_tracer.return_value = tracer2
+    log_diff("NoOp", cst.Name("a"), cst.Name("a"))
+    tracer2.log_mutation.assert_not_called()

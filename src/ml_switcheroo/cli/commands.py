@@ -7,7 +7,12 @@ synced with handler modules.
 
 from pathlib import Path
 
-from ml_switcheroo.cli.handlers.convert import _convert_single_file, _print_batch_summary, handle_convert
+from ml_switcheroo.cli.handlers.convert import (
+  CliConvertOptions,
+  _convert_single_file,
+  _print_batch_summary,
+  handle_convert,
+)
 
 # New export
 from ml_switcheroo.cli.handlers.convert_weights import WeightScriptGenerator
@@ -49,6 +54,7 @@ def handle_gen_weight_script(
 
 
 __all__ = [
+  "CliConvertOptions",
   "_convert_single_file",
   "_print_batch_summary",
   "handle_ci",

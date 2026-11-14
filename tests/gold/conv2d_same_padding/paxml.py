@@ -1,20 +1,19 @@
 """Test suite for the Paxml module."""
 
-from praxis import base_layer
 import jax.numpy as jnp
-
+from praxis import base_layer
 from praxis.layers import convolutions
 
 
 class SameConvModel(base_layer.BaseLayer):
-  """Test helper class SameConvModel."""
+  """Stub `base_layer.BaseLayer` subclass implementing `setup` for PaxML tests."""
 
   in_channels = 0
   out_channels = 0
   kernel_size = 3
 
   def setup(self) -> None:
-    """Helper to setup."""
+    """Execute `create_child` to support setup in PaxML tests."""
     self.create_child(
       "conv",
       convolutions.Conv2D.HParams(

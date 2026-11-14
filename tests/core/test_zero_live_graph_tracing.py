@@ -1,11 +1,11 @@
 """Unit tests for Phase 11: Live `zero-*` `ProxyTensor` Tracing & `evaluate_graph`."""
 
 from __future__ import annotations
-from tests.conftest import _test_setattr
 
 import types
 from unittest import mock
 
+import pytest
 from ml_switcheroo_ir import DType, LogicalEdge, LogicalGraph, LogicalNode
 
 from ml_switcheroo.config import RuntimeConfig
@@ -71,27 +71,34 @@ class _StubProxyTensor:
     return self
 
 
-def _make_stub_tracing_mod() -> types.ModuleType:
+def _make_stub_tracing_mod(monkeypatch: pytest.MonkeyPatch) -> types.ModuleType:
   """Build a stub `ml_switcheroo_compiler.tracing` module satisfying `_TracingModuleProtocol`.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture for scoped module attribute setup.
 
   Returns:
       Configured `types.ModuleType` instance.
   """
   mod = types.ModuleType("ml_switcheroo_compiler.tracing")
-  _test_setattr(mod, "global_tracing_state", _StubTracingState())
-  _test_setattr(mod, "ProxyTensor", _StubProxyTensor)
+  monkeypatch.setattr(mod, "global_tracing_state", _StubTracingState(), raising=False)
+  monkeypatch.setattr(mod, "ProxyTensor", _StubProxyTensor, raising=False)
   return mod
 
 
-def test_trace_with_zero_proxy_tensors_live() -> None:
-  """Verify trace_with_zero_proxy_tensors captures a LogicalGraph via global_tracing_state."""
+def test_trace_with_zero_proxy_tensors_live(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify trace_with_zero_proxy_tensors captures a LogicalGraph via global_tracing_state.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   code = """_helper = lambda z: z
 def _private_fn(x):
     return x
 def f(x, y):
     return x + y
 """
-  stub_mod = _make_stub_tracing_mod()
+  stub_mod = _make_stub_tracing_mod(monkeypatch)
   with mock.patch("importlib.import_module", return_value=stub_mod):
     g = trace_with_zero_proxy_tensors(code, input_shapes=[(2, 4), (2, 4)], dtype="float32", seed=42)
   assert isinstance(g, LogicalGraph)
@@ -99,8 +106,12 @@ def f(x, y):
   assert "input_1" in g.nodes
 
 
-def test_trace_with_zero_proxy_tensors_edge_cases() -> None:
-  """Verify trace_with_zero_proxy_tensors handles import errors, missing attrs, and empty graphs."""
+def test_trace_with_zero_proxy_tensors_edge_cases(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify trace_with_zero_proxy_tensors handles import errors, missing attrs, and empty graphs.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   with mock.patch("importlib.import_module", side_effect=ImportError("no tracing")):
     assert trace_with_zero_proxy_tensors("def f(x): return x", [(2, 4)]) is None
 
@@ -108,7 +119,7 @@ def test_trace_with_zero_proxy_tensors_edge_cases() -> None:
   with mock.patch("importlib.import_module", return_value=empty_mod):
     assert trace_with_zero_proxy_tensors("def f(x): return x", [(2, 4)]) is None
 
-  stub_mod = _make_stub_tracing_mod()
+  stub_mod = _make_stub_tracing_mod(monkeypatch)
   with mock.patch("importlib.import_module", return_value=stub_mod):
     # Code that raises inside callable
     bad_code = """def f(x):
@@ -155,15 +166,19 @@ f(1)
       """
       return LogicalGraph()
 
-  _test_setattr(mock_state_mod, "global_tracing_state", EmptyState())
-  _test_setattr(mock_state_mod, "ProxyTensor", lambda **kwargs: kwargs)
-  _test_setattr(mock_state_mod, "Tensor", lambda *args, **kwargs: args)
+  monkeypatch.setattr(mock_state_mod, "global_tracing_state", EmptyState(), raising=False)
+  monkeypatch.setattr(mock_state_mod, "ProxyTensor", lambda **kwargs: kwargs, raising=False)
+  monkeypatch.setattr(mock_state_mod, "Tensor", lambda *args, **kwargs: args, raising=False)
   with mock.patch("importlib.import_module", return_value=mock_state_mod):
     assert trace_with_zero_proxy_tensors("x = 1", [(2, 4)]) is None
 
 
-def test_evaluate_shared_backward_graph_live_and_fallback() -> None:
-  """Verify evaluate_shared_backward_graph evaluates nodes and falls back cleanly on error."""
+def test_evaluate_shared_backward_graph_live_and_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify evaluate_shared_backward_graph evaluates nodes and falls back cleanly on error.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   g = LogicalGraph(name="EvalGraph")
   g.nodes["x"] = LogicalNode(id="x", op_type="Input", shape_metadata=(2, 4), dtype=DType.float32)
   g.nodes["empty_shape"] = LogicalNode(id="empty_shape", op_type="Placeholder", shape_metadata=(), dtype=DType.float32)
@@ -192,13 +207,14 @@ def test_evaluate_shared_backward_graph_live_and_fallback() -> None:
       """
       self.shape = shape
 
-  _test_setattr(
+  monkeypatch.setattr(
     eval_mod,
     "evaluate_graph",
     lambda graph, env: {"x": _StubShapeObj((2, 4)), "y": _StubShapeObj((2, 4))},
+    raising=False,
   )
-  _test_setattr(tensor_mod, "TensorConfig", lambda shape, dtype: (shape, dtype))
-  _test_setattr(tensor_mod, "Tensor", lambda data, config: (data, config))
+  monkeypatch.setattr(tensor_mod, "TensorConfig", lambda shape, dtype: (shape, dtype), raising=False)
+  monkeypatch.setattr(tensor_mod, "Tensor", lambda data, config: (data, config), raising=False)
 
   def _stub_import(name: str) -> types.ModuleType:
     """Import stub for evaluator and tensor modules.

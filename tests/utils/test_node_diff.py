@@ -9,14 +9,14 @@ cst = _cst
 
 
 def test_capture_simple_call() -> None:
-  """Verifies the behavior of capture simple call."""
+  """Verify `Call` emits `my_func(1)` for capture simple call."""
   node = cst.Call(func=cst.Name("my_func"), args=[cst.Arg(cst.Integer("1"))])
   source = capture_node_source(node)
   assert "my_func(1)" in source
 
 
 def test_capture_complex_assignment() -> None:
-  """Verifies the behavior of capture complex assignment."""
+  """Verify `AssignTarget` emits `x = 10` for capture complex assignment."""
   target = cst.AssignTarget(target=cst.Name("x"))
   node = cst.Assign(targets=[target], value=cst.Integer("10"))
   source = capture_node_source(node)
@@ -24,7 +24,7 @@ def test_capture_complex_assignment() -> None:
 
 
 def test_diff_nodes_detection() -> None:
-  """Verifies the behavior of diff nodes detection."""
+  """Verify `Call` handles diff nodes detection as expected."""
   node_a = cst.Call(func=cst.Name("foo"))
   node_b = cst.Call(func=cst.Name("bar"))
   before, after, changed = diff_nodes(node_a, node_b)
@@ -34,7 +34,7 @@ def test_diff_nodes_detection() -> None:
 
 
 def test_diff_nodes_no_change() -> None:
-  """Verifies the behavior of diff nodes no change."""
+  """Verify `Call` handles diff nodes no change as expected."""
   node_a = cst.Call(func=cst.Name("foo"))
   node_b = cst.Call(func=cst.Name("foo"))
   _, _, changed = diff_nodes(node_a, node_b)
@@ -42,7 +42,7 @@ def test_diff_nodes_no_change() -> None:
 
 
 def test_capture_fallback() -> None:
-  """Verifies the behavior of capture fallback."""
+  """Verify `capture_node_source` handles capture fallback as expected."""
 
   class UnrepresentableNode(_cst.CSTNode):
     """Unrepresentable CST node for testing fallback."""

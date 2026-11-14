@@ -1,0 +1,36 @@
+--- Forward ---
+import jax.nn as nn
+import jax.numpy as jnp
+import flax.nnx as nnx
+
+class DynamicShapeNet(nnx.Module):
+    def __init__(self, rngs: nnx.Rngs):
+        # Flatten dynamic spatial dimensions (2, 3, 4, 4) -> (2, 48)
+        self.flat = nn.Flatten()
+        # LazyLinear resolves in_features=48 on-device
+        self.fc = nn.LazyLinear(10)
+
+    def __call__(self, x):
+        # Dynamic reshape with -1 and symbolic batch size
+        x = self.flat(x)  # flatten spatial dims
+        x = x.view(x.size(0), -1)  # symbolic -1 view
+        return self.fc(x)
+
+--- Backward ---
+import torch.nn.functional as F
+import torch
+import torch.nn as nn
+
+class DynamicShapeNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        # Flatten dynamic spatial dimensions (2, 3, 4, 4) -> (2, 48)
+        self.flat = nn.Flatten()
+        # LazyLinear resolves in_features=48 on-device
+        self.fc = nn.LazyLinear(10)
+
+    def forward(self, x):
+        # Dynamic reshape with -1 and symbolic batch size
+        x = self.flat(x)  # flatten spatial dims
+        x = x.view(x.size(0), -1)  # symbolic -1 view
+        return self.fc(x)

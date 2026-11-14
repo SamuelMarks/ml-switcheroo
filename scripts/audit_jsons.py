@@ -1,42 +1,18 @@
 """Audits and normalizes ODL YAML definitions and quarantine JSON artifacts.
 
 Separates verified operator specifications from unverified entries and ensures
-consistent `std_args` and `variants` structure across `semantics/odl/*.yaml`.
+consistent ``std_args`` and ``variants`` structure across ``semantics/odl/*.yaml``.
 """
 
 import json
+import logging
 from pathlib import Path
 
-from pydantic import JsonValue
 import yaml
+from pydantic import JsonValue
 
-
-def run(extra_ops: dict[str, dict[str, JsonValue]] | None = None) -> None:
-  """Audit ODL YAML specifications, normalize argument schemas, and update `quarantine.json`.
-
-  Args:
-      extra_ops: Optional mapping of extra operations to include in quarantine.
-  """
-  sem_dir: Path = Path("src/ml_switcheroo/semantics")
-  odl_dir: Path = sem_dir / "odl"
-  quarantine_file: Path = sem_dir / "quarantine.json"
-
-  k_nn: dict[str, dict[str, JsonValue]] = {}
-  k_extras: dict[str, dict[str, JsonValue]] = dict(extra_ops) if extra_ops is not None else {}
-
-  if odl_dir.exists():
-    for yaml_file in odl_dir.glob("*.yaml"):
-      try:
-        with open(yaml_file, "r") as yaml_f:
-          data: JsonValue = yaml.safe_load(yaml_f)
-          if isinstance(data, dict):
-            raw_op = data.get("operation", yaml_file.stem)
-            op_name: str = str(raw_op) if isinstance(raw_op, str) else yaml_file.stem
-            k_nn[op_name] = data
-      except Exception:
-        pass
-
-  verified_apis: set[str] = {
+_CORE_VERIFIED_APIS: frozenset[str] = frozenset(
+  {
     "Conv1d",
     "Conv2d",
     "Conv3d",
@@ -77,62 +53,129 @@ def run(extra_ops: dict[str, dict[str, JsonValue]] | None = None) -> None:
     "Max",
     "Min",
   }
+)
 
-  # Also keep APIs that have non-empty variants
-  for k, v in k_nn.items():
-    if v.get("variants"):
-      verified_apis.add(k)
 
-  quarantine: dict[str, dict[str, JsonValue]] = {}
-  new_k_nn: dict[str, dict[str, JsonValue]] = {}
+def _load_single_odl_entry(yaml_file: Path) -> tuple[str, dict[str, JsonValue]] | None:
+  """Load and parse a single discrete ODL YAML file.
 
-  for k, v in k_nn.items():
-    if k in verified_apis:
-      new_k_nn[k] = v
-    else:
-      quarantine[k] = v
+  Args:
+      yaml_file: Path to the discrete ODL ``*.yaml`` file.
 
-  for k, v in k_extras.items():
-    quarantine[k] = v
+  Returns:
+      Tuple of ``(operation_name, spec_dict)`` if readable and valid, otherwise ``None``.
+  """
+  try:
+    with open(yaml_file, "r") as yaml_f:
+      data: JsonValue = yaml.safe_load(yaml_f)
+      if isinstance(data, dict):
+        raw_op = data.get("operation", yaml_file.stem)
+        op_name: str = str(raw_op) if isinstance(raw_op, str) else yaml_file.stem
+        return op_name, data
+  except (OSError, yaml.YAMLError, ValueError, TypeError) as exc:
+    logging.getLogger(__name__).debug("Skipping unreadable ODL file %s: %s", yaml_file, exc)
+  return None
 
-  # Standardize args and variants
-  for k, v in new_k_nn.items():
-    new_args: list[JsonValue] = []
-    raw_std_args = v.get("std_args", [])
-    if isinstance(raw_std_args, list):
-      for arg in raw_std_args:
-        if isinstance(arg, str):
-          arg = {"name": arg, "type": "Any"}
-        elif isinstance(arg, dict):
-          if "name" not in arg:
-            arg["name"] = "unknown"
-          if "type" not in arg:
-            arg["type"] = "Any"
-        new_args.append(arg)
-    v["std_args"] = new_args
 
-    raw_variants = v.get("variants", {})
-    if isinstance(raw_variants, dict):
-      for fw, var in raw_variants.items():
-        if isinstance(var, dict):
-          if "api" not in var:
-            var["api"] = ""
-          if "args" not in var:
-            var["args"] = {}
+def _load_odl_entries(odl_dir: Path) -> dict[str, dict[str, JsonValue]]:
+  """Load discrete ODL YAML files from ``odl_dir`` into an operation dictionary.
 
-  # Rewrite odl files
+  Args:
+      odl_dir: Directory containing discrete ODL ``*.yaml`` files.
+
+  Returns:
+      Mapping of operation identifier to parsed YAML dictionary.
+  """
+  entries: dict[str, dict[str, JsonValue]] = {}
+  if not odl_dir.exists():
+    return entries
+  for yaml_file in odl_dir.glob("*.yaml"):
+    loaded = _load_single_odl_entry(yaml_file)
+    if loaded is not None:
+      entries[loaded[0]] = loaded[1]
+  return entries
+
+
+def _normalize_op_schema(op_spec: dict[str, JsonValue]) -> None:
+  """Normalize ``std_args`` and ``variants`` dictionaries in-place on ``op_spec``.
+
+  Args:
+      op_spec: Operation specification dictionary to standardize.
+  """
+  new_args: list[JsonValue] = []
+  raw_std_args = op_spec.get("std_args", [])
+  if isinstance(raw_std_args, list):
+    for arg in raw_std_args:
+      if isinstance(arg, str):
+        arg = {"name": arg, "type": "Any"}
+      elif isinstance(arg, dict):
+        arg.setdefault("name", "unknown")
+        arg.setdefault("type", "Any")
+      new_args.append(arg)
+  op_spec["std_args"] = new_args
+
+  raw_variants = op_spec.get("variants", {})
+  if isinstance(raw_variants, dict):
+    for var in raw_variants.values():
+      if isinstance(var, dict):
+        var.setdefault("api", "")
+        var.setdefault("args", {})
+
+
+def _write_odl_and_quarantine(
+  odl_dir: Path,
+  quarantine_file: Path,
+  verified_ops: dict[str, dict[str, JsonValue]],
+  quarantine_ops: dict[str, dict[str, JsonValue]],
+) -> None:
+  """Write normalized verified ODL YAML files and ``quarantine.json``.
+
+  Args:
+      odl_dir: Target ODL YAML directory.
+      quarantine_file: Target ``quarantine.json`` path.
+      verified_ops: Mapping of verified operation definitions.
+      quarantine_ops: Mapping of quarantined operation definitions.
+  """
   if odl_dir.exists():
     for existing_file in odl_dir.glob("*.yaml"):
       existing_file.unlink()
 
-  for k, v in new_k_nn.items():
-    v["operation"] = k
-    out_yaml_file: Path = odl_dir / f"{k.replace('/', '_')}.yaml"
+  for op_key, op_val in verified_ops.items():
+    op_val["operation"] = op_key
+    out_yaml_file: Path = odl_dir / f"{op_key.replace('/', '_')}.yaml"
     with open(out_yaml_file, "w") as out_f:
-      yaml.dump(v, out_f, sort_keys=False, indent=2)
+      yaml.dump(op_val, out_f, sort_keys=False, indent=2)
 
   with open(quarantine_file, "w") as qu_f:
-    json.dump(quarantine, qu_f, indent=2)
+    json.dump(quarantine_ops, qu_f, indent=2)
+
+
+def run(extra_ops: dict[str, dict[str, JsonValue]] | None = None) -> None:
+  """Audit ODL YAML specifications, normalize argument schemas, and update ``quarantine.json``.
+
+  Args:
+      extra_ops: Optional mapping of extra operations to include in quarantine.
+  """
+  sem_dir: Path = Path("src/ml_switcheroo/semantics")
+  odl_dir: Path = sem_dir / "odl"
+  quarantine_file: Path = sem_dir / "quarantine.json"
+
+  k_nn = _load_odl_entries(odl_dir)
+  quarantine: dict[str, dict[str, JsonValue]] = {}
+  new_k_nn: dict[str, dict[str, JsonValue]] = {}
+
+  verified_apis = set(_CORE_VERIFIED_APIS) | {k for k, v in k_nn.items() if v.get("variants")}
+  for k, v in k_nn.items():
+    if k in verified_apis:
+      _normalize_op_schema(v)
+      new_k_nn[k] = v
+    else:
+      quarantine[k] = v
+
+  if extra_ops is not None:
+    quarantine.update(extra_ops)
+
+  _write_odl_and_quarantine(odl_dir, quarantine_file, new_k_nn, quarantine)
 
 
 if __name__ == "__main__":

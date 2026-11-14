@@ -4,7 +4,7 @@ import keras
 
 
 def relu_activation(x: keras.KerasTensor) -> keras.KerasTensor:
-  """Helper to relu activation.
+  """Execute `relu` to support relu activation in keras3 tests.
 
   Args:
       x: Primary input tensor or array operand.

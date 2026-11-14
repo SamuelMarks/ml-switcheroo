@@ -1,18 +1,17 @@
 """Test suite for the Mlx module."""
 
 import mlx.core as mx
-
 import mlx.nn as nn
 
 
 class DropoutModel:
-  """Test helper class DropoutModel."""
+  """Sentinel `DropoutModel` fixture class used in MLX tests."""
 
   def __init__(self, p: float = 0.5):
     """Initializes the DropoutModel instance.
 
     Args:
-        p: The p (float) for   init  .
+        p: Input `p` parameter value (`float`).
     """
     super().__init__()
     self.dropout = nn.Dropout(p)

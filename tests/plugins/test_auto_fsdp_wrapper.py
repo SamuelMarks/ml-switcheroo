@@ -1,10 +1,9 @@
 """Test suite for the Auto Fsdp Wrapper module."""
 
-from tests.conftest import _test_getattr, _test_setattr
-
 from unittest.mock import MagicMock
 
 import libcst as cst
+import pytest
 
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.dsl import OperationDef, OpType
@@ -13,7 +12,7 @@ from ml_switcheroo.plugins.auto_fsdp_wrapper import wrap_with_sharding
 
 
 def test_auto_fsdp_wrapper_pytorch() -> None:
-  """Verifies the behavior of auto FSDP wrapper pytorch."""
+  """Verify `Call` handles auto FSDP wrapper pytorch as expected."""
   node = cst.Call(func=cst.Name("Linear"), args=[])
   op_def = OperationDef(
     operation="Linear", description="Linear Layer", op_type=OpType.CLASS, sharding_supported=True, variants={}
@@ -35,7 +34,7 @@ def test_auto_fsdp_wrapper_pytorch() -> None:
 
 
 def test_auto_fsdp_wrapper_jax() -> None:
-  """Verifies the behavior of auto FSDP wrapper JAX."""
+  """Verify `Call` handles auto FSDP wrapper JAX as expected."""
   node = cst.Call(func=cst.Name("Dense"), args=[])
   op_def = OperationDef(
     operation="Dense", description="Dense Layer", op_type=OpType.CLASS, sharding_supported=True, variants={}
@@ -56,7 +55,7 @@ def test_auto_fsdp_wrapper_jax() -> None:
 
 
 def test_auto_fsdp_wrapper_not_supported() -> None:
-  """Verifies the behavior of auto FSDP wrapper not supported."""
+  """Verify `Call` handles auto FSDP wrapper not supported as expected."""
   node = cst.Call(func=cst.Name("Activation"), args=[])
   op_def = OperationDef(
     operation="Activation", description="Activation Layer", op_type=OpType.CLASS, sharding_supported=False, variants={}
@@ -72,7 +71,7 @@ def test_auto_fsdp_wrapper_not_supported() -> None:
 
 
 def test_auto_fsdp_wrapper_unknown_api() -> None:
-  """Verifies the behavior of auto FSDP wrapper with unknown API."""
+  """Verify `Call` handles auto FSDP wrapper unknown API as expected."""
   node = cst.Call(func=cst.Name("Linear"), args=[])
   op_def = OperationDef(
     operation="Linear", description="Linear Layer", op_type=OpType.CLASS, sharding_supported=True, variants={}
@@ -88,7 +87,7 @@ def test_auto_fsdp_wrapper_unknown_api() -> None:
 
 
 def test_auto_fsdp_wrapper_no_op_id() -> None:
-  """Verifies the behavior of auto FSDP wrapper no op id."""
+  """Verify `Call` handles auto FSDP wrapper no operation id as expected."""
   node = cst.Call(func=cst.Name("Unknown"), args=[])
   mock_semantics = MagicMock()
   mock_config = RuntimeConfig(target_framework="torch", source_framework="jax")
@@ -99,50 +98,27 @@ def test_auto_fsdp_wrapper_no_op_id() -> None:
   assert cst.ensure_type(result.func, cst.Name).value == "Unknown"
 
 
-def test_auto_fsdp_wrapper_no_api() -> None:
-  """Verifies the behavior of auto FSDP wrapper no API."""
+def test_auto_fsdp_wrapper_no_api(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `Call` handles auto FSDP wrapper no API as expected.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   node = cst.Call(func=cst.Name("Linear"))
-  ctx = HookContext(semantics=MagicMock(), config=MagicMock(effective_target="torch"))
+  semantics = MagicMock()
+  ctx = HookContext(semantics=semantics, config=MagicMock(effective_target="torch"))
   ctx.current_op_id = "Conv2d"
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").semantics}, "__getitem__")(
-          "v"
-        ).get_operation
-      },
-      "__getitem__",
-    )("v"),
+  monkeypatch.setattr(
+    semantics.get_operation,
     "return_value",
-    _test_getattr(
-      {
-        "v": _test_getattr({"v": MagicMock}, "__getitem__")("v")(
-          sharding_supported=_test_getattr({"v": True}, "__getitem__")("v")
-        )
-      },
-      "__getitem__",
-    )("v"),
+    MagicMock(sharding_supported=True),
+    raising=False,
   )
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").semantics}, "__getitem__")(
-          "v"
-        ).get_framework_config
-      },
-      "__getitem__",
-    )("v"),
+  monkeypatch.setattr(
+    semantics.get_framework_config,
     "return_value",
-    _test_getattr(
-      {
-        "v": {
-          "plugin_traits": _test_getattr(
-            {"v": {"sharding_wrapper_api": _test_getattr({"v": None}, "__getitem__")("v")}}, "__getitem__"
-          )("v")
-        }
-      },
-      "__getitem__",
-    )("v"),
+    {"plugin_traits": {"sharding_wrapper_api": None}},
+    raising=False,
   )
   result = wrap_with_sharding(node, ctx)
   assert result is node

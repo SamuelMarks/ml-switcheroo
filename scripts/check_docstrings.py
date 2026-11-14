@@ -1,18 +1,17 @@
 """Automated Docstring Coverage and Quality Checker.
 
 Verifies 100% module, class, method, and function docstring presence,
-prohibits placeholder docstrings, and enforces explicit argument (`Args:`)
-documentation for all non-`self`/`cls` parameters in production modules
-(`src/`, `scripts/`, and `docs/`).
+prohibits placeholder/broken synthetic docstrings, enforces explicit `Args:`
+parameter declarations (with stale-parameter detection), distinguishes `Yields:`
+from `Returns:` on generators, and enforces `Raises:` and public `Attributes:`
+documentation across production modules (`src/`, `scripts/`, and `docs/`).
 """
-
-from __future__ import annotations
-import typing
 
 import argparse
 import ast
 import re
 import sys
+import typing
 from pathlib import Path
 
 PLACEHOLDER_DOCSTRINGS: frozenset[str] = frozenset(
@@ -25,11 +24,13 @@ PLACEHOLDER_DOCSTRINGS: frozenset[str] = frozenset(
     "dummy.",
     "dummy method.",
     "test module.",
+    "test docstring.",
     "auto-generated doc.",
     "run the script.",
     "execute implementation detail.",
     "computed test result or fixture value.",
     "test argument or fixture.",
+    "converts .",
   }
 )
 
@@ -37,14 +38,48 @@ PLACEHOLDER_SUBSTRINGS: tuple[str, ...] = (
   "execute implementation detail.",
   "computed test result or fixture value.",
   "test argument or fixture.",
+  "converts .",
+  "resulting `none` from",
+  "mock implementation of  ",
 )
+
+_PLACEHOLDER_PATTERNS: tuple[re.Pattern[str], ...] = (
+  re.compile(r"(?:^|\n)\s*[A-Za-z]+s\s+\.", re.IGNORECASE),
+  re.compile(r"^execute\s+.+\s+helper\s+logic\.$", re.IGNORECASE),
+  re.compile(r"^helper\s+to\b", re.IGNORECASE),
+  re.compile(r"^test\s+helper\s+class\s+\w+\.$", re.IGNORECASE),
+  re.compile(r"^test\s+stub\s+for\b", re.IGNORECASE),
+  re.compile(r"^verif(?:y|ies)\s+(?:the\s+)?behavior\s+of\b", re.IGNORECASE),
+  re.compile(r"^verify\s+[\w\s`']+\s+behavior\.$", re.IGNORECASE),
+  re.compile(r":\s*the\s+[\w\s]+\s+\([^)\n]+\)\s+for\s+[\w\s]+\.", re.IGNORECASE),
+)
+
+_NL = chr(10)
+_SECTION_BOUNDARY = rf"(?:{_NL}\s*(?:Args|Arguments|Parameters|Params|Returns|Return|Yields|Yield|Raises|Raise|Notes|Examples|Attributes):|\Z)"
+
+
+def _match_placeholder_pattern(doc: str, first_line: str) -> str | None:
+  """Match `first_line` or full `doc` against `_PLACEHOLDER_PATTERNS`.
+
+  Args:
+      doc: Full raw docstring content.
+      first_line: First non-empty summary line of `doc`.
+
+  Returns:
+      Matched synthetic docstring fragment if found, otherwise `None`.
+  """
+  for pattern in _PLACEHOLDER_PATTERNS:
+    if first_line and pattern.search(first_line):
+      return first_line
+  for pattern in _PLACEHOLDER_PATTERNS:
+    match = pattern.search(doc)
+    if match:
+      return match.group(0).strip()
+  return None
 
 
 def _find_placeholder(doc: str) -> str | None:
   """Return the matched placeholder string if `doc` contains a placeholder docstring.
-
-  Checks the full normalized docstring, the summary line, and banned synthetic
-  substrings inside `Args:` / `Returns:` sections.
 
   Args:
       doc: Raw docstring text to inspect.
@@ -56,12 +91,13 @@ def _find_placeholder(doc: str) -> str | None:
   if normalized in PLACEHOLDER_DOCSTRINGS:
     return doc.strip()
   lines = [line.strip() for line in doc.strip().splitlines() if line.strip()]
-  if lines and lines[0].lower() in PLACEHOLDER_DOCSTRINGS:
-    return lines[0]
+  first_line = lines[0] if lines else ""
+  if first_line.lower() in PLACEHOLDER_DOCSTRINGS:
+    return first_line
   for sub in PLACEHOLDER_SUBSTRINGS:
     if sub in normalized:
       return sub
-  return None
+  return _match_placeholder_pattern(doc, first_line)
 
 
 def is_test_path(path: Path) -> bool:
@@ -102,33 +138,81 @@ def _extract_args_section(doc: str) -> str:
       doc: Full docstring text.
 
   Returns:
-      The extracted `Args:`/`Parameters:` section text, or the full docstring if no
-      section header is present.
+      The extracted `Args:`/`Parameters:` section text, or `""` when absent.
   """
   match = re.search(
-    r"(?:^|\n)\s*(?:Args|Arguments|Parameters|Params):\s*\n(.*?)(?:\n\s*(?:Returns|Yields|Raises|Notes|Examples|Attributes):|\Z)",
+    rf"(?:^|{_NL})[ \t]*(?:Args|Arguments|Parameters|Params):[ \t]*(?:{_NL}(.*?))?{_SECTION_BOUNDARY}",
     doc,
     re.DOTALL,
   )
-  return match.group(1) if match else doc
+  return (match.group(1) or "") if match else ""
 
 
 def is_arg_documented(doc: str, arg_name: str) -> bool:
-  """Check whether a parameter name is documented within a docstring.
+  """Check whether a parameter has an explicit `arg_name:` declaration in `Args:`.
 
   Args:
       doc: Normalized docstring content.
       arg_name: Parameter name to search for.
 
   Returns:
-      True if the parameter (or its leading-underscore-stripped form) appears in `doc`.
+      True if `arg_name` (or its leading-underscore-stripped form) is declared in `Args:`.
   """
   target = _extract_args_section(doc)
-  if re.search(rf"\b{re.escape(arg_name)}\b", target):
-    return True
+  if not target:
+    return False
+  candidates = [re.escape(arg_name)]
   stripped = arg_name.lstrip("_")
-  if stripped and re.search(rf"\b{re.escape(stripped)}\b", target):
-    return True
+  if stripped and stripped != arg_name:
+    candidates.append(re.escape(stripped))
+  pattern = rf"(?:^|{_NL})\s*\*{{0,2}}(?:{'|'.join(candidates)})\s*(?:\([^:{_NL}]*\))?\s*:"
+  return bool(re.search(pattern, target))
+
+
+def find_stale_args(doc: str, param_names: typing.Sequence[str]) -> list[str]:
+  """Identify documented `Args:` parameter entries that do not exist in `param_names`.
+
+  Args:
+      doc: Full docstring content.
+      param_names: Actual parameter names from the function signature.
+
+  Returns:
+      Ordered list of stale parameter names declared in `Args:`.
+  """
+  target = _extract_args_section(doc)
+  if not target:
+    return []
+  non_empty = [line for line in target.splitlines() if line.strip()]
+  if not non_empty:
+    return []
+  min_indent = min(len(line) - len(line.lstrip()) for line in non_empty)
+  allowed = set(param_names) | {p.lstrip("_") for p in param_names if p.lstrip("_")} | {"self", "cls"}
+  stale: list[str] = []
+  entry_pat = rf"^\s*\*{{0,2}}([A-Za-z_][A-Za-z0-9_]*)\s*(?:\([^:{_NL}]*\))?\s*:"
+  for line in non_empty:
+    if len(line) - len(line.lstrip()) == min_indent:
+      match = re.match(entry_pat, line)
+      if match and match.group(1) not in allowed:
+        stale.append(match.group(1))
+  return stale
+
+
+def is_generator_function(node: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
+  """Determine whether `node` directly contains `yield` or `yield from` expressions.
+
+  Args:
+      node: Function or async function AST definition node.
+
+  Returns:
+      True if `node` is a generator function (ignoring nested scopes).
+  """
+  stack: list[ast.AST] = list(node.body)
+  while stack:
+    current = stack.pop()
+    if isinstance(current, (ast.Yield, ast.YieldFrom)):
+      return True
+    if not isinstance(current, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)):
+      stack.extend(ast.iter_child_nodes(current))
   return False
 
 
@@ -145,39 +229,187 @@ def has_non_none_return(node: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
     return False
   if isinstance(node.returns, ast.Constant) and node.returns.value is None:
     return False
-  if isinstance(node.returns, ast.Name) and node.returns.id == "None":
-    return False
-  return True
+  return not (isinstance(node.returns, ast.Name) and node.returns.id == "None")
 
 
 def is_return_documented(doc: str) -> bool:
-  """Check whether a docstring includes a `Returns:` or `Yields:` section.
+  """Check whether a docstring includes a `Returns:` section.
 
   Args:
       doc: Normalized docstring content.
 
   Returns:
-      True if a `Returns:`, `Return:`, or `Yields:` section is present in `doc`.
+      True if a `Returns:` or `Return:` section is present in `doc`.
   """
-  return bool(re.search(r"(?:^|\n)\s*(?:Returns|Yields|Return):", doc))
+  return bool(re.search(rf"(?:^|{_NL})\s*(?:Returns|Return):", doc))
 
 
-def check_file(path: Path, check_args: bool | None = None, check_returns: bool | None = None) -> list[str]:
-  """Validate docstrings, argument documentation, and return documentation for a Python file.
+def is_yield_documented(doc: str) -> bool:
+  """Check whether a docstring includes a `Yields:` section.
+
+  Args:
+      doc: Normalized docstring content.
+
+  Returns:
+      True if a `Yields:` or `Yield:` section is present in `doc`.
+  """
+  return bool(re.search(rf"(?:^|{_NL})\s*(?:Yields|Yield):", doc))
+
+
+def has_uncaught_raise(node: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
+  """Check whether `node` contains an uncaught `raise` statement in its direct scope.
+
+  Ignores raises inside `try:` bodies that attach `except` handlers (unless re-raised
+  inside an `except` or `finally` block).
+
+  Args:
+      node: Function or async function AST definition node.
+
+  Returns:
+      True if an uncaught `raise` statement exists in `node`.
+  """
+  stack: list[ast.AST] = list(node.body)
+  while stack:
+    current = stack.pop()
+    if isinstance(current, ast.Raise):
+      return True
+    if isinstance(current, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)):
+      continue
+    if isinstance(current, ast.Try):
+      if not current.handlers:
+        stack.extend(current.body)
+      for handler in current.handlers:
+        stack.extend(handler.body)
+      stack.extend(current.orelse)
+      stack.extend(current.finalbody)
+    else:
+      stack.extend(ast.iter_child_nodes(current))
+  return False
+
+
+def is_raises_documented(doc: str) -> bool:
+  """Check whether a docstring includes a `Raises:` section.
+
+  Args:
+      doc: Normalized docstring content.
+
+  Returns:
+      True if a `Raises:` or `Raise:` section is present in `doc`.
+  """
+  return bool(re.search(rf"(?:^|{_NL})\s*(?:Raises|Raise):", doc))
+
+
+def find_undocumented_class_attributes(node: ast.ClassDef, doc: str) -> list[str]:
+  """Find public annotated class attributes lacking `Attributes:`, inline docs, or `Field(description=...)`.
+
+  Args:
+      node: Class AST definition node.
+      doc: Class docstring text.
+
+  Returns:
+      Ordered list of undocumented public attribute names on `node`.
+  """
+  attr_match = re.search(rf"(?:^|{_NL})\s*Attributes:\s*{_NL}(.*?){_SECTION_BOUNDARY}", doc, re.DOTALL)
+  attr_block = attr_match.group(1) if attr_match else ""
+
+  undocumented: list[str] = []
+  for idx, stmt in enumerate(node.body):
+    if not (isinstance(stmt, ast.AnnAssign) and isinstance(stmt.target, ast.Name)):
+      continue
+    attr_name = stmt.target.id
+    if attr_name.startswith("_") or attr_name == "model_config":
+      continue
+    has_inline = False
+    if idx + 1 < len(node.body):
+      next_stmt = node.body[idx + 1]
+      has_inline = (
+        isinstance(next_stmt, ast.Expr)
+        and isinstance(next_stmt.value, ast.Constant)
+        and isinstance(next_stmt.value.value, str)
+      )
+    has_field_desc = isinstance(stmt.value, ast.Call) and any(kw.arg == "description" for kw in stmt.value.keywords)
+    in_attr_section = bool(
+      attr_block and re.search(rf"(?:^|{_NL})\s*{re.escape(attr_name)}\s*(?:\([^:{_NL}]*\))?\s*:", attr_block)
+    )
+    if not (has_inline or has_field_desc or in_attr_section):
+      undocumented.append(attr_name)
+  return undocumented
+
+
+def _check_function_node(
+  path: Path,
+  node: ast.FunctionDef | ast.AsyncFunctionDef,
+  doc: str,
+  *,
+  enforce_args: bool,
+  enforce_returns: bool,
+  enforce_raises: bool,
+) -> list[str]:
+  """Validate parameter, return/yield, and raises sections for a single function node.
+
+  Args:
+      path: Source file path.
+      node: Function or async function AST node.
+      doc: Extracted docstring for `node`.
+      enforce_args: Whether to check `Args:` completeness and staleness.
+      enforce_returns: Whether to check `Returns:` / `Yields:` presence.
+      enforce_raises: Whether to check `Raises:` presence.
+
+  Returns:
+      List of violation messages for `node`.
+  """
+  violations: list[str] = []
+  if enforce_args:
+    params = extract_parameter_names(node)
+    violations.extend(
+      f"{path}:{node.lineno}: Undocumented argument '{param}' in '{node.name}'"
+      for param in params
+      if not is_arg_documented(doc, param)
+    )
+    violations.extend(
+      f"{path}:{node.lineno}: Stale documented argument '{stale}' in '{node.name}'"
+      for stale in find_stale_args(doc, params)
+    )
+
+  if enforce_returns and has_non_none_return(node):
+    if is_generator_function(node):
+      if not is_yield_documented(doc):
+        violations.append(f"{path}:{node.lineno}: Missing Yields section in generator '{node.name}'")
+    elif not is_return_documented(doc):
+      violations.append(f"{path}:{node.lineno}: Missing Returns section in '{node.name}'")
+
+  if enforce_raises and has_uncaught_raise(node) and not is_raises_documented(doc):
+    violations.append(f"{path}:{node.lineno}: Missing Raises section in '{node.name}'")
+
+  return violations
+
+
+def check_file(
+  path: Path,
+  check_args: bool | None = None,
+  check_returns: bool | None = None,
+  *,
+  check_raises: bool | None = None,
+  check_attributes: bool | None = None,
+) -> list[str]:
+  """Validate docstrings, arguments, returns/yields, raises, and class attributes for a file.
 
   Args:
       path: Path to the Python file to inspect.
-      check_args: Whether to enforce `Args:` parameter documentation. If None,
-          enabled for all files (including `tests/`).
-      check_returns: Whether to enforce `Returns:` documentation for functions with
-          non-`None` return annotations. If None, enabled when `check_args` is enabled.
+      check_args: Whether to enforce `Args:` parameter documentation (default: True).
+      check_returns: Whether to enforce `Returns:` / `Yields:` documentation (default: matches `check_args`).
+      check_raises: Whether to enforce `Raises:` documentation (default: True on non-test files).
+      check_attributes: Whether to enforce public class `Attributes:` (default: True on non-test files).
 
   Returns:
       List of human-readable violation strings found in the file.
   """
   violations: list[str] = []
+  is_prod = not is_test_path(path)
   enforce_args = True if check_args is None else check_args
   enforce_returns = enforce_args if check_returns is None else check_returns
+  enforce_raises = is_prod if check_raises is None else check_raises
+  enforce_attributes = is_prod if check_attributes is None else check_attributes
 
   source = path.read_text(encoding="utf-8")
   tree = ast.parse(source, filename=str(path))
@@ -201,14 +433,23 @@ def check_file(path: Path, check_args: bool | None = None, check_returns: bool |
       if node_placeholder is not None:
         violations.append(f"{path}:{node.lineno}: Placeholder {kind} docstring for '{node.name}': '{node_placeholder}'")
 
-      if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-        if enforce_args:
-          params = extract_parameter_names(node)
-          for param in params:
-            if not is_arg_documented(doc, param):
-              violations.append(f"{path}:{node.lineno}: Undocumented argument '{param}' in '{node.name}'")
-        if enforce_returns and has_non_none_return(node) and not is_return_documented(doc):
-          violations.append(f"{path}:{node.lineno}: Missing Returns section in '{node.name}'")
+      if isinstance(node, ast.ClassDef):
+        if enforce_attributes:
+          violations.extend(
+            f"{path}:{node.lineno}: Undocumented public attribute '{attr_name}' in class '{node.name}'"
+            for attr_name in find_undocumented_class_attributes(node, doc)
+          )
+      else:
+        violations.extend(
+          _check_function_node(
+            path,
+            node,
+            doc,
+            enforce_args=enforce_args,
+            enforce_returns=enforce_returns,
+            enforce_raises=enforce_raises,
+          )
+        )
 
   return violations
 

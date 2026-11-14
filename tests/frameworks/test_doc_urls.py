@@ -17,14 +17,14 @@ CASES: list[tuple[str, str, str]] = [
 ]
 
 
-@pytest.mark.parametrize("fw_key, api, pattern", CASES)
+@pytest.mark.parametrize(("fw_key", "api", "pattern"), CASES)
 def test_doc_url_generation(fw_key: str, api: str, pattern: str) -> None:
-  """Verifies the behavior of documentation URL generation.
+  """Verify `get_adapter` handles doc url generation as expected.
 
   Args:
-      fw_key: The fw key (str) for test doc url generation.
-      api: The api (str) for test doc url generation.
-      pattern: The pattern (str) for test doc url generation.
+      fw_key: Input `fw_key` parameter value (`str`).
+      api: Input `api` parameter value (`str`).
+      pattern: Input `pattern` parameter value (`str`).
   """
   adapter = get_adapter(fw_key)
   assert adapter is not None, f"Adapter for {fw_key} missing"
@@ -34,7 +34,7 @@ def test_doc_url_generation(fw_key: str, api: str, pattern: str) -> None:
 
 
 def test_stub_adapters_return_docs() -> None:
-  """Verifies the behavior of stub adapters return documentation."""
+  """Verify `get_adapter` handles stub adapters return docs as expected."""
   mlir = get_adapter("mlir")
   assert mlir is not None
   assert mlir.get_doc_url("tosa.add") is None

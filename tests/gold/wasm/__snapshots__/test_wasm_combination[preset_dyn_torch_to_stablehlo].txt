@@ -1,0 +1,17 @@
+--- Forward ---
+module {sym_name = "DynamicShapeNet"} {func.func {sym_name = "__init__", function_type = (tensor<*xf32>) -> ()} {^entry(%self0: tensor<*xf32>):%1 = sw.op {type = "super"}%2 = sw.getattr (%1) {name = "__init__"}%3 = sw.call (%2)// Flatten dynamic spatial dimensions (2, 3, 4, 4) -> (2, 48)
+%4 = sw.op {type = "nn.Flatten"}sw.setattr (%self0, %4) {name = "flat"}// LazyLinear resolves in_features=48 on-device
+%cst5 = stablehlo.constant {value = dense<10>} : tensor<i32>%6 = sw.op (%cst5) {type = "nn.LazyLinear"}sw.setattr (%self0, %6) {name = "fc"}}func.func {sym_name = "forward", function_type = (tensor<*xf32>, tensor<*xf32>) -> tensor<*xf32>} : tensor<*xf32> {^entry(%self7: tensor<*xf32>, %x8: tensor<*xf32>):// Dynamic reshape with -1 and symbolic batch size
+// flatten spatial dims
+%9 = sw.getattr (%self7) {name = "flat"}%10 = sw.call (%9, %x8)// symbolic -1 view
+%cst11 = stablehlo.constant {value = dense<0>} : tensor<i32>%12 = sw.getattr (%10) {name = "size"}%13 = sw.call (%12, %cst11)%14 = sw.getattr (%10) {name = "view"}%15 = sw.call (%14, %13, %error)%16 = sw.getattr (%self7) {name = "fc"}%17 = sw.call (%16, %15)func.return (%17)}}
+--- Backward ---
+import torch
+import torch.nn as nn
+
+class GeneratedNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, x):
+        return x

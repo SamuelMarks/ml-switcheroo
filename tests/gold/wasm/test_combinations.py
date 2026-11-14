@@ -33,7 +33,7 @@ EXAMPLES: dict[str, dict[str, str]] = get_examples()
 
 @pytest.fixture(scope="module")
 def semantics() -> SemanticsManager:
-  """Helper to semantics.
+  """Create a configured `SemanticsManager` fixture for combinations tests.
 
   Returns:
       Configured `semantics` fixture value (SemanticsManager).
@@ -43,12 +43,12 @@ def semantics() -> SemanticsManager:
 
 @pytest.mark.parametrize("example_key", sorted(EXAMPLES.keys()))
 def test_wasm_combination(example_key: str, semantics: SemanticsManager, snapshot: SnapshotAssert) -> None:
-  """Verifies the behavior of wasm combination.
+  """Verify `ex.get` handles Wasm combination as expected.
 
   Args:
-      example_key: The example key (str) for test wasm combination.
+      example_key: Input `example_key` parameter value (`str`).
       semantics: SemanticsManager instance providing operation and trait definitions.
-      snapshot: The snapshot (SnapshotAssert) for test wasm combination.
+      snapshot: Input `snapshot` parameter value (`SnapshotAssert`).
   """
   ex = EXAMPLES[example_key]
   src_fw: str = ex["srcFw"]

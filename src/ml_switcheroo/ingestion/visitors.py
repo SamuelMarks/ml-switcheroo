@@ -49,6 +49,22 @@ class PyTorchVisitor(cst.CSTVisitor):
     elif original_node.name.value == "forward":
       self.in_forward = False
 
+  @staticmethod
+  def _call_leaf_name(func: cst.BaseExpression) -> str | None:
+    """Return the bare callable identifier from a ``cst.Name`` or ``cst.Attribute`` node.
+
+    Args:
+        func: Call target expression node.
+
+    Returns:
+        Leaf identifier string if ``func`` is a ``Name`` or ``Attribute``, otherwise ``None``.
+    """
+    if isinstance(func, cst.Attribute):
+      return func.attr.value
+    if isinstance(func, cst.Name):
+      return func.value
+    return None
+
   def visit_Assign(self, node: cst.Assign) -> bool | None:
     """Extract state allocations in __init__.
 
@@ -58,42 +74,24 @@ class PyTorchVisitor(cst.CSTVisitor):
     Returns:
         None to continue traversal.
     """
-    if self.in_init and isinstance(node.value, cst.Call):
-      call_node = node.value
-      func = call_node.func
+    if not (self.in_init and isinstance(node.value, cst.Call)):
+      return None
 
-      is_parameter = False
-      is_register_buffer = False
-
-      if isinstance(func, cst.Attribute):
-        if func.attr.value == "Parameter":
-          is_parameter = True
-      elif isinstance(func, cst.Name):
-        if func.value == "Parameter":
-          is_parameter = True
-
-      if isinstance(func, cst.Attribute):
-        if func.attr.value == "register_buffer":
-          is_register_buffer = True
-      elif isinstance(func, cst.Name):
-        if func.value == "register_buffer":
-          is_register_buffer = True
-
-      if is_parameter:
-        for target in node.targets:
-          target_node = target.target
-          if (
-            isinstance(target_node, cst.Attribute)
-            and isinstance(target_node.value, cst.Name)
-            and target_node.value.value == "self"
-          ):
-            self.state_allocations[target_node.attr.value] = call_node
-      elif is_register_buffer and len(call_node.args) >= 1:
-        arg_name_node = call_node.args[0].value
-        if isinstance(arg_name_node, cst.SimpleString):
-          name = arg_name_node.value.strip("\"'")
-          if len(call_node.args) >= 2:
-            self.state_allocations[name] = call_node.args[1].value
+    call_node = node.value
+    leaf = self._call_leaf_name(call_node.func)
+    if leaf == "Parameter":
+      for target in node.targets:
+        target_node = target.target
+        if (
+          isinstance(target_node, cst.Attribute)
+          and isinstance(target_node.value, cst.Name)
+          and target_node.value.value == "self"
+        ):
+          self.state_allocations[target_node.attr.value] = call_node
+    elif leaf == "register_buffer" and len(call_node.args) >= 2:
+      arg_name_node = call_node.args[0].value
+      if isinstance(arg_name_node, cst.SimpleString):
+        self.state_allocations[arg_name_node.value.strip("\"'")] = call_node.args[1].value
     return None
 
   def visit_SimpleStatementLine(self, node: cst.SimpleStatementLine) -> bool | None:
@@ -113,9 +111,13 @@ class PyTorchVisitor(cst.CSTVisitor):
           call_node = stmt.value
           func = call_node.func
           is_register_buffer = False
-          if isinstance(func, cst.Attribute) and func.attr.value == "register_buffer":
-            if isinstance(func.value, cst.Name) and func.value.value == "self":
-              is_register_buffer = True
+          if (
+            isinstance(func, cst.Attribute)
+            and func.attr.value == "register_buffer"
+            and isinstance(func.value, cst.Name)
+            and func.value.value == "self"
+          ):
+            is_register_buffer = True
           if is_register_buffer and len(call_node.args) >= 1:
             arg_name_node = call_node.args[0].value
             if isinstance(arg_name_node, cst.SimpleString):
@@ -231,19 +233,19 @@ class JAXVisitor(cst.CSTVisitor):
         self.jit_nodes.append(node)
       elif isinstance(dec_node, cst.Call):
         func = dec_node.func
-        if isinstance(func, cst.Attribute) and func.attr.value == "jit":
+        if (isinstance(func, cst.Attribute) and func.attr.value == "jit") or (
+          isinstance(func, cst.Name) and func.value == "jit"
+        ):
           self.jit_nodes.append(node)
-        elif isinstance(func, cst.Name) and func.value == "jit":
-          self.jit_nodes.append(node)
-        elif isinstance(func, cst.Attribute) and func.attr.value == "vmap":
-          self.vmap_nodes.append(node)
-        elif isinstance(func, cst.Name) and func.value == "vmap":
+        elif (isinstance(func, cst.Attribute) and func.attr.value == "vmap") or (
+          isinstance(func, cst.Name) and func.value == "vmap"
+        ):
           self.vmap_nodes.append(node)
       elif isinstance(dec_node, cst.Name) and dec_node.value == "jit":
         self.jit_nodes.append(node)
-      elif isinstance(dec_node, cst.Name) and dec_node.value == "vmap":
-        self.vmap_nodes.append(node)
-      elif isinstance(dec_node, cst.Attribute) and dec_node.attr.value == "vmap":
+      elif (isinstance(dec_node, cst.Name) and dec_node.value == "vmap") or (
+        isinstance(dec_node, cst.Attribute) and dec_node.attr.value == "vmap"
+      ):
         self.vmap_nodes.append(node)
     return None
 

@@ -1,12 +1,9 @@
 """Test suite for the Latex Dsl module."""
 
-from tests.conftest import _test_getattr
-
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
 
 from ml_switcheroo.frameworks.base import InitMode, StandardMap
 from ml_switcheroo.frameworks.latex_dsl import LatexDSLAdapter
@@ -14,7 +11,7 @@ from ml_switcheroo.semantics.schema import PluginTraits
 
 
 def test_latex_dsl_init() -> None:
-  """Verifies the behavior of LaTeX DSL initialization."""
+  """Verify `LatexDSLAdapter` returns `98` for latex DSL init."""
   adapter = LatexDSLAdapter()
   assert adapter.display_name == "LaTeX DSL (MIDL)"
   assert adapter.ui_priority == 98
@@ -23,15 +20,15 @@ def test_latex_dsl_init() -> None:
 
 
 def test_latex_dsl_create_parser() -> None:
-  """Verifies the behavior of LaTeX DSL create parser."""
+  """Verify `LatexDSLAdapter` handles latex DSL create parser as expected."""
   adapter = LatexDSLAdapter()
   parser = adapter.create_parser("y = |x|")
   assert parser is not None
-  assert _test_getattr(parser, "source", None) == "y = |x|"
+  assert parser.source == "y = |x|"
 
 
 def test_latex_dsl_properties() -> None:
-  """Verifies the behavior of LaTeX DSL properties."""
+  """Verify `LatexDSLAdapter` emits `midl` for latex DSL properties."""
   adapter = LatexDSLAdapter()
   assert adapter.import_alias == ("midl", "midl")
   assert "midl" in adapter.import_namespaces
@@ -49,10 +46,8 @@ def test_latex_dsl_properties() -> None:
   assert "Module" in defs
   specs = adapter.specifications
   assert "Conv2d" in specs
-  snapshot: dict[str, RuntimeTensorOrValue] = {}
-  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    _test_getattr({"v": snapshot}, "__getitem__")("v")
-  )
+  snapshot: dict[str, dict[str, JsonValue]] = {}
+  adapter.apply_wiring(snapshot)
   assert snapshot == {}
   assert adapter.get_doc_url("anything") is None
   examples: dict[str, str] = adapter.get_tiered_examples()
@@ -61,10 +56,10 @@ def test_latex_dsl_properties() -> None:
 
 @patch("ml_switcheroo.frameworks.latex_dsl.load_definitions")
 def test_latex_dsl_definitions_already_present(mock_load: MagicMock) -> None:
-  """Verifies the behavior of LaTeX DSL definitions already present.
+  """Verify `LatexDSLAdapter` handles latex DSL definitions already present as expected.
 
   Args:
-      mock_load: The mock load (MagicMock) for test latex dsl definitions already present.
+      mock_load: Input `mock_load` parameter value (`MagicMock`).
   """
   mock_load.return_value = {
     "Module": StandardMap(api="existing.Module"),
@@ -77,13 +72,13 @@ def test_latex_dsl_definitions_already_present(mock_load: MagicMock) -> None:
 
 
 def test_latex_dsl_adapter_get_device_check_syntax() -> None:
-  """Verify latex dsl adapter get device check syntax behavior."""
+  """Verify `LatexDSLAdapter` handles latex DSL adapter get device check syntax as expected."""
   adapter = LatexDSLAdapter()
   assert adapter.get_device_check_syntax() == "True"
 
 
 def test_latex_dsl_adapter_definitions() -> None:
-  """Verify latex dsl adapter definitions behavior."""
+  """Verify `ldsl.LatexDSLAdapter` emits `Module` for latex DSL adapter definitions."""
   from unittest.mock import patch
 
   import ml_switcheroo.frameworks.latex_dsl as ldsl
@@ -97,7 +92,7 @@ def test_latex_dsl_adapter_definitions() -> None:
 
 
 def test_latex_dsl_adapter_properties() -> None:
-  """Verify latex dsl adapter properties behavior."""
+  """Verify `LatexDSLAdapter` emits `tier1_math` for latex DSL adapter properties."""
   adapter = LatexDSLAdapter()
   assert adapter.get_device_syntax("cpu") == ""
   assert adapter.get_rng_split_syntax("rng", "key") == ""
@@ -117,7 +112,7 @@ def test_latex_dsl_adapter_properties() -> None:
 
 
 def test_latex_dsl_adapter_missing_methods() -> None:
-  """Verify latex dsl adapter missing methods behavior."""
+  """Verify `LatexDSLAdapter` handles latex DSL adapter missing methods as expected."""
   adapter = LatexDSLAdapter()
   assert adapter.get_device_syntax("cpu") == ""
   assert adapter.get_device_check_syntax() == "True"

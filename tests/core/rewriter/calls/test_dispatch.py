@@ -1,9 +1,11 @@
-"""Test suite for conditional dispatch logic."""
+"""Unit tests for conditional rule dispatch (`ml_switcheroo.core.rewriter.calls.dispatch`)."""
 
-from tests.conftest import _test_getattr
+from unittest.mock import MagicMock
 
 import libcst as cst
+from pydantic import JsonValue
 
+from ml_switcheroo.core.dsl import Rule
 from ml_switcheroo.core.rewriter.calls.dispatch import (
   _check_rule_condition,
   _extract_argument_node,
@@ -13,237 +15,141 @@ from ml_switcheroo.core.rewriter.calls.dispatch import (
 from ml_switcheroo.enums import LogicOp
 
 
-class DummyRule:
-  """Mock rule for dispatch evaluation."""
+class _DispatchRewriterStub:
+  """Minimal rewriter host stub providing `source_framework` and `_is_module_alias`."""
 
-  def __init__(
-    self,
-    if_arg: str,
-    op: LogicOp | str,
-    is_val: int | float | str | bool | None | list[int] | tuple[int, ...] | set[int],
-    use_api: str,
-  ) -> None:
-    """Initialize test helper instance.
+  def __init__(self, source_framework: str = "torch", *, module_alias: bool = False) -> None:
+    """Initialize source framework and alias behavior.
 
     Args:
-        if_arg: The if arg (str) for   init  .
-        op: The op (LogicOp | str) for   init  .
-        is_val: The is val (int | float | str | bool | None | list[int] | tuple[int, ...] | set[int]) for   init  .
-        use_api: The use api (str) for   init  .
-    """
-    self.if_arg = if_arg
-    self.op = op
-    self.is_val = is_val
-    self.use_api = use_api
-
-
-class DummyRewriter:
-  """Mock rewriter."""
-
-  def __init__(self, source_framework: str) -> None:
-    """Initialize test helper instance.
-
-    Args:
-        source_framework: Source framework identifier string.
+        source_framework: Source framework identifier.
+        module_alias: Return value for `_is_module_alias`.
     """
     self.source_framework = source_framework
+    self._module_alias = module_alias
 
-  def _is_module_alias(self, name: cst.CSTNode) -> bool:
-    """Execute is module alias helper logic.
+  def _is_module_alias(self, _node: cst.CSTNode) -> bool:
+    """Indicate whether `_node` is a registered module alias.
 
     Args:
-        name: Identifier or operation name string.
+        _node: Receiver CST node.
 
     Returns:
-        Resulting `bool` from is module alias.
+        Configured `self._module_alias` boolean.
     """
-    return False
+    return self._module_alias
 
 
-def parse_call(code: str) -> cst.Call:
-  """Parses a single call from code.
+def _parse_call(code: str) -> cst.Call:
+  """Parse a Python call expression into `cst.Call`.
+
+  Args:
+      code: Python call expression string.
 
   Returns:
-      Resulting `cst.Call` from parse call.
+      Parsed `cst.Call` node.
   """
-  module: cst.Module = cst.parse_module(code)
-  expr = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
-  return cst.ensure_type(expr, cst.Call)
+  return cst.ensure_type(cst.parse_expression(code), cst.Call)
 
 
-def test_node_to_literal() -> None:
-  """Verify node to literal behavior."""
+def test_node_to_literal_conversions_and_malformed_values() -> None:
+  """Verify `_node_to_literal` converts Python CST scalars and returns `None` on malformed/compound nodes."""
   assert _node_to_literal(cst.Integer("42")) == 42
   assert _node_to_literal(cst.Float("3.14")) == 3.14
   assert _node_to_literal(cst.SimpleString("'hello'")) == "hello"
   assert _node_to_literal(cst.Name("True")) is True
   assert _node_to_literal(cst.Name("False")) is False
   assert _node_to_literal(cst.Name("None")) is None
-
-  # Unconvertible node
+  assert _node_to_literal(cst.Name("Other")) is None
   assert _node_to_literal(cst.List([])) is None
 
+  bad_int = MagicMock(spec=cst.Integer)
+  bad_int.value = "not_int"
+  assert _node_to_literal(bad_int) is None
 
-def test_check_rule_condition_is_type() -> None:
-  """Verify check rule condition is type behavior."""
-  rule_int = DummyRule("x", LogicOp.IS_TYPE, "int", "foo")
-  assert _check_rule_condition(cst.Integer("5"), rule_int)
-  assert not _check_rule_condition(cst.Float("5.0"), rule_int)
-
-  rule_float = DummyRule("x", LogicOp.IS_TYPE, "float", "foo")
-  assert _check_rule_condition(cst.Float("3.14"), rule_float)
-  assert not _check_rule_condition(cst.Integer("3"), rule_float)
-
-  rule_str = DummyRule("x", LogicOp.IS_TYPE, "str", "foo")
-  assert _check_rule_condition(cst.SimpleString('"hi"'), rule_str)
-
-  rule_list = DummyRule("x", LogicOp.IS_TYPE, "list", "foo")
-  assert _check_rule_condition(cst.List([]), rule_list)
-
-  rule_dict = DummyRule("x", LogicOp.IS_TYPE, "dict", "foo")
-  assert _check_rule_condition(cst.Dict([]), rule_dict)
-
-  rule_bool = DummyRule("x", LogicOp.IS_TYPE, "bool", "foo")
-  assert _check_rule_condition(cst.Name("True"), rule_bool)
-  assert not _check_rule_condition(cst.Name("None"), rule_bool)
-
-  rule_unknown = DummyRule("x", LogicOp.IS_TYPE, "foo", "foo")
-  assert not _check_rule_condition(cst.Name("var"), rule_unknown)
+  bad_float = MagicMock(spec=cst.Float)
+  bad_float.value = "not_float"
+  assert _node_to_literal(bad_float) is None
 
 
-def test_check_rule_condition_operators() -> None:
-  """Verify check rule condition operators behavior."""
-  # EQ
-  rule_eq = DummyRule("x", LogicOp.EQ, 5, "foo")
-  assert _check_rule_condition(cst.Integer("5"), rule_eq)
-  assert not _check_rule_condition(cst.Integer("6"), rule_eq)
+def test_check_rule_condition_type_checks_and_comparisons() -> None:
+  """Verify `_check_rule_condition` across `IS_TYPE` and all comparison `LogicOp` operators."""
+  assert _check_rule_condition(cst.Integer("5"), Rule(if_arg="x", op=LogicOp.IS_TYPE, is_val="int", use_api="f"))
+  assert not _check_rule_condition(cst.Float("5.0"), Rule(if_arg="x", op=LogicOp.IS_TYPE, is_val="int", use_api="f"))
+  assert _check_rule_condition(cst.Float("3.14"), Rule(if_arg="x", op=LogicOp.IS_TYPE, is_val="float", use_api="f"))
+  assert not _check_rule_condition(cst.Integer("3"), Rule(if_arg="x", op=LogicOp.IS_TYPE, is_val="float", use_api="f"))
+  assert _check_rule_condition(cst.SimpleString('"s"'), Rule(if_arg="x", op=LogicOp.IS_TYPE, is_val="str", use_api="f"))
+  assert _check_rule_condition(cst.List([]), Rule(if_arg="x", op=LogicOp.IS_TYPE, is_val="list", use_api="f"))
+  assert _check_rule_condition(cst.Dict([]), Rule(if_arg="x", op=LogicOp.IS_TYPE, is_val="dict", use_api="f"))
+  assert _check_rule_condition(cst.Name("True"), Rule(if_arg="x", op=LogicOp.IS_TYPE, is_val="bool", use_api="f"))
+  assert _check_rule_condition(cst.Name("False"), Rule(if_arg="x", op=LogicOp.IS_TYPE, is_val="bool", use_api="f"))
+  assert not _check_rule_condition(cst.Name("None"), Rule(if_arg="x", op=LogicOp.IS_TYPE, is_val="bool", use_api="f"))
+  assert not _check_rule_condition(cst.Name("v"), Rule(if_arg="x", op=LogicOp.IS_TYPE, is_val="other", use_api="f"))
 
-  # NEQ
-  rule_neq = DummyRule("x", LogicOp.NEQ, 5, "foo")
-  assert _check_rule_condition(cst.Integer("6"), rule_neq)
-  assert not _check_rule_condition(cst.Integer("5"), rule_neq)
+  assert _check_rule_condition(cst.Integer("5"), Rule(if_arg="x", op=LogicOp.EQ, is_val=5, use_api="f"))
+  assert not _check_rule_condition(cst.Integer("6"), Rule(if_arg="x", op=LogicOp.EQ, is_val=5, use_api="f"))
+  assert _check_rule_condition(cst.Integer("6"), Rule(if_arg="x", op=LogicOp.NEQ, is_val=5, use_api="f"))
+  assert not _check_rule_condition(cst.Integer("5"), Rule(if_arg="x", op=LogicOp.NEQ, is_val=5, use_api="f"))
+  assert _check_rule_condition(cst.Integer("6"), Rule(if_arg="x", op=LogicOp.GT, is_val=5, use_api="f"))
+  assert not _check_rule_condition(cst.Integer("4"), Rule(if_arg="x", op=LogicOp.GT, is_val=5, use_api="f"))
+  assert _check_rule_condition(cst.Integer("4"), Rule(if_arg="x", op=LogicOp.LT, is_val=5, use_api="f"))
+  assert not _check_rule_condition(cst.Integer("6"), Rule(if_arg="x", op=LogicOp.LT, is_val=5, use_api="f"))
+  assert _check_rule_condition(cst.Integer("5"), Rule(if_arg="x", op=LogicOp.GTE, is_val=5, use_api="f"))
+  assert not _check_rule_condition(cst.Integer("4"), Rule(if_arg="x", op=LogicOp.GTE, is_val=5, use_api="f"))
+  assert _check_rule_condition(cst.Integer("5"), Rule(if_arg="x", op=LogicOp.LTE, is_val=5, use_api="f"))
+  assert not _check_rule_condition(cst.Integer("6"), Rule(if_arg="x", op=LogicOp.LTE, is_val=5, use_api="f"))
+  assert _check_rule_condition(cst.Integer("2"), Rule(if_arg="x", op=LogicOp.IN, is_val=[1, 2, 3], use_api="f"))
+  assert not _check_rule_condition(cst.Integer("4"), Rule(if_arg="x", op=LogicOp.IN, is_val=[1, 2, 3], use_api="f"))
+  assert _check_rule_condition(cst.Integer("4"), Rule(if_arg="x", op=LogicOp.NOT_IN, is_val=[1, 2, 3], use_api="f"))
+  assert not _check_rule_condition(cst.Integer("2"), Rule(if_arg="x", op=LogicOp.NOT_IN, is_val=[1, 2, 3], use_api="f"))
+  assert not _check_rule_condition(cst.Name("var"), Rule(if_arg="x", op=LogicOp.EQ, is_val=5, use_api="f"))
 
-  # GT
-  rule_gt = DummyRule("x", LogicOp.GT, 5, "foo")
-  assert _check_rule_condition(cst.Integer("6"), rule_gt)
-  assert not _check_rule_condition(cst.Integer("5"), rule_gt)
+  class _UnknownOpRule:
+    """Rule stub carrying an unrecognized `op` string."""
 
-  # LT
-  rule_lt = DummyRule("x", LogicOp.LT, 5, "foo")
-  assert _check_rule_condition(cst.Integer("4"), rule_lt)
+    if_arg = "x"
+    op = "UNKNOWN_OP"
+    is_val = 5
+    use_api = "f"
 
-  # GTE
-  rule_gte = DummyRule("x", LogicOp.GTE, 5, "foo")
-  assert _check_rule_condition(cst.Integer("5"), rule_gte)
-
-  # LTE
-  rule_lte = DummyRule("x", LogicOp.LTE, 5, "foo")
-  assert _check_rule_condition(cst.Integer("5"), rule_lte)
-
-  # IN
-  rule_in = DummyRule("x", LogicOp.IN, [1, 2, 3], "foo")
-  assert _check_rule_condition(cst.Integer("2"), rule_in)
-
-  # NOT_IN
-  rule_notin = DummyRule("x", LogicOp.NOT_IN, [1, 2, 3], "foo")
-  assert _check_rule_condition(cst.Integer("4"), rule_notin)
-
-  # Missing literal
-  assert not _check_rule_condition(cst.Name("var"), rule_eq)
-
-
-def test_extract_argument_node_keyword() -> None:
-  """Verify extract argument node keyword behavior."""
-  rewriter = DummyRewriter("torch")
-  call: cst.Call = parse_call("func(a=1, b=2)")
-
-  node = _extract_argument_node(rewriter, call, "b", "b", ["a", "b"])
-  assert isinstance(node, cst.Integer)
-  assert node.value == "2"
+  assert _check_rule_condition(cst.Integer("6"), _UnknownOpRule()) is False
+  assert _check_rule_condition(cst.Integer("6"), "not_a_rule") is False
 
 
-def test_extract_argument_node_positional() -> None:
-  """Verify extract argument node positional behavior."""
-  rewriter = DummyRewriter("torch")
-  call: cst.Call = parse_call("func(1, 2)")
+def test_extract_argument_node_and_evaluate_dispatch_rules() -> None:
+  """Verify keyword, positional, receiver-method extraction, and full `evaluate_dispatch_rules` matching."""
+  rewriter = _DispatchRewriterStub("torch", module_alias=False)
 
-  node = _extract_argument_node(rewriter, call, "b", "b", ["a", "b"])
-  assert isinstance(node, cst.Integer)
-  assert node.value == "2"
+  class _PlainDispatchHost:
+    """Host without `_is_module_alias`."""
 
+  assert _extract_argument_node(_PlainDispatchHost(), _parse_call("func(a=1)"), "other", "a", ["a"]) is None
 
-def test_extract_argument_node_method() -> None:
-  """Verify extract argument node method behavior."""
+  kw_node = _extract_argument_node(rewriter, _parse_call("func(a=1, b=2)"), "b", "b", ["a", "b"])
+  assert isinstance(kw_node, cst.Integer)
+  assert kw_node.value == "2"
 
-  class MethodRewriter(DummyRewriter):
-    """Test helper class MethodRewriter."""
+  pos_node = _extract_argument_node(rewriter, _parse_call("func(1, 2)"), "b", "b", ["a", "b"])
+  assert isinstance(pos_node, cst.Integer)
+  assert pos_node.value == "2"
 
-    def _is_module_alias(self, name: cst.CSTNode) -> bool:
-      """Execute is module alias helper logic.
+  meth_node = _extract_argument_node(rewriter, _parse_call("obj.func(2)"), "b", "b", ["x", "b"])
+  assert isinstance(meth_node, cst.Integer)
+  assert meth_node.value == "2"
 
-      Args:
-          name: Identifier or operation name string.
+  assert _extract_argument_node(rewriter, _parse_call("func(1)"), "b", "b", ["a", "b"]) is None
+  assert _extract_argument_node(rewriter, _parse_call("func(1)"), "c", "c", ["a", "b"]) is None
 
-      Returns:
-          Resulting `bool` from is module alias.
-      """
-      return False
-
-  rewriter = MethodRewriter("torch")
-  call: cst.Call = parse_call("obj.func(2)")
-
-  node = _extract_argument_node(rewriter, call, "b", "b", ["x", "b"])
-  assert isinstance(node, cst.Integer)
-  assert node.value == "2"
-
-
-def test_extract_argument_node_not_found() -> None:
-  """Verify extract argument node not found behavior."""
-  rewriter = DummyRewriter("torch")
-  call: cst.Call = parse_call("func(1)")
-
-  node = _extract_argument_node(rewriter, call, "b", "b", ["a", "b"])
-  assert node is None
-
-  node2 = _extract_argument_node(rewriter, call, "c", "c", ["a", "b"])
-  assert node2 is None
-
-
-def test_evaluate_dispatch_rules() -> None:
-  """Verify evaluate dispatch rules behavior."""
-  rewriter = DummyRewriter("torch")
-  call: cst.Call = parse_call("func(mode='fast')")
-
-  rules = [
-    DummyRule("mode", LogicOp.EQ, "fast", "fast_func"),
-    DummyRule("mode", LogicOp.EQ, "slow", "slow_func"),
+  rules: list[Rule | JsonValue] = [
+    "non_rule_entry",
+    Rule(if_arg="missing", op=LogicOp.EQ, is_val="x", use_api="miss_func"),
+    Rule(if_arg="mode", op=LogicOp.EQ, is_val="fast", use_api="fast_func"),
+    Rule(if_arg="mode", op=LogicOp.EQ, is_val="slow", use_api="slow_func"),
   ]
-
-  details = {
-    "variants": {"torch": {"args": {"mode": "mode"}}},
-    "std_args": ["data", {"name": "mode"}],
+  details: dict[str, JsonValue] = {
+    "variants": {"torch": {"args": {"mode": "src_mode"}}},
+    "std_args": [["data", "Tensor"], {}, {"name": "mode"}, "extra"],
   }
-
-  result = evaluate_dispatch_rules(rewriter, call, rules, details)
-  assert result == "fast_func"
-
-  call_slow: cst.Call = parse_call("func(mode='slow')")
-  assert evaluate_dispatch_rules(rewriter, call_slow, rules, details) == "slow_func"
-
-  call_none: cst.Call = parse_call("func(mode='unknown')")
-  assert evaluate_dispatch_rules(rewriter, call_none, rules, details) is None
-
-
-def test_evaluate_dispatch_rules_tuple_std_args() -> None:
-  """Verify evaluate dispatch rules tuple std args behavior."""
-  rewriter = DummyRewriter("torch")
-  call: cst.Call = parse_call("func(1, 2)")
-
-  rules = [
-    DummyRule("y", LogicOp.EQ, 2, "special_func"),
-  ]
-
-  details = {"variants": {"torch": {"args": {"y": "y"}}}, "std_args": [["x", "int"], ["y", "int"]]}
-
-  result = evaluate_dispatch_rules(rewriter, call, rules, details)
-  assert result == "special_func"
+  assert evaluate_dispatch_rules(rewriter, _parse_call("func(src_mode='fast')"), rules, details) == "fast_func"
+  assert evaluate_dispatch_rules(rewriter, _parse_call("func(src_mode='slow')"), rules, details) == "slow_func"
+  assert evaluate_dispatch_rules(rewriter, _parse_call("func(src_mode='other')"), rules, details) is None

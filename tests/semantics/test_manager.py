@@ -1,18 +1,23 @@
 """Test suite for manager."""
 
-from tests.conftest import _test_getattr, _test_hasattr, _test_setattr
+from pathlib import Path
+
+import pytest
+from pydantic import JsonValue
 
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_manager_init() -> None:
-  """Verify manager init behavior."""
+  """Verify `SemanticsManager` handles manager init as expected."""
   sm = SemanticsManager()
-  assert sm is not None
+  assert isinstance(sm.data, dict)
+  assert len(sm.data) >= 1
+  assert len(sm._reverse_index) >= 1
 
 
 def test_manager_coverage() -> None:
-  """Verify manager coverage behavior."""
+  """Verify `SemanticsManager` handles manager coverage as expected."""
   from ml_switcheroo.semantics.manager import SemanticsManager
 
   sm = SemanticsManager()
@@ -27,7 +32,7 @@ def test_manager_coverage() -> None:
 
 
 def test_manager_load_validation() -> None:
-  """Verify manager load validation behavior."""
+  """Verify `SemanticsManager` handles manager load validation as expected."""
   from pathlib import Path
   from unittest.mock import mock_open, patch
 
@@ -40,26 +45,27 @@ def test_manager_load_validation() -> None:
     sm.load_validation_report(Path("dummy.json"))
 
   # Read err
-  with patch("pathlib.Path.exists", return_value=True):
-    with patch("builtins.open", side_effect=OSError("Read err")):
-      sm.load_validation_report(Path("dummy.json"))
+  with patch("pathlib.Path.exists", return_value=True), patch("builtins.open", side_effect=OSError("Read err")):
+    sm.load_validation_report(Path("dummy.json"))
 
   # Success
   m_open = mock_open(read_data='{"Abs": true}')
-  with patch("pathlib.Path.exists", return_value=True):
-    with patch("builtins.open", m_open):
-      sm.load_validation_report(Path("dummy.json"))
-      assert sm._validation_status.get("Abs") is True
+  with patch("pathlib.Path.exists", return_value=True), patch("builtins.open", m_open):
+    sm.load_validation_report(Path("dummy.json"))
+    assert sm._validation_status.get("Abs") is True
 
   # Non-dict report
   m_open_list = mock_open(read_data="[1, 2, 3]")
-  with patch("pathlib.Path.exists", return_value=True):
-    with patch("builtins.open", m_open_list):
-      sm.load_validation_report(Path("dummy.json"))
+  with patch("pathlib.Path.exists", return_value=True), patch("builtins.open", m_open_list):
+    sm.load_validation_report(Path("dummy.json"))
 
 
-def test_manager_build_index_aliases_json() -> None:
-  """Test that _build_index loads aliases.json if it exists."""
+def test_manager_build_index_aliases_json(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Test that _build_index loads aliases.json if it exists.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   from unittest.mock import MagicMock, mock_open, patch
 
   from ml_switcheroo.semantics.manager import SemanticsManager
@@ -75,7 +81,7 @@ def test_manager_build_index_aliases_json() -> None:
       """Mock joinpath for file resolution.
 
       Args:
-          path: The path (str) for joinpath.
+          path: Filesystem path under test (`str`).
 
       Returns:
           Resulting `MagicMock` from joinpath.
@@ -91,10 +97,11 @@ def test_manager_build_index_aliases_json() -> None:
 
     # Give it data so it triggers the alias registration
     sm.data = {"Op": {"variants": {"fw": {"api": "my_alias.sub"}}}}
-    _test_setattr(
-      _test_getattr({"v": sm}, "__getitem__")("v"),
+    monkeypatch.setattr(
+      sm,
       "_key_origins",
-      _test_getattr({"v": {"Op": _test_getattr({"v": 1}, "__getitem__")("v")}}, "__getitem__")("v"),
+      {"Op": 1},
+      raising=False,
     )
     sm._build_index()
 
@@ -112,7 +119,9 @@ def test_manager_build_index_aliases_exception() -> None:
 
   with patch("importlib.resources.files", side_effect=OSError("Failed")):
     sm = SemanticsManager()
-    assert sm is not None
+    assert isinstance(sm, SemanticsManager)
+    assert len(sm.data) >= 1
+    assert len(sm._reverse_index) >= 1
 
 
 def test_manager_empty_impl_and_missing_variant_cache() -> None:
@@ -142,10 +151,12 @@ def test_manager_build_index_no_priority_scores() -> None:
   with patch("os.path.exists", side_effect=lambda p: False if "priority_scores.json" in str(p) else orig_exists(p)):
     sm._build_index()
   assert isinstance(sm._reverse_index, dict)
+  assert len(sm._reverse_index) >= 1
+  assert len(sm.data) >= 1
 
 
 def test_manager_update_definition() -> None:
-  """Verify manager update definition behavior."""
+  """Verify `SemanticsManager` emits `NewOp` for manager update definition."""
   from unittest.mock import mock_open, patch
 
   from ml_switcheroo.semantics.manager import SemanticsManager
@@ -157,21 +168,23 @@ def test_manager_update_definition() -> None:
 
   # Valid
   m_open = mock_open()
-  with patch("builtins.open", m_open):
-    with patch("pathlib.Path.mkdir"):
-      sm.update_definition("NewOp", {"variants": {"torch": {"api": "torch.new_op"}, "jax": {}}})
-      assert "NewOp" in sm.data
-      assert "torch.new_op" in sm._reverse_index
+  with patch("builtins.open", m_open), patch("pathlib.Path.mkdir"):
+    sm.update_definition("NewOp", {"variants": {"torch": {"api": "torch.new_op"}, "jax": {}}})
+    assert "NewOp" in sm.data
+    assert "torch.new_op" in sm._reverse_index
 
   # Write error
-  with patch("builtins.open", side_effect=OSError("Write err")):
-    with patch("pathlib.Path.mkdir"):
-      sm.update_definition("WriteFail", {"variants": {"torch": {"api": "torch.write_fail"}}})
-      assert "WriteFail" in sm.data
+  with patch("builtins.open", side_effect=OSError("Write err")), patch("pathlib.Path.mkdir"):
+    sm.update_definition("WriteFail", {"variants": {"torch": {"api": "torch.write_fail"}}})
+    assert "WriteFail" in sm.data
 
 
-def test_manager_get_import_map() -> None:
-  """Verify manager get import map behavior."""
+def test_manager_get_import_map(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `SemanticsManager` emits `torch` for manager get import map.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   from ml_switcheroo.semantics.manager import SemanticsManager
 
   sm = SemanticsManager()
@@ -198,25 +211,16 @@ def test_manager_get_import_map() -> None:
 
   # Try inheritance mapping
   # Mock _resolve_inheritance to return "flax" for some target
-  _test_setattr(
-    _test_getattr({"v": sm}, "__getitem__")("v"),
+  monkeypatch.setattr(
+    sm,
     "_framework_aliases",
-    _test_getattr(
-      {
-        "v": {
-          "myfw": _test_getattr(
-            {
-              "v": (
-                _test_getattr({"v": "myfw.mod"}, "__getitem__")("v"),
-                _test_getattr({"v": "myfw"}, "__getitem__")("v"),
-              )
-            },
-            "__getitem__",
-          )("v")
-        }
-      },
-      "__getitem__",
-    )("v"),
+    {
+      "myfw": (
+        "myfw.mod",
+        "myfw",
+      )
+    },
+    raising=False,
   )
 
   # Let's override resolve_inheritance
@@ -229,7 +233,7 @@ def test_manager_get_import_map() -> None:
 
 
 def test_manager_resolve_variant() -> None:
-  """Verify manager resolve variant behavior."""
+  """Verify `SemanticsManager` handles manager resolve variant as expected."""
   from ml_switcheroo.semantics.manager import SemanticsManager
 
   sm = SemanticsManager()
@@ -238,20 +242,9 @@ def test_manager_resolve_variant() -> None:
   sm.data = {"Abs": {"variants": {"torch": {"api": "torch.abs"}, "numpy": {"api": "np.abs"}}}}
 
   # Direct match
-  assert sm.resolve_variant("Abs", "torch") is not None
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": sm}, "__getitem__")("v").resolve_variant}, "__getitem__")("v")(
-            _test_getattr({"v": "Abs"}, "__getitem__")("v"), _test_getattr({"v": "torch"}, "__getitem__")("v")
-          )
-        },
-        "__getitem__",
-      )("v")["api"]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "torch.abs"}, "__getitem__")("v")
+  torch_var = sm.resolve_variant("Abs", "torch")
+  assert torch_var is not None
+  assert torch_var["api"] == "torch.abs"
 
   # Missing
   assert sm.resolve_variant("Unknown", "torch") is None
@@ -260,27 +253,16 @@ def test_manager_resolve_variant() -> None:
   from unittest.mock import patch
 
   with patch.object(sm, "_resolve_inheritance", side_effect=lambda x: "numpy" if x == "custom_numpy" else None):
-    assert sm.resolve_variant("Abs", "custom_numpy") is not None
-    assert _test_getattr(
-      {
-        "v": _test_getattr(
-          {
-            "v": _test_getattr({"v": _test_getattr({"v": sm}, "__getitem__")("v").resolve_variant}, "__getitem__")("v")(
-              _test_getattr({"v": "Abs"}, "__getitem__")("v"), _test_getattr({"v": "custom_numpy"}, "__getitem__")("v")
-            )
-          },
-          "__getitem__",
-        )("v")["api"]
-      },
-      "__getitem__",
-    )("v") == _test_getattr({"v": "np.abs"}, "__getitem__")("v")
+    custom_var = sm.resolve_variant("Abs", "custom_numpy")
+    assert custom_var is not None
+    assert custom_var["api"] == "np.abs"
 
     # Fallback missing
     assert sm.resolve_variant("Abs", "unknown_fw") is None
 
 
 def test_manager_get_definition_missing() -> None:
-  """Verify manager get definition missing behavior."""
+  """Verify `SemanticsManager` handles manager get definition missing as expected."""
   from ml_switcheroo.semantics.manager import SemanticsManager
 
   sm = SemanticsManager()
@@ -288,7 +270,7 @@ def test_manager_get_definition_missing() -> None:
 
 
 def test_manager_get_framework_config() -> None:
-  """Verify manager get framework config behavior."""
+  """Verify `SemanticsManager` handles manager get framework config as expected."""
   from ml_switcheroo.semantics.manager import SemanticsManager
 
   sm = SemanticsManager()
@@ -307,7 +289,7 @@ def test_manager_get_framework_config() -> None:
 
 
 def test_manager_resolve_inheritance() -> None:
-  """Verify manager resolve inheritance behavior."""
+  """Verify `SemanticsManager` handles manager resolve inheritance as expected."""
   from ml_switcheroo.semantics.manager import SemanticsManager
 
   sm = SemanticsManager()
@@ -325,7 +307,7 @@ def test_manager_resolve_inheritance() -> None:
 
 
 def test_manager_resolve_variant_limit() -> None:
-  """Verify manager resolve variant limit behavior."""
+  """Verify `SemanticsManager` handles manager resolve variant limit as expected."""
   from ml_switcheroo.semantics.manager import SemanticsManager
 
   sm = SemanticsManager()
@@ -338,7 +320,7 @@ def test_manager_resolve_variant_limit() -> None:
 
 
 def test_manager_is_verified() -> None:
-  """Verify manager is verified behavior."""
+  """Verify `SemanticsManager` handles manager is verified as expected."""
   from ml_switcheroo.semantics.manager import SemanticsManager
 
   sm = SemanticsManager()
@@ -349,7 +331,7 @@ def test_manager_is_verified() -> None:
 
 
 def test_manager_get_definition_by_id() -> None:
-  """Verify manager get definition by id behavior."""
+  """Verify `SemanticsManager` handles manager get definition by id as expected."""
   from ml_switcheroo.semantics.manager import SemanticsManager
 
   sm = SemanticsManager()
@@ -358,7 +340,7 @@ def test_manager_get_definition_by_id() -> None:
 
 
 def test_manager_get_definition() -> None:
-  """Verify manager get definition behavior."""
+  """Verify `SemanticsManager` handles manager get definition as expected."""
   from ml_switcheroo.semantics.manager import SemanticsManager
 
   sm = SemanticsManager()
@@ -370,7 +352,7 @@ def test_manager_get_definition() -> None:
 
 
 def test_manager_get_definition_missing_real() -> None:
-  """Verify manager get definition missing real behavior."""
+  """Verify `SemanticsManager` handles manager get definition missing real as expected."""
   from ml_switcheroo.semantics.manager import SemanticsManager
 
   sm = SemanticsManager()
@@ -380,14 +362,14 @@ def test_manager_get_definition_missing_real() -> None:
 
 
 def test_semantic_manager_inherit_fallback() -> None:
-  """Verify semantic manager inherit fallback behavior."""
+  """Verify `SemanticsManager` handles semantic manager inherit fallback as expected."""
   manager = SemanticsManager()
   res = manager._resolve_inheritance("unknown_fw")
   assert res is None
 
 
 def test_semantic_manager_reverse_lookup_fallback() -> None:
-  """Verify semantic manager reverse lookup fallback behavior."""
+  """Verify `SemanticsManager` handles semantic manager reverse lookup fallback as expected."""
   manager = SemanticsManager()
   manager.data = {"AbstractOp": {"description": "A test op"}}
 
@@ -396,38 +378,42 @@ def test_semantic_manager_reverse_lookup_fallback() -> None:
 
 
 def test_get_framework_ecosystem() -> None:
-  """Verify get framework ecosystem behavior."""
+  """Verify `SemanticsManager` handles get framework ecosystem as expected."""
   from unittest.mock import patch
 
   from ml_switcheroo.semantics.manager import SemanticsManager
 
   sm = SemanticsManager()
   # Mock config and resolve inheritance
-  with patch.object(
-    sm, "get_framework_config", side_effect=lambda fw: {"alias": {"module": "myalias"}} if fw == "my_fw" else {}
+  with (
+    patch.object(
+      sm, "get_framework_config", side_effect=lambda fw: {"alias": {"module": "myalias"}} if fw == "my_fw" else {}
+    ),
+    patch.object(sm, "_resolve_inheritance", side_effect=lambda fw: "base_fw" if fw == "my_fw" else None),
   ):
-    with patch.object(sm, "_resolve_inheritance", side_effect=lambda fw: "base_fw" if fw == "my_fw" else None):
-      ecosystem = sm.get_framework_ecosystem("my_fw")
-      assert ecosystem == {"my_fw", "myalias", "base_fw"}
+    ecosystem = sm.get_framework_ecosystem("my_fw")
+    assert ecosystem == {"my_fw", "myalias", "base_fw"}
 
 
 def test_manager_cache_branch() -> None:
-  """Verify manager cache branch behavior."""
-  from ml_switcheroo.semantics import manager
+  """Verify ``SemanticsManager`` ``lru_cache`` hit, ``clear_semantics_cache``, and ``empty()`` constructor."""
+  from ml_switcheroo.semantics.manager import SemanticsManager, _get_cached_default_snapshot, clear_semantics_cache
 
-  original_cache = manager._MANAGER_CACHE
-  manager._MANAGER_CACHE = {"test_cache_key": "test_cache_val"}
-  # We might just test that cache works if that's what it was testing
-  # Actually, the original code had sm2 = manager.SemanticsManager()
-  # but maybe SemanticsManager uses _MANAGER_CACHE to set attributes?
-  # Let's just create one instance and see.
-  _sm = manager.SemanticsManager()
-  assert isinstance(_sm, manager.SemanticsManager)
-  manager._MANAGER_CACHE = original_cache
+  clear_semantics_cache()
+  first = SemanticsManager()
+  second = SemanticsManager()
+  info = _get_cached_default_snapshot.cache_info()
+  assert info.hits >= 1
+  assert first.data.keys() == second.data.keys()
+
+  empty_mgr = SemanticsManager.empty()
+  assert empty_mgr.data == {}
+  clear_semantics_cache()
+  assert _get_cached_default_snapshot.cache_info().currsize == 0
 
 
 def test_build_index_priority() -> None:
-  """Verify build index priority behavior."""
+  """Verify `SemanticsManager` emits `torch.abs` for build index priority."""
   from ml_switcheroo.semantics.manager import SemanticsManager, SemanticTier
 
   sm = SemanticsManager()
@@ -450,20 +436,23 @@ def test_build_index_priority() -> None:
   assert "torch.abs" in sm._reverse_index
 
 
-def test_get_known_apis() -> None:
-  """Verify get known apis behavior."""
+def test_get_known_apis(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `SemanticsManager` handles get known apis as expected.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   from ml_switcheroo.semantics.manager import SemanticsManager
 
   sm = SemanticsManager()
-  _test_setattr(
-    _test_getattr({"v": sm}, "__getitem__")("v"),
+  expected_data: dict[str, dict[str, JsonValue]] = {"test": {"val": 123}}
+  monkeypatch.setattr(
+    sm,
     "data",
-    _test_getattr({"v": {"test": _test_getattr({"v": 123}, "__getitem__")("v")}}, "__getitem__")("v"),
+    expected_data,
+    raising=False,
   )
-  assert _test_getattr(
-    {"v": _test_getattr({"v": _test_getattr({"v": sm}, "__getitem__")("v").get_known_apis}, "__getitem__")("v")()},
-    "__getitem__",
-  )("v") == _test_getattr({"v": {"test": _test_getattr({"v": 123}, "__getitem__")("v")}}, "__getitem__")("v")
+  assert sm.get_known_apis() == expected_data
 
 
 def test_manager_get_definition_branches() -> None:
@@ -498,18 +487,9 @@ def test_manager_get_definition_branches() -> None:
   assert res_var is not None
   assert res_var["api"] == "jax.my_op"
 
-  # Non-string abstract_id fallback (line 305->316)
-  _test_getattr(
-    _test_getattr({"v": _test_getattr({"v": sm}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__"
-  )(123, _test_getattr({"v": {"variants": _test_getattr({"v": {}}, "__getitem__")("v")}}, "__getitem__")("v"))
-  assert _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": sm}, "__getitem__")("v").resolve_variant}, "__getitem__")("v")(
-        _test_getattr({"v": 123}, "__getitem__")("v"), _test_getattr({"v": "jax"}, "__getitem__")("v")
-      )
-    },
-    "__getitem__",
-  )("v") is _test_getattr({"v": None}, "__getitem__")("v")
+  # Missing variant fallback when operation has empty variants
+  sm.data["EmptyVarOp"] = {"variants": {}}
+  assert sm.resolve_variant("EmptyVarOp", "jax") is None
 
 
 def test_manager_build_index_no_attrs() -> None:
@@ -517,7 +497,7 @@ def test_manager_build_index_no_attrs() -> None:
   from ml_switcheroo.semantics.manager import SemanticsManager
 
   class DummySubclass(SemanticsManager):
-    """Test helper class DummySubclass."""
+    """Minimal `SemanticsManager` test double used in manager tests."""
 
     def __init__(self) -> None:
       """Initialize test helper instance."""
@@ -526,8 +506,10 @@ def test_manager_build_index_no_attrs() -> None:
 
   dummy = DummySubclass()
   dummy._build_index()
-  assert _test_hasattr(dummy, "_reverse_index")
-  assert _test_hasattr(dummy, "_variant_cache")
+  assert isinstance(dummy._reverse_index, dict)
+  assert dummy._reverse_index == {}
+  assert isinstance(dummy._variant_cache, dict)
+  assert dummy._variant_cache == {}
 
 
 def test_lookup_and_search_snapshot_symbols() -> None:
@@ -622,3 +604,59 @@ def test_extract_framework_isolated() -> None:
   # Exception branch
   with patch("ml_ecosystem_snapshots.api.extract_snapshot_isolated", side_effect=RuntimeError("Extraction Error")):
     assert sm.extract_framework_isolated("torch") == {}
+
+
+def test_manager_alias_case_insensitive_variant_and_update_definition(
+  tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+  """Verify incomplete `alias` configs, case-insensitive `resolve_variant`, and `update_definition` fields.
+
+  Args:
+      tmp_path: Pytest temporary directory fixture.
+      monkeypatch: Pytest monkeypatch fixture.
+  """
+  import ml_switcheroo.semantics.manager as mgr_mod
+
+  mgr = SemanticsManager(load_defaults=False)
+  mgr.framework_configs["no_alias_fw"] = {"some_other_key": "val"}
+  mgr.framework_configs["missing_alias_fields_fw"] = {"alias": {"module": "only_mod"}}
+  mgr.framework_configs["missing_mod_alias_fw"] = {"alias": {"name": "only_name"}}
+  mgr._build_index()
+  aliases = mgr.get_framework_aliases()
+  assert "no_alias_fw" not in aliases
+  assert "missing_alias_fields_fw" not in aliases
+  assert "missing_mod_alias_fw" not in aliases
+
+  mgr.data["relu"] = {"operation": "relu", "variants": {"torch": {"api": "torch.relu"}}}
+  mgr.data["RELU"] = {"operation": "RELU", "variants": {"jax": {"api": "jax.nn.relu"}}}
+  mgr._variant_cache.clear()
+  assert mgr.resolve_variant("RELU", "torch") == {"api": "torch.relu"}
+
+  mgr.data["OTHER"] = {"operation": "OTHER", "variants": {}}
+  mgr.data["other"] = {"operation": "other", "variants": {"flax": {"api": "flax.other"}}}
+  mgr._variant_cache.clear()
+  assert mgr.resolve_variant("OTHER", "torch") is None
+
+  mgr.data["lower_only"] = {"operation": "lower_only", "variants": {}}
+  mgr._variant_cache.clear()
+  assert mgr.resolve_variant("lower_only", "torch") is None
+
+  monkeypatch.setattr(mgr_mod, "resolve_semantics_dir", lambda: tmp_path)
+  mgr.update_definition(
+    "custom_op",
+    {
+      "operation": "custom_op",
+      "variants": {"torch": {"api": "torch.custom_op"}},
+      "description": "Full description",
+      "std_args": ["x"],
+      "frameworks": {},
+    },
+  )
+  assert mgr.data["custom_op"]["description"] == "Full description"
+  assert mgr.data["custom_op"]["std_args"] == ["x"]
+
+  mgr.update_definition(
+    "test.op",
+    {"operation": "test.op", "variants": {}, "description": "Provided description", "std_args": [], "frameworks": {}},
+  )
+  assert mgr.data["test.op"]["description"] == "Provided description"

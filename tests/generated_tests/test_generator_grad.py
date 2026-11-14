@@ -1,0 +1,103 @@
+"""Test suite for the Generator Grad module."""
+
+from pathlib import Path
+from unittest.mock import MagicMock
+
+import pytest
+
+from ml_switcheroo.generated_tests.generator import TestCaseGenerator
+from ml_switcheroo.semantics.manager import SemanticsManager
+
+
+@pytest.fixture
+def generator(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestCaseGenerator:
+  """Create a configured `TestCaseGenerator` fixture for generator grad tests.
+
+  Args:
+      tmp_path: Pytest temporary directory path fixture.
+      monkeypatch: Pytest monkeypatch fixture.
+
+  Returns:
+      Configured `generator` fixture value (TestCaseGenerator).
+  """
+  mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
+  templates: dict[str, dict[str, str]] = {
+    "torch": {"import": "import torch", "convert_input": "torch.tensor({np_var})", "to_numpy": "{res_var}.numpy()"},
+    "jax": {"import": "import jax", "convert_input": "jnp.array({np_var})", "to_numpy": "{res_var}"},
+  }
+  monkeypatch.setattr(mgr, "get_test_template", MagicMock(side_effect=lambda fw: templates.get(fw)), raising=False)
+  monkeypatch.setattr(mgr, "test_templates", templates, raising=False)
+  monkeypatch.setattr(mgr, "get_framework_config", MagicMock(return_value={}), raising=False)
+  return TestCaseGenerator(semantics_mgr=mgr)
+
+
+def test_grad_injection_enabled(generator: TestCaseGenerator, tmp_path: Path) -> None:
+  """Verify `generator.generate` emits `Gradient Verification` for grad injection enabled.
+
+  Args:
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
+  """
+  semantics = {"sin": {"std_args": ["x"], "variants": {"torch": {"api": "torch.sin"}, "jax": {"api": "jnp.sin"}}}}
+  out_file: Path = tmp_path / "test_sin.py"
+  generator.generate(semantics, out_file)
+  content: str = out_file.read_text()
+  assert "jax.grad(lambda a0: jnp.sum(jnp.sin(a0)))(jnp.array(np_x))" in content
+  assert "torch.func.grad(lambda a0: torch.sum(torch.sin(a0)))(torch.tensor(np_x))" in content
+  assert "Gradient Verification" in content
+  assert "np.testing.assert_allclose(g_ref, g_val" in content
+
+
+def test_grad_injection_disabled_flag(generator: TestCaseGenerator, tmp_path: Path) -> None:
+  """Verify `generator.generate` handles grad injection disabled flag as expected.
+
+  Args:
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
+  """
+  semantics = {
+    "argmax": {
+      "std_args": ["x"],
+      "differentiable": False,
+      "variants": {"torch": {"api": "torch.argmax"}, "jax": {"api": "jnp.argmax"}},
+    }
+  }
+  out_file: Path = tmp_path / "test_nodiff.py"
+  generator.generate(semantics, out_file)
+  content: str = out_file.read_text()
+  assert "jax.grad" not in content
+  assert "Gradient Verification" not in content
+
+
+def test_grad_injection_disabled_primitive(generator: TestCaseGenerator, tmp_path: Path) -> None:
+  """Verify `generator.generate` handles grad injection disabled primitive as expected.
+
+  Args:
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
+  """
+  semantics = {
+    "factorial": {
+      "std_args": [{"name": "n", "type": "int"}],
+      "variants": {"torch": {"api": "torch.math"}, "jax": {"api": "jax.math"}},
+    }
+  }
+  out_file: Path = tmp_path / "test_int_input.py"
+  generator.generate(semantics, out_file)
+  content: str = out_file.read_text()
+  assert "jax.grad" not in content
+
+
+def test_grad_multi_arg(generator: TestCaseGenerator, tmp_path: Path) -> None:
+  """Verify `generator.generate` emits `lambda a0, a1:` for grad multi arg.
+
+  Args:
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
+  """
+  semantics = {"add": {"std_args": ["x", "y"], "variants": {"torch": {"api": "torch.add"}, "jax": {"api": "jnp.add"}}}}
+  out_file: Path = tmp_path / "test_multi.py"
+  generator.generate(semantics, out_file)
+  content: str = out_file.read_text()
+  assert "lambda a0, a1:" in content
+  assert "jnp.add(a0, a1)" in content

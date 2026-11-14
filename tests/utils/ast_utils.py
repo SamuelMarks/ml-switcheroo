@@ -12,8 +12,7 @@ Functions:
     cmp_ast: Recursively compares AST nodes, sequences of nodes, or values.
 """
 
-from tests.conftest import _test_getattr
-
+import ast
 import typing
 from ast import AST
 
@@ -52,13 +51,15 @@ def cmp_ast(node0: AstComparable, node1: AstComparable) -> bool:
   if isinstance(node0, (list, tuple)) and isinstance(node1, (list, tuple)):
     if len(node0) != len(node1):
       return False
-    for left, right in zip(node0, node1):
+    for left, right in zip(node0, node1, strict=False):
       if not cmp_ast(left, right):
         return False
   elif isinstance(node0, AST) and isinstance(node1, AST):
-    for field in _test_getattr(node0, "_fields"):
-      left_val = _test_getattr(node0, field, Undefined)
-      right_val = _test_getattr(node1, field, Undefined)
+    fields0 = dict(ast.iter_fields(node0))
+    fields1 = dict(ast.iter_fields(node1))
+    for field in node0._fields:
+      left_val = fields0.get(field, Undefined)
+      right_val = fields1.get(field, Undefined)
       if not cmp_ast(left_val, right_val):
         return False
   else:

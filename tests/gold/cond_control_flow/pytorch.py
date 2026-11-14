@@ -4,10 +4,10 @@ import torch
 
 
 def conditional_op(pred: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
-  """Helper to conditional op.
+  """Execute `pred.item` to support conditional operation in pytorch tests.
 
   Args:
-      pred: The pred (torch.Tensor) for conditional op.
+      pred: Input `pred` parameter value (`torch.Tensor`).
       x: Primary input tensor or array operand.
 
   Returns:
@@ -15,5 +15,4 @@ def conditional_op(pred: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
   """
   if pred.item():
     return x * 2
-  else:
-    return x + 2
+  return x + 2

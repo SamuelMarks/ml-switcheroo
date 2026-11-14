@@ -1,94 +1,118 @@
-"""Plugin for Scatter/Gather Syntax Transformation.
+"""Plugin for Functional Scatter/Index-Update Syntax Transformation.
 
-Handles the fundamental semantic difference between:
-1. PyTorch (`x.scatter_(dim, index, src)`): Implicitly iterates `dim`.
-2. JAX/NumPy (`x.at[index].set(src)`): Explicit indexing via special accessor.
-
-This plugin converts:
-- `x.scatter_(dim, index, src)` -> `x.at[index].set(src)` (Simple Case)
-- `x.scatter(dim, index, src)` -> `x.at[index].set(src)` (Out-of-place)
-
-Decoupling Logic:
-    Removed framework checks. This logic executes if the operation is mapped
-    via `requires_plugin="scatter_indexer"`.
+Converts in-place and functional scatter operations across method, functional,
+and keyword-argument forms into functional ``.at[index].set(src)`` / ``.add(src)``
+updates without source-only positional arity assumptions.
 """
+
+import typing
 
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
+from ml_switcheroo.plugins.utils import is_framework_module_node
+
+_RECEIVER_KEYWORDS = frozenset({"input", "tensor", "x", "self"})
+_INDEX_KEYWORDS = frozenset({"index", "indices"})
+_SRC_KEYWORDS = frozenset({"src", "value", "updates", "values"})
+
+
+def _extract_method_and_receiver(
+  node: cst.Call,
+  ctx: HookContext,
+) -> tuple[str, cst.BaseExpression | None, list[cst.Arg]]:
+  """Resolve scatter method name, receiver tensor, and remaining call arguments.
+
+  Args:
+      node: Original scatter ``cst.Call`` node.
+      ctx: Active ``HookContext``.
+
+  Returns:
+      Tuple of ``(method_name, receiver_expr_or_none, remaining_args)``.
+  """
+  args = list(node.args)
+  if isinstance(node.func, cst.Attribute):
+    method_name = node.func.attr.value
+    if not is_framework_module_node(node.func.value, ctx):
+      return method_name, node.func.value, args
+  else:
+    method_name = node.func.value if isinstance(node.func, cst.Name) else "scatter"
+
+  for idx, arg in enumerate(args):
+    if arg.keyword is not None and arg.keyword.value in _RECEIVER_KEYWORDS:
+      remaining = args[:idx] + args[idx + 1 :]
+      return method_name, arg.value, remaining
+
+  positional = [a for a in args if a.keyword is None and not a.star]
+  if len(positional) >= 4:
+    first_pos_idx = next(i for i, a in enumerate(args) if a.keyword is None and not a.star)
+    return method_name, args[first_pos_idx].value, args[:first_pos_idx] + args[first_pos_idx + 1 :]
+
+  return method_name, None, args
+
+
+def _extract_index_and_src(
+  args: typing.Sequence[cst.Arg],
+) -> tuple[cst.BaseExpression | None, cst.BaseExpression | None]:
+  """Extract ``index`` and ``src`` expressions from positional or keyword arguments.
+
+  Args:
+      args: Arguments excluding the receiver tensor.
+
+  Returns:
+      Tuple ``(index_expr, src_expr)`` or ``(None, None)`` if insufficient arguments.
+  """
+  index_expr: cst.BaseExpression | None = None
+  src_expr: cst.BaseExpression | None = None
+  positional: list[cst.BaseExpression] = []
+
+  for arg in args:
+    if arg.star:
+      continue
+    if arg.keyword is not None:
+      kw = arg.keyword.value
+      if kw in _INDEX_KEYWORDS:
+        index_expr = arg.value
+      elif kw in _SRC_KEYWORDS:
+        src_expr = arg.value
+    else:
+      positional.append(arg.value)
+
+  has_dim_kw = any(a.keyword is not None and a.keyword.value in {"dim", "axis"} for a in args)
+  if not has_dim_kw and positional:
+    positional = positional[1:]
+
+  if index_expr is None and positional:
+    index_expr = positional.pop(0)
+  if src_expr is None and positional:
+    src_expr = positional.pop(0)
+
+  return index_expr, src_expr
 
 
 @register_hook("scatter_indexer")
 def transform_scatter(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """Transform Transforms scatter method calls into index-update syntax (JAX style).
-
-  Trigger: Operations mapped with `requires_plugin: "scatter_indexer"`.
-
-  Transformation:
-      Input:  `tensor.scatter_(dim, index, src)`
-      Output: `tensor.at[index].set(src)`
-
-  Note regarding `dim`:
-  JAX's `at[index]` syntax implies the indices are fully specified or slicing.
-  PyTorch's `scatter` applies along a `dim`.
-  This transformation maps to the high-level `at[idx].set(src)` utility.
+  """Transform scatter method or function calls into ``.at[index].set(src)`` syntax.
 
   Args:
-      node: The original CST Call (scatter).
-      ctx: The hook context.
+      node: Original scatter ``cst.Call`` node.
+      ctx: Active ``HookContext``.
 
   Returns:
-      The transformed CST Call (at[].set()).
-
+      Transformed index-update call, or ``node`` unchanged if arguments are incomplete.
   """
-  # We expect 3 arguments: dim, index, src
-  # Or 4: dim, index, src, reduce
-  args = list(node.args)
-  if len(args) < 3:
+  method_name, receiver, remaining_args = _extract_method_and_receiver(node, ctx)
+  if receiver is None:
     return node
 
-  # Extract Receiver (tensor)
-  if not isinstance(node.func, cst.Attribute):
+  index_arg, src_arg = _extract_index_and_src(remaining_args)
+  if index_arg is None or src_arg is None:
     return node
-  receiver = node.func.value
 
-  # Extract Arguments (Assume Positional or Keyword 'index', 'src')
-  # Torch sig: scatter_(dim, index, src, *, reduce=None)
-
-  # Heuristics for args:
-  # Arg 0: dim (Ignored in naive .at[] mapping, or used to build tuple index?)
-  # Arg 1: index
-  # Arg 2: src
-
-  index_arg = args[1].value
-  src_arg = args[2].value
-
-  # Check keywords
-  for arg in args:
-    if arg.keyword:
-      if arg.keyword.value == "index":
-        index_arg = arg.value
-      if arg.keyword.value == "src" or arg.keyword.value == "value":
-        src_arg = arg.value
-
-  # Construct: receiver.at
   at_attr = cst.Attribute(value=receiver, attr=cst.Name("at"))
-
-  # Construct: .at[index]
-  # We strip the "dim" argument. This is semantic lossy if dim != 0!
-  # But for 1D/2D embedding lookups often used, it suffices.
   at_item = cst.Subscript(value=at_attr, slice=[cst.SubscriptElement(slice=cst.Index(value=index_arg))])
-
-  # Construct: .set(src)
-  # Check if this was scatter_add (reduce='add') or just scatter
-  # If method name contains "add", use .add()
-  method_name = node.func.attr.value
-  target_method = "set"
-
-  if "add" in method_name:
-    target_method = "add"
-
-  # Generate final call
-  final_call = cst.Call(func=cst.Attribute(value=at_item, attr=cst.Name(target_method)), args=[cst.Arg(value=src_arg)])
-
-  return final_call
+  target_method = "add" if "add" in method_name else "set"
+  return cst.Call(
+    func=cst.Attribute(value=at_item, attr=cst.Name(target_method)),
+    args=[cst.Arg(value=src_arg)],
+  )

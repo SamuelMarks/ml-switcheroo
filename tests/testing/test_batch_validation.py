@@ -1,12 +1,10 @@
 """Test suite for the Batch Validation module."""
 
-from tests.conftest import _test_getattr
-
-from pydantic import JsonValue
 import pathlib
 from unittest.mock import MagicMock, patch
 
 import pytest
+from pydantic import JsonValue
 
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.testing.batch_runner import BatchValidator
@@ -14,7 +12,7 @@ from ml_switcheroo.testing.batch_runner import BatchValidator
 
 @pytest.fixture
 def mock_semantics() -> MagicMock:
-  """Execute mock semantics helper logic.
+  """Create a configured `MagicMock` fixture for batch validation tests.
 
   Returns:
       Configured `mock_semantics` fixture value (MagicMock).
@@ -32,10 +30,10 @@ def mock_semantics() -> MagicMock:
 
 @pytest.fixture
 def validator(mock_semantics: MagicMock) -> BatchValidator:
-  """Execute validator helper logic.
+  """Create a configured `BatchValidator` fixture for batch validation tests.
 
   Args:
-      mock_semantics: The mock semantics (MagicMock) for validator.
+      mock_semantics: Input `mock_semantics` parameter value (`MagicMock`).
 
   Returns:
       Configured `validator` fixture value (BatchValidator).
@@ -44,10 +42,10 @@ def validator(mock_semantics: MagicMock) -> BatchValidator:
 
 
 def test_batch_execution_flow(validator: BatchValidator) -> None:
-  """Verifies the behavior of batch execution flow.
+  """Verify `validator.run_all` returns `4` for batch execution flow.
 
   Args:
-      validator: The validator (BatchValidator) for test batch execution flow.
+      validator: Input `validator` parameter value (`BatchValidator`).
   """
 
   def mock_verify(
@@ -57,45 +55,23 @@ def test_batch_execution_flow(validator: BatchValidator) -> None:
     constraints: dict[str, dict[str, JsonValue]] | None = None,
     shape_calc: str | None = None,
   ) -> tuple[bool, str]:
-    """Execute mock verify helper logic.
+    """Execute `mock_verify` helper in batch validation tests.
 
     Args:
-        variants: The variants (dict[str, JsonValue]) for mock verify.
-        params: The params (list[str]) for mock verify.
-        hints: The hints (dict[str, str] | None) for mock verify.
-        constraints: The constraints (dict[str, dict[str, JsonValue]] | None) for mock verify.
-        shape_calc: The shape calc (str | None) for mock verify.
+        variants: Per-framework operation variant mappings (`dict[str, JsonValue]`).
+        params: Input `params` parameter value (`list[str]`).
+        hints: Input `hints` parameter value (`dict[str, str] | None`).
+        constraints: Input `constraints` parameter value (`dict[str, dict[str, JsonValue]] | None`).
+        shape_calc: Input `shape_calc` parameter value (`str | None`).
 
     Returns:
         Resulting `tuple[bool, str]` from mock verify.
     """
     if not variants:
       return (True, "Skipped")
-    api: str = _test_getattr(
-      {
-        "v": _test_getattr(
-          {
-            "v": _test_getattr(
-              {
-                "v": list(
-                  _test_getattr(
-                    {
-                      "v": _test_getattr({"v": _test_getattr({"v": variants}, "__getitem__")("v").values}, "__getitem__")(
-                        "v"
-                      )()
-                    },
-                    "__getitem__",
-                  )("v")
-                )
-              },
-              "__getitem__",
-            )("v")[0]
-          },
-          "__getitem__",
-        )("v")["api"]
-      },
-      "__getitem__",
-    )("v")
+    first_var = next(iter(variants.values()))
+    assert isinstance(first_var, dict)
+    api = first_var.get("api")
     if api == "t.op":
       return (True, "OK")
     if api == "t.break":
@@ -116,10 +92,10 @@ def test_batch_execution_flow(validator: BatchValidator) -> None:
 
 
 def test_extraction_of_shape_calc(validator: BatchValidator) -> None:
-  """Verify extraction of shape calc behavior.
+  """Verify `validator.run_all` handles extraction of shape calc as expected.
 
   Args:
-      validator: The validator (BatchValidator) for test extraction of shape calc.
+      validator: Input `validator` parameter value (`BatchValidator`).
   """
   with patch.object(validator.runner, "verify", return_value=(True, "OK")) as mock_run:
     validator.run_all()
@@ -136,10 +112,10 @@ def test_extraction_of_shape_calc(validator: BatchValidator) -> None:
 
 
 def test_manual_override_priority(validator: BatchValidator, tmp_path: pathlib.Path) -> None:
-  """Verifies the behavior of manual override priority.
+  """Verify `validator.run_all` returns `3` for manual override priority.
 
   Args:
-      validator: The validator (BatchValidator) for test manual override priority.
+      validator: Input `validator` parameter value (`BatchValidator`).
       tmp_path: Pytest temporary directory path fixture.
   """
   test_dir: pathlib.Path = tmp_path / "tests"
@@ -147,11 +123,11 @@ def test_manual_override_priority(validator: BatchValidator, tmp_path: pathlib.P
   (test_dir / "test_manual.py").write_text("def test_manual_op(): pass")
 
   def mock_verify(*args: JsonValue, **kwargs: JsonValue) -> tuple[bool, str]:
-    """Execute mock verify helper logic.
+    """Execute `mock_verify` helper in batch validation tests.
 
     Args:
-        args: The args (JsonValue) for mock verify.
-        kwargs: The kwargs (JsonValue) for mock verify.
+        args: Positional argument specifications (`JsonValue`).
+        kwargs: Keyword argument bindings (`JsonValue`).
 
     Returns:
         Resulting `tuple[bool, str]` from mock verify.
@@ -165,10 +141,10 @@ def test_manual_override_priority(validator: BatchValidator, tmp_path: pathlib.P
 
 
 def test_ignore_generated_tests(validator: BatchValidator, tmp_path: pathlib.Path) -> None:
-  """Verify ignore generated tests behavior.
+  """Verify `validator.run_all` returns `4` for ignore generated tests.
 
   Args:
-      validator: The validator (BatchValidator) for test ignore generated tests.
+      validator: Input `validator` parameter value (`BatchValidator`).
       tmp_path: Pytest temporary directory path fixture.
   """
   gen_dir: pathlib.Path = tmp_path / "generated"
@@ -180,15 +156,15 @@ def test_ignore_generated_tests(validator: BatchValidator, tmp_path: pathlib.Pat
 
 
 def test_unpack_args_logic(validator: BatchValidator) -> None:
-  """Verifies the behavior of unpack arguments logic.
+  """Verify `validator._unpack_args` handles logic as expected.
 
   Args:
-      validator: The validator (BatchValidator) for test unpack args logic.
+      validator: Input `validator` parameter value (`BatchValidator`).
   """
   raw = [("x", "Array"), "axis", ("dims", "Tuple[int]")]
   params: list[str]
   hints: dict[str, str]
-  params, hints, constraints = validator._unpack_args(raw)
+  params, hints, _constraints = validator._unpack_args(raw)
   assert params == ["x", "axis", "dims"]
   assert hints["x"] == "Array"
   assert hints["dims"] == "Tuple[int]"

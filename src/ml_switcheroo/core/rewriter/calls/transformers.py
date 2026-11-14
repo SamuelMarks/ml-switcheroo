@@ -6,6 +6,8 @@ and Structured Index Selection.
 
 import libcst as cst
 
+from ml_switcheroo.exceptions import MacroExpansionError
+
 
 def apply_index_select(inner_node: cst.BaseExpression, index: int) -> cst.Subscript:
   """Wrap an expression node with a subscript access for a specific integer index.
@@ -51,8 +53,8 @@ def rewrite_as_inline_lambda(lambda_str: str, args: list[cst.Arg]) -> cst.Call:
     parsed_expr = cst.parse_expression(lambda_str)
     parenthesized_lambda = parsed_expr.with_changes(lpar=[cst.LeftParen()], rpar=[cst.RightParen()])
     return cst.Call(func=parenthesized_lambda, args=args)
-  except cst.ParserSyntaxError:
-    raise ValueError(f"Invalid lambda syntax in semantics: {lambda_str}")
+  except cst.ParserSyntaxError as e:
+    raise ValueError(f"Invalid lambda syntax in semantics: {lambda_str}") from e
 
 
 class MacroSubstitutionTransformer(cst.CSTTransformer):
@@ -102,23 +104,23 @@ def rewrite_as_macro(template: str, args_list: list[cst.Arg], std_arg_names: lis
       cst.BaseExpression: The constructed expression logic.
 
   Raises:
-      ValueError: If arguments required by the template are missing, or if the
-          resulting template produces invalid Python syntax.
+      MacroExpansionError: If arguments required by the template are missing, or if the
+          resulting template produces invalid Python syntax or a non-expression CST node.
   """
   arg_map: dict[str, cst.BaseExpression] = {}
 
-  for i, (std_name, arg) in enumerate(zip(std_arg_names, args_list)):
+  for _i, (std_name, arg) in enumerate(zip(std_arg_names, args_list, strict=False)):
     arg_map[std_name] = arg.value
 
   import string
 
   parsed_format = list(string.Formatter().parse(template))
   clean_template = ""
-  for literal_text, field_name, format_spec, conversion in parsed_format:
+  for literal_text, field_name, _format_spec, _conversion in parsed_format:
     clean_template += literal_text
     if field_name is not None:
       if field_name not in arg_map:
-        raise ValueError(f"Macro template requires argument '{field_name}' but it was missing/unresolvable.")
+        raise MacroExpansionError(f"Macro template requires argument '{field_name}' but it was missing/unresolvable.")
 
       # Inject a unique safe identifier that can be reliably found in the CST
       safe_id = f"_MACRO_VAR_{field_name}_"
@@ -127,10 +129,11 @@ def rewrite_as_macro(template: str, args_list: list[cst.Arg], std_arg_names: lis
   try:
     base_expr = cst.parse_expression(clean_template)
     visited = base_expr.visit(MacroSubstitutionTransformer(arg_map))
-    assert isinstance(visited, cst.BaseExpression)
+    if not isinstance(visited, cst.BaseExpression):
+      raise MacroExpansionError(f"Macro substitution returned {type(visited).__name__}, expected BaseExpression.")
     return visited
-  except cst.ParserSyntaxError:
-    raise ValueError(f"Macro template output produced invalid python: {clean_template}")
+  except cst.ParserSyntaxError as exc:
+    raise MacroExpansionError(f"Macro template output produced invalid python: {clean_template}") from exc
 
 
 def rewrite_as_infix(
@@ -175,7 +178,7 @@ def rewrite_as_infix(
       expr = expr.with_changes(lpar=[cst.LeftParen()], rpar=[cst.RightParen()])
     return cst.UnaryOperation(operator=cst_op, expression=expr)
 
-  elif arity == 2:
+  if arity == 2:
     if len(args) < 2:
       raise ValueError(f"Binary operator '{op_symbol}' requires 2 arguments, got {len(args)}")
 
@@ -200,5 +203,4 @@ def rewrite_as_infix(
 
     return cst.BinaryOperation(left=args[0].value, operator=cst_bin_op, right=args[1].value)
 
-  else:
-    raise ValueError(f"Infix operator requires 1 or 2 args, got {len(args)}")
+  raise ValueError(f"Infix operator requires 1 or 2 args, got {len(args)}")

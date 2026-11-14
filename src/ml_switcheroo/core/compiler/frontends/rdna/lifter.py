@@ -12,7 +12,15 @@ from ml_switcheroo.core.compiler.isa.lifter import IsaLifter
 
 
 class RdnaLifter(IsaLifter[RdnaNode, RdnaInstruction, RdnaComment]):
-  """Reconstruct a LogicalGraph from a sequence of RDNA AST nodes."""
+  """Reconstruct a LogicalGraph from a sequence of RDNA AST nodes.
+
+  Attributes:
+      DEFAULT_GRAPH_NAME: The default graph name (`str`).
+      COMMENT_TYPE: The comment type (`type[RdnaComment]`).
+      INSTRUCTION_TYPE: The instruction type (`type[RdnaInstruction]`).
+      ANALYZER_CLS: The analyzer cls (`type[IsaAnalyzer]`).
+      ORPHAN_PREFIX: The orphan prefix (`str`).
+  """
 
   DEFAULT_GRAPH_NAME: str = "DecompiledNet"
   COMMENT_TYPE: type[RdnaComment] = RdnaComment

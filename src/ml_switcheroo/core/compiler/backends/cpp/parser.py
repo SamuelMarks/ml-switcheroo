@@ -7,6 +7,7 @@ used in PyTorch extensions, producing CppNode CSTs.
 import typing
 
 from lark import Lark, Token, Transformer, Tree, v_args
+from lark.exceptions import LarkError
 
 from ml_switcheroo.core.compiler.backends.cpp.cst import (
   BinaryExpression,
@@ -26,6 +27,7 @@ from ml_switcheroo.core.compiler.backends.cpp.cst import (
   TypeIdentifier,
   VariableDeclaration,
 )
+from ml_switcheroo.exceptions import SyntaxParseError
 
 CppChild: typing.TypeAlias = Token | Tree[Token] | CppNode | typing.Sequence[CppNode] | str | None
 
@@ -463,7 +465,8 @@ class CppParser:
     try:
       tree = self.parser.parse(self.text)
       node = self.transformer.transform(tree)
-      assert isinstance(node, CppModule)
+      if not isinstance(node, CppModule):
+        raise SyntaxParseError(f"Expected CppModule root, got {type(node).__name__}")
       return node
-    except Exception as e:
-      raise ValueError(f"Unexpected token: {e}")
+    except (LarkError, ValueError, TypeError, KeyError, IndexError, RuntimeError) as e:
+      raise SyntaxParseError(f"Unexpected token: {e}") from e

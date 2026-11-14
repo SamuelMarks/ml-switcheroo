@@ -5,19 +5,19 @@ import torch.nn as nn
 
 
 class BNModel(nn.Module):
-  """Test helper class BNModel."""
+  """Stub `nn.Module` subclass implementing `forward` for pytorch tests."""
 
   def __init__(self, num_features: int):
     """Initializes the BNModel instance.
 
     Args:
-        num_features: The num features (int) for   init  .
+        num_features: Input `num_features` parameter value (`int`).
     """
     super().__init__()
     self.bn = nn.BatchNorm2d(num_features)
 
   def forward(self, x: torch.Tensor) -> torch.Tensor:
-    """Helper to forward.
+    """Compute the forward pass of `BNModel` on input tensors.
 
     Args:
         x: Primary input tensor or array operand.

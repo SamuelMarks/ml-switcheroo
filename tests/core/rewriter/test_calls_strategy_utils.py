@@ -1,22 +1,19 @@
 """Test suite for the Calls Strategy Utils module."""
 
-from tests.conftest import _test_getattr
-
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
-from pydantic import JsonValue
 from unittest.mock import MagicMock, patch
 
 import libcst as _cst
+from pydantic import JsonValue
 
 from ml_switcheroo.core.rewriter.calls.strategy import execute_strategy
 from ml_switcheroo.core.rewriter.calls.utils import rewrite_stateful_call
+from ml_switcheroo.enums import RuntimeTensorOrValue
 
 cst = _cst
 
 
 class MockSigCtx:
-  """Test helper class MockSigCtx."""
+  """Sentinel `MockSigCtx` fixture class used in calls strategy utils tests."""
 
   def __init__(
     self,
@@ -26,22 +23,22 @@ class MockSigCtx:
     """Initializes the MockSigCtx instance.
 
     Args:
-        existing: The existing (list[str] | None) for init.
-        injected: The injected (list[tuple[str, str | None]] | None) for init.
+        existing: Input `existing` parameter value (`list[str] | None`).
+        injected: Input `injected` parameter value (`list[tuple[str, str | None]] | None`).
     """
     self.existing_args = existing or []
     self.injected_args = injected or []
 
 
 class MockContext:
-  """Test helper class MockContext."""
+  """Sentinel `MockContext` fixture class used in calls strategy utils tests."""
 
   def __init__(self, has_hook: bool = True, has_sig: bool = True) -> None:
     """Initializes the MockContext instance.
 
     Args:
-        has_hook: The has hook (bool) for init.
-        has_sig: The has sig (bool) for init.
+        has_hook: Input `has_hook` parameter value (`bool`).
+        has_sig: Input `has_sig` parameter value (`bool`).
     """
     if has_hook:
       self.hook_context = MagicMock()
@@ -50,7 +47,7 @@ class MockContext:
 
 
 class MockRewriter:
-  """Test helper class MockRewriter."""
+  """Test double `MockRewriter` used in calls strategy utils tests."""
 
   def __init__(
     self,
@@ -62,10 +59,10 @@ class MockRewriter:
     """Initializes the MockRewriter instance.
 
     Args:
-        fail_norm: The fail norm (bool) for init.
-        no_imports: The no imports (bool) for init.
-        legacy_sig: The legacy sig (bool) for init.
-        strict_mode: The strict mode (bool) for init.
+        fail_norm: Input `fail_norm` parameter value (`bool`).
+        no_imports: Input `no_imports` parameter value (`bool`).
+        legacy_sig: Input `legacy_sig` parameter value (`bool`).
+        strict_mode: Input `strict_mode` parameter value (`bool`).
     """
     self.context = MockContext(has_sig=not legacy_sig)
     if legacy_sig:
@@ -86,13 +83,13 @@ class MockRewriter:
     det: dict[str, JsonValue],
     map: dict[str, JsonValue],
   ) -> list[cst.Arg]:
-    """Mock implementation of  normalize arguments.
+    """Execute `ValueError` to support normalize arguments in calls strategy utils tests.
 
     Args:
-        orig: The orig (cst.Call) for normalize arguments.
-        upd: The upd (cst.Call) for normalize arguments.
-        det: The det (dict[str, JsonValue]) for normalize arguments.
-        map: The map (dict[str, JsonValue]) for normalize arguments.
+        orig: Input `orig` parameter value (`cst.Call`).
+        upd: Input `upd` parameter value (`cst.Call`).
+        det: Input `det` parameter value (`dict[str, JsonValue]`).
+        map: Input `map` parameter value (`dict[str, JsonValue]`).
 
     Returns:
         Resulting `list[cst.Arg]` from normalize arguments.
@@ -102,23 +99,26 @@ class MockRewriter:
     return list(upd.args)
 
   def _report_failure(self, msg: str) -> None:
-    """Mock implementation of  report failure.
+    """Execute `_report_failure` on `MockRewriter` for calls strategy utils tests.
 
     Args:
-        msg: The msg (str) for report failure.
+        msg: Input `msg` parameter value (`str`).
     """
     self.failures.append(msg)
 
   def _report_warning(self, msg: str) -> None:
-    """Mock implementation of  report warning.
+    """Execute `_report_warning` on `MockRewriter` for calls strategy utils tests.
 
     Args:
-        msg: The msg (str) for report warning.
+        msg: Input `msg` parameter value (`str`).
     """
     self.warnings.append(msg)
 
   def _create_name_node(self, name: str) -> cst.BaseExpression:
-    """Mock implementation of  create name node.
+    """Execute `Name` to support create name node in calls strategy utils tests.
+
+    Args:
+        name: Target symbol or register identifier.
 
     Returns:
         Resulting `cst.BaseExpression` from create name node.
@@ -126,7 +126,10 @@ class MockRewriter:
     return cst.Name(name)
 
   def _create_dotted_name(self, name: str) -> cst.BaseExpression:
-    """Mock implementation of  create dotted name.
+    """Execute `Name` to support create dotted name in calls strategy utils tests.
+
+    Args:
+        name: Target symbol or register identifier.
 
     Returns:
         Resulting `cst.BaseExpression` from create dotted name.
@@ -169,7 +172,7 @@ def test_execute_strategy_plugin(mock_get_hook: MagicMock) -> None:
   """Executes strategy plugin.
 
   Args:
-      mock_get_hook: The mock get hook (MagicMock) for test execute strategy plugin.
+      mock_get_hook: Input `mock_get_hook` parameter value (`MagicMock`).
   """
   rewriter = MockRewriter()
   orig = cst.Call(func=cst.Name("foo"), args=[])
@@ -209,22 +212,14 @@ def test_execute_strategy_standard() -> None:
   res_miss = execute_strategy(rewriter, orig, upd, {}, {}, "op_id")
   assert res_miss is upd
   assert len(rewriter.failures) == 1
-  mapping = {"api": "target_foo"}
+  mapping: dict[str, JsonValue] = {"api": "target_foo"}
   res = execute_strategy(rewriter, orig, upd, mapping, {}, "op_id")
   assert isinstance(res, cst.Call)
   assert cst.ensure_type(res.func, cst.Name).value == "target_foo"
-  _test_getattr(_test_getattr({"v": mapping}, "__getitem__")("v"), "__setitem__")(
-    "layout_map",
-    _test_getattr(
-      {
-        "v": {
-          "x": _test_getattr({"v": "NCHW -> NHWC"}, "__getitem__")("v"),
-          "return": _test_getattr({"v": "NHWC -> NCHW"}, "__getitem__")("v"),
-        }
-      },
-      "__getitem__",
-    )("v"),
-  )
+  mapping["layout_map"] = {
+    "x": "NCHW -> NHWC",
+    "return": "NHWC -> NCHW",
+  }
   details = {"std_args": ["x", {"name": "y"}, ["z"]]}
   with (
     patch("ml_switcheroo.core.rewriter.calls.strategy.compute_permutation") as mock_comp,
@@ -250,15 +245,7 @@ def test_rewrite_stateful_call() -> None:
   assert isinstance(res, cst.Call)
   assert len(res.args) == 1
   assert cst.ensure_type(res.args[0].value, cst.Name).value == "vars"
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {"v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v").func}, "__getitem__")("v").attr},
-        "__getitem__",
-      )("v").value
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "apply"}, "__getitem__")("v")
+  assert cst.ensure_type(res.func, cst.Attribute).attr.value == "apply"
   assert len(rewriter.warnings) == 1
   rewriter.context.signature_stack[0].injected_args.append(("vars", None))
   rewrite_stateful_call(rewriter, orig, "my_inst", {"prepend_arg": "vars"})

@@ -7,7 +7,7 @@ in `ml_switcheroo.core.markup.parser`.
 
 import libcst as cst
 
-from ml_switcheroo.core.latex.nodes import ComputeNode, InputNode, LatexNode, MemoryNode, ReturnNode, StateOpNode
+from ml_switcheroo.core.latex.nodes import ComputeNode, InputNode, MemoryNode, ReturnNode, StateOpNode
 from ml_switcheroo.core.markup.parser import BaseTokenizer, RecursiveDescentParser, Token
 
 _LATEX_TOKEN_SPEC: list[tuple[str, str]] = [
@@ -40,9 +40,7 @@ class _LatexRecursiveDescentParser(RecursiveDescentParser):
     self.expect(open_tok)
     depth = 1
     parts: list[str] = []
-    while self.current is not None and depth > 0:
-      tok = self.advance()
-      assert tok is not None
+    while depth > 0 and (tok := self.advance()) is not None:
       if tok.type == open_tok:
         depth += 1
         parts.append(tok.value)
@@ -309,16 +307,13 @@ class LatexParser:
 
     fwd_body = []
     for op_item in ops:
-      op: ComputeNode | StateOpNode | LatexNode = op_item
       lhs = cst.AssignTarget(cst.Name(op_item.node_id))
-      if isinstance(op, ComputeNode):
-        op_target = f"midl.{op.op_type}"
-        rhs: cst.BaseExpression = self._create_call(op_target, args_list=op.args)
-      elif isinstance(op, StateOpNode):
-        fname = f"self.{op.attribute_id}"
-        rhs = self._create_call(fname, args_list=op.args)
+      if isinstance(op_item, ComputeNode):
+        op_target = f"midl.{op_item.op_type}"
+        rhs: cst.BaseExpression = self._create_call(op_target, args_list=op_item.args)
       else:
-        rhs = cst.Name("None")
+        fname = f"self.{op_item.attribute_id}"
+        rhs = self._create_call(fname, args_list=op_item.args)
 
       fwd_body.append(cst.SimpleStatementLine([cst.Assign(targets=[lhs], value=rhs)]))
 

@@ -1,18 +1,18 @@
 """Test suite for the Registry Loader Extra module."""
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
+from typing import ClassVar
 from unittest.mock import MagicMock
 
-from pydantic import JsonValue
 import pytest
+from pydantic import JsonValue
 
 import ml_switcheroo.semantics.registry_loader as registry_loader
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.semantics.registry_loader import RegistryLoader
 
 
 def test_registry_loader_exceptions(monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture) -> None:
-  """Verifies the behavior of registry loader exceptions.
+  """Verify `RegistryLoader` handles registry loader exceptions as expected.
 
   Args:
       monkeypatch (pytest.MonkeyPatch): Pytest fixture.
@@ -20,10 +20,10 @@ def test_registry_loader_exceptions(monkeypatch: pytest.MonkeyPatch, caplog: pyt
   """
 
   class BadTraitsAdapter:
-    """Test helper class BadTraitsAdapter."""
+    """Sentinel `BadTraitsAdapter` fixture class used in registry loader tests."""
 
     class FakeTraits:
-      """Test helper class FakeTraits."""
+      """Test double `FakeTraits` implementing `model_dump` for registry loader tests."""
 
       def model_dump(self, **kwargs: JsonValue) -> dict[str, JsonValue]:
         """Mock implementation of model dump.
@@ -43,7 +43,7 @@ def test_registry_loader_exceptions(monkeypatch: pytest.MonkeyPatch, caplog: pyt
     plugin_traits = FakeTraits()
 
   class BadWiringAdapter:
-    """Test helper class BadWiringAdapter."""
+    """Test double `BadWiringAdapter` implementing `apply_wiring` for registry loader tests."""
 
     def apply_wiring(self, snap: dict[str, JsonValue]) -> None:
       """Applies wiring.
@@ -67,9 +67,9 @@ def test_registry_loader_exceptions(monkeypatch: pytest.MonkeyPatch, caplog: pyt
     """
     if fw == "dummy":
       return None
-    elif fw == "dummy_traits":
+    if fw == "dummy_traits":
       return BadTraitsAdapter()
-    elif fw == "dummy_wiring":
+    if fw == "dummy_wiring":
       return BadWiringAdapter()
     return None
 
@@ -138,7 +138,7 @@ def test_registry_loader_prelabel_and_plugin_metadata(monkeypatch: pytest.Monkey
   class MockSpec:
     """Mock spec."""
 
-    ops: dict[str, RuntimeTensorOrValue] = {"plugin_op": {"frameworks": {"jax": {}}}}
+    ops: ClassVar[dict[str, RuntimeTensorOrValue]] = {"plugin_op": {"frameworks": {"jax": {}}}}
 
   monkeypatch.setattr(registry_loader.hooks, "get_all_hook_metadata", lambda: {"my_plugin": MockSpec()})
   manager.data = {}
@@ -203,8 +203,8 @@ def test_registry_loader_remaining_branches(monkeypatch: pytest.MonkeyPatch) -> 
 
     structural_traits = None
     plugin_traits = None
-    specifications = {"lower_spec": MockSpec()}
-    import_namespaces = {"path.to.module": "not_an_import_config"}
+    specifications: ClassVar[dict[str, MockSpec]] = {"lower_spec": MockSpec()}
+    import_namespaces: ClassVar[dict[str, str]] = {"path.to.module": "not_an_import_config"}
 
   monkeypatch.setattr(registry_loader, "get_adapter", lambda _: TestAdapter())
   monkeypatch.setattr(registry_loader, "available_frameworks", lambda: ["test_fw"])

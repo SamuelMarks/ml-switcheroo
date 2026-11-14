@@ -10,7 +10,7 @@ from ml_switcheroo.tools.injector_plugin import PluginGenerator
 
 @pytest.fixture
 def plugin_dir(tmp_path: Path) -> Path:
-  """Execute plugin dir helper logic.
+  """Create a configured `Path` fixture for plugin injector logic tests.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.

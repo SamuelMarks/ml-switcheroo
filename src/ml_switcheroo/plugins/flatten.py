@@ -17,14 +17,22 @@ from ml_switcheroo.plugins.utils import create_dotted_name
 
 @typing.runtime_checkable
 class _VariantArgsProtocol(typing.Protocol):
-  """Protocol for variant objects exposing `args`."""
+  """Protocol for variant objects exposing `args`.
+
+  Attributes:
+      args: The args (`dict[str, str] | None`).
+  """
 
   args: dict[str, str] | None
 
 
 @typing.runtime_checkable
 class _VariantOpTypeProtocol(typing.Protocol):
-  """Protocol for variant objects exposing `op_type`."""
+  """Protocol for variant objects exposing `op_type`.
+
+  Attributes:
+      op_type: The op type (`str | None`).
+  """
 
   op_type: str | None
 
@@ -56,6 +64,119 @@ def _create_integer(val: int) -> cst.BaseExpression:
   return cst.Integer(str(val))
 
 
+def _parse_signed_int_cst(expr: cst.BaseExpression) -> int | None:
+  """Extract a signed integer literal from a CST ``Integer`` or unary ``-Integer`` node.
+
+  Args:
+      expr: Candidate CST expression node.
+
+  Returns:
+      Parsed integer value if ``expr`` is a base-10 integer literal, otherwise ``None``.
+  """
+  try:
+    if isinstance(expr, cst.Integer):
+      return int(expr.value)
+    if (
+      isinstance(expr, cst.UnaryOperation)
+      and isinstance(expr.operator, cst.Minus)
+      and isinstance(expr.expression, cst.Integer)
+    ):
+      return -int(expr.expression.value)
+  except ValueError:
+    pass
+  return None
+
+
+def _extract_flatten_dims(args: list[cst.Arg]) -> tuple[int, int]:
+  """Extract ``(start_dim, end_dim)`` from positional and keyword flatten arguments.
+
+  Args:
+      args: Call argument list starting with the input tensor expression.
+
+  Returns:
+      Tuple of ``(start_dim, end_dim)`` defaulting to ``(0, -1)``.
+  """
+  start_dim = 0
+  end_dim = -1
+
+  if len(args) > 1:
+    pos_start = _parse_signed_int_cst(args[1].value)
+    if pos_start is not None:
+      start_dim = pos_start
+  if len(args) > 2:
+    pos_end = _parse_signed_int_cst(args[2].value)
+    if pos_end is not None:
+      end_dim = pos_end
+
+  for arg in args:
+    if arg.keyword:
+      parsed = _parse_signed_int_cst(arg.value)
+      if parsed is not None:
+        if arg.keyword.value == "start_dim":
+          start_dim = parsed
+        elif arg.keyword.value == "end_dim":
+          end_dim = parsed
+
+  return start_dim, end_dim
+
+
+def _synthesize_collapse_call(
+  node: cst.Call,
+  target_api: str,
+  input_arg: cst.Arg,
+  start_dim: int,
+  end_dim: int,
+) -> cst.Call:
+  """Synthesize an exclusive ``stop_dimension`` collapse call (e.g. ``jax.lax.collapse``).
+
+  Args:
+      node: Original CST ``Call`` node.
+      target_api: Dotted target API path string.
+      input_arg: First input tensor ``cst.Arg`` node.
+      start_dim: Inclusive start dimension index.
+      end_dim: Inclusive end dimension index (``-1`` denotes ``x.ndim``).
+
+  Returns:
+      Rewritten collapse ``cst.Call`` node.
+  """
+  new_func = _create_dotted_name(target_api)
+  arg0 = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
+  arg1 = cst.Arg(value=_create_integer(start_dim), comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
+  arg2_val: cst.BaseExpression = (
+    cst.Attribute(value=input_arg.value, attr=cst.Name("ndim")) if end_dim == -1 else _create_integer(end_dim + 1)
+  )
+  return node.with_changes(func=new_func, args=[arg0, arg1, cst.Arg(value=arg2_val)])
+
+
+def _synthesize_batch_reshape_call(node: cst.Call, target_api: str, input_arg: cst.Arg) -> cst.Call:
+  """Synthesize ``reshape(x, (x.shape[0], -1))`` for batch-preserving ``flatten(x, 1, -1)``.
+
+  Args:
+      node: Original CST ``Call`` node.
+      target_api: Dotted target reshape API path string.
+      input_arg: First input tensor ``cst.Arg`` node.
+
+  Returns:
+      Rewritten reshape ``cst.Call`` node.
+  """
+  new_func = _create_dotted_name(target_api)
+  shape_attr = cst.Attribute(value=input_arg.value, attr=cst.Name("shape"))
+  batch_dim = cst.Subscript(value=shape_attr, slice=[cst.SubscriptElement(slice=cst.Index(value=cst.Integer("0")))])
+  neg_one = cst.UnaryOperation(operator=cst.Minus(), expression=cst.Integer("1"))
+  shape_tuple = cst.Tuple(
+    elements=[
+      cst.Element(value=batch_dim, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))),
+      cst.Element(value=neg_one),
+    ]
+  )
+  fmt_input = (
+    input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
+    if input_arg.comma == cst.MaybeSentinel.DEFAULT
+    else input_arg
+  )
+  return node.with_changes(func=new_func, args=[fmt_input, cst.Arg(value=shape_tuple)])
+
+
 @register_hook("flatten_range")
 def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
   """Transform Transforms `flatten(x, start, end)` into target-specific logic.
@@ -79,69 +200,11 @@ def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
     return node
 
   input_arg = args[0]
-  input_val = input_arg.value
+  start_dim, end_dim = _extract_flatten_dims(args)
 
-  # Default values for Torch flatten semantics
-  start_dim = 0
-  end_dim = -1
-
-  # Extract positional args
-  if len(args) > 1:
-    try:
-      if isinstance(args[1].value, cst.Integer):
-        start_dim = int(args[1].value.value)
-      elif (
-        isinstance(args[1].value, cst.UnaryOperation)
-        and isinstance(args[1].value.operator, cst.Minus)
-        and isinstance(args[1].value.expression, cst.Integer)
-      ):
-        start_dim = -int(args[1].value.expression.value)
-    except ValueError:
-      pass
-
-  if len(args) > 2:
-    try:
-      if isinstance(args[2].value, cst.Integer):
-        end_dim = int(args[2].value.value)
-      elif (
-        isinstance(args[2].value, cst.UnaryOperation)
-        and isinstance(args[2].value.operator, cst.Minus)
-        and isinstance(args[2].value.expression, cst.Integer)
-      ):
-        end_dim = -int(args[2].value.expression.value)
-    except ValueError:
-      pass
-
-  # Extract keyword args
-  for arg in args:
-    if arg.keyword:
-      if arg.keyword.value == "start_dim":
-        if isinstance(arg.value, cst.Integer):
-          start_dim = int(arg.value.value)
-        elif (
-          isinstance(arg.value, cst.UnaryOperation)
-          and isinstance(arg.value.operator, cst.Minus)
-          and isinstance(arg.value.expression, cst.Integer)
-        ):
-          start_dim = -int(arg.value.expression.value)
-      if arg.keyword.value == "end_dim":
-        if isinstance(arg.value, cst.Integer):
-          end_dim = int(arg.value.value)
-        elif (
-          isinstance(arg.value, cst.UnaryOperation)
-          and isinstance(arg.value.operator, cst.Minus)
-          and isinstance(arg.value.expression, cst.Integer)
-        ):
-          end_dim = -int(arg.value.expression.value)
-
-  # Lookup the API configured in ODL/Semantics
-  target_api = None
-  if ctx.current_op_id:
-    target_api = ctx.lookup_api(ctx.current_op_id)
-
+  target_api = ctx.lookup_api(ctx.current_op_id) if ctx.current_op_id else None
   if not target_api:
     target_api = ctx.lookup_api("flatten") or ctx.lookup_api("Flatten")
-
   if not target_api:
     return node
 
@@ -158,83 +221,28 @@ def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
   variant_args: dict[str, str] = raw_v_args if isinstance(raw_v_args, dict) else {}
   api_leaf = target_api.rsplit(".", 1)[-1]
 
-  # --- STRATEGY: Exclusive stop_dimension collapse ---
-  # flatten(x, 1) -> collapse(x, 1, x.ndim)
-  # flatten(x, 1, 2) -> collapse(x, 1, 3) (Exclusive stop)
   if "stop_dimension" in variant_args or api_leaf == "collapse":
-    new_func = _create_dotted_name(target_api)
+    return _synthesize_collapse_call(node, target_api, input_arg, start_dim, end_dim)
 
-    # Arg 1: Input (x)
-    arg0 = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
-
-    # Arg 2: start_dim
-    arg1_val = _create_integer(start_dim)
-    arg1 = cst.Arg(value=arg1_val, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
-
-    # Arg 3: stop_dimension
-    # PyTorch 'end_dim' is inclusive. 'stop_dimension' is exclusive.
-    # If end_dim == -1, it means "until the end", which corresponds to x.ndim.
-    arg2_val: cst.BaseExpression
-    if end_dim == -1:
-      # Generate: x.ndim
-      arg2_val = cst.Attribute(value=input_val, attr=cst.Name("ndim"))
-    else:
-      # Generate: end_dim + 1
-      arg2_val = _create_integer(end_dim + 1)
-
-    arg2 = cst.Arg(value=arg2_val)
-
-    return node.with_changes(func=new_func, args=[arg0, arg1, arg2])
-
-  # --- STRATEGY: Inclusive start_axis / end_axis flatten ---
   if "start_axis" in variant_args or target_api.endswith(".core.flatten"):
     new_func = _create_dotted_name(target_api)
     arg0 = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
     arg1 = cst.Arg(value=_create_integer(start_dim), comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
-    arg2 = cst.Arg(value=_create_integer(end_dim))
-    return node.with_changes(func=new_func, args=[arg0, arg1, arg2])
+    return node.with_changes(func=new_func, args=[arg0, arg1, cst.Arg(value=_create_integer(end_dim))])
 
-  # --- STRATEGY: Callable Class (Keras / TensorFlow / Paxml) ---
-  # keras.layers.Flatten()(x)
-  is_class = False
-  if isinstance(target_variant, _VariantOpTypeProtocol) and target_variant.op_type is not None:
-    is_class = "class" in str(target_variant.op_type).lower()
+  is_class = (
+    isinstance(target_variant, _VariantOpTypeProtocol)
+    and target_variant.op_type is not None
+    and "class" in str(target_variant.op_type).lower()
+  )
   if is_class or target_api.endswith(".Flatten"):
-    # Create the class instantiation: tf.keras.layers.Flatten()
-    class_name = _create_dotted_name(target_api)
-    instantiation = cst.Call(func=class_name, args=[])
-    # Call it with the input: tf.keras.layers.Flatten()(x)
-    clean_input_arg = input_arg.with_changes(comma=cst.MaybeSentinel.DEFAULT)
-    return cst.Call(func=instantiation, args=[clean_input_arg])
+    instantiation = cst.Call(func=_create_dotted_name(target_api), args=[])
+    return cst.Call(func=instantiation, args=[input_arg.with_changes(comma=cst.MaybeSentinel.DEFAULT)])
 
-  # --- STRATEGY: Ravel (Full Flatten) ---
-  # flatten(x) or flatten(x, 0, -1) -> ravel(x)
-  if start_dim == 0 and end_dim == -1:
-    if "ravel" in target_api.lower() or "flatten" in target_api.lower():
-      new_func = _create_dotted_name(target_api)
-      return node.with_changes(func=new_func, args=[input_arg])
+  if start_dim == 0 and end_dim == -1 and ("ravel" in target_api.lower() or "flatten" in target_api.lower()):
+    return node.with_changes(func=_create_dotted_name(target_api), args=[input_arg])
 
-  # --- STRATEGY: Reshape (Batch Preserving) ---
-  # flatten(x, 1) -> reshape(x, (x.shape[0], -1))
   if start_dim == 1 and end_dim == -1:
-    new_func = _create_dotted_name(target_api)
-
-    # Construct shape tuple: (x.shape[0], -1)
-    shape_attr = cst.Attribute(value=input_val, attr=cst.Name("shape"))
-    batch_dim = cst.Subscript(value=shape_attr, slice=[cst.SubscriptElement(slice=cst.Index(value=cst.Integer("0")))])
-    neg_one = cst.UnaryOperation(operator=cst.Minus(), expression=cst.Integer("1"))
-
-    shape_tuple = cst.Tuple(
-      elements=[
-        cst.Element(value=batch_dim, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))),
-        cst.Element(value=neg_one),
-      ]
-    )
-
-    if input_arg.comma == cst.MaybeSentinel.DEFAULT:
-      input_arg = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
-
-    new_args = [input_arg, cst.Arg(value=shape_tuple)]
-    return node.with_changes(func=new_func, args=new_args)
+    return _synthesize_batch_reshape_call(node, target_api, input_arg)
 
   return node

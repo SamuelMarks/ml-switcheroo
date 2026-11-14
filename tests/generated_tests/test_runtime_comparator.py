@@ -1,0 +1,96 @@
+"""Test suite for the Runtime Comparator module."""
+
+import numpy as np
+
+from ml_switcheroo.generated_tests.runtime import verify_results
+
+
+def test_compare_simple_arrays() -> None:
+  """Verify `np.array` handles compare simple arrays as expected."""
+  a = np.array([1.0, 2.0])
+  b = np.array([1.000001, 2.0])
+  assert verify_results(a, b)
+  c = np.array([5.0, 2.0])
+  assert not verify_results(a, c)
+
+
+def test_compare_shapes_mismatch() -> None:
+  """Verify `np.ones` handles compare shapes mismatch as expected."""
+  a = np.ones((2, 2))
+  b = np.ones((2, 3))
+  assert not verify_results(a, b)
+
+
+def test_compare_list_of_tensors() -> None:
+  """Verify `verify_results` handles compare list of tensors as expected."""
+  a = [np.zeros(2), np.ones(2)]
+  b = [np.zeros(2), np.ones(2)]
+  assert verify_results(a, b)
+  c = [np.zeros(2), np.zeros(2)]
+  assert not verify_results(a, c)
+
+
+def test_compare_tuple_structure() -> None:
+  """Verify `verify_results` handles compare tuple structure as expected."""
+  a = (
+    np.array(1),
+    {"key": np.array(2)},
+  )
+  b = (
+    np.array(1),
+    {"key": np.array(2)},
+  )
+  assert verify_results(a, b)
+  c = [
+    np.array(1),
+    {"key": np.array(2)},
+  ]
+  assert verify_results(a, c)
+  d = (np.array(1),)
+  assert not verify_results(a, d)
+
+
+def test_compare_dict_mismatch() -> None:
+  """Verify `verify_results` handles compare dict mismatch as expected."""
+  a: dict[str, int] = {"x": 1}
+  b: dict[str, int] = {"y": 1}
+  assert not verify_results(a, b)
+  c: dict[str, int] = {"x": 2}
+  assert not verify_results(a, c)
+
+
+def test_compare_boolean_exact() -> None:
+  """Verify `np.array` handles compare boolean exact as expected."""
+  a = np.array([True, False])
+  b = np.array([True, True])
+  assert not verify_results(a, b)
+  a2 = np.array([True, False])
+  assert verify_results(a, a2)
+
+
+def test_compare_nan_handling() -> None:
+  """Verify `np.array` handles compare nan handling as expected."""
+  a = np.array([np.nan, 1.0])
+  b = np.array([np.nan, 1.0])
+  assert verify_results(a, b)
+  c = np.array([0.0, 1.0])
+  assert not verify_results(a, c)
+
+
+def test_compare_strings() -> None:
+  """Verify `verify_results` handles compare strings as expected."""
+  a: str = "same"
+  b: str = "same"
+  assert verify_results(a, b)
+  assert not verify_results(a, "diff")
+
+
+def test_compare_none() -> None:
+  """Verify `verify_results` handles compare none as expected."""
+  assert verify_results(None, None)
+  assert not verify_results(None, 1)
+
+
+def test_compare_scalar_vs_0d_array() -> None:
+  """Verify `verify_results` handles compare scalar vs 0d array as expected."""
+  assert verify_results(1.0, np.array(1.0))

@@ -1,8 +1,8 @@
-"""MLIR Emitter Expression Mixin.
+"""MLIR Expression Emitter Delegate.
 
-This module provides the `MlirEmitterExprMixin` class, which handles the
-translation of standard Python expressions (via LibCST AST representation)
-into MLIR operations and values.
+Provides ``MlirExprEmitter``, a single-responsibility delegate translating
+Python LibCST expressions (names, calls, binary operations, constants, and
+type annotations) into MLIR ``ValueNode`` and ``OperationNode`` sequences.
 """
 
 import typing
@@ -10,106 +10,105 @@ import typing
 import libcst as cst
 
 from ml_switcheroo.core.mlir.cst import AttributeNode, OperationNode, ValueNode
-
-if typing.TYPE_CHECKING:
-  from ml_switcheroo.core.mlir.emitter_decl import ContextDummy
+from ml_switcheroo.core.mlir.emitter_decl import SSAContext
 
 
-class MlirEmitterExprMixin:
-  """Mixin class for emitting MLIR operations from LibCST expressions.
+class MlirExprEmitterHost(typing.Protocol):
+  """Structural protocol required by ``MlirExprEmitter``.
 
-  This mixin provides capabilities to process, lower, and compile various
-  Python expression structures—including name accesses, call operations,
-  binary expressions, and numeric constants—into an equivalent list of
-  supporting MLIR operations and their final evaluated values.
+  Attributes:
+      ctx: Active ``SSAContext`` instance.
   """
 
-  # This is provided by the mixed-in classes
-  ctx: "ContextDummy"
-
-  if typing.TYPE_CHECKING:
-
-    def _flatten_attr(self, attr: cst.BaseExpression) -> str | None:
-      """Flatten a Name or Attribute chain into a dotted string.
-
-      Args:
-          attr: The LibCST node representing the attribute or name to flatten.
-
-      Returns:
-          A dotted string representation of the attribute chain (e.g., "self.layer")
-          or None if it cannot be flattened.
-      """
-      ...
-
-    def _get_binop_str(self, op: cst.BaseBinaryOp) -> str:
-      """Map a LibCST binary operator node to its corresponding string identifier.
-
-      Args:
-          op: The LibCST binary operator node (e.g., cst.Add, cst.Multiply).
-
-      Returns:
-          The string identifier (e.g., "add", "mul", "matmul") for the operator.
-      """
-      ...
+  ctx: SSAContext
 
   def _emit_expression(self, expr: cst.BaseExpression) -> tuple[ValueNode, list[OperationNode]]:
-    """Recursively converts an expression into a value node and a list of supporting operations.
-
-    Handles the translation of:
-    - Variable references (Names)
-    - Function and method calls (including keyword arguments)
-    - Binary operations
-    - Numeric constants (Integers and Floats)
+    """Emit ``expr`` (allowing polymorphic subclass dispatch such as ``StableHloEmitter``).
 
     Args:
-        expr: The LibCST base expression node to be processed.
+        expr: Sub-expression to emit.
 
     Returns:
-        A tuple containing:
-            - The resulting ValueNode representing the evaluated expression.
-            - A list of OperationNode objects generated to evaluate the expression.
+        Tuple of ``(ValueNode, list[OperationNode])``.
+    """
+    ...
+
+  def _flatten_attr(self, node: cst.CSTNode) -> str | None:
+    """Flatten a ``Name`` or ``Attribute`` chain into a dotted string.
+
+    Args:
+        node: CST node to flatten.
+
+    Returns:
+        Dotted string or ``None``.
+    """
+    ...
+
+  def _get_binop_str(self, operator: cst.BaseBinaryOp) -> str:
+    """Map a LibCST binary operator node to its string identifier.
+
+    Args:
+        operator: Binary operator CST node.
+
+    Returns:
+        Operator code string (e.g. ``'add'``, ``'matmul'``).
+    """
+    ...
+
+
+class MlirExprEmitter:
+  """Single-responsibility delegate lowering LibCST expressions into MLIR operations.
+
+  Attributes:
+      host: Bound ``MlirExprEmitterHost`` instance.
+  """
+
+  def __init__(self, host: MlirExprEmitterHost) -> None:
+    """Initialize ``MlirExprEmitter`` bound to ``host``.
+
+    Args:
+        host: Bound ``MlirExprEmitterHost`` instance.
+    """
+    self.host: MlirExprEmitterHost = host
+
+  def emit_expression(self, expr: cst.BaseExpression) -> tuple[ValueNode, list[OperationNode]]:
+    """Recursively convert ``expr`` into a ``ValueNode`` and supporting ``OperationNode`` list.
+
+    Args:
+        expr: LibCST expression node to lower.
+
+    Returns:
+        Tuple of ``(result_value, emitted_operations)``.
     """
     ops: list[OperationNode] = []
     if isinstance(expr, cst.Name):
-      val = self.ctx.lookup(expr.value)
+      val = self.host.ctx.lookup(expr.value)
       if not val:
         val = ValueNode(name=f"@{expr.value}")
       return val, ops
-    elif isinstance(expr, cst.Call):
-      operands = []
-      arg_keywords = []  # new feature
 
-      # Process arguments
+    if isinstance(expr, cst.Call):
+      operands: list[ValueNode] = []
+      arg_keywords: list[str] = []
+
       for arg in expr.args:
-        v, o = self._emit_expression(arg.value)
+        v, o = self.host._emit_expression(arg.value)
         ops.extend(o)
         operands.append(v)
+        arg_keywords.append(arg.keyword.value if arg.keyword else "")
 
-        # Capture keyword if present
-        kw = ""
-        if arg.keyword:
-          kw = arg.keyword.value
-        arg_keywords.append(kw)
-
-      flat_name = self._flatten_attr(expr.func)
+      flat_name = self.host._flatten_attr(expr.func)
       root_var = flat_name.split(".")[0] if flat_name else ""
-      is_static_op = False
-      if flat_name and not self.ctx.lookup(root_var):
-        is_static_op = True
+      is_static_op = bool(flat_name and not self.host.ctx.lookup(root_var))
 
       common_attrs: list[AttributeNode] = []
-      # Pack keywords into attribute if any are non-empty
       if any(arg_keywords):
-        # AttributeNode needs a list of strings formatted for the printer
-        # e.g. ["k=val", ""] -> we just need to store the keys.
-        # "arg_keywords" = ["a", "", "b"]
-        # We store as list of quoted strings
         kw_vals = [f'"{k}"' for k in arg_keywords]
         common_attrs.append(AttributeNode(name="arg_keywords", value=kw_vals))
 
       if is_static_op:
-        result = self.ctx.allocate_ssa()
-        attrs: list[AttributeNode] = [AttributeNode(name="type", value=f'"{flat_name}"')] + common_attrs
+        result = self.host.ctx.allocate_ssa()
+        attrs: list[AttributeNode] = [AttributeNode(name="type", value=f'"{flat_name}"'), *common_attrs]
         op = OperationNode(
           name="sw.op",
           results=[result],
@@ -120,9 +119,9 @@ class MlirEmitterExprMixin:
         return result, ops
 
       if isinstance(expr.func, cst.Attribute):
-        obj, o_ops = self._emit_expression(expr.func.value)
+        obj, o_ops = self.host._emit_expression(expr.func.value)
         ops.extend(o_ops)
-        attr_val = self.ctx.allocate_ssa()
+        attr_val = self.host.ctx.allocate_ssa()
         get_op = OperationNode(
           name="sw.getattr",
           results=[attr_val],
@@ -130,33 +129,32 @@ class MlirEmitterExprMixin:
           attributes=[AttributeNode(name="name", value=f'"{expr.func.attr.value}"')],
         )
         ops.append(get_op)
-        res_val = self.ctx.allocate_ssa()
-        # Attach keywords
+        res_val = self.host.ctx.allocate_ssa()
         call_op = OperationNode(
           name="sw.call",
           results=[res_val],
-          operands=[attr_val] + operands,
+          operands=[attr_val, *operands],
           attributes=common_attrs,
         )
         ops.append(call_op)
         return res_val, ops
 
       if isinstance(expr.func, cst.Name):
-        func_val, f_ops = self._emit_expression(expr.func)
+        func_val, f_ops = self.host._emit_expression(expr.func)
         ops.extend(f_ops)
-        result = self.ctx.allocate_ssa()
-        call_op = OperationNode(name="sw.call", results=[result], operands=[func_val] + operands, attributes=common_attrs)
+        result = self.host.ctx.allocate_ssa()
+        call_op = OperationNode(name="sw.call", results=[result], operands=[func_val, *operands], attributes=common_attrs)
         ops.append(call_op)
         return result, ops
 
     elif isinstance(expr, cst.BinaryOperation):
-      lhs_val, l_ops = self._emit_expression(expr.left)
-      rhs_val, r_ops = self._emit_expression(expr.right)
+      lhs_val, l_ops = self.host._emit_expression(expr.left)
+      rhs_val, r_ops = self.host._emit_expression(expr.right)
       ops.extend(l_ops)
       ops.extend(r_ops)
 
-      op_str = self._get_binop_str(expr.operator)
-      res_val = self.ctx.allocate_ssa()
+      op_str = self.host._get_binop_str(expr.operator)
+      res_val = self.host.ctx.allocate_ssa()
       op = OperationNode(
         name="sw.op",
         results=[res_val],
@@ -167,24 +165,28 @@ class MlirEmitterExprMixin:
       return res_val, ops
 
     elif isinstance(expr, (cst.Integer, cst.Float)):
-      val = self.ctx.allocate_ssa(prefix="%cst")
+      val = self.host.ctx.allocate_ssa(prefix="%cst")
       op = OperationNode(name="sw.constant", results=[val], attributes=[AttributeNode(name="value", value=expr.value)])
       ops.append(op)
       return val, ops
 
     return ValueNode(name="%error"), []
 
-  def _annotation_to_string(self, node: cst.CSTNode) -> str:
-    """Flatten a type annotation node into its corresponding string representation.
+  @staticmethod
+  def annotation_to_string(node: cst.CSTNode) -> str:
+    """Flatten a CST type annotation node into its dotted string representation.
 
     Args:
-        node: The LibCST node representing the type annotation.
+        node: LibCST node representing the type annotation.
 
     Returns:
-        A string representation of the type annotation (e.g., "int", "Any").
+        Dotted string representation (e.g. ``'int'``, ``'torch.Tensor'``) or ``'Any'``.
     """
     if isinstance(node, cst.Name):
       return node.value
-    elif isinstance(node, cst.Attribute):
-      return f"{self._annotation_to_string(node.value)}.{node.attr.value}"
+    if isinstance(node, cst.Attribute):
+      return f"{MlirExprEmitter.annotation_to_string(node.value)}.{node.attr.value}"
     return "Any"
+
+
+__all__ = ["MlirExprEmitter", "MlirExprEmitterHost"]

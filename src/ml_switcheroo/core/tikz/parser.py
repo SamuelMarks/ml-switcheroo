@@ -11,7 +11,9 @@ if typing.TYPE_CHECKING:
   from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 from lark import Lark, Token, Transformer, Tree
+from lark.exceptions import LarkError
 
+from ml_switcheroo.core.cst.base import Trivia
 from ml_switcheroo.core.tikz.nodes import (
   TikzBaseNode,
   TikzEdge,
@@ -22,6 +24,7 @@ from ml_switcheroo.core.tikz.nodes import (
   TikzTextNode,
   TriviaNode,
 )
+from ml_switcheroo.exceptions import SyntaxParseError
 
 TikzAtom: typing.TypeAlias = TikzBaseNode | Tree[Token] | Token | str | None
 TikzParsedChild: typing.TypeAlias = TikzAtom | list[TikzAtom]
@@ -29,6 +32,28 @@ TikzParsedChild: typing.TypeAlias = TikzAtom | list[TikzAtom]
 
 class TikzTransformer(Transformer[Token, TikzParsedChild]):
   """Transform a parsed TikZ AST into TikZ CST components."""
+
+  @staticmethod
+  def _partition_top_level_children(
+    children: list[TikzParsedChild],
+  ) -> tuple[list[TikzAtom], list[TriviaNode], list[TriviaNode]]:
+    """Separate flattened element atoms from outer leading and trailing ``TriviaNode`` items.
+
+    Args:
+        children: Raw parsed child list passed to ``start``.
+
+    Returns:
+        Tuple of ``(elements, leading_trivia, trailing_trivia)``.
+    """
+    elements: list[TikzAtom] = []
+    leading: list[TriviaNode] = []
+    trailing: list[TriviaNode] = []
+    for c in children:
+      if isinstance(c, list):
+        elements.extend(c)
+      elif isinstance(c, TriviaNode):
+        (leading if not elements else trailing).append(c)
+    return elements, leading, trailing
 
   def start(self, children: list[TikzParsedChild]) -> TikzGraph:
     """Process the root start rule.
@@ -39,25 +64,12 @@ class TikzTransformer(Transformer[Token, TikzParsedChild]):
     Returns:
         The reconstructed TikzGraph representing the entire parsed structure.
     """
-    elements: list[TikzAtom] = []
-    leading: list[TriviaNode] = []
-    trailing: list[TriviaNode] = []
-    for c in children:
-      if isinstance(c, list):
-        # elements
-        elements.extend(c)
-      elif isinstance(c, TriviaNode):
-        # Handle top level trivia if not absorbed by elements
-        if not elements:
-          leading.append(c)
-        else:
-          trailing.append(c)
-
-    # Extract Graph from elements
+    elements, leading, trailing = self._partition_top_level_children(children)
     graph_children: list[TikzBaseNode] = []
     found_env = False
     ended_env = False
     options: list[TikzOption] = []
+
     for el in elements:
       if isinstance(el, TriviaNode):
         if not found_env:
@@ -69,24 +81,18 @@ class TikzTransformer(Transformer[Token, TikzParsedChild]):
       elif isinstance(el, str):
         if el.startswith("\\begin{tikzpicture}"):
           found_env = True
-          # extract options if any
           if "[" in el and "]" in el:
             opts_str = el.split("[")[1].split("]")[0]
-            opts = [o.strip() for o in opts_str.split(",")]
-            for o in opts:
-              options.append(TikzOption(key=o))
+            options.extend(TikzOption(key=o.strip()) for o in opts_str.split(","))
         elif el == "\\end{tikzpicture}":
           ended_env = True
       elif isinstance(el, TikzGraph):
-        # If the parser successfully mapped the whole thing to a graph
-        # we just return it with attached trivia
-        el.leading_trivia = leading + el.leading_trivia
-        el.trailing_trivia = el.trailing_trivia + trailing
+        el.leading_trivia = [Trivia(text=t.content, kind=t.kind) for t in leading] + el.leading_trivia
+        el.trailing_trivia = el.trailing_trivia + [Trivia(text=t.content, kind=t.kind) for t in trailing]
         return el
       elif isinstance(el, (TikzNode, TikzEdge)):
         graph_children.append(el)
 
-    # Fallback if no TIKZ_ENV_BEGIN was matched properly
     return TikzGraph(children=graph_children, options=options, leading_trivia=leading, trailing_trivia=trailing)
 
   def element(self, children: list[TikzParsedChild]) -> list[TikzParsedChild]:
@@ -247,9 +253,8 @@ class TikzTransformer(Transformer[Token, TikzParsedChild]):
               pass
       elif isinstance(c, TikzTable):
         content = c
-      elif isinstance(c, Tree) and c.data == "text_content":
-        if c.children:
-          content = str(c.children[0])
+      elif isinstance(c, Tree) and c.data == "text_content" and c.children:
+        content = str(c.children[0])
 
     return TikzNode(
       node_id=node_id, x=x, y=y, content=content, options=options, leading_trivia=leading, trailing_trivia=trailing
@@ -430,16 +435,20 @@ class TikzParser:
 
     Returns:
         The reconstructed TikzGraph.
+
+    Raises:
+        ValueError: If the TikZ input fails Lark grammar parsing.
     """
     try:
       tree = self.parser.parse(self.text)
-    except Exception as e:
-      # Re-raise standard exception for fuzzer/error handling tests
-      raise ValueError(f"Failed to parse TikZ: {e}") from e
+    except (LarkError, ValueError, TypeError, KeyError, IndexError, RuntimeError) as e:
+      # Re-raise SyntaxParseError (a ValueError subclass) for fuzzer/error handling tests
+      raise SyntaxParseError(f"Failed to parse TikZ: {e}") from e
 
     transformer = TikzTransformer()
     res = transformer.transform(tree)
-    assert isinstance(res, TikzGraph)
+    if not isinstance(res, TikzGraph):
+      raise SyntaxParseError(f"Expected TikzGraph root, got {type(res).__name__}")
     return res
 
 

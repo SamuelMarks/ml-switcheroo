@@ -1,16 +1,14 @@
 """Test suite for array api reader."""
 
-from tests.conftest import _test_getattr, _test_hasattr
-
 import ast
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.importers.array_api_reader import ArrayApiReader, ArrayApiSpecImporter
 
 
 def test_array_api_reader(tmp_path: Path) -> None:
-  """Verify array api reader behavior.
+  """Verify `ArrayApiSpecImporter` emits `add` for array API reader.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
@@ -82,7 +80,7 @@ def broken(
 
 
 def test_parse_annotation() -> None:
-  """Verify parse annotation behavior."""
+  """Verify `ArrayApiSpecImporter` handles parse annotation as expected."""
   importer = ArrayApiSpecImporter()
 
   # Test None
@@ -132,7 +130,7 @@ def test_parse_annotation() -> None:
 
 
 def test_get_assignment_name() -> None:
-  """Verify get assignment name behavior."""
+  """Verify `ArrayApiSpecImporter` handles get assignment name as expected."""
   importer = ArrayApiSpecImporter()
 
   # Test Assign
@@ -162,7 +160,7 @@ def test_get_assignment_name() -> None:
 
 
 def test_clean_docstring() -> None:
-  """Verify clean docstring behavior."""
+  """Verify `ArrayApiSpecImporter` handles clean docstring as expected."""
   importer = ArrayApiSpecImporter()
   assert importer._clean_docstring(None) == ""
   assert importer._clean_docstring("   ") == ""
@@ -170,7 +168,7 @@ def test_clean_docstring() -> None:
 
 
 def test_array_api_reader_relative_to_value_error(tmp_path: Path) -> None:
-  """Verify array api reader relative to value error behavior.
+  """Verify `ArrayApiSpecImporter` handles array API reader relative to value error as expected.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
@@ -188,12 +186,11 @@ def test_array_api_reader_relative_to_value_error(tmp_path: Path) -> None:
 
 
 def test_array_api_reader_subscript_no_slice() -> None:
-  """Verify array api reader subscript no slice behavior."""
+  """Verify `ArrayApiSpecImporter` handles array API reader subscript no slice as expected."""
   reader = ArrayApiSpecImporter()
   # Mock Subscript without slice
   node = ast.Subscript(value=ast.Name(id="List"), slice=ast.Name(id="Any"))
-  if _test_hasattr(node, "slice"):
-    del node.slice
+  del node.slice
   assert reader._parse_annotation(node) == "List"
 
 
@@ -344,11 +341,9 @@ def test_validate_function_signature() -> None:
     importer.validate_function_signature("", {"std_args": []})
 
   with pytest.raises(ValueError, match="Invalid operation name"):
-    _test_getattr({"v": _test_getattr({"v": importer}, "__getitem__")("v").validate_function_signature}, "__getitem__")(
-      "v"
-    )(
-      _test_getattr({"v": 123}, "__getitem__")("v"),
-      _test_getattr({"v": {"std_args": _test_getattr({"v": []}, "__getitem__")("v")}}, "__getitem__")("v"),
+    importer.validate_function_signature(
+      MagicMock(),
+      {"std_args": []},
     )
 
   # Non-list std_args
@@ -387,7 +382,8 @@ def test_sync_with_snapshot_and_golden(tmp_path: Path) -> None:
 
     # Validate add signature: x1, x2
     add_args = [p[0] for p in res["add"]["std_args"]]
-    assert "x1" in add_args and "x2" in add_args
+    assert "x1" in add_args
+    assert "x2" in add_args
   else:
     # Fallback to test sync_with_snapshot forwarding to parse_snapshot
     import json

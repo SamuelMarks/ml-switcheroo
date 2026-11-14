@@ -5,26 +5,8 @@ class which ties the scanning and rendering logic
 into a Docutils node.
 """
 
-import typing
-
 from docutils import nodes
-from pydantic import JsonValue
-
-if typing.TYPE_CHECKING:
-
-  class Directive:
-    """Type stub for docutils Directive."""
-
-    def __init__(self, *args: JsonValue, **kwargs: JsonValue) -> None:
-      """Initialize Directive stub.
-
-      Args:
-          *args: Positional arguments.
-          **kwargs: Keyword arguments.
-      """
-      ...
-else:
-  from docutils.parsers.rst import Directive
+from docutils.parsers.rst import Directive
 
 from ml_switcheroo.sphinx_ext.registry import scan_registry
 from ml_switcheroo.sphinx_ext.rendering import render_demo_html
@@ -35,9 +17,12 @@ class SwitcherooDemo(Directive):
 
   Usage:
       .. switcheroo_demo::
+
+  Attributes:
+      has_content: Whether the directive accepts nested body lines.
   """
 
-  has_content = True
+  has_content: bool = True
 
   def run(self) -> list[nodes.raw]:
     """Execute execution entry point for the directive.

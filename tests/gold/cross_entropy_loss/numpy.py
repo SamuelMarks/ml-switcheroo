@@ -10,8 +10,8 @@ def compute_loss(
   """Computes loss.
 
   Args:
-      logits: The logits (np.typing.NDArray[np.float64]) for compute loss.
-      targets: The targets (np.typing.NDArray[np.float64]) for compute loss.
+      logits: Input `logits` parameter value (`np.typing.NDArray[np.float64]`).
+      targets: Input `targets` parameter value (`np.typing.NDArray[np.float64]`).
 
   Returns:
       Resulting `np.typing.NDArray[np.float64]` from compute loss.

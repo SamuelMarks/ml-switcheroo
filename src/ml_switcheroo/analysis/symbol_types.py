@@ -1,24 +1,17 @@
 """Symbol types and scopes used for static analysis and type inference."""
 
-import pydantic
+import dataclasses
 
 
-class SymbolType(pydantic.BaseModel):
-  """Base class for inferred types."""
+@dataclasses.dataclass
+class SymbolType:
+  """Base class for inferred types.
 
-  model_config = pydantic.ConfigDict(extra="forbid")
+  Attributes:
+      name: A string representation of the type (e.g., `'Tensor'`).
+  """
 
   name: str = "Unknown"
-  """A string representation of the type (e.g., 'Tensor')."""
-
-  def __init__(self, name: str = "Unknown", **kwargs: str | list["SymbolType"]) -> None:
-    """Initialize SymbolType.
-
-    Args:
-        name: A string representation of the type.
-        **kwargs: Subclass field values forwarded to BaseModel.
-    """
-    super().__init__(name=name, **kwargs)
 
   def __str__(self) -> str:
     """Return the type name.
@@ -28,167 +21,107 @@ class SymbolType(pydantic.BaseModel):
     """
     return self.name
 
-  def __eq__(self, other: "SymbolType | str | int | float | bool | None") -> bool:
-    """Check equality with another symbol type based on name.
 
-    Args:
-        other: The other object to compare.
-
-    Returns:
-        True if other is a SymbolType and names match, False otherwise.
-    """
-    if not isinstance(other, SymbolType):
-      return False
-    return self.name == other.name
-
-
+@dataclasses.dataclass
 class TensorType(SymbolType):
-  """Represent an N-dimensional array or tensor associated with a specific framework."""
+  """Represent an N-dimensional array or tensor associated with a specific framework.
+
+  Attributes:
+      name: Type name (`str`).
+      framework: Framework key (e.g., `'torch'` or `'jax'`) responsible for this tensor.
+  """
 
   name: str = "Tensor"
   framework: str = "unknown"
-  """Execute framework key (e.g. "torch" or "jax") responsible for this tensor."""
-
-  def __init__(self, name: str = "Tensor", framework: str = "unknown") -> None:
-    """Initialize TensorType.
-
-    Args:
-        name: Type name.
-        framework: Framework key.
-    """
-    super().__init__(name=name, framework=framework)
-
-  def __eq__(self, other: "SymbolType | str | int | float | bool | None") -> bool:
-    """Check equality with another tensor type.
-
-    Args:
-        other: The other object to compare.
-
-    Returns:
-        True if other is a TensorType with matching name and framework,
-        False otherwise.
-    """
-    if not isinstance(other, TensorType):
-      return False
-    return self.name == other.name and self.framework == other.framework
 
 
+@dataclasses.dataclass
 class ModuleType(SymbolType):
-  """Represent an imported module or sub-module."""
+  """Represent an imported module or sub-module.
 
-  path: str
+  Attributes:
+      name: Module type name (`str`).
+      path: Fully qualified module path string (e.g., `'torch.nn'`).
+  """
+
   name: str = "Module"
-  """Fully qualified path string (e.g. "torch.nn")."""
-
-  def __init__(self, name: str = "Module", path: str = "") -> None:
-    """Initialize ModuleType.
-
-    Args:
-        name: Module type name or path.
-        path: Module path string.
-    """
-    super().__init__(name=name, path=path)
-
-  def __eq__(self, other: "SymbolType | str | int | float | bool | None") -> bool:
-    """Check equality with another module type.
-
-    Args:
-        other: The other object to compare.
-
-    Returns:
-        True if other is a ModuleType with matching name and path, False otherwise.
-    """
-    if not isinstance(other, ModuleType):
-      return False
-    return self.name == other.name and self.path == other.path
+  path: str = ""
 
 
+@dataclasses.dataclass
 class UnionType(SymbolType):
-  """Represent a union of potential types resulting from control flow divergence."""
+  """Represent a union of potential types resulting from control flow divergence.
 
-  types: list[SymbolType]
+  Attributes:
+      types: List of `SymbolType` instances in the union.
+      name: Display label for the union type (`str`).
+  """
+
+  types: list[SymbolType] = dataclasses.field(default_factory=list, compare=False)
   name: str = "Union"
+  _canonical_members: frozenset[str] = dataclasses.field(default_factory=frozenset, init=False, repr=False)
 
   def __init__(self, types: list[SymbolType], name: str = "Union") -> None:
-    """Initialize UnionType.
+    """Initialize `UnionType` and compute its order-independent canonical key.
 
     Args:
         types: List of symbol types in the union.
         name: Name of the union type.
     """
-    super().__init__(types=types, name=name)
+    self.name = name
+    self.types = types
+    self._canonical_members = frozenset(str(t) for t in types)
 
   def __str__(self) -> str:
     """Get string representation of the union type.
 
     Returns:
-        A formatted string of unique types enclosed in Union[...].
+        A formatted string of unique types enclosed in `Union[...]`.
     """
-    unique_names = sorted(list(set(str(t) for t in self.types)))
+    unique_names = sorted(self._canonical_members)
     return f"Union[{', '.join(unique_names)}]"
 
-  def __eq__(self, other: "SymbolType | str | int | float | bool | None") -> bool:
-    """Check equality with another union type.
 
-    Args:
-        other: The other object to compare.
+@dataclasses.dataclass
+class Scope:
+  """Represent a variable scope (Global, Class, or Function).
 
-    Returns:
-        True if other is a UnionType containing equivalent types regardless of
-        order, False otherwise.
-    """
-    if not isinstance(other, UnionType):
-      return False
-    # Set based comparison for equivalence ignoring order
-    return set(str(t) for t in self.types) == set(str(t) for t in other.types)
-
-
-class Scope(pydantic.BaseModel):
-  """Represent a variable scope (Global, Class, or Function)."""
-
-  model_config = pydantic.ConfigDict(extra="forbid")
+  Attributes:
+      parent: Enclosing `Scope` (`None` for global scope).
+      name: Debug label for the scope (`str`).
+      symbols: Mapping from variable identifier to inferred `SymbolType`.
+  """
 
   parent: "Scope | None" = None
   name: str = "<root>"
-  symbols: dict[str, SymbolType] = pydantic.Field(default_factory=dict)
-
-  def __init__(self, parent: "Scope | None" = None, name: str = "<root>") -> None:
-    """Initialize the scope.
-
-    Args:
-        parent: The enclosing scope (None for global).
-        name: Debug name for the scope.
-    """
-    super().__init__(parent=parent, name=name)
+  symbols: dict[str, SymbolType] = dataclasses.field(default_factory=dict)
 
   def set(self, name: str, sym_type: SymbolType) -> None:
     """Register a symbol in the current scope.
 
     Args:
         name: Variable identifier.
-        sym_type: Inferred Type object.
-
+        sym_type: Inferred `SymbolType` instance.
     """
     self.symbols[name] = sym_type
 
   def get(self, name: str) -> SymbolType | None:
-    """Resolve a symbol, traversing parent scopes.
+    """Resolve a symbol, traversing parent scopes when not defined locally.
 
     Args:
-        name: Variable identifier to lookup.
+        name: Variable identifier to look up.
 
     Returns:
-        The SymbolType if found, else None.
-
+        The `SymbolType` if found, otherwise `None`.
     """
     if name in self.symbols:
       return self.symbols[name]
-    if self.parent:
+    if self.parent is not None:
       return self.parent.get(name)
     return None
 
   def snapshot(self) -> dict[str, SymbolType]:
-    """Return a shallow copy of the current symbol table for branching.
+    """Return a shallow copy of the current local symbol table for branching.
 
     Returns:
         A dictionary mapping symbol names to their types in the current scope.

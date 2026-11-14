@@ -1,19 +1,18 @@
 """Test suite for the Paxml module."""
 
-from praxis import base_layer
 import jax.numpy as jnp
-
+from praxis import base_layer
 from praxis.layers import rnn_cell
 
 
 class LSTMModel(base_layer.BaseLayer):
-  """Test helper class LSTMModel."""
+  """Stub `base_layer.BaseLayer` subclass implementing `setup` for PaxML tests."""
 
   input_size = 0
   hidden_size = 0
 
   def setup(self) -> None:
-    """Helper to setup."""
+    """Execute `create_child` to support setup in PaxML tests."""
     self.create_child(
       "lstm_cell", rnn_cell.LSTMCellSimple.HParams(num_input_nodes=self.input_size, num_hidden_nodes=self.hidden_size)
     )
@@ -27,4 +26,3 @@ class LSTMModel(base_layer.BaseLayer):
     Returns:
         Output tensor or value computed by the forward pass.
     """
-    pass

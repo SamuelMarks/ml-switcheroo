@@ -26,7 +26,8 @@ def test_symbol_type() -> None:
   assert str(sym1) == "Unknown"
   assert sym1 == sym2
   assert sym1 != sym3
-  assert sym1 != "Not a SymbolType"
+  non_sym: SymbolType | str = "Not a SymbolType"
+  assert sym1 != non_sym
 
 
 def test_tensor_type() -> None:
@@ -43,7 +44,8 @@ def test_tensor_type() -> None:
   assert t1.name == "Tensor"
   assert t1 == t2
   assert t1 != t3
-  assert t1 != "Not a TensorType"
+  non_tensor: SymbolType | str = "Not a TensorType"
+  assert t1 != non_tensor
 
 
 def test_module_type() -> None:
@@ -59,7 +61,8 @@ def test_module_type() -> None:
   assert m1.name == "Module"
   assert m1 == m2
   assert m1 != m3
-  assert m1 != "Not a ModuleType"
+  non_mod: SymbolType | str = "Not a ModuleType"
+  assert m1 != non_mod
 
 
 def test_union_type() -> None:
@@ -83,7 +86,8 @@ def test_union_type() -> None:
   # Let's check the eq implementation: return set(str(t) for t in self.types) == set(str(t) for t in other.types)
   # Yes, since both are "Tensor", the set is {"Tensor"}. So they are equal.
 
-  assert u1 != "Not a UnionType"
+  non_union: SymbolType | str = "Not a UnionType"
+  assert u1 != non_union
 
 
 def test_scope() -> None:

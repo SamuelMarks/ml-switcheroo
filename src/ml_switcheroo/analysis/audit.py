@@ -10,6 +10,7 @@ to determine if they are currently supported by the transpiler.
 import libcst as cst
 
 from ml_switcheroo.core.scanners import get_full_name
+from ml_switcheroo.exceptions import SnapshotGroundingError
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -101,11 +102,13 @@ class CoverageScanner(cst.CSTVisitor):
     self._check_node(node)
 
   def _check_node(self, node: cst.CSTNode) -> None:
-    """Resolve the FQN of a node and records its support status.
+    """Resolve the FQN of a node and record its support status.
 
     Args:
         node: The AST node to inspect (Name or Attribute).
 
+    Raises:
+        SnapshotGroundingError: If a matched definition's ``variants`` entry is not a dictionary.
     """
     fqn = self._resolve_fqn(node)
     if not fqn:
@@ -129,7 +132,8 @@ class CoverageScanner(cst.CSTVisitor):
       # definition is (abstract_id, details_dict)
       _, details = definition
       variants = details.get("variants", {})
-      assert isinstance(variants, dict)
+      if not isinstance(variants, dict):
+        raise SnapshotGroundingError(f"Expected dict for 'variants' on '{fqn}', got {type(variants).__name__}.")
       for fw_key, vari in variants.items():
         if isinstance(vari, dict) and vari.get("api") == fqn:
           framework = fw_key

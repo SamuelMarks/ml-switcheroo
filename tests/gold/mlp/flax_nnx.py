@@ -6,14 +6,14 @@ from flax import nnx
 
 
 class MLP(nnx.Module):
-  """Test helper class MLP."""
+  """Minimal `nnx.Module` test double used in flax NNX tests."""
 
   def __init__(self, in_features: int, hidden_features: int, out_features: int, rngs: nnx.Rngs):
     """Initializes the MLP instance.
 
     Args:
         in_features: Number of input linear features.
-        hidden_features: The hidden features (int) for   init  .
+        hidden_features: Input `hidden_features` parameter value (`int`).
         out_features: Number of output linear features.
         rngs: Flax NNX Rngs container for stochastic parameter initialization.
     """
@@ -31,5 +31,4 @@ class MLP(nnx.Module):
     """
     x = self.fc1(x)
     x = jax.nn.relu(x)
-    x = self.fc2(x)
-    return x
+    return self.fc2(x)

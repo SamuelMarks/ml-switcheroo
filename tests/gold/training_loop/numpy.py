@@ -20,14 +20,13 @@ def train_step(
 
   Args:
       model: Neural network model instance under test.
-      optimizer: The optimizer (str | None) for train step.
+      optimizer: Input `optimizer` parameter value (`str | None`).
       x: Primary input tensor or array operand.
       y: Secondary input tensor or target operand.
-      loss_fn: The loss fn (typing.Callable[[np.typing.NDArray[np.float64], np.typing.NDArray[np.float64]], np.typing.NDArray[np.float64]]) for train step.
+      loss_fn: Input `loss_fn` parameter value (`typing.Callable[[np.typing.NDArray[np.float64], np.typing.NDArray[np.float64]], np.typing.NDArray[np.float64]]`).
 
   Returns:
       Resulting `np.typing.NDArray[np.float64]` from train step.
   """
   predictions = model(x)
-  loss = loss_fn(predictions, y)
-  return loss
+  return loss_fn(predictions, y)

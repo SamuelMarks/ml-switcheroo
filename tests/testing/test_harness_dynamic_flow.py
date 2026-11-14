@@ -1,17 +1,18 @@
 """Test suite for the Harness Dynamic Flow module."""
 
 from pathlib import Path
+from typing import ClassVar
 from unittest.mock import patch
 
-from pydantic import JsonValue
 import pytest
+from pydantic import JsonValue
 
 from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
 
 @pytest.fixture
 def generator() -> HarnessGenerator:
-  """Execute generator helper logic.
+  """Create a configured `HarnessGenerator` fixture for harness dynamic flow tests.
 
   Returns:
       Configured `generator` fixture value (HarnessGenerator).
@@ -20,10 +21,10 @@ def generator() -> HarnessGenerator:
 
 
 class MockAdapterWithMagic:
-  """Test helper class MockAdapterWithMagic."""
+  """Test double `MockAdapterWithMagic` used in harness dynamic flow tests."""
 
-  declared_magic_args: list[str] = ["magic_k", "other_k"]
-  harness_imports: list[str] = ["import magic_lib"]
+  declared_magic_args: ClassVar[list[str]] = ["magic_k", "other_k"]
+  harness_imports: ClassVar[list[str]] = ["import magic_lib"]
 
   def get_harness_init_code(self) -> str:
     """Mock implementation of get harness initialization code.
@@ -46,10 +47,10 @@ class MockAdapterWithMagic:
 
 
 class MockAdapterNoMagic:
-  """Test helper class MockAdapterNoMagic."""
+  """Test double `MockAdapterNoMagic` used in harness dynamic flow tests."""
 
-  declared_magic_args: list[str] = []
-  harness_imports: list[str] = []
+  declared_magic_args: ClassVar[list[str]] = []
+  harness_imports: ClassVar[list[str]] = []
 
   def get_harness_init_code(self) -> str:
     """Mock implementation of get harness initialization code.
@@ -72,7 +73,7 @@ class MockAdapterNoMagic:
 
 
 def test_dynamic_logic_injection(generator: HarnessGenerator, tmp_path: Path) -> None:
-  """Verifies the behavior of dynamic logic injection.
+  """Verify `generator.generate` emits `import magic_lib` for dynamic logic injection.
 
   Args:
       generator: Code or MLIR generator instance under test.
@@ -91,7 +92,7 @@ def test_dynamic_logic_injection(generator: HarnessGenerator, tmp_path: Path) ->
 
 
 def test_dynamic_logic_noop(generator: HarnessGenerator, tmp_path: Path) -> None:
-  """Verifies the behavior of dynamic logic noop.
+  """Verify `generator.generate` handles dynamic logic noop as expected.
 
   Args:
       generator: Code or MLIR generator instance under test.

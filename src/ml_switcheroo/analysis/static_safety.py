@@ -117,12 +117,11 @@ class StaticSafetyScanner(cst.CSTVisitor):
     # Unless the while loop test is a boolean literal True or False with a break,
     # flag data-dependent loops.
     is_static_counter = False
-    if isinstance(node.test, cst.Comparison):
-      # Check if right or left is a literal and comparator is comparison
-      if isinstance(node.test.left, cst.Integer) or any(
-        isinstance(comp.comparator, cst.Integer) for comp in node.test.comparisons
-      ):
-        is_static_counter = True
+    if isinstance(node.test, cst.Comparison) and (
+      isinstance(node.test.left, cst.Integer)
+      or any(isinstance(comp.comparator, cst.Integer) for comp in node.test.comparisons)
+    ):
+      is_static_counter = True
 
     if not is_static_counter:
       self.diagnostics.append(
@@ -143,9 +142,9 @@ class StaticSafetyScanner(cst.CSTVisitor):
     func_name: str | None = None
     if isinstance(node.func, cst.Attribute):
       val = node.func.value
-      if isinstance(val, cst.Attribute) and val.attr.value == "autograd":
-        func_name = f"autograd.{node.func.attr.value}"
-      elif isinstance(val, cst.Name) and val.value == "autograd":
+      if (isinstance(val, cst.Attribute) and val.attr.value == "autograd") or (
+        isinstance(val, cst.Name) and val.value == "autograd"
+      ):
         func_name = f"autograd.{node.func.attr.value}"
       elif node.func.attr.value in ("backward", "grad"):
         func_name = node.func.attr.value
@@ -170,10 +169,7 @@ class StaticSafetyScanner(cst.CSTVisitor):
     Returns:
         List of detected StaticSafetyDiagnostic objects.
     """
-    if isinstance(code_or_module, str):
-      module = cst.parse_module(code_or_module)
-    else:
-      module = code_or_module
+    module = cst.parse_module(code_or_module) if isinstance(code_or_module, str) else code_or_module
 
     scanner = cls()
     module.visit(scanner)

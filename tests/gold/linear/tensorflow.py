@@ -4,7 +4,7 @@ import tensorflow as tf
 
 
 class Model:
-  """Test helper class Model."""
+  """Test double `Model` implementing `call` for tensorflow tests."""
 
   def __init__(self, in_features: int, out_features: int):
     """Initializes the Model instance.
@@ -17,7 +17,7 @@ class Model:
     self.linear = tf.keras.layers.Dense(out_features, input_shape=(in_features,))
 
   def call(self, x: tf.Tensor) -> tf.Tensor:
-    """Helper to call.
+    """Execute `linear` to support call in tensorflow tests.
 
     Args:
         x: Primary input tensor or array operand.

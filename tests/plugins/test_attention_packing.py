@@ -11,7 +11,7 @@ from ml_switcheroo.plugins.attention_packing import repack_attn_flax, repack_att
 
 @pytest.fixture
 def mock_ctx() -> MagicMock:
-  """Execute mock ctx helper logic.
+  """Create a configured `MagicMock` fixture for attention packing tests.
 
   Returns:
       Configured `mock_ctx` fixture value (MagicMock).
@@ -42,7 +42,7 @@ def parse_call_node(code: str) -> cst.Call:
 
 
 def to_code(node: cst.CSTNode) -> str:
-  """Helper to to code.
+  """Execute `Module` to support to code in attention packing tests.
 
   Args:
       node: CST or AST node under inspection or transformation.
@@ -54,7 +54,7 @@ def to_code(node: cst.CSTNode) -> str:
 
 
 def test_keras_strategy_constructor_happy_path(mock_ctx: MagicMock) -> None:
-  """Verifies the behavior of Keras strategy constructor happy path.
+  """Verify `parse_call_node` handles keras strategy constructor happy path as expected.
 
   Args:
       mock_ctx: Mocked HookContext or RewriterContext instance.
@@ -69,7 +69,7 @@ def test_keras_strategy_constructor_happy_path(mock_ctx: MagicMock) -> None:
 
 
 def test_keras_strategy_constructor_missing_api_aborts(mock_ctx: MagicMock) -> None:
-  """Verifies the behavior of Keras strategy constructor missing API aborts.
+  """Verify `parse_call_node` handles keras strategy constructor missing API aborts as expected.
 
   Args:
       mock_ctx: Mocked HookContext or RewriterContext instance.
@@ -82,7 +82,7 @@ def test_keras_strategy_constructor_missing_api_aborts(mock_ctx: MagicMock) -> N
 
 
 def test_keras_strategy_forward(mock_ctx: MagicMock) -> None:
-  """Verifies the behavior of Keras strategy forward.
+  """Verify `parse_call_node` emits `(q,v,` for keras strategy forward.
 
   Args:
       mock_ctx: Mocked HookContext or RewriterContext instance.
@@ -99,7 +99,7 @@ def test_keras_strategy_forward(mock_ctx: MagicMock) -> None:
 
 
 def test_flax_strategy_constructor_happy_path(mock_ctx: MagicMock) -> None:
-  """Verifies the behavior of Flax strategy constructor happy path.
+  """Verify `parse_call_node` handles flax strategy constructor happy path as expected.
 
   Args:
       mock_ctx: Mocked HookContext or RewriterContext instance.
@@ -113,7 +113,7 @@ def test_flax_strategy_constructor_happy_path(mock_ctx: MagicMock) -> None:
 
 
 def test_flax_strategy_constructor_missing_api_aborts(mock_ctx: MagicMock) -> None:
-  """Verifies the behavior of Flax strategy constructor missing API aborts.
+  """Verify `parse_call_node` handles flax strategy constructor missing API aborts as expected.
 
   Args:
       mock_ctx: Mocked HookContext or RewriterContext instance.
@@ -126,7 +126,7 @@ def test_flax_strategy_constructor_missing_api_aborts(mock_ctx: MagicMock) -> No
 
 
 def test_flax_strategy_forward(mock_ctx: MagicMock) -> None:
-  """Verifies the behavior of Flax strategy forward.
+  """Verify `parse_call_node` emits `mask=m` for flax strategy forward.
 
   Args:
       mock_ctx: Mocked HookContext or RewriterContext instance.
@@ -140,7 +140,7 @@ def test_flax_strategy_forward(mock_ctx: MagicMock) -> None:
 
 
 def test_torch_strategy_constructor_happy_path(mock_ctx: MagicMock) -> None:
-  """Verifies the behavior of PyTorch strategy constructor happy path.
+  """Verify `parse_call_node` handles torch strategy constructor happy path as expected.
 
   Args:
       mock_ctx: Mocked HookContext or RewriterContext instance.
@@ -159,7 +159,7 @@ def test_torch_strategy_constructor_happy_path(mock_ctx: MagicMock) -> None:
 
 
 def test_torch_strategy_constructor_with_batch_first(mock_ctx: MagicMock) -> None:
-  """Verifies the behavior of PyTorch strategy constructor with batch first.
+  """Verify `parse_call_node` handles torch strategy constructor with batch first as expected.
 
   Args:
       mock_ctx: Mocked HookContext or RewriterContext instance.
@@ -173,7 +173,7 @@ def test_torch_strategy_constructor_with_batch_first(mock_ctx: MagicMock) -> Non
 
 
 def test_torch_strategy_constructor_missing_api(mock_ctx: MagicMock) -> None:
-  """Verifies the behavior of PyTorch strategy constructor missing API.
+  """Verify `parse_call_node` handles torch strategy constructor missing API as expected.
 
   Args:
       mock_ctx: Mocked HookContext or RewriterContext instance.
@@ -186,7 +186,7 @@ def test_torch_strategy_constructor_missing_api(mock_ctx: MagicMock) -> None:
 
 
 def test_torch_strategy_forward(mock_ctx: MagicMock) -> None:
-  """Verifies the behavior of PyTorch strategy forward.
+  """Verify `parse_call_node` emits `(q,k,v` for torch strategy forward.
 
   Args:
       mock_ctx: Mocked HookContext or RewriterContext instance.
@@ -202,21 +202,28 @@ def test_torch_strategy_forward(mock_ctx: MagicMock) -> None:
 
 
 def test_torch_strategy_forward_keras_style(mock_ctx: MagicMock) -> None:
-  """Verifies the behavior of PyTorch strategy forward Keras style.
+  """Verifies PyTorch forward strategy repacks Keras keyword and positional styles.
 
   Args:
-      mock_ctx: Mocked HookContext or RewriterContext instance.
+      mock_ctx: Mocked HookContext instance.
   """
   code2: str = "y = self.attn(q, key=k, v=v, attention_mask=m)"
   call_node2: cst.Call = parse_call_node(code2)
   res2: cst.CSTNode = repack_attn_torch(call_node2, mock_ctx)
   res_code2: str = to_code(res2).replace(" ", "")
-  assert "(q,k,v=v" in res_code2
-  assert "attn_mask=m" in res_code2
+  assert "(q,k,v,attn_mask=m)" in res_code2
+
+  keras_pos_code: str = "y = self.attn(q, v, key=k, attention_mask=m)"
+  keras_res: cst.CSTNode = repack_attn_torch(parse_call_node(keras_pos_code), mock_ctx)
+  assert "(q,k,v,attn_mask=m)" in to_code(keras_res).replace(" ", "")
+
+  self_attn_code: str = "y = self.attn(query=q, value=v)"
+  self_res: cst.CSTNode = repack_attn_torch(parse_call_node(self_attn_code), mock_ctx)
+  assert "(q,v,v)" in to_code(self_res).replace(" ", "")
 
 
 def test_torch_strategy_forward_too_few_args(mock_ctx: MagicMock) -> None:
-  """Verifies the behavior of PyTorch strategy forward too few arguments.
+  """Verify `parse_call_node` handles torch strategy forward too few args as expected.
 
   Args:
       mock_ctx: Mocked HookContext or RewriterContext instance.
@@ -228,7 +235,7 @@ def test_torch_strategy_forward_too_few_args(mock_ctx: MagicMock) -> None:
 
 
 def test_torch_constructor_fallback(mock_ctx: MagicMock) -> None:
-  """Verifies the behavior of PyTorch constructor fallback.
+  """Verify `parse_call_node` handles torch constructor fallback as expected.
 
   Args:
       mock_ctx: Mocked HookContext or RewriterContext instance.
@@ -242,7 +249,7 @@ def test_torch_constructor_fallback(mock_ctx: MagicMock) -> None:
 
 
 def test_keras_strategy_constructor_positional(mock_ctx: MagicMock) -> None:
-  """Verifies the behavior of Keras strategy constructor positional.
+  """Verify `parse_call_node` handles keras strategy constructor positional as expected.
 
   Args:
       mock_ctx: Mocked HookContext or RewriterContext instance.
@@ -256,7 +263,7 @@ def test_keras_strategy_constructor_positional(mock_ctx: MagicMock) -> None:
 
 
 def test_keras_strategy_forward_positional_after_kwargs(mock_ctx: MagicMock) -> None:
-  """Verifies the behavior of Keras strategy forward positional after keyword arguments.
+  """Verify keras strategy forward positional after kwargs works as expected.
 
   Args:
       mock_ctx: Mocked HookContext or RewriterContext instance.
@@ -269,7 +276,7 @@ def test_keras_strategy_forward_positional_after_kwargs(mock_ctx: MagicMock) -> 
 
 
 def test_keras_strategy_forward_too_few_args(mock_ctx: MagicMock) -> None:
-  """Verifies the behavior of Keras strategy forward too few arguments.
+  """Verify `parse_call_node` handles keras strategy forward too few args as expected.
 
   Args:
       mock_ctx: Mocked HookContext or RewriterContext instance.
@@ -281,7 +288,7 @@ def test_keras_strategy_forward_too_few_args(mock_ctx: MagicMock) -> None:
 
 
 def test_flax_strategy_forward_too_few_args(mock_ctx: MagicMock) -> None:
-  """Verifies the behavior of Flax strategy forward too few arguments.
+  """Verify `parse_call_node` handles flax strategy forward too few args as expected.
 
   Args:
       mock_ctx: Mocked HookContext or RewriterContext instance.
@@ -293,7 +300,7 @@ def test_flax_strategy_forward_too_few_args(mock_ctx: MagicMock) -> None:
 
 
 def test_flax_strategy_forward_other_args(mock_ctx: MagicMock) -> None:
-  """Verifies the behavior of Flax strategy forward other arguments.
+  """Verify `parse_call_node` emits `10` for flax strategy forward other args.
 
   Args:
       mock_ctx: Mocked HookContext or RewriterContext instance.
@@ -307,7 +314,7 @@ def test_flax_strategy_forward_other_args(mock_ctx: MagicMock) -> None:
 
 
 def test_keras_strategy_forward_other_kwargs(mock_ctx: MagicMock) -> None:
-  """Verifies the behavior of Keras strategy forward other keyword arguments.
+  """Verify `parse_call_node` handles keras strategy forward other kwargs as expected.
 
   Args:
       mock_ctx: Mocked HookContext or RewriterContext instance.

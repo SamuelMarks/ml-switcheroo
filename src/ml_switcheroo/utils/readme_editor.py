@@ -4,11 +4,10 @@ This module provides logic to inject automated verification reports (the Compati
 directly into the `README.md` file, ensuring documentation stays valid with the code.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
-from pathlib import Path
 import typing
+from pathlib import Path
 
-
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.utils.console import log_error, log_success
 
 if typing.TYPE_CHECKING:
@@ -71,11 +70,14 @@ class ReadmeEditor:
     next_heading_idx = -1
 
     for i, token in enumerate(tokens):
-      if token.type == "heading_open":
-        if i + 1 < len(tokens) and tokens[i + 1].type == "inline":
-          if header_marker in tokens[i + 1].content:
-            target_idx = i
-            break
+      if (
+        token.type == "heading_open"
+        and i + 1 < len(tokens)
+        and tokens[i + 1].type == "inline"
+        and header_marker in tokens[i + 1].content
+      ):
+        target_idx = i
+        break
 
     if target_idx == -1:
       log_error(f"Could not find '{header_marker}' section in README.")
@@ -107,7 +109,7 @@ class ReadmeEditor:
     pre_lines = lines[:start_line]
     post_lines = lines[end_line:] if end_line != len(lines) else []
 
-    new_lines = pre_lines + [""] + new_table.splitlines() + [""] + post_lines
+    new_lines = [*pre_lines, "", *new_table.splitlines(), "", *post_lines]
 
     try:
       self.readme_path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")

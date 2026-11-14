@@ -1,9 +1,9 @@
 """Test suite for the Doc Context module."""
 
 from unittest.mock import MagicMock, patch
-from pydantic import JsonValue
 
 import pytest
+from pydantic import JsonValue
 
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.utils.doc_context import DocContextBuilder
@@ -11,7 +11,7 @@ from ml_switcheroo.utils.doc_context import DocContextBuilder
 
 @pytest.fixture
 def mock_semantics() -> MagicMock:
-  """Execute mock semantics helper logic.
+  """Create a configured `MagicMock` fixture for doc context tests.
 
   Returns:
       Configured `mock_semantics` fixture value (MagicMock).
@@ -21,7 +21,7 @@ def mock_semantics() -> MagicMock:
 
 @pytest.fixture
 def builder(mock_semantics: MagicMock) -> DocContextBuilder:
-  """Execute builder helper logic.
+  """Create a configured `DocContextBuilder` fixture for doc context tests.
 
   Args:
       mock_semantics: Mocked SemanticsManager instance.
@@ -33,7 +33,7 @@ def builder(mock_semantics: MagicMock) -> DocContextBuilder:
 
 
 def test_argument_formatting_string(builder: DocContextBuilder) -> None:
-  """Verifies the behavior of argument formatting string.
+  """Verify `builder._format_args` handles argument formatting string as expected.
 
   Args:
       builder: Runtime or IR builder helper instance.
@@ -44,7 +44,7 @@ def test_argument_formatting_string(builder: DocContextBuilder) -> None:
 
 
 def test_argument_formatting_tuple(builder: DocContextBuilder) -> None:
-  """Verifies the behavior of argument formatting tuple.
+  """Verify `builder._format_args` handles argument formatting tuple as expected.
 
   Args:
       builder: Runtime or IR builder helper instance.
@@ -55,7 +55,7 @@ def test_argument_formatting_tuple(builder: DocContextBuilder) -> None:
 
 
 def test_argument_formatting_dict(builder: DocContextBuilder) -> None:
-  """Verifies the behavior of argument formatting dictionary.
+  """Verify `builder._format_args` handles argument formatting dict as expected.
 
   Args:
       builder: Runtime or IR builder helper instance.
@@ -87,7 +87,7 @@ def test_argument_formatting_edge_branches(builder: DocContextBuilder) -> None:
 
 
 def test_missing_property_defaults(builder: DocContextBuilder) -> None:
-  """Verifies the behavior of missing property defaults.
+  """Verify `builder.build` handles missing property defaults as expected.
 
   Args:
       builder: Runtime or IR builder helper instance.
@@ -100,7 +100,7 @@ def test_missing_property_defaults(builder: DocContextBuilder) -> None:
 
 
 def test_impl_type_classification_plugin(builder: DocContextBuilder) -> None:
-  """Verifies the behavior of impl type classification plugin.
+  """Verify `builder._determine_impl_type` handles impl type classification plugin as expected.
 
   Args:
       builder: Runtime or IR builder helper instance.
@@ -110,7 +110,7 @@ def test_impl_type_classification_plugin(builder: DocContextBuilder) -> None:
 
 
 def test_impl_type_classification_macro(builder: DocContextBuilder) -> None:
-  """Verifies the behavior of impl type classification macro.
+  """Verify `builder._determine_impl_type` handles impl type classification macro as expected.
 
   Args:
       builder: Runtime or IR builder helper instance.
@@ -120,7 +120,7 @@ def test_impl_type_classification_macro(builder: DocContextBuilder) -> None:
 
 
 def test_impl_type_classification_infix(builder: DocContextBuilder) -> None:
-  """Verifies the behavior of impl type classification infix.
+  """Verify `builder._determine_impl_type` handles impl type classification infix as expected.
 
   Args:
       builder: Runtime or IR builder helper instance.
@@ -130,7 +130,7 @@ def test_impl_type_classification_infix(builder: DocContextBuilder) -> None:
 
 
 def test_impl_type_classification_direct(builder: DocContextBuilder) -> None:
-  """Verifies the behavior of impl type classification direct.
+  """Verify `builder._determine_impl_type` handles impl type classification direct as expected.
 
   Args:
       builder: Runtime or IR builder helper instance.
@@ -140,7 +140,7 @@ def test_impl_type_classification_direct(builder: DocContextBuilder) -> None:
 
 
 def test_impl_type_classification_inline_lambda_and_fallback(builder: DocContextBuilder) -> None:
-  """Verifies the behavior of inline_lambda and fallback custom classification.
+  """Verify impl type classification inline lambda and fallback works as expected.
 
   Args:
       builder: Runtime or IR builder helper instance.
@@ -178,7 +178,7 @@ def test_resolve_variants_skips_none_and_handles_macro(builder: DocContextBuilde
 
 
 def test_full_build_flow_with_adapter_logic(builder: DocContextBuilder) -> None:
-  """Verifies the behavior of full build flow with adapter logic.
+  """Verify `builder.build` handles full build flow with adapter logic as expected.
 
   Args:
       builder: Runtime or IR builder helper instance.
@@ -209,9 +209,11 @@ def test_full_build_flow_with_adapter_logic(builder: DocContextBuilder) -> None:
       return mock_jax
     return None
 
-  with patch("ml_switcheroo.utils.doc_context.get_framework_priority_order", return_value=["torch", "jax"]):
-    with patch("ml_switcheroo.utils.doc_context.get_adapter", side_effect=get_adapter_side_effect):
-      context = builder.build("Abs", op_def)
+  with (
+    patch("ml_switcheroo.utils.doc_context.get_framework_priority_order", return_value=["torch", "jax"]),
+    patch("ml_switcheroo.utils.doc_context.get_adapter", side_effect=get_adapter_side_effect),
+  ):
+    context = builder.build("Abs", op_def)
   assert context["name"] == "Abs"
   assert context["description"] == "Calculate abs."
   assert context["args"] == ["x"]
@@ -234,6 +236,31 @@ def test_full_build_flow_with_adapter_logic(builder: DocContextBuilder) -> None:
   assert isinstance(v2, dict)
   assert v2["key"] == "unknown_fw"
   assert v2["framework"] == "unknown_fw"
+
+
+def test_build_list_std_args_and_variant_metadata_fields(builder: DocContextBuilder) -> None:
+  """Verify `DocContextBuilder.build` formats list `std_args` and classifies `type_map`/`args`/`inline_lambda` variants.
+
+  Args:
+      builder: `DocContextBuilder` fixture.
+  """
+  res = builder.build(
+    "foo",
+    {
+      "std_args": ["a", ["b", "int"], {"name": "c", "type": "float", "default": 1.0}],
+      "variants": {
+        "jax": None,
+        "torch": {"transformation_type": "inline_lambda"},
+        "mlx": {"something": "else"},
+        "numpy": {"type_map": "b", "api": "np.foo"},
+        "keras": {"args": "c", "api": "keras.ops.foo"},
+      },
+    },
+  )
+  assert res["args"] == ["a", "b: int", "c: float = 1.0"]
+  variants = res["variants"]
+  assert isinstance(variants, list)
+  assert len(variants) == 4
 
 
 def test_resolve_variants_adapter_without_display_name(builder: DocContextBuilder) -> None:

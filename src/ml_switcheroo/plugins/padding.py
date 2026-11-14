@@ -1,11 +1,9 @@
-"""Plugin for normalizing Padding arguments.
+"""Plugin for Normalizing Tensor Padding Coordinate Formats.
 
-Addresses the semantic mismatch between:
-1. PyTorch (`pad(x, (left, right, top, bottom))`): Pads starting from the last dimension.
-2. JAX/NumPy (`pad(x, ((n_b, n_a), (c_b, c_a), ...))`): Explicit per-dimension tuples.
-
-This plugin transforms standard 4D tensor padding (images) into the explicit
-tuple-of-tuples format required by XLA compilers and NumPy-compatible libraries.
+Normalizes flat reverse-pair padding tuples (4D NCHW and 5D NCDHW) and
+already-nested per-dimension pair tuples across positional and keyword call
+forms using ``PluginTraits.has_numpy_compatible_arrays`` and
+``HookContext.current_variant``.
 """
 
 import typing
@@ -13,14 +11,18 @@ import typing
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
-from ml_switcheroo.plugins.utils import create_dotted_name
+from ml_switcheroo.plugins.utils import create_dotted_name, resolve_variant_api
+from ml_switcheroo.semantics.resolution import query_framework_traits
+
+_INPUT_KEYWORDS = frozenset({"input", "x", "array", "tensor"})
+_PAD_KEYWORDS = frozenset({"pad", "pad_width", "paddings"})
 
 
 def _create_zero_pad() -> cst.Element:
-  """Support to create (0, 0) tuple element.
+  """Create a ``(0, 0)`` padding pair tuple element.
 
   Returns:
-      cst.Element: A CST element representing a (0, 0) tuple.
+      CST ``Element`` representing ``(0, 0)``.
   """
   return cst.Element(
     value=cst.Tuple(
@@ -33,14 +35,14 @@ def _create_zero_pad() -> cst.Element:
 
 
 def _create_dim_pad(before: cst.BaseExpression, after: cst.BaseExpression) -> cst.Element:
-  """Support to create (before, after) tuple element.
+  """Create a ``(before, after)`` padding pair tuple element.
 
   Args:
-      before: The CST expression representing padding before the dimension.
-      after: The CST expression representing padding after the dimension.
+      before: Padding expression before the dimension.
+      after: Padding expression after the dimension.
 
   Returns:
-      cst.Element: A CST element representing a (before, after) tuple.
+      CST ``Element`` representing ``(before, after)``.
   """
   return cst.Element(
     value=cst.Tuple(
@@ -52,105 +54,142 @@ def _create_dim_pad(before: cst.BaseExpression, after: cst.BaseExpression) -> cs
   )
 
 
-@typing.runtime_checkable
-class _NumpyCompatibleTraitsProtocol(typing.Protocol):
-  """Protocol for traits objects exposing `has_numpy_compatible_arrays`."""
-
-  has_numpy_compatible_arrays: bool
-
-
 def _supports_numpy_padding(ctx: HookContext) -> bool:
-  """Check if target supports tuple-of-tuples padding via PluginTraits.
+  """Check if the target framework supports tuple-of-tuples padding via ``PluginTraits``.
 
   Args:
-      ctx: Hook context containing the semantics and target framework.
+      ctx: Hook context containing semantics and target framework metadata.
 
   Returns:
-      bool: True if the target framework configuration supports NumPy-style padding, False otherwise.
+      True if the target framework supports NumPy-style tuple-of-tuples padding.
   """
   if ctx.semantics is None:
     return False
 
-  conf = ctx.semantics.get_framework_config(ctx.target_framework)
-  if not conf:
-    return False
+  fw_traits = query_framework_traits(ctx.semantics, ctx.target_framework)
+  return bool(fw_traits.plugin_traits is not None and fw_traits.plugin_traits.has_numpy_compatible_arrays)
 
-  traits = conf.get("plugin_traits")
-  if not traits:
-    return False
 
-  if isinstance(traits, dict):
-    return bool(traits.get("has_numpy_compatible_arrays", False))
+def _extract_input_and_pad_indices(args: typing.Sequence[cst.Arg]) -> tuple[int, int] | None:
+  """Locate the indices of the input tensor and padding tuple arguments.
 
-  if isinstance(traits, _NumpyCompatibleTraitsProtocol):
-    return bool(traits.has_numpy_compatible_arrays)
-  return False
+  Args:
+      args: Sequence of call arguments.
+
+  Returns:
+      ``(input_idx, pad_idx)`` if both arguments are present, otherwise ``None``.
+  """
+  input_idx: int | None = None
+  pad_idx: int | None = None
+  pos_indices: list[int] = []
+
+  for idx, arg in enumerate(args):
+    if arg.star:
+      continue
+    if arg.keyword is not None:
+      kw = arg.keyword.value
+      if kw in _INPUT_KEYWORDS:
+        input_idx = idx
+      elif kw in _PAD_KEYWORDS:
+        pad_idx = idx
+    else:
+      pos_indices.append(idx)
+
+  if input_idx is None and pos_indices:
+    input_idx = pos_indices.pop(0)
+  if pad_idx is None and pos_indices:
+    pad_idx = pos_indices.pop(0)
+
+  if input_idx is None or pad_idx is None:
+    return None
+  return input_idx, pad_idx
+
+
+def _convert_pad_tuple(pad_tuple: cst.Tuple) -> cst.Tuple | None:
+  """Convert flat reverse-pair tuples or validate pre-nested pair tuples.
+
+  Args:
+      pad_tuple: Source padding ``cst.Tuple`` node.
+
+  Returns:
+      Normalized tuple-of-pairs ``cst.Tuple``, or ``None`` if unsupported shape.
+  """
+  elements = pad_tuple.elements
+  if elements and all(isinstance(el.value, (cst.Tuple, cst.List)) and len(el.value.elements) == 2 for el in elements):
+    return pad_tuple
+
+  if len(elements) == 4:
+    left, right, top, bottom = (el.value for el in elements)
+    return cst.Tuple(
+      elements=[
+        _create_zero_pad(),
+        _create_zero_pad(),
+        _create_dim_pad(top, bottom),
+        _create_dim_pad(left, right),
+      ]
+    )
+
+  if len(elements) == 6:
+    left, right, top, bottom, front, back = (el.value for el in elements)
+    return cst.Tuple(
+      elements=[
+        _create_zero_pad(),
+        _create_zero_pad(),
+        _create_dim_pad(front, back),
+        _create_dim_pad(top, bottom),
+        _create_dim_pad(left, right),
+      ]
+    )
+
+  return None
 
 
 @register_hook("padding_converter")
 def transform_padding(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """Transform  Transforms padding coordinate format from Torch style to NumPy style.
-
-  Trigger: Operations mapped to 'pad' with `requires_plugin: "padding_converter"`.
-
-  Decoupling:
-      Strictly looks up 'Pad' API. If missing, returns original node.
+  """Transform padding coordinate format into NumPy-compatible tuple-of-tuples.
 
   Args:
-      node: The original CST Call node.
-      ctx: Hook Context containing target framework metadata.
+      node: Original padding ``cst.Call`` node.
+      ctx: Hook context containing target framework traits and variant metadata.
 
   Returns:
-      The transformed CST Call node if mapping exists, else original.
-
+      Transformed ``cst.Call`` node if supported and mapped, else ``node``.
   """
-  # 0. Capability and API Check
   if not _supports_numpy_padding(ctx):
     return node
 
-  target_api = ctx.lookup_api("Pad")
+  target_api = resolve_variant_api(ctx, ("Pad", "pad"))
   if not target_api:
     return node
 
   args = list(node.args)
-  if len(args) < 2:
+  located = _extract_input_and_pad_indices(args)
+  if located is None:
     return node
 
-  input_arg = args[0]
-  pad_arg = args[1]
+  input_idx, pad_idx = located
+  input_arg = args[input_idx]
+  pad_arg = args[pad_idx]
 
-  # We can only perform structural rewrites if the padding is a Tuple literal.
   if not isinstance(pad_arg.value, cst.Tuple):
     return node
 
-  elements = pad_arg.value.elements
+  new_pad_tuple = _convert_pad_tuple(pad_arg.value)
+  if new_pad_tuple is None:
+    return node
 
-  # PyTorch Convention: (left, right, top, bottom) for 4D input NCHW -> pads W then H.
-  if len(elements) == 4:
-    left = elements[0].value
-    right = elements[1].value
-    top = elements[2].value
-    bottom = elements[3].value
-
-    # JAX/NumPy Convention (NCHW assumption): ((0,0), (0,0), (top, bottom), (left, right))
-    new_elements = [
-      _create_zero_pad(),  # Batch
-      _create_zero_pad(),  # Channel
-      _create_dim_pad(top, bottom),  # Height
-      _create_dim_pad(left, right),  # Width
-    ]
-
-    new_pad_tuple = cst.Tuple(elements=new_elements)
-
-    # Update argument list
-    if input_arg.comma == cst.MaybeSentinel.DEFAULT:
-      args[0] = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
-
-    args[1] = pad_arg.with_changes(value=new_pad_tuple)
-
-    # Build Dotted Name for function
-    new_func = create_dotted_name(target_api)
-
-    return node.with_changes(func=new_func, args=args)
-
-  return node
+  clean_input = input_arg.with_changes(
+    keyword=None,
+    equal=cst.MaybeSentinel.DEFAULT,
+    comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
+  )
+  clean_pad = pad_arg.with_changes(
+    keyword=None,
+    equal=cst.MaybeSentinel.DEFAULT,
+    value=new_pad_tuple,
+    comma=cst.MaybeSentinel.DEFAULT,
+  )
+  return node.with_changes(
+    func=create_dotted_name(target_api),
+    args=[clean_input, clean_pad],
+  )

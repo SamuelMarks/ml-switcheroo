@@ -6,11 +6,15 @@ collecting tiered examples to be embedded in the static site.
 """
 
 import json
+import typing
 from collections import defaultdict
 
 from ml_switcheroo.config import get_framework_priority_order
 from ml_switcheroo.frameworks import available_frameworks, get_adapter
 from ml_switcheroo.sphinx_ext.types import HierarchyMap
+
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.frameworks.base import FrameworkAdapter
 
 
 def _build_cross_dialect_dynamic_presets() -> dict[str, dict[str, str | bool | None]]:
@@ -134,6 +138,96 @@ s_cbranch_scc1 L_GEMM_fc1
   }
 
 
+def _extract_adapter_tiers(adapter: "FrameworkAdapter") -> list[str]:
+  """Return supported semantic tier names for ``adapter``, falling back to all standard tiers.
+
+  Args:
+      adapter: Registered framework adapter instance.
+
+  Returns:
+      List of supported tier identifier strings.
+  """
+  try:
+    supp_tiers = adapter.supported_tiers
+  except AttributeError:
+    supp_tiers = []
+  return [t.value for t in supp_tiers] if supp_tiers else ["array", "neural", "extras"]
+
+
+def _resolve_default_target(
+  src_fw: str,
+  parent_key: str | None,
+  src_flavour: str | None,
+  priorities: list[str],
+  final_hierarchy: HierarchyMap,
+) -> tuple[str, str | None]:
+  """Select the default target framework and optional flavour for an example starting from ``src_fw``.
+
+  Args:
+      src_fw: Effective source root framework key.
+      parent_key: Optional parent framework key when ``adapter`` is a child flavour.
+      src_flavour: Optional source flavour key.
+      priorities: Ordered framework priority list.
+      final_hierarchy: Sorted parent-to-children framework hierarchy.
+
+  Returns:
+      Tuple of ``(target_framework_key, optional_target_flavour_key)``.
+  """
+  tgt_fw: str | None = None
+  candidates = [fw for fw in priorities if fw not in (src_fw, parent_key, src_flavour)]
+  if candidates:
+    try:
+      curr_idx = priorities.index(src_fw)
+      rotated = priorities[curr_idx + 1 :] + priorities[:curr_idx]
+      tgt_fw = next((c for c in rotated if c in candidates), None)
+    except ValueError:
+      tgt_fw = candidates[0]
+
+  resolved_tgt = tgt_fw or "target_placeholder"
+  tgt_flavour = final_hierarchy[resolved_tgt][0]["key"] if final_hierarchy.get(resolved_tgt) else None
+  return resolved_tgt, tgt_flavour
+
+
+def _collect_adapter_examples(
+  key: str,
+  adapter: "FrameworkAdapter",
+  priorities: list[str],
+  final_hierarchy: HierarchyMap,
+) -> dict[str, dict[str, str | bool | None]]:
+  """Build interactive demo example records from ``adapter.get_tiered_examples()``.
+
+  Args:
+      key: Registered adapter key.
+      adapter: Registered framework adapter instance.
+      priorities: Ordered framework priority list.
+      final_hierarchy: Sorted parent-to-children framework hierarchy.
+
+  Returns:
+      Dictionary of example entries keyed by ``<key>_<tier_name>``.
+  """
+  collected: dict[str, dict[str, str | bool | None]] = {}
+  parent_key = adapter.inherits_from
+  src_fw = parent_key if parent_key else key
+  src_flavour = key if parent_key else None
+  display_fw = str(adapter.display_name) if adapter.display_name else key.title()
+  tgt_fw, tgt_flavour = _resolve_default_target(src_fw, parent_key, src_flavour, priorities, final_hierarchy)
+
+  for tier_name, code in adapter.get_tiered_examples().items():
+    req_tier = "array" if "math" in tier_name else ("neural" if "neural" in tier_name else "extras")
+    clean_tier_name = tier_name.replace("tier", "")
+    clean_label = clean_tier_name.split("_")[-1].capitalize() if "_" in clean_tier_name else clean_tier_name.capitalize()
+    collected[f"{key}_{tier_name}"] = {
+      "label": f"{display_fw}: {clean_label}",
+      "srcFw": src_fw,
+      "srcFlavour": src_flavour,
+      "tgtFw": tgt_fw,
+      "tgtFlavour": tgt_flavour,
+      "code": code,
+      "requiredTier": req_tier,
+    }
+  return collected
+
+
 def scan_registry() -> tuple[HierarchyMap, str, str]:
   """Scan registered adapters to build hierarchy, examples, and tier metadata.
 
@@ -147,119 +241,38 @@ def scan_registry() -> tuple[HierarchyMap, str, str]:
   fws = available_frameworks()
   priorities = get_framework_priority_order()
 
-  # 1. Build Node Map
   hierarchy: HierarchyMap = defaultdict(list)
   tier_metadata: dict[str, list[str]] = {}
-
-  # Track roots explicitly
-  roots = set()
+  roots: set[str] = set()
 
   for key in fws:
     adapter = get_adapter(key)
     if not adapter:
       continue
-
     label = str(adapter.display_name) if adapter.display_name else key.capitalize()
-    parent = adapter.inherits_from
-
-    # Extract Tiers
-    tiers = []
-    try:
-      supp_tiers = adapter.supported_tiers
-    except AttributeError:
-      supp_tiers = []
-
-    if supp_tiers:
-      tiers = [t.value for t in supp_tiers]
+    tier_metadata[key] = _extract_adapter_tiers(adapter)
+    if adapter.inherits_from:
+      hierarchy[adapter.inherits_from].append({"key": key, "label": label})
     else:
-      tiers = ["array", "neural", "extras"]
-    tier_metadata[key] = tiers
-
-    if parent:
-      # This is a child node (e.g. flax_nnx -> jax)
-      hierarchy[parent].append({"key": key, "label": label})
-    else:
-      # This is a root node (e.g. torch, jax, nvidia_sass, rdna)
       roots.add(key)
 
-  # 2. Convert to Render-Ready structures & Gather Examples
+  sorted_roots = sorted(roots, key=lambda x: priorities.index(x) if x in priorities else 999)
+  final_hierarchy: HierarchyMap = {
+    root: sorted(hierarchy.get(root, []), key=lambda x: x["label"]) for root in sorted_roots
+  }
+
   examples: dict[str, dict[str, str | bool | None]] = {}
-
-  # Ensure we iterate roots sorted by priority provided by config
-  sorted_roots = sorted(
-    list(roots),
-    key=lambda x: priorities.index(x) if x in priorities else 999,
-  )
-
-  # FIX: Iterate over sorted_roots to ensure keys exist in final_hierarchy
-  final_hierarchy = {root: sorted(hierarchy.get(root, []), key=lambda x: x["label"]) for root in sorted_roots}
-
-  # Collect Examples from Adapters
   for key in fws:
     adapter = get_adapter(key)
     if adapter is not None:
-      tiered_examples: dict[str, str] = adapter.get_tiered_examples()
-      parent_key = adapter.inherits_from
+      examples.update(_collect_adapter_examples(key, adapter, priorities, final_hierarchy))
 
-      for tier_name, code in tiered_examples.items():
-        uid = f"{key}_{tier_name}"
-
-        if parent_key:
-          src_fw = parent_key
-          src_flavour = key
-        else:
-          src_fw = key
-          src_flavour = None
-
-        req_tier = "extras"
-        if "math" in tier_name:
-          req_tier = "array"
-        elif "neural" in tier_name:
-          req_tier = "neural"
-
-        clean_tier_name = tier_name.replace("tier", "")
-        clean_label = (
-          clean_tier_name.split("_")[-1].capitalize() if "_" in clean_tier_name else clean_tier_name.capitalize()
-        )
-
-        display_fw = str(adapter.display_name) if adapter.display_name else key.title()
-        label = f"{display_fw}: {clean_label}"
-
-        # Dynamic Target Heuristic
-        tgt_fw = None
-        tgt_flavour = None
-
-        candidates = [fw for fw in priorities if fw != src_fw and fw != parent_key and fw != src_flavour]
-
-        if candidates:
-          try:
-            curr_idx = priorities.index(src_fw)
-            rotated = priorities[curr_idx + 1 :] + priorities[:curr_idx]
-            for c in rotated:
-              if c in candidates:
-                tgt_fw = c
-                break
-          except ValueError:
-            tgt_fw = candidates[0]
-
-        if not tgt_fw:
-          tgt_fw = "target_placeholder"
-
-        if tgt_fw in final_hierarchy and final_hierarchy[tgt_fw]:
-          tgt_flavour = final_hierarchy[tgt_fw][0]["key"]
-
-        examples[uid] = {
-          "label": label,
-          "srcFw": src_fw,
-          "srcFlavour": src_flavour,
-          "tgtFw": tgt_fw,
-          "tgtFlavour": tgt_flavour,
-          "code": code,
-          "requiredTier": req_tier,
-        }
-
-  for preset_uid, preset_data in _build_cross_dialect_dynamic_presets().items():
-    if preset_data["srcFw"] in fws and preset_data["tgtFw"] in fws:
-      examples[preset_uid] = preset_data
+  examples.update(
+    {
+      preset_uid: preset_data
+      for preset_uid, preset_data in _build_cross_dialect_dynamic_presets().items()
+      if preset_data["srcFw"] in fws and preset_data["tgtFw"] in fws
+    }
+  )
 
   return final_hierarchy, json.dumps(examples), json.dumps(tier_metadata)

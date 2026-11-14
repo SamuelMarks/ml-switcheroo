@@ -7,12 +7,62 @@ This module resolves default Source and Target frameworks by querying the
 to the specific libraries installed.
 """
 
+import contextlib
 import sys
 import typing
 from enum import Enum
 from pathlib import Path as Path
 
-from pydantic import BaseModel, Field, JsonValue, ValidationError, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, JsonValue, ValidationError, field_validator, model_validator
+
+from ml_switcheroo.exceptions import ConfigurationError
+
+IntermediateFormat: typing.TypeAlias = typing.Literal[
+  "ir",
+  "ml_switcheroo_ir",
+  "mlir",
+  "stablehlo",
+  "python",
+]
+
+VALID_INTERMEDIATE_FORMATS: frozenset[str] = frozenset(
+  {
+    "ir",
+    "ml_switcheroo_ir",
+    "mlir",
+    "stablehlo",
+    "python",
+  }
+)
+
+
+def validate_intermediate_format(value: str | None) -> IntermediateFormat | None:
+  """Validate and normalize an optional intermediate representation identifier.
+
+  Args:
+      value: Candidate intermediate dialect string or ``None``.
+
+  Returns:
+      Validated ``IntermediateFormat`` literal or ``None``.
+
+  Raises:
+      ConfigurationError: If ``value`` is not a supported intermediate format.
+  """
+  if value is None:
+    return None
+  cleaned = value.strip().lower()
+  if cleaned == "ir":
+    return "ir"
+  if cleaned == "ml_switcheroo_ir":
+    return "ml_switcheroo_ir"
+  if cleaned == "mlir":
+    return "mlir"
+  if cleaned == "stablehlo":
+    return "stablehlo"
+  if cleaned == "python":
+    return "python"
+  supported = ", ".join(sorted(VALID_INTERMEDIATE_FORMATS))
+  raise ConfigurationError(f"Unsupported intermediate format '{value}'. Supported formats: {supported}.")
 
 
 class ConversionMode(str, Enum):
@@ -137,14 +187,15 @@ def _import_tomllib() -> TomlLoaderProtocol | None:
   if sys.version_info >= (3, 11):
     import tomllib
 
-    return tomllib
+    loader: TomlLoaderProtocol | None = tomllib
   else:
     try:
-      import tomli as tomllib
+      import tomli
 
-      return tomllib
+      loader = tomli
     except ImportError:
-      return None
+      loader = None
+  return loader
 
 
 tomllib = _import_tomllib()
@@ -192,10 +243,8 @@ def get_framework_priority_order() -> list[str]:
         pass
 
       # Extract priority
-      try:
+      with contextlib.suppress(AttributeError, ValueError, TypeError):
         priority = int(adapter.ui_priority)
-      except (AttributeError, ValueError, TypeError):
-        pass
 
     # Move children (flavours) to the very end for UI clarity
     if is_child:
@@ -217,6 +266,15 @@ def _resolve_default_source() -> str:
   """
   fws = get_framework_priority_order()
   return fws[0] if fws else "source_placeholder"
+
+
+def default_source_framework() -> str:
+  """Resolve the highest-priority registered source framework key.
+
+  Returns:
+      str: Highest-priority registered framework key.
+  """
+  return _resolve_default_source()
 
 
 def _resolve_default_target() -> str:
@@ -267,9 +325,9 @@ class RuntimeConfig(BaseModel):
   strict_mode: bool = Field(False, description="If True, fail on unknown APIs.")
 
   # Structural Verification
-  intermediate: str | None = Field(
+  intermediate: IntermediateFormat | None = Field(
     None,
-    description="Intermediate representation layer (e.g. 'ir', 'mlir', 'tikz') for round-trip verification.",
+    description="Intermediate representation layer ('ir', 'ml_switcheroo_ir', 'mlir', 'stablehlo', 'python') for round-trip execution.",
   )
 
   # Pipeline Control Flags
@@ -288,6 +346,8 @@ class RuntimeConfig(BaseModel):
   plugin_settings: dict[str, JsonValue] = Field(default_factory=dict, description="Configuration passed to plugins.")
   plugin_paths: list[Path] = Field(default_factory=list, description="External directories to scan for plugins.")
   validation_report: Path | None = Field(None, description="Path to a verification lockfile.")
+  snapshot_dir: Path | None = Field(None, description="Optional directory containing framework API snapshots.")
+  workspace_path: Path | None = Field(None, description="Optional workspace directory for sibling development packages.")
 
   # On-Device Execution & Autodiff Configuration
   enable_on_device_execution: bool = Field(
@@ -347,6 +407,22 @@ class RuntimeConfig(BaseModel):
     elif self.enable_graph_optimization and self.mode == ConversionMode.PRESERVE_TRIVIA:
       self.mode = ConversionMode.OPTIMIZED
     return self
+
+  @field_validator("intermediate", mode="before")
+  @classmethod
+  def validate_intermediate(cls, v: str | None) -> IntermediateFormat | None:
+    """Validate that ``intermediate`` is a supported intermediate representation.
+
+    Args:
+        v: Raw intermediate format string or ``None``.
+
+    Returns:
+        Validated ``IntermediateFormat`` literal or ``None``.
+
+    Raises:
+        ConfigurationError: If ``v`` is not a supported intermediate representation.
+    """
+    return validate_intermediate_format(v)
 
   @field_validator("source_framework", "target_framework")
   @classmethod
@@ -414,81 +490,59 @@ class RuntimeConfig(BaseModel):
     try:
       return schema.model_validate(self.plugin_settings)
     except ValidationError as e:
-      raise ValueError(f"Plugin configuration validation failed: {e}")
+      raise ValueError(f"Plugin configuration validation failed: {e}") from e
 
-  @classmethod
-  def load(
-    cls,
-    source: str | None = None,
-    target: str | None = None,
-    source_flavour: str | None = None,
-    target_flavour: str | None = None,
-    strict_mode: bool | None = None,
-    intermediate: str | None = None,
-    enable_graph_optimization: bool | None = None,
-    enable_sharding: bool | None = None,
-    plugin_settings: typing.Mapping[str, JsonValue] | None = None,
-    validation_report: Path | None = None,
-    search_path: Path | None = None,
-    mode: str | ConversionMode | None = None,
-    opt_level: str | OptimizationLevel | None = None,
-    execution_backend: str | ExecutionBackend | None = None,
-    enable_on_device_execution: bool | None = None,
-    emit_backward_code: bool | None = None,
-  ) -> "RuntimeConfig":
-    """Load configuration from ``pyproject.toml``, overriding with CLI arguments.
-
-    Defaults are calculated dynamically via factory methods if not found.
+  @staticmethod
+  def _resolve_frameworks_and_flavours(
+    toml_config: typing.Mapping[str, JsonValue],
+    source: str | None,
+    target: str | None,
+    source_flavour: str | None,
+    target_flavour: str | None,
+  ) -> tuple[str, str, str | None, str | None]:
+    """Merge CLI overrides, TOML entries, and dynamic defaults for source/target frameworks and flavours.
 
     Args:
-        source (Optional[str]): Override source framework.
-        target (Optional[str]): Override target framework.
-        source_flavour (Optional[str]): Override source flavour.
-        target_flavour (Optional[str]): Override target flavour.
-        strict_mode (Optional[bool]): Override strict mode setting.
-        intermediate (Optional[str]): Override intermediate representation mode.
-        enable_graph_optimization (Optional[bool]): Override fusion/optimization setting.
-        enable_sharding (Optional[bool]): Override sharding semantics.
-        plugin_settings (Optional[Mapping[str, JsonValue]]): Additional plugin settings.
-        validation_report (Optional[Path]): Override validation report path.
-        search_path (Optional[Path]): Directory path to search for config file.
-        mode (Optional[str | ConversionMode]): Conversion mode ('preserve_trivia' or 'optimized').
-        opt_level (Optional[str | OptimizationLevel]): Optimization level ('O0', 'O1', 'O2', 'O3').
-        execution_backend (Optional[str | ExecutionBackend]): Execution backend (default: 'webgpu').
-        enable_on_device_execution (Optional[bool]): Execute forward/backward passes on-device.
-        emit_backward_code (Optional[bool]): Synthesize explicit backward/VJP code.
+        toml_config: Parsed ``[tool.ml_switcheroo]`` mapping.
+        source: CLI source framework override.
+        target: CLI target framework override.
+        source_flavour: CLI source flavour override.
+        target_flavour: CLI target flavour override.
 
     Returns:
-        RuntimeConfig: The fully resolved configuration object.
-
+        Tuple of ``(source_framework, target_framework, source_flavour, target_flavour)``.
     """
-    start_dir = search_path or Path.cwd()
-    toml_config, toml_dir = _load_toml_settings(start_dir)
-
-    # 1. Framework Defaults
     raw_src = toml_config.get("source_framework")
     final_source = source if source else (str(raw_src) if isinstance(raw_src, str) else _resolve_default_source())
     raw_tgt = toml_config.get("target_framework")
     final_target = target if target else (str(raw_tgt) if isinstance(raw_tgt, str) else _resolve_default_target())
 
-    # 1b. Flavours
     raw_src_flav = toml_config.get("source_flavour")
     final_src_flavour = source_flavour or (str(raw_src_flav) if isinstance(raw_src_flav, str) else None)
     raw_tgt_flav = toml_config.get("target_flavour")
     final_tgt_flavour = target_flavour or (str(raw_tgt_flav) if isinstance(raw_tgt_flav, str) else None)
+    return final_source, final_target, final_src_flavour, final_tgt_flavour
 
-    # 2. Strict Mode
-    if strict_mode is not None:
-      final_strict = strict_mode
-    else:
-      final_strict = bool(toml_config.get("strict_mode", False))
+  @staticmethod
+  def _resolve_mode_and_opt_level(
+    toml_config: typing.Mapping[str, JsonValue],
+    mode: str | ConversionMode | None,
+    enable_graph_optimization: bool | None,
+    opt_level: str | OptimizationLevel | None,
+  ) -> tuple[ConversionMode, bool, OptimizationLevel]:
+    """Resolve conversion mode, graph optimization flag, and optimization level across CLI and TOML.
 
-    # 2b. Intermediate Mode
-    raw_inter = toml_config.get("intermediate")
-    final_intermediate = intermediate or (str(raw_inter) if isinstance(raw_inter, str) else None)
+    Args:
+        toml_config: Parsed ``[tool.ml_switcheroo]`` mapping.
+        mode: Optional CLI conversion mode override.
+        enable_graph_optimization: Optional CLI graph optimization override.
+        opt_level: Optional CLI optimization level override.
 
-    # 2c. Conversion Mode & Fusion / Graph Optimization
+    Returns:
+        Tuple of ``(conversion_mode, enable_graph_optimization, opt_level)``.
+    """
     raw_mode = toml_config.get("mode")
+    toml_graph_opt = bool(toml_config.get("enable_graph_optimization", False))
     if mode is not None:
       final_mode = ConversionMode(mode)
       final_graph_opt = (
@@ -499,11 +553,9 @@ class RuntimeConfig(BaseModel):
       final_mode = ConversionMode.OPTIMIZED if final_graph_opt else ConversionMode.PRESERVE_TRIVIA
     elif isinstance(raw_mode, str) and raw_mode in {m.value for m in ConversionMode}:
       final_mode = ConversionMode(raw_mode)
-      final_graph_opt = (final_mode == ConversionMode.OPTIMIZED) or bool(
-        toml_config.get("enable_graph_optimization", False)
-      )
+      final_graph_opt = (final_mode == ConversionMode.OPTIMIZED) or toml_graph_opt
     else:
-      final_graph_opt = bool(toml_config.get("enable_graph_optimization", False))
+      final_graph_opt = toml_graph_opt
       final_mode = ConversionMode.OPTIMIZED if final_graph_opt else ConversionMode.PRESERVE_TRIVIA
 
     raw_opt_level = toml_config.get("opt_level")
@@ -514,57 +566,116 @@ class RuntimeConfig(BaseModel):
     else:
       final_opt_level = OptimizationLevel.O2
 
-    # 2d. Sharding / Scalability
-    if enable_sharding is not None:
-      final_sharding = enable_sharding
-    else:
-      final_sharding = bool(toml_config.get("enable_sharding", False))
+    return final_mode, final_graph_opt, final_opt_level
 
-    # 2e. Import Fixer
-    final_import_fixer = bool(toml_config.get("enable_import_fixer", True))
+  @staticmethod
+  def _resolve_backend(
+    toml_config: typing.Mapping[str, JsonValue],
+    execution_backend: str | ExecutionBackend | None,
+  ) -> ExecutionBackend:
+    """Resolve the active ``ExecutionBackend`` from CLI override or TOML configuration.
 
-    # 2f. Execution Backend & On-Device Execution
-    raw_backend = toml_config.get("execution_backend")
+    Args:
+        toml_config: Parsed ``[tool.ml_switcheroo]`` mapping.
+        execution_backend: Optional CLI backend override.
+
+    Returns:
+        Resolved ``ExecutionBackend`` enum value.
+    """
     if execution_backend is not None:
-      final_backend = ExecutionBackend(execution_backend)
-    elif isinstance(raw_backend, str) and raw_backend in {b.value for b in ExecutionBackend}:
-      final_backend = ExecutionBackend(raw_backend)
-    else:
-      final_backend = ExecutionBackend.WEBGPU
+      return ExecutionBackend(execution_backend)
+    raw_backend = toml_config.get("execution_backend")
+    if isinstance(raw_backend, str) and raw_backend in {b.value for b in ExecutionBackend}:
+      return ExecutionBackend(raw_backend)
+    return ExecutionBackend.WEBGPU
 
-    if enable_on_device_execution is not None:
-      final_on_device = enable_on_device_execution
-    else:
-      final_on_device = bool(toml_config.get("enable_on_device_execution", False))
+  @staticmethod
+  def _resolve_plugin_paths(toml_config: typing.Mapping[str, JsonValue], toml_dir: Path | None) -> list[Path]:
+    """Resolve ``plugin_paths`` entries from TOML relative to ``toml_dir`` when available.
 
-    if emit_backward_code is not None:
-      final_emit_bwd = emit_backward_code
-    else:
-      final_emit_bwd = bool(toml_config.get("emit_backward_code", False))
+    Args:
+        toml_config: Parsed ``[tool.ml_switcheroo]`` mapping.
+        toml_dir: Directory containing the discovered ``pyproject.toml``, if any.
 
-    # 3. Plugin Settings (Merge TOML + CLI, CLI wins)
-    raw_toml_plugins = toml_config.get("plugin_settings", {})
-    toml_plugins: dict[str, JsonValue] = dict(raw_toml_plugins) if isinstance(raw_toml_plugins, dict) else {}
-    cli_plugins: dict[str, JsonValue] = dict(plugin_settings) if plugin_settings else {}
-    final_plugins: dict[str, JsonValue] = {**toml_plugins, **cli_plugins}
-
-    # 4. Validation Report
-    final_report = validation_report
-    if not final_report and "validation_report" in toml_config:
-      final_report = Path(str(toml_config["validation_report"]))
-
-    # 5. External Plugins
+    Returns:
+        List of resolved absolute plugin directory ``Path`` instances.
+    """
     raw_paths_val = toml_config.get("plugin_paths", [])
     raw_paths: list[str] = (
       [str(p) for p in raw_paths_val if isinstance(p, (str, Path))] if isinstance(raw_paths_val, list) else []
     )
-    final_plugin_paths: list[Path] = []
-    if toml_dir:
-      for p in raw_paths:
-        resolved = (toml_dir / Path(p)).resolve()
-        final_plugin_paths.append(resolved)
-    else:
-      final_plugin_paths = [Path(p).resolve() for p in raw_paths]
+    if toml_dir is not None:
+      return [(toml_dir / Path(p)).resolve() for p in raw_paths]
+    return [Path(p).resolve() for p in raw_paths]
+
+  @classmethod
+  def load(
+    cls,
+    overrides: "RuntimeConfigOverrides | None" = None,
+    *,
+    source: str | None = None,
+    target: str | None = None,
+    strict_mode: bool | None = None,
+    search_path: Path | None = None,
+  ) -> "RuntimeConfig":
+    """Load configuration from ``pyproject.toml``, overriding with typed CLI/API overrides.
+
+    Defaults are calculated dynamically via factory methods if not found.
+
+    Args:
+        overrides: Optional ``RuntimeConfigOverrides`` bundle of CLI/API overrides.
+        source: Convenience override for source framework.
+        target: Convenience override for target framework.
+        strict_mode: Convenience override for strict mode setting.
+        search_path: Convenience directory path to begin ``pyproject.toml`` discovery.
+
+    Returns:
+        RuntimeConfig: The fully resolved configuration object.
+    """
+    ov = overrides if overrides is not None else RuntimeConfigOverrides()
+    eff_source = source if source is not None else ov.source
+    eff_target = target if target is not None else ov.target
+    eff_strict = strict_mode if strict_mode is not None else ov.strict_mode
+    eff_search = search_path if search_path is not None else ov.search_path
+
+    toml_config, toml_dir = _load_toml_settings(eff_search or Path.cwd())
+    final_source, final_target, final_src_flavour, final_tgt_flavour = cls._resolve_frameworks_and_flavours(
+      toml_config, eff_source, eff_target, ov.source_flavour, ov.target_flavour
+    )
+
+    final_strict = eff_strict if eff_strict is not None else bool(toml_config.get("strict_mode", False))
+    raw_inter = toml_config.get("intermediate")
+    final_intermediate = validate_intermediate_format(
+      ov.intermediate if ov.intermediate is not None else (str(raw_inter) if isinstance(raw_inter, str) else None)
+    )
+
+    final_mode, final_graph_opt, final_opt_level = cls._resolve_mode_and_opt_level(
+      toml_config, ov.mode, ov.enable_graph_optimization, ov.opt_level
+    )
+    final_sharding = (
+      ov.enable_sharding if ov.enable_sharding is not None else bool(toml_config.get("enable_sharding", False))
+    )
+    final_import_fixer = bool(toml_config.get("enable_import_fixer", True))
+    final_backend = cls._resolve_backend(toml_config, ov.execution_backend)
+    final_on_device = (
+      ov.enable_on_device_execution
+      if ov.enable_on_device_execution is not None
+      else bool(toml_config.get("enable_on_device_execution", False))
+    )
+    final_emit_bwd = (
+      ov.emit_backward_code if ov.emit_backward_code is not None else bool(toml_config.get("emit_backward_code", False))
+    )
+
+    raw_toml_plugins = toml_config.get("plugin_settings", {})
+    toml_plugins: dict[str, JsonValue] = dict(raw_toml_plugins) if isinstance(raw_toml_plugins, dict) else {}
+    cli_plugins: dict[str, JsonValue] = dict(ov.plugin_settings) if ov.plugin_settings else {}
+    final_plugins: dict[str, JsonValue] = {**toml_plugins, **cli_plugins}
+
+    final_report = ov.validation_report
+    if not final_report and "validation_report" in toml_config:
+      final_report = Path(str(toml_config["validation_report"]))
+
+    final_plugin_paths = cls._resolve_plugin_paths(toml_config, toml_dir)
 
     return cls(
       source_framework=final_source,
@@ -585,6 +696,48 @@ class RuntimeConfig(BaseModel):
       plugin_paths=final_plugin_paths,
       validation_report=final_report,
     )
+
+
+class RuntimeConfigOverrides(BaseModel):
+  """Typed CLI/API override bundle for ``RuntimeConfig.load`` and ``ASTEngine.from_options``.
+
+  Attributes:
+      source: Optional source framework override.
+      target: Optional target framework override.
+      source_flavour: Optional source flavour override.
+      target_flavour: Optional target flavour override.
+      strict_mode: Optional strict mode override.
+      intermediate: Optional intermediate representation mode override.
+      enable_graph_optimization: Optional graph optimization override.
+      enable_sharding: Optional sharding semantics override.
+      plugin_settings: Optional plugin settings mapping.
+      validation_report: Optional validation report file path.
+      search_path: Optional directory path to begin ``pyproject.toml`` discovery.
+      mode: Optional conversion mode override.
+      opt_level: Optional optimization level override.
+      execution_backend: Optional execution backend override.
+      enable_on_device_execution: Optional on-device forward/backward execution override.
+      emit_backward_code: Optional explicit backward/VJP synthesis override.
+  """
+
+  model_config = ConfigDict(extra="forbid", frozen=True)
+
+  source: str | None = None
+  target: str | None = None
+  source_flavour: str | None = None
+  target_flavour: str | None = None
+  strict_mode: bool | None = None
+  intermediate: str | None = None
+  enable_graph_optimization: bool | None = None
+  enable_sharding: bool | None = None
+  plugin_settings: typing.Mapping[str, JsonValue] | None = None
+  validation_report: Path | None = None
+  search_path: Path | None = None
+  mode: str | ConversionMode | None = None
+  opt_level: str | OptimizationLevel | None = None
+  execution_backend: str | ExecutionBackend | None = None
+  enable_on_device_execution: bool | None = None
+  emit_backward_code: bool | None = None
 
 
 def _load_toml_settings(start_path: Path) -> tuple[dict[str, JsonValue], Path | None]:
@@ -615,7 +768,7 @@ def _load_toml_settings(start_path: Path) -> tuple[dict[str, JsonValue], Path | 
         raw_tool = data.get("tool", {})
         tool_section = raw_tool.get("ml_switcheroo", {}) if isinstance(raw_tool, dict) else {}
         return (dict(tool_section) if isinstance(tool_section, dict) else {}), path
-      except Exception:
+      except (OSError, ValueError, TypeError, KeyError):
         # Malformed TOML or permission error implies skip
         return {}, None
 
@@ -656,13 +809,8 @@ def parse_cli_key_values(
     elif lower_val == "false":
       final_val = False
     else:
-      try:
-        if "." in val_str or "e" in lower_val:
-          final_val = float(val_str)
-        else:
-          final_val = int(val_str)
-      except ValueError:
-        pass
+      with contextlib.suppress(ValueError):
+        final_val = float(val_str) if "." in val_str or "e" in lower_val else int(val_str)
 
     config[key] = final_val
 

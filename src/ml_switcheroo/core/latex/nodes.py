@@ -17,7 +17,7 @@ from abc import ABC
 
 import pydantic
 
-from ml_switcheroo.core.cst.base import CstFieldValue
+from ml_switcheroo.core.cst.base import CstFieldValue, TriviaInput
 from ml_switcheroo.core.markup.cst import MarkupNode
 from ml_switcheroo.utils.formatting import StructuredFormatter, escape_latex
 
@@ -28,13 +28,20 @@ class LatexNode(MarkupNode, ABC):
   Enforces a ``emit()`` method for serialization support.
   """
 
-  def __init__(self, **kwargs: CstFieldValue) -> None:
+  def __init__(
+    self,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
+    **kwargs: CstFieldValue,
+  ) -> None:
     """Initialize LatexNode.
 
     Args:
+        leading_trivia: Optional leading trivia preceding this node.
+        trailing_trivia: Optional trailing trivia following this node.
         **kwargs: Subclass field values forwarded to MarkupNode.
     """
-    super().__init__(**kwargs)
+    super().__init__(leading_trivia=leading_trivia, trailing_trivia=trailing_trivia, **kwargs)
 
   def emit(self, indent_level: int = 0) -> str:
     """Serialize the node object back into its LaTeX macro representation with indentation.

@@ -7,17 +7,16 @@ LibCST lifting.
 
 import json
 import os
-from abc import abstractmethod
 import types
 import typing
+from abc import abstractmethod
 
 import libcst as cst
-from ml_switcheroo_ir import AttributeValue
 import yaml
-from ml_switcheroo.core.compiler.ir import LogicalGraph, topological_sort
-
+from ml_switcheroo_ir import AttributeValue
 from pydantic import JsonValue
 
+from ml_switcheroo.core.compiler.ir import LogicalGraph, topological_sort
 from ml_switcheroo.core.compiler.isa.allocator import GenericRegisterAllocator
 from ml_switcheroo.core.compiler.isa.cst import (
   IsaComment,
@@ -28,6 +27,7 @@ from ml_switcheroo.core.compiler.isa.cst import (
   IsaRegister,
 )
 from ml_switcheroo.core.rewriter.context import SemanticsProtocol
+from ml_switcheroo.exceptions import BackendEmissionError
 
 if typing.TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
@@ -70,13 +70,28 @@ class _IsaSemanticsProtocol(typing.Protocol):
 
 @typing.runtime_checkable
 class _NamedRegisterProtocol(typing.Protocol):
-  """Protocol for ISA registers exposing a `.name` property."""
+  """Protocol for ISA registers exposing a `.name` property.
+
+  Attributes:
+      name: The name (`str`).
+  """
 
   name: str
 
 
 class IsaSynthesizer(typing.Generic[NodeT, RegT]):
-  """Unified Base Class for Hardware ISA Synthesizers."""
+  """Unified Base Class for Hardware ISA Synthesizers.
+
+  Attributes:
+      TARGET_NAME: The target name (`str`).
+      COMMENT_CLS: The comment cls (`type[IsaComment]`).
+      INSTRUCTION_CLS: The instruction cls (`type[IsaInstruction]`).
+      LABEL_CLS: The label cls (`type[IsaLabel]`).
+      IMMEDIATE_CLS: The immediate cls (`type[IsaImmediate]`).
+      LABEL_COMMENT_PREFIX: The label comment prefix (`str`).
+      EMIT_BEGIN_END_COMMENTS_IN_PY: The emit begin end comments in py (`bool`).
+      emit_trivia_comments: The emit trivia comments (`bool`).
+  """
 
   TARGET_NAME: str = ""
   COMMENT_CLS: type[IsaComment] = IsaComment
@@ -89,7 +104,7 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
 
   def __init__(
     self,
-    semantics: "SemanticsManager | SemanticsProtocol",
+    semantics: "SemanticsManager | SemanticsProtocol | None",
     allocator: GenericRegisterAllocator[RegT],
     macros_yaml_path: str,
     macros_json_path: str,
@@ -105,8 +120,12 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
         macros_json_path: Fallback filesystem path to the JSON macro registry file.
         macro_module: Python module containing macro expansion functions.
         emit_trivia_comments: Whether to emit non-runtime ``leading_trivia`` / ``trailing_trivia`` comments.
+
+    Raises:
+        BackendEmissionError: If ``semantics`` is ``None``.
     """
-    assert self._is_isa_semantics(semantics)
+    if not self._is_isa_semantics(semantics):
+      raise BackendEmissionError("BaseIsaSynthesizer requires a non-None SemanticsManager instance.")
     self.semantics: _IsaSemanticsProtocol = semantics
     self.allocator: GenericRegisterAllocator[RegT] = allocator
     self.emit_trivia_comments: bool = emit_trivia_comments
@@ -131,17 +150,15 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
 
     import inspect
 
+    macro_members = dict(inspect.getmembers(macro_module))
     for key, func_name in mapping.items():
-      try:
-        candidate = inspect.getattr_static(macro_module, func_name)
-      except AttributeError:
-        candidate = None
+      candidate = macro_members.get(func_name)
       if self._is_macro_expander(candidate):
         self.macro_registry[key] = candidate
 
   @staticmethod
   def _is_isa_semantics(
-    obj: "SemanticsManager | SemanticsProtocol | _IsaSemanticsProtocol",
+    obj: "SemanticsManager | SemanticsProtocol | _IsaSemanticsProtocol | None",
   ) -> typing.TypeGuard[_IsaSemanticsProtocol]:
     """Narrow `obj` to `_IsaSemanticsProtocol`.
 
@@ -250,8 +267,12 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
     Args:
         output_nodes: Target list of synthesized ISA AST nodes.
         node: Constructed ISA node to append.
+
+    Raises:
+        BackendEmissionError: If ``node`` is not a valid ``IsaNode`` instance.
     """
-    assert self._is_target_node(node)
+    if not self._is_target_node(node):
+      raise BackendEmissionError(f"Expected IsaNode for synthesis output, got {type(node).__name__}.")
     output_nodes.append(node)
 
   def _emit_node_trivia_comments(

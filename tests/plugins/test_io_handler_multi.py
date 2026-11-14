@@ -1,7 +1,5 @@
 """Test suite for the Io Handler Multi module."""
 
-from tests.conftest import _test_getattr
-
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -35,8 +33,8 @@ def base_semantics() -> MagicMock:
   Returns:
       MagicMock: Mock base semantics.
   """
-  _test_getattr(hooks._HOOKS, "__setitem__")("io_handler", transform_io_calls)
-  hooks._PLUGINS_LOADED = True
+  hooks.register_hook("io_handler")(transform_io_calls)
+  hooks.set_plugins_loaded(True)
   mgr: MagicMock = MagicMock()
   io_def: dict[str, dict[str, dict[str, str]]] = {
     "variants": {"numpy": {"requires_plugin": "io_handler"}, "tensorflow": {"requires_plugin": "io_handler"}}
@@ -63,7 +61,7 @@ def get_rw(mgr: MagicMock, target: str) -> PivotRewriter:
 
 @patch("ml_switcheroo.plugins.io_handler.get_adapter")
 def test_numpy_save(mock_get: MagicMock, base_semantics: MagicMock) -> None:
-  """Verifies the behavior of NumPy save.
+  """Verify `get_rw` emits `import numpy as np` for numpy save.
 
   Args:
       mock_get (MagicMock): Get adapter mock.
@@ -78,7 +76,7 @@ def test_numpy_save(mock_get: MagicMock, base_semantics: MagicMock) -> None:
 
 @patch("ml_switcheroo.plugins.io_handler.get_adapter")
 def test_numpy_load(mock_get: MagicMock, base_semantics: MagicMock) -> None:
-  """Verifies the behavior of NumPy load.
+  """Verify `get_rw` emits `np.load(file='f')` for numpy load.
 
   Args:
       mock_get (MagicMock): Get adapter mock.
@@ -92,7 +90,7 @@ def test_numpy_load(mock_get: MagicMock, base_semantics: MagicMock) -> None:
 
 @patch("ml_switcheroo.plugins.io_handler.get_adapter")
 def test_tensorflow_save(mock_get: MagicMock, base_semantics: MagicMock) -> None:
-  """Verifies the behavior of TensorFlow save.
+  """Verify `get_rw` emits `import tensorflow as tf` for tensorflow save.
 
   Args:
       mock_get (MagicMock): Get adapter mock.
@@ -107,7 +105,7 @@ def test_tensorflow_save(mock_get: MagicMock, base_semantics: MagicMock) -> None
 
 @patch("ml_switcheroo.plugins.io_handler.get_adapter")
 def test_tensorflow_load(mock_get: MagicMock, base_semantics: MagicMock) -> None:
-  """Verifies the behavior of TensorFlow load.
+  """Verify `get_rw` emits `tf.io.read_file('p')` for tensorflow load.
 
   Args:
       mock_get (MagicMock): Get adapter mock.

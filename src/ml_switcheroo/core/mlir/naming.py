@@ -68,10 +68,7 @@ class NamingContext:
       if match:
         candidate = match.group(1)
         # Only use stripped name if it's safe (not reserved/used)
-        if candidate not in self._used_names and candidate not in self._reserved:
-          base = candidate
-        else:
-          base = clean
+        base = candidate if candidate not in self._used_names and candidate not in self._reserved else clean
       else:
         base = clean
 
@@ -81,10 +78,14 @@ class NamingContext:
       # If it was an SSA reference (e.g. %self), base will be 'self'.
 
       # We distinguish explicit semantic hints from SSA hints by checking structure
-      if not ssa_name.endswith(hint) and not hint.startswith("_") and not ssa_name.startswith(f"%{hint}"):
-        # This implies 'hint' came from op type, not ssa ID
-        if not base.startswith("_"):
-          base = f"_{base}"
+      # This implies 'hint' came from op type, not ssa ID
+      if (
+        not ssa_name.endswith(hint)
+        and not hint.startswith("_")
+        and not ssa_name.startswith(f"%{hint}")
+        and not base.startswith("_")
+      ):
+        base = f"_{base}"
 
     elif ssa_name.startswith("%"):
       base = "_" + ssa_name[1:]
@@ -94,10 +95,7 @@ class NamingContext:
     # Fallback/Collision Resolution
     if not py_name.isidentifier() or py_name in self._reserved or py_name in self._used_names:
       # Collision or invalid: Try prepending underscore
-      if not py_name.startswith("_"):
-        attempt = f"_{py_name}"
-      else:
-        attempt = py_name
+      attempt = f"_{py_name}" if not py_name.startswith("_") else py_name
 
       # If still used or invalid, fallback to indexed v
       if attempt in self._used_names or not attempt.isidentifier():

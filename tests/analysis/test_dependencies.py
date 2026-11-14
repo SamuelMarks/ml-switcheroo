@@ -5,8 +5,6 @@ external library dependencies from CST trees. It tests standard library filterin
 root resolution (ignoring known ML frameworks), and detection of completely unknown modules.
 """
 
-from tests.conftest import _test_setattr
-
 import sys
 from unittest.mock import MagicMock, patch
 
@@ -17,16 +15,19 @@ from ml_switcheroo.analysis.dependencies import DependencyScanner
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-def test_dependency_scanner() -> None:
+def test_dependency_scanner(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test standard dependency extraction and categorizations.
 
   This test provides a block of imports and verifies that the DependencyScanner
   correctly categorizes them. It checks that `cv2` and `unknown_lib` are identified
   as unknown imports, while standard libraries (`os`, `sys`), the source framework
   (`torch`), relative imports, and known semantic targets (`numpy`, `pandas`) are safely ignored.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
   """
   semantics: SemanticsManager = SemanticsManager()
-  _test_setattr(semantics, "import_data", {"numpy.core": {}, "pandas": {}})
+  monkeypatch.setattr(semantics, "import_data", {"numpy.core": {}, "pandas": {}}, raising=False)
 
   scanner: DependencyScanner = DependencyScanner(semantics, source_framework="torch")
 
@@ -86,7 +87,6 @@ def test_get_root_package_fallback() -> None:
 
     def __init__(self) -> None:
       """Initialize the mock ImportFrom element."""
-      pass
 
     @property
     def relative(self) -> tuple[cst.Dot, ...]:

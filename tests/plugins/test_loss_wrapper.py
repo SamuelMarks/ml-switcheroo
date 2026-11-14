@@ -1,14 +1,11 @@
 """Test suite for the Loss Wrapper module."""
 
-from tests.conftest import _test_getattr, _test_setattr
-
 import typing
-from pydantic import JsonValue
-
 from unittest.mock import MagicMock
 
 import libcst as cst
 import pytest
+from pydantic import JsonValue
 
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.config import RuntimeConfig
@@ -36,21 +33,31 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   Returns:
       Callable[[str], PivotRewriter]: A factory function.
   """
-  _test_getattr(
-    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
-  )("loss_reduction", _test_getattr({"v": transform_loss_reduction}, "__getitem__")("v"))
-  hooks._PLUGINS_LOADED = True
+  hooks.register_hook("loss_reduction")(transform_loss_reduction)
+  hooks.set_plugins_loaded(True)
   mgr = MagicMock()
-  ce_def = {
-    "variants": {
-      "torch": {"api": "torch.nn.functional.cross_entropy"},
-      "jax": {"api": "optax.softmax_cross_entropy_with_integer_labels", "requires_plugin": "loss_reduction"},
-      "tensorflow": {"api": "tf.nn.sparse_softmax_cross_entropy_with_logits", "requires_plugin": "loss_reduction"},
-    }
+  ce_variants: dict[str, dict[str, JsonValue]] = {
+    "torch": {"api": "torch.nn.functional.cross_entropy"},
+    "jax": {"api": "optax.softmax_cross_entropy_with_integer_labels", "requires_plugin": "loss_reduction"},
+    "tensorflow": {"api": "tf.nn.sparse_softmax_cross_entropy_with_logits", "requires_plugin": "loss_reduction"},
   }
-  mean_def = {"variants": {"jax": {"api": "jnp.mean"}, "tensorflow": {"api": "tf.reduce_mean"}}}
-  sum_def = {"variants": {"jax": {"api": "jnp.sum"}, "tensorflow": {"api": "tf.reduce_sum"}}}
-  all_defs = {"CrossEntropyLoss": ce_def, "Mean": mean_def, "Sum": sum_def}
+  mean_variants: dict[str, dict[str, JsonValue]] = {
+    "jax": {"api": "jnp.mean"},
+    "tensorflow": {"api": "tf.reduce_mean"},
+  }
+  sum_variants: dict[str, dict[str, JsonValue]] = {
+    "jax": {"api": "jnp.sum"},
+    "tensorflow": {"api": "tf.reduce_sum"},
+  }
+  ce_def: dict[str, JsonValue] = {"variants": dict[str, JsonValue](ce_variants)}
+  mean_def: dict[str, JsonValue] = {"variants": dict[str, JsonValue](mean_variants)}
+  sum_def: dict[str, JsonValue] = {"variants": dict[str, JsonValue](sum_variants)}
+  all_defs: dict[str, dict[str, JsonValue]] = {"CrossEntropyLoss": ce_def, "Mean": mean_def, "Sum": sum_def}
+  all_variants: dict[str, dict[str, dict[str, JsonValue]]] = {
+    "CrossEntropyLoss": ce_variants,
+    "Mean": mean_variants,
+    "Sum": sum_variants,
+  }
 
   def get_def(name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Gets def.
@@ -61,18 +68,7 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
     Returns:
         Optional[Tuple[str, dict[str, JsonValue]]]: The definition or None.
     """
-    _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
-      {
-        "v": (
-          _test_getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"),
-          _test_getattr({"v": ce_def}, "__getitem__")("v"),
-        )
-        if _test_getattr({"v": "cross_entropy"}, "__getitem__")("v") in _test_getattr({"v": name}, "__getitem__")("v")
-        else None
-      },
-      "__getitem__",
-    )("v")
-    return _ret_v
+    return ("CrossEntropyLoss", ce_def) if "cross_entropy" in name else None
 
   def resolve_variant(aid: str, fw: str) -> dict[str, JsonValue] | None:
     """Resolves variant.
@@ -84,21 +80,8 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
     Returns:
         Optional[dict[str, JsonValue]]: The variant or None.
     """
-    if aid in all_defs and fw in all_defs[aid]["variants"]:
-      _ret_v: dict[str, JsonValue] | None = _test_getattr(
-        {
-          "v": _test_getattr(
-            {
-              "v": _test_getattr({"v": _test_getattr({"v": all_defs}, "__getitem__")("v")[aid]}, "__getitem__")("v")[
-                "variants"
-              ]
-            },
-            "__getitem__",
-          )("v")[fw]
-        },
-        "__getitem__",
-      )("v")
-      return _ret_v
+    if aid in all_variants and fw in all_variants[aid]:
+      return all_variants[aid][fw]
     return None
 
   mgr.get_definition.side_effect = get_def
@@ -125,7 +108,7 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
 
 
 def test_jax_mean_reduction(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of JAX mean reduction.
+  """Verify `rewriter_factory` emits `optax.softmax_cross_entropy` for JAX mean reduction.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): Factory instance.
@@ -138,7 +121,7 @@ def test_jax_mean_reduction(rewriter_factory: typing.Callable[[str], PivotRewrit
 
 
 def test_tensorflow_mean_reduction(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of TensorFlow mean reduction.
+  """Verify `rewriter_factory` emits `tf.reduce_mean` for tensorflow mean reduction.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): Factory instance.
@@ -151,7 +134,7 @@ def test_tensorflow_mean_reduction(rewriter_factory: typing.Callable[[str], Pivo
 
 
 def test_explicit_sum_reduction(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of explicit sum reduction.
+  """Verify `rewriter_factory` emits `jnp.sum` for explicit sum reduction.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): Factory instance.
@@ -164,7 +147,7 @@ def test_explicit_sum_reduction(rewriter_factory: typing.Callable[[str], PivotRe
 
 
 def test_reduction_none(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of reduction none.
+  """Verify `rewriter_factory` emits `optax.softmax` for reduction none.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): Factory instance.
@@ -188,24 +171,21 @@ def test_loss_wrapper_reduction_variable(rewriter_factory: typing.Callable[[str]
   assert "my_mode" in res
 
 
-def test_loss_wrapper_fallback(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
+def test_loss_wrapper_fallback(
+  rewriter_factory: typing.Callable[[str], PivotRewriter], monkeypatch: pytest.MonkeyPatch
+) -> None:
   """Verifies fallback when API not found.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): Factory instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
   rewriter = rewriter_factory("torch")
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
-          "v"
-        ).get_known_apis
-      },
-      "__getitem__",
-    )("v"),
+  monkeypatch.setattr(
+    rewriter.semantics.get_known_apis,
     "return_value",
-    _test_getattr({"v": {}}, "__getitem__")("v"),
+    {},
+    raising=False,
   )
   code = "torch.nn.functional.mse_loss(a, b, reduction='sum')"
   res = rewrite_code(rewriter, code)
@@ -238,11 +218,14 @@ def test_loss_wrapper_no_context_fallback(rewriter_factory: typing.Callable[[str
   # removed jnp.mean check
 
 
-def test_loss_wrapper_fallback_wrapper_none(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
+def test_loss_wrapper_fallback_wrapper_none(
+  rewriter_factory: typing.Callable[[str], PivotRewriter], monkeypatch: pytest.MonkeyPatch
+) -> None:
   """Verifies fallback when wrapper API lookup fails.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): Factory instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
   rewriter = rewriter_factory("jax")
 
@@ -259,18 +242,21 @@ def test_loss_wrapper_fallback_wrapper_none(rewriter_factory: typing.Callable[[s
       return "optax.softmax_cross_entropy_with_integer_labels"
     return None
 
-  _test_setattr(rewriter.context.hook_context, "lookup_api", lookup)
+  monkeypatch.setattr(rewriter.context.hook_context, "lookup_api", lookup, raising=False)
   code = "torch.nn.functional.cross_entropy(a, b, reduction='sum')"
   res = rewrite_code(rewriter, code)
   assert "optax" in res
   # removed jnp.mean check
 
 
-def test_loss_wrapper_fallback_no_context(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
+def test_loss_wrapper_fallback_no_context(
+  rewriter_factory: typing.Callable[[str], PivotRewriter], monkeypatch: pytest.MonkeyPatch
+) -> None:
   """Verifies fallback when no op_id is set.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): Factory instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
   rewriter = rewriter_factory("jax")
   rewriter.context.hook_context.current_op_id = None
@@ -290,7 +276,7 @@ def test_loss_wrapper_fallback_no_context(rewriter_factory: typing.Callable[[str
       return "jnp.mean"
     return None
 
-  _test_setattr(rewriter.context.hook_context, "lookup_api", lookup)
+  monkeypatch.setattr(rewriter.context.hook_context, "lookup_api", lookup, raising=False)
   code = "torch.nn.functional.mse_loss(a, b, reduction=my_mode)"
   res = rewrite_code(rewriter, code)
   assert "torch" in res
@@ -309,11 +295,14 @@ def test_loss_wrapper_variable_and_no_context(rewriter_factory: typing.Callable[
   assert "torch" in res
 
 
-def test_loss_wrapper_variable_no_context_real(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
+def test_loss_wrapper_variable_no_context_real(
+  rewriter_factory: typing.Callable[[str], PivotRewriter], monkeypatch: pytest.MonkeyPatch
+) -> None:
   """Verifies variable reduction with no op_id actually uses CrossEntropyLoss lookup.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): Factory instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
   rewriter = rewriter_factory("jax")
   rewriter.context.hook_context.current_op_id = None
@@ -327,33 +316,18 @@ def test_loss_wrapper_variable_no_context_real(rewriter_factory: typing.Callable
     Returns:
         Tuple[str, dict[str, JsonValue]]: Tuple containing string and definition dictionary.
     """
-    ce_def = {
+    ce_def: dict[str, JsonValue] = {
       "variants": {
         "jax": {"api": "optax.softmax_cross_entropy_with_integer_labels", "requires_plugin": "loss_reduction"},
       }
     }
-    _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
-      {
-        "v": (
-          _test_getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"),
-          _test_getattr({"v": ce_def}, "__getitem__")("v"),
-        )
-      },
-      "__getitem__",
-    )("v")
-    return _ret_v
+    return ("CrossEntropyLoss", ce_def)
 
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
-          "v"
-        ).get_definition
-      },
-      "__getitem__",
-    )("v"),
+  monkeypatch.setattr(
+    rewriter.semantics.get_definition,
     "side_effect",
-    _test_getattr({"v": get_def}, "__getitem__")("v"),
+    get_def,
+    raising=False,
   )
 
   code = "torch.nn.functional.cross_entropy(a, b)"
@@ -361,11 +335,14 @@ def test_loss_wrapper_variable_no_context_real(rewriter_factory: typing.Callable
   assert "optax" in res
 
 
-def test_loss_wrapper_fallback_no_context_real(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
+def test_loss_wrapper_fallback_no_context_real(
+  rewriter_factory: typing.Callable[[str], PivotRewriter], monkeypatch: pytest.MonkeyPatch
+) -> None:
   """Verifies fallback when no op_id is set.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): Factory instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
   rewriter = rewriter_factory("jax")
   rewriter.context.hook_context.current_op_id = None
@@ -379,33 +356,18 @@ def test_loss_wrapper_fallback_no_context_real(rewriter_factory: typing.Callable
     Returns:
         Tuple[str, dict[str, JsonValue]]: Tuple containing string and definition dictionary.
     """
-    ce_def = {
+    ce_def: dict[str, JsonValue] = {
       "variants": {
         "jax": {"api": "optax.softmax_cross_entropy_with_integer_labels", "requires_plugin": "loss_reduction"},
       }
     }
-    _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
-      {
-        "v": (
-          _test_getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"),
-          _test_getattr({"v": ce_def}, "__getitem__")("v"),
-        )
-      },
-      "__getitem__",
-    )("v")
-    return _ret_v
+    return ("CrossEntropyLoss", ce_def)
 
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
-          "v"
-        ).get_definition
-      },
-      "__getitem__",
-    )("v"),
+  monkeypatch.setattr(
+    rewriter.semantics.get_definition,
     "side_effect",
-    _test_getattr({"v": get_def}, "__getitem__")("v"),
+    get_def,
+    raising=False,
   )
 
   code = "torch.nn.functional.cross_entropy(a, b)"  # triggers lines 72, 90
@@ -413,11 +375,14 @@ def test_loss_wrapper_fallback_no_context_real(rewriter_factory: typing.Callable
   assert "optax" in res
 
 
-def test_loss_wrapper_variable_and_no_context_really(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
+def test_loss_wrapper_variable_and_no_context_really(
+  rewriter_factory: typing.Callable[[str], PivotRewriter], monkeypatch: pytest.MonkeyPatch
+) -> None:
   """Verifies variable reduction with no op_id actually uses CrossEntropyLoss lookup.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): Factory instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
   rewriter = rewriter_factory("jax")
   rewriter.context.hook_context.current_op_id = None
@@ -431,44 +396,32 @@ def test_loss_wrapper_variable_and_no_context_really(rewriter_factory: typing.Ca
     Returns:
         Tuple[str, dict[str, JsonValue]]: Tuple containing string and definition dictionary.
     """
-    ce_def = {
+    ce_def: dict[str, JsonValue] = {
       "variants": {
         "jax": {"api": "optax.softmax_cross_entropy_with_integer_labels", "requires_plugin": "loss_reduction"},
       }
     }
-    _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
-      {
-        "v": (
-          _test_getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"),
-          _test_getattr({"v": ce_def}, "__getitem__")("v"),
-        )
-      },
-      "__getitem__",
-    )("v")
-    return _ret_v
+    return ("CrossEntropyLoss", ce_def)
 
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
-          "v"
-        ).get_definition
-      },
-      "__getitem__",
-    )("v"),
+  monkeypatch.setattr(
+    rewriter.semantics.get_definition,
     "side_effect",
-    _test_getattr({"v": get_def}, "__getitem__")("v"),
+    get_def,
+    raising=False,
   )
   code = "torch.nn.functional.cross_entropy(a, b, reduction=my_mode)"
   res = rewrite_code(rewriter, code)
   assert "optax" in res
 
 
-def test_loss_wrapper_none_op_id(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
+def test_loss_wrapper_none_op_id(
+  rewriter_factory: typing.Callable[[str], PivotRewriter], monkeypatch: pytest.MonkeyPatch
+) -> None:
   """Verifies none op_id sets CrossEntropyLoss.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): Factory instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
   rewriter = rewriter_factory("jax")
   rewriter.context.hook_context.current_op_id = None
@@ -476,63 +429,27 @@ def test_loss_wrapper_none_op_id(rewriter_factory: typing.Callable[[str], PivotR
   from ml_switcheroo.plugins.loss_wrapper import transform_loss_reduction
 
   module = cst.parse_module(code)
-  node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
-  _test_setattr(
+  stmt = cst.ensure_type(module.body[0], cst.SimpleStatementLine)
+  expr = cst.ensure_type(stmt.body[0], cst.Expr)
+  node = cst.ensure_type(expr.value, cst.Call)
+  monkeypatch.setattr(
     rewriter.context.hook_context,
     "lookup_api",
     lambda x: "optax.softmax_cross_entropy_with_integer_labels" if x == "CrossEntropyLoss" else None,
+    raising=False,
   )
-  res = transform_loss_reduction(node, rewriter.context.hook_context)
-  assert _test_getattr({"v": "optax"}, "__getitem__")("v") in _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
-            body=_test_getattr(
-              {
-                "v": [
-                  _test_getattr(
-                    {
-                      "v": _test_getattr(
-                        {"v": _test_getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__"
-                      )("v")(
-                        body=_test_getattr(
-                          {
-                            "v": [
-                              _test_getattr(
-                                {
-                                  "v": _test_getattr(
-                                    {"v": _test_getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__"
-                                  )("v")(value=_test_getattr({"v": res}, "__getitem__")("v"))
-                                },
-                                "__getitem__",
-                              )("v")
-                            ]
-                          },
-                          "__getitem__",
-                        )("v")
-                      )
-                    },
-                    "__getitem__",
-                  )("v")
-                ]
-              },
-              "__getitem__",
-            )("v")
-          )
-        },
-        "__getitem__",
-      )("v").code
-    },
-    "__getitem__",
-  )("v")
+  res = cst.ensure_type(transform_loss_reduction(node, rewriter.context.hook_context), cst.Call)
+  assert "optax" in cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=res)])]).code
 
 
-def test_loss_wrapper_empty_string_op_id(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
+def test_loss_wrapper_empty_string_op_id(
+  rewriter_factory: typing.Callable[[str], PivotRewriter], monkeypatch: pytest.MonkeyPatch
+) -> None:
   """Verifies empty string op_id sets CrossEntropyLoss.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): Factory instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
   rewriter = rewriter_factory("jax")
   rewriter.context.hook_context.current_op_id = None
@@ -540,63 +457,27 @@ def test_loss_wrapper_empty_string_op_id(rewriter_factory: typing.Callable[[str]
   from ml_switcheroo.plugins.loss_wrapper import transform_loss_reduction
 
   module = cst.parse_module(code)
-  node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
-  _test_setattr(
+  stmt = cst.ensure_type(module.body[0], cst.SimpleStatementLine)
+  expr = cst.ensure_type(stmt.body[0], cst.Expr)
+  node = cst.ensure_type(expr.value, cst.Call)
+  monkeypatch.setattr(
     rewriter.context.hook_context,
     "lookup_api",
     lambda x: "optax.softmax_cross_entropy_with_integer_labels" if x == "CrossEntropyLoss" else None,
+    raising=False,
   )
-  res = transform_loss_reduction(node, rewriter.context.hook_context)
-  assert _test_getattr({"v": "optax"}, "__getitem__")("v") in _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
-            body=_test_getattr(
-              {
-                "v": [
-                  _test_getattr(
-                    {
-                      "v": _test_getattr(
-                        {"v": _test_getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__"
-                      )("v")(
-                        body=_test_getattr(
-                          {
-                            "v": [
-                              _test_getattr(
-                                {
-                                  "v": _test_getattr(
-                                    {"v": _test_getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__"
-                                  )("v")(value=_test_getattr({"v": res}, "__getitem__")("v"))
-                                },
-                                "__getitem__",
-                              )("v")
-                            ]
-                          },
-                          "__getitem__",
-                        )("v")
-                      )
-                    },
-                    "__getitem__",
-                  )("v")
-                ]
-              },
-              "__getitem__",
-            )("v")
-          )
-        },
-        "__getitem__",
-      )("v").code
-    },
-    "__getitem__",
-  )("v")
+  res = cst.ensure_type(transform_loss_reduction(node, rewriter.context.hook_context), cst.Call)
+  assert "optax" in cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=res)])]).code
 
 
-def test_loss_wrapper_fallback_no_context_really(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
+def test_loss_wrapper_fallback_no_context_really(
+  rewriter_factory: typing.Callable[[str], PivotRewriter], monkeypatch: pytest.MonkeyPatch
+) -> None:
   """Verifies fallback when no op_id is set.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): Factory instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
   rewriter = rewriter_factory("jax")
   rewriter.context.hook_context.current_op_id = ""
@@ -610,33 +491,18 @@ def test_loss_wrapper_fallback_no_context_really(rewriter_factory: typing.Callab
     Returns:
         Tuple[str, dict[str, JsonValue]]: Tuple containing string and definition dictionary.
     """
-    ce_def = {
+    ce_def: dict[str, JsonValue] = {
       "variants": {
         "jax": {"api": "optax.softmax_cross_entropy_with_integer_labels", "requires_plugin": "loss_reduction"},
       }
     }
-    _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
-      {
-        "v": (
-          _test_getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"),
-          _test_getattr({"v": ce_def}, "__getitem__")("v"),
-        )
-      },
-      "__getitem__",
-    )("v")
-    return _ret_v
+    return ("CrossEntropyLoss", ce_def)
 
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
-          "v"
-        ).get_definition
-      },
-      "__getitem__",
-    )("v"),
+  monkeypatch.setattr(
+    rewriter.semantics.get_definition,
     "side_effect",
-    _test_getattr({"v": get_def}, "__getitem__")("v"),
+    get_def,
+    raising=False,
   )
   code = "torch.nn.functional.cross_entropy(a, b)"
   res = rewrite_code(rewriter, code)
@@ -644,16 +510,19 @@ def test_loss_wrapper_fallback_no_context_really(rewriter_factory: typing.Callab
 
 
 def test_loss_wrapper_fallback_no_context_really_empty_string(
-  rewriter_factory: typing.Callable[[str], PivotRewriter],
+  rewriter_factory: typing.Callable[[str], PivotRewriter], monkeypatch: pytest.MonkeyPatch
 ) -> None:
   """Verifies fallback when no op_id is set.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): Factory instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
   rewriter = rewriter_factory("jax")
   rewriter.context.hook_context.current_op_id = None
-  _test_setattr(rewriter.context.hook_context, "lookup_api", lambda x: "optax" if x == "CrossEntropyLoss" else None)
+  monkeypatch.setattr(
+    rewriter.context.hook_context, "lookup_api", lambda x: "optax" if x == "CrossEntropyLoss" else None, raising=False
+  )
 
   def get_def(name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Look up mock target API path or definition for the given identifier.
@@ -664,44 +533,32 @@ def test_loss_wrapper_fallback_no_context_really_empty_string(
     Returns:
         Tuple[str, dict[str, JsonValue]]: Tuple containing string and definition dictionary.
     """
-    ce_def = {
+    ce_def: dict[str, JsonValue] = {
       "variants": {
         "jax": {"api": "optax.softmax_cross_entropy_with_integer_labels", "requires_plugin": "loss_reduction"},
       }
     }
-    _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
-      {
-        "v": (
-          _test_getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"),
-          _test_getattr({"v": ce_def}, "__getitem__")("v"),
-        )
-      },
-      "__getitem__",
-    )("v")
-    return _ret_v
+    return ("CrossEntropyLoss", ce_def)
 
-  _test_setattr(
-    _test_getattr(
-      {
-        "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
-          "v"
-        ).get_definition
-      },
-      "__getitem__",
-    )("v"),
+  monkeypatch.setattr(
+    rewriter.semantics.get_definition,
     "side_effect",
-    _test_getattr({"v": get_def}, "__getitem__")("v"),
+    get_def,
+    raising=False,
   )
   code = "torch.nn.functional.cross_entropy(a, b)"
   res = rewrite_code(rewriter, code)
   assert "optax" in res
 
 
-def test_loss_wrapper_direct_empty_context(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
+def test_loss_wrapper_direct_empty_context(
+  rewriter_factory: typing.Callable[[str], PivotRewriter], monkeypatch: pytest.MonkeyPatch
+) -> None:
   """Verifies empty context hits fallback.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): Factory instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
   rewriter = rewriter_factory("jax")
   rewriter.context.hook_context.current_op_id = None
@@ -711,56 +568,17 @@ def test_loss_wrapper_direct_empty_context(rewriter_factory: typing.Callable[[st
 
   code = "torch.nn.functional.cross_entropy(a, b)"
   module = cst.parse_module(code)
-  node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
-  _test_setattr(
+  stmt = cst.ensure_type(module.body[0], cst.SimpleStatementLine)
+  expr = cst.ensure_type(stmt.body[0], cst.Expr)
+  node = cst.ensure_type(expr.value, cst.Call)
+  monkeypatch.setattr(
     rewriter.context.hook_context,
     "lookup_api",
     lambda x: "optax.softmax_cross_entropy_with_integer_labels" if x == "CrossEntropyLoss" else None,
+    raising=False,
   )
-  res = transform_loss_reduction(node, rewriter.context.hook_context)
-  assert _test_getattr({"v": "optax"}, "__getitem__")("v") in _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
-            body=_test_getattr(
-              {
-                "v": [
-                  _test_getattr(
-                    {
-                      "v": _test_getattr(
-                        {"v": _test_getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__"
-                      )("v")(
-                        body=_test_getattr(
-                          {
-                            "v": [
-                              _test_getattr(
-                                {
-                                  "v": _test_getattr(
-                                    {"v": _test_getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__"
-                                  )("v")(value=_test_getattr({"v": res}, "__getitem__")("v"))
-                                },
-                                "__getitem__",
-                              )("v")
-                            ]
-                          },
-                          "__getitem__",
-                        )("v")
-                      )
-                    },
-                    "__getitem__",
-                  )("v")
-                ]
-              },
-              "__getitem__",
-            )("v")
-          )
-        },
-        "__getitem__",
-      )("v").code
-    },
-    "__getitem__",
-  )("v")
+  res = cst.ensure_type(transform_loss_reduction(node, rewriter.context.hook_context), cst.Call)
+  assert "optax" in cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=res)])]).code
 
 
 def test_loss_wrapper_unknown_reduction(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:

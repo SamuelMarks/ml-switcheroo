@@ -1,173 +1,216 @@
-"""Test suite for torch."""
+"""Unit tests for `TorchAdapter` (`ml_switcheroo.frameworks.torch`)."""
 
-from tests.conftest import _test_getattr
+import importlib
+import sys
+from unittest.mock import MagicMock, patch
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
-
+import numpy as np
 import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
 
+import ml_switcheroo.frameworks.torch as torch_mod
+from ml_switcheroo.core.ghost import GhostRef
+from ml_switcheroo.frameworks.base import FrameworkSnapshot, InitMode, StandardMap
 from ml_switcheroo.frameworks.torch import TorchAdapter
 
 
-def test_torch_adapter_basic() -> None:
-  """Verify torch adapter basic behavior."""
-  adapter = TorchAdapter()
+def test_torch_adapter_metadata_traits_syntax_and_definitions(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `TorchAdapter` metadata, namespaces, traits, syntax helpers, doc URLs, and fallback definitions.
 
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
+  adapter = TorchAdapter()
   assert adapter.import_alias == ("torch", "torch")
   ns = adapter.import_namespaces
-  assert "torch" in ns
   assert ns["torch"].recommended_alias == "torch"
   assert ns["torch.nn"].recommended_alias == "nn"
   assert ns["torch.nn.functional"].recommended_alias == "F"
-
   assert SemanticTier.NEURAL in adapter.supported_tiers
 
   cfg = adapter.test_config
   assert "import torch" in cfg["import"]
   assert "tensor" in cfg["convert_input"]
-
   assert adapter.harness_imports == []
   assert adapter.get_harness_init_code() == ""
-  assert "cpu().numpy()" in adapter.get_to_numpy_code()
+  assert "detach().cpu().numpy()" in adapter.get_to_numpy_code()
 
-  traits = adapter.structural_traits
-  assert traits.module_base == "torch.nn.Module"
-  assert traits.forward_method == "forward"
+  s_traits = adapter.structural_traits
+  assert s_traits.module_base == "torch.nn.Module"
+  assert s_traits.forward_method == "forward"
 
-  ptraits = adapter.plugin_traits
-  assert ptraits.has_numpy_compatible_arrays is False
-  assert ptraits.requires_explicit_rng is False
-  assert ptraits.requires_functional_state is False
-
+  p_traits = adapter.plugin_traits
+  assert p_traits.has_numpy_compatible_arrays is False
+  assert p_traits.requires_explicit_rng is False
+  assert p_traits.requires_functional_state is False
   assert adapter.rng_seed_methods == ["manual_seed", "seed"]
   assert adapter.declared_magic_args == []
 
-  defs = adapter.definitions
-  assert isinstance(defs, dict)
-
-
-def test_torch_adapter_syntax() -> None:
-  """Verify torch adapter syntax behavior."""
-  adapter = TorchAdapter()
-
   assert adapter.get_device_syntax("cuda", "0") == "torch.device(cuda, 0)"
   assert adapter.get_device_syntax("cpu", None) == "torch.device(cpu)"
-
+  assert "xpu" in adapter.get_device_syntax("xpu")
   assert adapter.get_device_check_syntax() == "torch.cuda.is_available()"
   assert adapter.get_rng_split_syntax("rng", "key") == "pass"
 
+  assert "nn.init.html" in (adapter.get_doc_url("torch.nn.init.constant_") or "")
+  assert "generated/torch.add.html" in (adapter.get_doc_url("torch.add") or "")
+  assert "pytorch.org" in (adapter.get_doc_url("torch.nn.Linear") or "")
+  assert "pytorch.org" in (adapter.get_doc_url("unknown") or "")
+  assert "tier1_math" in adapter.get_tiered_examples()
 
-def test_torch_adapter_docs() -> None:
-  """Verify torch adapter docs behavior."""
+  snap_empty: dict[str, dict[str, JsonValue]] = {}
+  adapter.apply_wiring(snap_empty)
+  assert "mappings" in snap_empty
+
+  snap_existing: dict[str, dict[str, JsonValue]] = {"mappings": {}}
+  adapter.apply_wiring(snap_existing)
+  assert snap_existing == {"mappings": {}}
+
+  # `definitions` fallback population vs pre-populated definitions
+  monkeypatch.setattr(torch_mod, "load_definitions", lambda _fw: {})
+  fallback_defs = adapter.definitions
+  assert {"ReLU", "Linear", "Conv2d"} <= set(fallback_defs.keys())
+
+  prepopulated = {
+    k: StandardMap(api=f"custom.{k}") for k in ("ReLU", "Linear", "Conv2d", "Conv1d", "Conv3d", "ConvTranspose2d")
+  }
+  monkeypatch.setattr(torch_mod, "load_definitions", lambda _fw: dict(prepopulated))
+  custom_defs = adapter.definitions
+  assert custom_defs["Conv2d"].api == "custom.Conv2d"
+
+
+def test_torch_adapter_modes_collection_and_convert(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify LIVE/GHOST initialization, `_collect_ghost`/`_collect_live`, module reload, and `convert` fallbacks.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
+  # GHOST initialization with and without snapshot
+  with patch.object(torch_mod, "torch", None):
+    with patch.object(torch_mod, "load_snapshot_for_adapter", return_value={}):
+      ghost_empty = TorchAdapter()
+      assert ghost_empty._mode == InitMode.GHOST
+      assert ghost_empty._snapshot_data == FrameworkSnapshot()
+      ghost_empty._snapshot_data = None
+      assert ghost_empty._collect_ghost(SemanticTier.LAYER) == []
+
+    with patch.object(
+      torch_mod,
+      "load_snapshot_for_adapter",
+      return_value={
+        "version": "2.4",
+        "categories": {"layer": [{"api_path": "torch.nn.Linear", "name": "Linear", "kind": "class"}]},
+      },
+    ):
+      ghost_snap = TorchAdapter()
+      assert ghost_snap._mode == InitMode.GHOST
+      assert ghost_snap._snapshot_data is not None
+      assert ghost_snap._snapshot_data.version == "2.4"
+      layers = ghost_snap._collect_ghost(SemanticTier.LAYER)
+      assert len(layers) == 1
+      assert layers[0].api_path == "torch.nn.Linear"
+
+  # `_collect_live` across tiers
   adapter = TorchAdapter()
-  url: str | None = adapter.get_doc_url("torch.nn.Linear")
-  assert url is not None
-  assert "pytorch.org" in url
+  assert adapter._collect_live(SemanticTier.LOSS) == []
+  assert adapter._collect_live(SemanticTier.OPTIMIZER) == []
+  assert adapter._collect_live(SemanticTier.ACTIVATION) == []
+  assert adapter._collect_live(SemanticTier.LAYER) == []
+  assert adapter._collect_live(SemanticTier.ARRAY_API) == []
 
-  url_unkn: str | None = adapter.get_doc_url("unknown")
-  assert url_unkn is not None
-  assert "pytorch.org" in url_unkn
+  layer_ref = GhostRef(name="Linear", api_path="torch.nn.Linear", kind="class")
+  monkeypatch.setattr(adapter, "_scan_layers", lambda: [layer_ref], raising=False)
+  assert adapter._collect_live(SemanticTier.LAYER) == [layer_ref]
 
-  examples: dict[str, str] = adapter.get_tiered_examples()
-  assert len(examples) > 0
+  # `convert`: live/mocked torch, `from_numpy` fallback to `tensor()`, `tensor()` failure passthrough, and ImportError
+  assert adapter.convert(42) == 42
 
+  class _MockTorchHappy:
+    """Stub `torch` module succeeding on `from_numpy` and `tensor`."""
 
-def test_torch_adapter_convert() -> None:
-  """Verify torch adapter convert behavior."""
-  pytest.importorskip("torch")
-  adapter = TorchAdapter()
-  import numpy as np
-  import torch
+    @staticmethod
+    def from_numpy(_arr: np.ndarray[tuple[int, ...], np.dtype[np.int64]]) -> str:
+      """Return `'from_np'`.
 
-  # test list
-  t = adapter.convert([1, 2, 3])
-  assert isinstance(t, torch.Tensor)
+      Args:
+          _arr: NumPy array.
 
-  # test numpy
-  t2 = adapter.convert(np.array([1, 2, 3]))
-  assert isinstance(t2, torch.Tensor)
+      Returns:
+          Literal `'from_np'`.
+      """
+      return "from_np"
 
-  # test primitive
-  t3 = adapter.convert(1)
-  assert t3 == 1
+    @staticmethod
+    def tensor(_data: list[int]) -> str:
+      """Return `'from_list'`.
 
+      Args:
+          _data: Python list.
 
-def test_torch_adapter_collect_ghost() -> None:
-  """Verify torch adapter collect ghost behavior."""
-  adapter = TorchAdapter()
-  res = adapter._collect_ghost(SemanticTier.LOSS)
-  assert isinstance(res, list)
+      Returns:
+          Literal `'from_list'`.
+      """
+      return "from_list"
 
+  class _MockTorchFallback:
+    """Stub `torch` module raising `ValueError` on `from_numpy` and falling back to `tensor`."""
 
-def test_torch_adapter_collect_live() -> None:
-  """Verify torch adapter collect live behavior."""
-  adapter = TorchAdapter()
-  res = adapter._collect_live(SemanticTier.NEURAL)
-  assert isinstance(res, list)
+    @staticmethod
+    def from_numpy(_arr: np.ndarray[tuple[int, ...], np.dtype[np.int64]]) -> str:
+      """Raise `ValueError`.
 
-  res2 = adapter._collect_live(SemanticTier.LOSS)
-  assert isinstance(res2, list)
+      Args:
+          _arr: NumPy array.
 
-  res3 = adapter._collect_live(SemanticTier.OPTIMIZER)
-  assert isinstance(res3, list)
+      Returns:
+          Never returns; raises `ValueError`.
 
-  res4 = adapter._collect_live(SemanticTier.ACTIVATION)
-  assert isinstance(res4, list)
+      Raises:
+          ValueError: Always raised.
+      """
+      raise ValueError("from_numpy failed")
 
+    @staticmethod
+    def tensor(data: np.ndarray[tuple[int, ...], np.dtype[np.int64]] | list[int]) -> str:
+      """Return `'fallback_tensor'` for ndarray and raise `ValueError` for list.
 
-def test_torch_adapter_wiring() -> None:
-  """Verify torch adapter wiring behavior."""
-  adapter = TorchAdapter()
-  snapshot: dict[str, RuntimeTensorOrValue] = {"mappings": {}}
-  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    _test_getattr({"v": snapshot}, "__getitem__")("v")
-  )
-  res = None
-  assert res is None
-  assert snapshot == {"mappings": {}}
+      Args:
+          data: Input data.
 
+      Returns:
+          Literal `'fallback_tensor'`.
 
-def test_convert() -> None:
-  """Verify convert behavior."""
-  from unittest.mock import MagicMock, patch
+      Raises:
+          ValueError: When `data` is a `list`.
+      """
+      if isinstance(data, list):
+        raise ValueError("list failed")
+      return "fallback_tensor"
 
-  from ml_switcheroo.frameworks.torch import TorchAdapter
+  with pytest.MonkeyPatch.context() as mp:
+    mp.setitem(sys.modules, "torch", _MockTorchHappy())
+    assert adapter.convert(np.array([1, 2])) == "from_np"
+    assert adapter.convert([1, 2]) == "from_list"
+    assert adapter.convert(42) == 42
 
-  with patch.dict("sys.modules", {"torch": MagicMock()}):
-    import numpy as np
+  with pytest.MonkeyPatch.context() as mp:
+    mp.setitem(sys.modules, "torch", _MockTorchFallback())
+    assert adapter.convert(np.array([1, 2])) == "fallback_tensor"
+    assert adapter.convert([1, 2, 3]) == [1, 2, 3]
 
-    adapter = TorchAdapter()
-    r1 = adapter.convert(np.array([1, 2, 3]))
-    r2 = adapter.convert([1, 2, 3])
-    r3 = adapter.convert(1)
-  assert r1 is not None
-  assert r2 is not None
-  assert r3 == 1
+  with pytest.MonkeyPatch.context() as mp:
+    mp.setitem(sys.modules, "torch", None)
+    assert adapter.convert([1, 2, 3]) == [1, 2, 3]
+    importlib.reload(torch_mod)
+    assert torch_mod.torch is None
 
+  with pytest.MonkeyPatch.context() as mp:
+    mp.setitem(sys.modules, "torch", MagicMock())
+    mp.setitem(sys.modules, "torch.nn", MagicMock())
+    mp.setitem(sys.modules, "torch.nn.functional", MagicMock())
+    mp.setitem(sys.modules, "torch.optim", MagicMock())
+    importlib.reload(torch_mod)
+    assert TorchAdapter()._mode == InitMode.LIVE
 
-def test_torch_ghost_mode_with_snapshot() -> None:
-  """Verify torch ghost mode with snapshot behavior."""
-  from unittest.mock import patch
-
-  from ml_switcheroo.frameworks.torch import TorchAdapter
-
-  with patch("ml_switcheroo.frameworks.torch.load_snapshot_for_adapter", return_value={"test": 1}):
-    with patch("ml_switcheroo.frameworks.torch.torch", None):
-      adapter = TorchAdapter()
-      assert adapter._snapshot_data == {"test": 1}
-
-
-def test_torch_definitions_skip() -> None:
-  """Verify torch definitions skip behavior."""
-  from unittest.mock import patch
-
-  from ml_switcheroo.frameworks.torch import TorchAdapter
-
-  with patch("ml_switcheroo.frameworks.torch.load_definitions", return_value={"Conv2d": "already_exists"}):
-    adapter = TorchAdapter()
-    defs = adapter.definitions
-    assert _test_getattr({"v": _test_getattr({"v": defs}, "__getitem__")("v")["Conv2d"]}, "__getitem__")(
-      "v"
-    ) == _test_getattr({"v": "already_exists"}, "__getitem__")("v")
+  importlib.reload(torch_mod)

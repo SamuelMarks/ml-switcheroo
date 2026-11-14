@@ -1,0 +1,46 @@
+"""Test suite for the Stablehlo Codegen module."""
+
+import pytest
+from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+from ml_switcheroo.semantics.manager import SemanticsManager
+
+SOURCE_TORCH: str = "\nimport torch\n\ndef transpose_matrices(batch):\n    return torch.permute(batch, 0, 2, 1)\n"
+
+
+@pytest.fixture(scope="module")
+def semantics() -> SemanticsManager:
+  """Create a configured `SemanticsManager` fixture for stablehlo codegen tests.
+
+  Returns:
+      Configured `semantics` fixture value (SemanticsManager).
+  """
+  mgr = SemanticsManager()
+  mgr._key_origins["permute_dims"] = SemanticTier.ARRAY_API.value
+  mgr._providers["numpy"] = {SemanticTier.ARRAY_API: {"root": "numpy", "sub": None, "alias": "np"}}
+
+  mgr._reverse_index["torch.permute"] = ("permute_dims", mgr.data["permute_dims"])
+  mgr.framework_configs["numpy"] = {"alias": {"module": "numpy", "name": "np"}}
+  mgr.framework_configs["jax"] = {"alias": {"module": "jax.numpy", "name": "jnp"}}
+  return mgr
+
+
+@pytest.mark.parametrize(
+  ("target_framework", "expected_partial"),
+  [("jax", "jnp.transpose(batch, axes=(0, 2, 1))"), ("numpy", "np.transpose(batch, axes=(0, 2, 1))")],
+)
+def test_ex03_permute_plugin(semantics: SemanticsManager, target_framework: str, expected_partial: str) -> None:
+  """Verify `RuntimeConfig` handles ex03 permute plugin as expected.
+
+  Args:
+      semantics: SemanticsManager instance providing operation and trait definitions.
+      target_framework: Target framework identifier string.
+      expected_partial: Input `expected_partial` parameter value (`str`).
+  """
+  config = RuntimeConfig(source_framework="torch", target_framework=target_framework, strict_mode=True)
+  engine = ASTEngine(semantics=semantics, config=config)
+  result: ConversionResult = engine.run(SOURCE_TORCH)
+  assert result.success, f"Errors: {result.errors}"
+  assert expected_partial in result.code

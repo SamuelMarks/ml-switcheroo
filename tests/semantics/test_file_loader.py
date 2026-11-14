@@ -1,18 +1,13 @@
-"""Test suite for the File Loader module."""
-
-from tests.conftest import _test_getattr
-
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
+"""Unit tests for `KnowledgeBaseLoader` using real `tmp_path` directories (`ml_switcheroo.semantics.file_loader`)."""
 
 import json
 from pathlib import Path
-from unittest.mock import MagicMock, patch
 
 import pytest
 import yaml
-from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
 
+import ml_switcheroo.semantics.file_loader as fl_mod
 from ml_switcheroo.semantics.file_loader import (
   KnowledgeBaseLoader,
   clean_content_descriptions,
@@ -20,283 +15,189 @@ from ml_switcheroo.semantics.file_loader import (
   get_docstring_parser,
   parse_docstring_sections,
 )
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-def test_file_loader_init() -> None:
-  """Verifies the behavior of file loader initialization."""
-  mgr: MagicMock = MagicMock()
-  loader: KnowledgeBaseLoader = KnowledgeBaseLoader(mgr)
-  assert loader.mgr is mgr
-
-
-@patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir")
-@patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir")
-def test_load_knowledge_graph_missing_dirs(mock_snap_dir: MagicMock, mock_sem_dir: MagicMock, tmp_path: Path) -> None:
-  """Loads knowledge graph missing dirs.
+def test_load_knowledge_graph_missing_and_populated_directories(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `KnowledgeBaseLoader.load_knowledge_graph` across missing, YAML, overlay, and discovered files.
 
   Args:
-      mock_snap_dir (MagicMock): Mock argument.
-      mock_sem_dir (MagicMock): Mock argument.
-      tmp_path (Path): Tmp path pytest fixture.
+      tmp_path: Pytest temporary directory fixture.
+      monkeypatch: Pytest monkeypatch fixture.
   """
-  mock_sem_dir.return_value = tmp_path / "missing_sem"
-  mock_snap_dir.return_value = tmp_path / "missing_snap"
-  mgr: MagicMock = MagicMock()
-  loader: KnowledgeBaseLoader = KnowledgeBaseLoader(mgr)
+  # 1. Missing semantics and snapshots directories -> clean no-op
+  mgr_empty = SemanticsManager(load_defaults=False)
+  monkeypatch.setattr(fl_mod, "resolve_semantics_dir", lambda: tmp_path / "missing_sem")
+  monkeypatch.setattr(fl_mod, "resolve_snapshots_dir", lambda: tmp_path / "missing_snap")
+  loader_empty = KnowledgeBaseLoader(mgr_empty)
+  assert loader_empty.mgr is mgr_empty
+  loader_empty.load_knowledge_graph()
+  assert mgr_empty.data == {}
+
+  # 2. Populated semantics (`array`, `neural`, `discovered`, `other`, skipped `schema.yaml`) & snapshot overlay
+  sem_dir = tmp_path / "sem"
+  snap_dir = tmp_path / "snap"
+  sem_dir.mkdir()
+  snap_dir.mkdir()
+  monkeypatch.setattr(fl_mod, "resolve_semantics_dir", lambda: sem_dir)
+  monkeypatch.setattr(fl_mod, "resolve_snapshots_dir", lambda: snap_dir)
+
+  (sem_dir / "schema.yaml").write_text("ignored: true", encoding="utf-8")
+  (sem_dir / "k_array_api.yaml").write_text(
+    yaml.dump(
+      {"Add": {"operation": "Add", "description": ":class:`~torch.Tensor` add", "std_args": ["x", "y"], "variants": {}}}
+    ),
+    encoding="utf-8",
+  )
+  (sem_dir / "Conv2d_neural.yaml").write_text(
+    yaml.dump({"operation": "Conv2d", "description": ":func:`conv2d` layer", "std_args": ["x"], "variants": {}}),
+    encoding="utf-8",
+  )
+  (sem_dir / "k_discovered.yaml").write_text(
+    yaml.dump({"operation": "DiscOp", "description": "discovered", "std_args": [], "variants": {}}),
+    encoding="utf-8",
+  )
+  (sem_dir / "k_extras.yaml").write_text(
+    yaml.dump({"Save": {"operation": "Save", "description": "save op", "std_args": [], "variants": {}}}),
+    encoding="utf-8",
+  )
+  (snap_dir / "torch_v2.0_map.json").write_text(
+    json.dumps(
+      {
+        "__framework__": "torch",
+        "mappings": {"Add": {"api": "torch.add", "description": ":func:`add`"}},
+      }
+    ),
+    encoding="utf-8",
+  )
+
+  mgr = SemanticsManager(load_defaults=False)
+  KnowledgeBaseLoader(mgr).load_knowledge_graph()
+  assert {"Add", "Conv2d", "DiscOp", "Save"} <= set(mgr.data.keys())
+  assert mgr.data["Add"]["description"] == "torch.Tensor add"
+  assert mgr.data["Conv2d"]["description"] == "conv2d layer"
+
+
+def test_load_knowledge_graph_json_fallback_and_malformed_files(
+  tmp_path: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+  """Verify `.json` spec fallback and logged warnings on malformed YAML/JSON files.
+
+  Args:
+      tmp_path: Pytest temporary directory fixture.
+      monkeypatch: Pytest monkeypatch fixture.
+      caplog: Pytest log capture fixture.
+  """
+  sem_dir = tmp_path / "sem_err"
+  snap_dir = tmp_path / "snap_err"
+  sem_dir.mkdir()
+  snap_dir.mkdir()
+  monkeypatch.setattr(fl_mod, "resolve_semantics_dir", lambda: sem_dir)
+  monkeypatch.setattr(fl_mod, "resolve_snapshots_dir", lambda: snap_dir)
+
+  (sem_dir / "broken.yaml").write_text("invalid: [yaml", encoding="utf-8")
+  (snap_dir / "broken_map.json").write_text("{invalid json", encoding="utf-8")
+
+  mgr = SemanticsManager(load_defaults=False)
+  loader = KnowledgeBaseLoader(mgr)
   loader.load_knowledge_graph()
-  _res = None
-  assert _res is None
-  assert not mgr.data.update.called
+  assert "Error loading" in caplog.text
+  assert "Error loading overlay broken_map.json" in caplog.text
 
+  # `.json` fallback branch inside `_load_semantics_directory` when a `.json` path is yielded
+  json_spec = sem_dir / "legacy_array.json"
+  json_spec.write_text(
+    json.dumps({"JsonOp": {"operation": "JsonOp", "description": "from json", "std_args": [], "variants": {}}}),
+    encoding="utf-8",
+  )
+  orig_rglob = Path.rglob
 
-@patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir")
-@patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir")
-def test_load_knowledge_graph_with_files(mock_snap_dir: MagicMock, mock_sem_dir: MagicMock, tmp_path: Path) -> None:
-  """Loads knowledge graph with files.
+  def _rglob_with_json(self_path: Path, pattern: str) -> list[Path]:
+    """Return `[json_spec]` when scanning `sem_dir` for `*.yaml`.
 
-  Args:
-      mock_snap_dir (MagicMock): Mock argument.
-      mock_sem_dir (MagicMock): Mock argument.
-      tmp_path (Path): Tmp path pytest fixture.
-  """
-  sem_dir: Path = tmp_path / "sem"
-  sem_dir.mkdir()
-  mock_sem_dir.return_value = sem_dir
-  snap_dir: Path = tmp_path / "snap"
-  snap_dir.mkdir()
-  mock_snap_dir.return_value = snap_dir
-  (sem_dir / "schema.yaml").touch()
-  array_file: Path = sem_dir / "array.yaml"
-  array_content = {"Add": {"operation": "Add", "description": "add"}}
-  array_file.write_text(yaml.dump(array_content))
-  neural_file: Path = sem_dir / "neural.yaml"
-  neural_content = {"operation": "Conv2d", "description": "conv"}
-  neural_file.write_text(yaml.dump(neural_content))
-  other_file: Path = sem_dir / "other.yaml"
-  other_file.write_text(yaml.dump({"Other": {}}))
-  disc_file: Path = sem_dir / "k_discovered.yaml"
-  disc_file.write_text(yaml.dump({"Disc": {}}))
-  map_file: Path = snap_dir / "test_map.json"
-  map_file.write_text(json.dumps({"mappings": {}}))
-  mgr: MagicMock = MagicMock()
-  loader: KnowledgeBaseLoader = KnowledgeBaseLoader(mgr)
-  with (
-    patch("ml_switcheroo.semantics.file_loader.merge_tier_data") as mock_merge_tier,
-    patch("ml_switcheroo.semantics.file_loader.merge_overlay_data") as mock_merge_overlay,
-  ):
-    loader.load_knowledge_graph()
-    assert mock_merge_tier.call_count == 4
-    assert mock_merge_overlay.call_count == 1
+    Args:
+        self_path: Directory path being globbed.
+        pattern: Glob pattern string.
 
+    Returns:
+        Matching paths list.
+    """
+    if self_path == sem_dir and pattern == "*.yaml":
+      return [json_spec]
+    return list(orig_rglob(self_path, pattern))
 
-@patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir")
-@patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir")
-def test_load_knowledge_graph_errors(mock_snap_dir: MagicMock, mock_sem_dir: MagicMock, tmp_path: Path) -> None:
-  """Loads knowledge graph errors.
-
-  Args:
-      mock_snap_dir (MagicMock): Mock argument.
-      mock_sem_dir (MagicMock): Mock argument.
-      tmp_path (Path): Tmp path pytest fixture.
-  """
-  sem_dir: Path = tmp_path / "sem"
-  sem_dir.mkdir()
-  mock_sem_dir.return_value = sem_dir
-  snap_dir: Path = tmp_path / "snap"
-  snap_dir.mkdir()
-  mock_snap_dir.return_value = snap_dir
-  array_file: Path = sem_dir / "array.yaml"
-  array_file.write_text("invalid: yaml: :")
-  map_file: Path = snap_dir / "test_map.json"
-  map_file.write_text("invalid json")
-  mgr: MagicMock = MagicMock()
-  loader: KnowledgeBaseLoader = KnowledgeBaseLoader(mgr)
+  monkeypatch.setattr(Path, "rglob", _rglob_with_json)
   loader.load_knowledge_graph()
-  _res = None
-  assert _res is None
+  assert "JsonOp" in mgr.data
 
 
-@patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir")
-@patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir")
-def test_load_knowledge_graph_json_fallback(mock_snap_dir: MagicMock, mock_sem_dir: MagicMock, tmp_path: Path) -> None:
-  """Tests loading json file from semantics directory.
-
-  Args:
-      mock_snap_dir (MagicMock): Mock argument.
-      mock_sem_dir (MagicMock): Mock argument.
-      tmp_path (Path): Tmp path pytest fixture.
-  """
-  sem_dir: Path = tmp_path / "sem"
-  sem_dir.mkdir()
-  mock_sem_dir.return_value = sem_dir
-  snap_dir: Path = tmp_path / "snap"
-  snap_dir.mkdir()
-  mock_snap_dir.return_value = snap_dir
-
-  # To reach the else branch for JSON parsing, we need to mock Path.rglob
-  # to return a file with a .json suffix, because rglob("*.yaml") wouldn't find it natively.
-  json_file: Path = sem_dir / "test.json"
-  json_file.write_text(json.dumps({"Add": {"operation": "Add", "description": "json file"}}))
-
-  mgr: MagicMock = MagicMock()
-  loader: KnowledgeBaseLoader = KnowledgeBaseLoader(mgr)
-
-  with patch("pathlib.Path.rglob", return_value=[json_file]):
-    with patch.object(loader, "_load_tier_content") as mock_load_tier:
-      loader.load_knowledge_graph()
-      mock_load_tier.assert_called_once()
-
-
-def test_load_tier_content() -> None:
-  """Loads tier content."""
-  mgr: MagicMock = MagicMock()
-  loader: KnowledgeBaseLoader = KnowledgeBaseLoader(mgr)
-  content = {"Add": {"operation": "Add", "description": ":class:`~torch.Tensor` add"}}
-  with patch("ml_switcheroo.semantics.file_loader.merge_tier_data") as mock_merge:
-    loader._load_tier_content(content, SemanticTier.ARRAY_API)
-    mock_merge.assert_called_once()
-    assert content["Add"]["description"] == "torch.Tensor add"
-
-
-def test_load_overlay_content() -> None:
-  """Loads overlay content."""
-  mgr: MagicMock = MagicMock()
-  loader: KnowledgeBaseLoader = KnowledgeBaseLoader(mgr)
-  content = {"Add": {"operation": "Add", "description": ":func:`relu` activation"}}
-  with patch("ml_switcheroo.semantics.file_loader.merge_overlay_data") as mock_merge:
-    loader._load_overlay_content(content, "test_map.json")
-    mock_merge.assert_called_once()
-    assert content["Add"]["description"] == "relu activation"
-
-
-def test_clean_sphinx_roles() -> None:
-  """Verifies clean_sphinx_roles behavior on None and formatted strings."""
+def test_sphinx_role_cleaning_and_docstring_helpers() -> None:
+  """Verify `clean_sphinx_roles`, `clean_content_descriptions`, and Griffe docstring helpers."""
   assert clean_sphinx_roles(None) is None
   assert clean_sphinx_roles("plain string") == "plain string"
-  res = clean_sphinx_roles(":class:`~torch.Tensor` and :func:`relu`")
-  assert res == "torch.Tensor and relu"
+  assert clean_sphinx_roles(":class:`~torch.Tensor` and :func:`relu`") == "torch.Tensor and relu"
 
-
-def test_parse_docstring_sections_and_parser() -> None:
-  """Verifies docstring parsing with Griffe integration."""
   _ = get_docstring_parser("google")
-  # In tests without griffe loaded properly, it might be None, which is fine.
-  sections = parse_docstring_sections("Short description.\n\nArgs:\n    x: Input tensor.\n")
+  sections = parse_docstring_sections(
+    """Short description.
+
+Args:
+    x: Input tensor.
+"""
+  )
   assert isinstance(sections, list)
 
-
-def test_clean_content_descriptions_branches() -> None:
-  """Verifies clean_content_descriptions handles non-dicts and various description forms."""
-  # Non-dict content
   clean_content_descriptions("not a dict")
   clean_content_descriptions([1, 2, 3])
 
-  # Non-dict op, dict without description, dict with non-string desc, and valid desc
-  data = {
+  valid_entry: dict[str, JsonValue] = {"operation": "Baz", "description": ":func:`relu` op"}
+  non_str_entry: dict[str, JsonValue] = {"operation": "Bar", "description": 123}
+  data: dict[str, JsonValue] = {
     "raw_list": [1],
     "no_desc": {"operation": "Foo"},
-    "non_str_desc": {"operation": "Bar", "description": 123},
-    "valid_desc": {"operation": "Baz", "description": ":func:`relu` op"},
+    "non_str_desc": non_str_entry,
+    "valid_desc": valid_entry,
   }
   clean_content_descriptions(data)
-  assert _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": data}, "__getitem__")("v")["valid_desc"]}, "__getitem__")("v")[
-        "description"
-      ]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "relu op"}, "__getitem__")("v")
-  assert _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": data}, "__getitem__")("v")["non_str_desc"]}, "__getitem__")("v")[
-        "description"
-      ]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": 123}, "__getitem__")("v")
+  assert valid_entry["description"] == "relu op"
+  assert non_str_entry["description"] == 123
 
+  # `SemanticLoadError` when `parse_docstring_with_griffe` returns a non-list
+  from unittest.mock import MagicMock
 
-class DummyManager:
-  """Test helper class DummyManager."""
+  from ml_switcheroo.exceptions import SemanticLoadError
 
-  def __init__(self) -> None:
-    """Initializes the DummyManager instance."""
-    self.data: dict[str, RuntimeTensorOrValue] = {}
-    self._key_origins: dict[str, RuntimeTensorOrValue] = {}
-    self.framework_configs: dict[str, RuntimeTensorOrValue] = {}
-    self.test_templates: dict[str, RuntimeTensorOrValue] = {}
+  with pytest.MonkeyPatch.context() as mp:
+    mp.setattr(fl_mod, "parse_docstring_with_griffe", lambda _d, _p: "not_a_list")
+    with pytest.raises(SemanticLoadError, match="Expected list"):
+      parse_docstring_sections("doc")
 
+  # Default `_DEFAULT_SEM_DIR` parsed YAML cache hit and untyped manager store fallbacks
+  with pytest.MonkeyPatch.context() as mp:
+    fake_default = Path("/fake/default/sem")
+    mp.setattr(fl_mod, "_DEFAULT_SEM_DIR", fake_default)
+    mp.setattr(
+      fl_mod, "_PARSED_YAML_CACHE", [(10, {"CachedOp": {"operation": "CachedOp", "std_args": [], "variants": {}}})]
+    )
+    mp.setattr(fl_mod, "resolve_semantics_dir", lambda: fake_default)
+    mp.setattr(fl_mod, "resolve_snapshots_dir", lambda: Path("/fake/missing/snaps"))
+    mp.setattr(Path, "exists", lambda self_p: self_p == fake_default)
 
-def test_file_loader_discovered_filename(tmp_path: Path) -> None:
-  """Verifies the behavior of file loader discovered filename.
+    cached_mgr = SemanticsManager(load_defaults=False)
+    KnowledgeBaseLoader(cached_mgr).load_knowledge_graph()
+    assert "CachedOp" in cached_mgr.data
 
-  Args:
-      tmp_path (Path): Tmp path pytest fixture.
-  """
-  manager = DummyManager()
-  loader: KnowledgeBaseLoader = _test_getattr(
-    {
-      "v": _test_getattr({"v": KnowledgeBaseLoader}, "__getitem__")("v")(
-        _test_getattr({"v": manager}, "__getitem__")("v")
-      )
-    },
-    "__getitem__",
-  )("v")
-  sem_dir: Path = tmp_path / "semantics"
-  sem_dir.mkdir()
-  (sem_dir / "k_discovered.yaml").write_text("operation: test\n")
-  with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=sem_dir):
-    with patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir", return_value=tmp_path / "snapshots"):
-      loader.load_knowledge_graph()
-  assert "test" in manager.data
+    # Manager with non-dict `operations` and manager lacking `operations` attribute
+    mock_non_dict_mgr = MagicMock(spec=SemanticsManager)
+    mock_non_dict_mgr.data = {}
+    mock_non_dict_mgr._key_origins = {}
+    mock_non_dict_mgr.framework_configs = {}
+    mock_non_dict_mgr.operations = MagicMock()
+    mock_non_dict_mgr.framework_traits = {}
+    KnowledgeBaseLoader(mock_non_dict_mgr).load_knowledge_graph()
+    assert "CachedOp" in mock_non_dict_mgr.data
 
-
-def test_file_loader_spec_exception(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
-  """Verifies the behavior of file loader spec correctly handling an exception.
-
-  Args:
-      tmp_path (Path): Tmp path pytest fixture.
-      caplog (pytest.LogCaptureFixture): Pytest caplog fixture.
-  """
-  manager = DummyManager()
-  loader: KnowledgeBaseLoader = _test_getattr(
-    {
-      "v": _test_getattr({"v": KnowledgeBaseLoader}, "__getitem__")("v")(
-        _test_getattr({"v": manager}, "__getitem__")("v")
-      )
-    },
-    "__getitem__",
-  )("v")
-  sem_dir: Path = tmp_path / "semantics"
-  sem_dir.mkdir()
-  (sem_dir / "k_neural.yaml").write_text("invalid yaml:")
-  with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=sem_dir):
-    with patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir", return_value=tmp_path / "snapshots"):
-      loader.load_knowledge_graph()
-  assert "⚠️ Error loading" in caplog.text
-
-
-def test_file_loader_overlay_exception(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
-  """Verifies the behavior of file loader overlay correctly handling an exception.
-
-  Args:
-      tmp_path (Path): Tmp path pytest fixture.
-      caplog (pytest.LogCaptureFixture): Pytest caplog fixture.
-  """
-  manager = DummyManager()
-  loader: KnowledgeBaseLoader = _test_getattr(
-    {
-      "v": _test_getattr({"v": KnowledgeBaseLoader}, "__getitem__")("v")(
-        _test_getattr({"v": manager}, "__getitem__")("v")
-      )
-    },
-    "__getitem__",
-  )("v")
-  snap_dir: Path = tmp_path / "snapshots"
-  snap_dir.mkdir()
-  (snap_dir / "test_map.json").write_text("invalid json")
-  with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=tmp_path / "semantics"):
-    with patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir", return_value=snap_dir):
-      loader.load_knowledge_graph()
-  assert "⚠️ Error loading overlay test_map.json" in caplog.text
+    bare_mgr = SemanticsManager(load_defaults=False)
+    del bare_mgr.operations
+    KnowledgeBaseLoader(bare_mgr).load_knowledge_graph()
+    assert "CachedOp" in bare_mgr.data

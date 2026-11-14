@@ -27,13 +27,13 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Execute rewriter helper logic.
+  """Create a configured `PivotRewriter` fixture for ckpt keys tests.
 
   Returns:
       Configured `rewriter` fixture value (PivotRewriter).
   """
   hooks.register_hook("checkpoint_mapper")(transform_checkpoint_keys)
-  hooks._PLUGINS_LOADED = True
+  hooks.set_plugins_loaded(True)
   mgr = MagicMock()
   load_def = {
     "variants": {
@@ -74,7 +74,7 @@ def test_load_state_dict_kwargs(rewriter: PivotRewriter) -> None:
 
 
 def test_mapper_source_availability() -> None:
-  """Verifies the behavior of mapper source availability."""
+  """Verify mapper source availability produces the expected state."""
   assert "class KeyMapper" in KEY_MAPPER_SOURCE
   assert "map_name" in KEY_MAPPER_SOURCE
   assert "map_value" in KEY_MAPPER_SOURCE

@@ -1,194 +1,181 @@
-"""Test suite for graph."""
+"""Unit tests for `GraphExtractor` (`ml_switcheroo.core.graph`)."""
 
 import libcst as cst
 
 from ml_switcheroo.core.graph import GraphExtractor
 
+_NL = chr(10)
 
-def test_graph_extractor_init_pass() -> None:
-  """Verify graph extractor init pass behavior."""
-  code: str = """
-class MyModel:
-    def __init__(self):
-        self.conv1 = nn.Conv2d(16, 32, kernel_size=3)
-        self.linear = nn.Linear(32, 10)
-        self.dropout = Dropout(p=0.5)
-"""
-  tree: cst.Module = cst.parse_module(code)
+
+def extract_from_code(code: str) -> GraphExtractor:
+  """Parse Python `code` and visit it with `GraphExtractor`.
+
+  Args:
+      code: Python source code snippet.
+
+  Returns:
+      Populated `GraphExtractor` instance.
+  """
   extractor = GraphExtractor()
-  tree.visit(extractor)
-
-  assert extractor.model_name == "MyModel"
-  assert "conv1" in extractor.layer_registry
-  assert "linear" in extractor.layer_registry
-
-  conv_node = extractor.layer_registry["conv1"]
-  assert conv_node.op_type == "Conv2d"
-  assert conv_node.attributes["arg_0"] == "16"
-  assert conv_node.attributes["arg_1"] == "32"
-  assert conv_node.attributes["kernel_size"] == "3"
-
-  # Check graph population
-  assert len(extractor.graph.nodes) == 3
+  cst.parse_module(code).visit(extractor)
+  return extractor
 
 
-def test_graph_extractor_forward_pass() -> None:
-  """Verify graph extractor forward pass behavior."""
-  code: str = """
-class MyModel:
+def test_init_and_setup_layer_registration() -> None:
+  """Verify `__init__` and `setup` register `self.<layer>` and `self.create_child(...)` nodes."""
+  code = """
+class PaxmlNet:
     def __init__(self):
-        self.conv1 = nn.Conv2d(16, 32)
-        self.relu = F.relu
+        self.conv1 = nn.Conv2d(16, 32, kernel_size=3, bias=False)
+        self.conv_plain = Conv2d(8, 16)
+        self.plain_layer = Linear
+        self.attr_layer = mod.Linear
+        self.scalar_val = 1
+        local_unused = nn.Linear(1)
+        self.conv1.sub = op()
+        other.layer = nn.Linear()
+
+    def setup(self):
+        other.create_child('foo', Linear())
+        self.other_func('bar', Linear())
+        self.create_child('plain_child', Linear())
+        self.create_child('proj', layers.Conv3D(64, bias=True))
+        self.create_child('fc', Linear)
+        self.create_child('dense', pl.Dense)
+        self.create_child('too_few_args')
+        self.create_child(123, Linear)
+        self.create_child('unknown', 1 + 2)
+
+    def helper(self, x):
+        y = x + 1
+        1 + 1
+        return y
+"""
+  ex = extract_from_code(code)
+  assert ex.model_name == "PaxmlNet"
+  assert {"conv1", "plain_layer", "attr_layer", "plain_child", "proj", "fc", "dense"} <= set(ex.layer_registry.keys())
+  assert "scalar_val" not in ex.layer_registry
+  conv = ex.layer_registry["conv1"]
+  assert conv.op_type == "Conv2d"
+  assert conv.attributes == {"arg_0": "16", "arg_1": "32", "kernel_size": "3", "bias": "False"}
+
+
+def test_forward_entrypoints_and_multi_call_dataflow() -> None:
+  """Verify `forward`, `call`, `__call__`, `kernel`, and `f` trace inputs, repeated ops, and returns."""
+  code = """
+class MultiReluNet:
+    def __init__(self):
+        self.conv = nn.Conv2d(1, 20, 5)
 
     def forward(self, x):
-        h = self.conv1(x)
-        out = self.relu(h)
-        return out
+        # First conv comment
+        h0 = self.conv(x, x.size(0))  # inline conv1
+        # Second conv comment
+        h0b = self.conv(h0)  # inline conv2
+        h1 = F.relu(h0b)
+        h2 = F.relu(h1)
+        h_cat = F.cat([h2, x])
+        h_res = h_cat + x
+        return F.relu(h_res)
 """
-  tree: cst.Module = cst.parse_module(code)
-  extractor = GraphExtractor()
-  tree.visit(extractor)
+  tree = cst.parse_module(code)
+  ex = GraphExtractor()
+  tree.visit(ex)
 
-  # Input nodes
-  assert "Input_x" in extractor.layer_registry
+  assert {"Input_x", "conv", "func_relu", "func_relu_1", "func_relu_2", "output"} <= set(ex.layer_registry.keys())
+  edges = [(e.source, e.target) for e in ex.graph.edges]
+  assert ("Input_x", "conv") in edges
+  assert ("conv", "func_relu") in edges
+  assert ("func_relu_2", "output") in edges
 
-  # Check edges
-  edges: list[tuple[str, str]] = [(e.source, e.target) for e in extractor.graph.edges]
-  assert ("Input_x", "conv1") in edges
-  assert ("conv1", "relu") in edges
-  assert ("relu", "output") in edges
+  # Re-resolving an already-tracked call AST node returns its existing `func_relu` ID
+  cls_node = cst.ensure_type(tree.body[0], cst.ClassDef)
+  fwd_fn = cst.ensure_type(cls_node.body.body[1], cst.FunctionDef)
+  relu_stmt = cst.ensure_type(fwd_fn.body.body[2], cst.SimpleStatementLine)
+  relu_assign = cst.ensure_type(relu_stmt.body[0], cst.Assign)
+  relu_call = cst.ensure_type(relu_assign.value, cst.Call)
+  assert ex._resolve_layer_or_func_name(relu_call.func, context_node=relu_assign) == "func_relu"
 
+  for entry_name in ("call", "__call__", "kernel", "f"):
+    entry_ex = extract_from_code(_NL.join(["class Net:", f"    def {entry_name}(self, x):", "        return x"]))
+    assert "Input_x" in entry_ex.graph.nodes
+    assert "output" in entry_ex.graph.nodes
+    assert len(entry_ex.graph.edges) == 1
 
-def test_graph_extractor_direct_call_return() -> None:
-  """Verify graph extractor direct call return behavior."""
-  code: str = """
-class MyModel:
-    def __init__(self):
-        self.conv1 = nn.Conv2d(16, 32)
-
-    def forward(self, x):
-        return self.conv1(x)
-"""
-  tree: cst.Module = cst.parse_module(code)
-  extractor = GraphExtractor()
-  tree.visit(extractor)
-
-  edges: list[tuple[str, str]] = [(e.source, e.target) for e in extractor.graph.edges]
-  assert ("Input_x", "conv1") in edges
-  assert ("conv1", "output") in edges
+  dup_in = extract_from_code(
+    _NL.join(["class Net:", "    def forward(self, x):", "        pass", "    def call(self, x):", "        pass"])
+  )
+  assert "Input_x" in dup_in.graph.nodes
 
 
-def test_graph_extractor_top_level_data_flow() -> None:
-  """Verify graph extractor top level data flow behavior."""
-  code: str = """
+def test_top_level_flow_returns_and_unresolvable_edge_cases() -> None:
+  """Verify module-level dataflow, bare/complex returns, chained targets, and unresolvable calls."""
+  top_ex = extract_from_code(
+    """
 x = 1
-y = 2
-z = add(x, y)
+arr[0] = 2
+b = x
+(u, v) = (1, 2)
+1 + 1
+y = add(x, ext_var, kw=True)
+F.relu(ext_var)
+x = 2
 """
-  tree: cst.Module = cst.parse_module(code)
-  extractor = GraphExtractor()
-  tree.visit(extractor)
+  )
+  assert {"Input_x", "Input_ext_var", "func_add", "func_relu"} <= set(top_ex.graph.nodes.keys())
 
-  assert "Input_x" in extractor.layer_registry
-  assert "Input_y" in extractor.layer_registry
-  assert "func_add" in extractor.layer_registry
+  from ml_switcheroo.core.compiler.ir import LogicalNode
 
-  edges: list[tuple[str, str]] = [(e.source, e.target) for e in extractor.graph.edges]
-  assert ("Input_x", "func_add") in edges
-  assert ("Input_y", "func_add") in edges
+  pre_ex = GraphExtractor()
+  pre_ex.layer_registry["Input_pre"] = LogicalNode("Input_pre", "Input", attributes={"name": "pre"})
+  cst.parse_module("out = fn(pre)").visit(pre_ex)
+  assert pre_ex.provenance["pre"] == "Input_pre"
 
-
-def test_graph_extractor_top_level_expr() -> None:
-  """Verify graph extractor top level expr behavior."""
-  code: str = """
-func(x)
-"""
-  tree: cst.Module = cst.parse_module(code)
-  extractor = GraphExtractor()
-  tree.visit(extractor)
-
-  assert "func_func" in extractor.layer_registry
-  assert "Input_x" in extractor.layer_registry
-
-  edges: list[tuple[str, str]] = [(e.source, e.target) for e in extractor.graph.edges]
-  assert ("Input_x", "func_func") in edges
-
-
-def test_graph_extractor_missing_nodes() -> None:
-  """Verify graph extractor missing nodes behavior."""
-  # Various branches that return None or False
-  extractor = GraphExtractor()
-
-  # Not self
-  extractor._in_init = True
-  code: str = "other.layer = nn.Linear()"
-  cst.parse_module(code).visit(extractor)
-
-  # Not Call
-  code2: str = "self.layer = 1"
-  cst.parse_module(code2).visit(extractor)
-
-  # Data flow not call
-  extractor._in_init = False
-  extractor._in_forward = True
-  code3: str = "x = 1"
-  cst.parse_module(code3).visit(extractor)
-
-  # Get var name complex
-  code4: str = "x[0] = func(y[0])"
-  _res = cst.parse_module(code4).visit(extractor)
-  assert isinstance(_res, cst.Module)
-  assert "func_func" in extractor.layer_registry
-  assert extractor.layer_registry["func_func"].op_type == "func"
-
-
-def test_graph_extractor_return_complex() -> None:
-  """Verify graph extractor return complex behavior."""
-  code: str = """
-class MyModel:
+  ret_ex = extract_from_code(
+    """
+class Net:
+    def __init__(self):
+        self.fc = nn.Linear(4, 2)
     def forward(self, x):
-        return x + 1
+        u = self.unregistered_layer(x)
+        y = z = F.relu(x)
+        a.b = F.relu(x)
+        x[0] = func(y[0])
+        if True:
+            return
+        if False:
+            return x + 1
+        if False:
+            return y
+        if False:
+            return y
+        if False:
+            return self.fc(x)
+        if False:
+            return F.relu(x)
+        if False:
+            return unknown_var
+        return (a[0])()
 """
-  tree: cst.Module = cst.parse_module(code)
-  extractor = GraphExtractor()
-  _res = tree.visit(extractor)
-  assert isinstance(_res, cst.Module)
-  assert "Input_x" in extractor.graph.nodes
-  assert "output" not in extractor.graph.nodes
-  assert extractor.graph.edges == []
-  # Shouldn't crash, should just return False in visit_Return since value is BinOp
+  )
+  assert "output" in ret_ex.graph.nodes
 
+  empty_ex = extract_from_code("")
+  assert empty_ex.graph.nodes == {}
+  assert empty_ex.graph.edges == []
 
-def test_graph_extractor_missing_paths() -> None:
-  """Verify graph extractor missing paths behavior."""
-  extractor = GraphExtractor()
-  extractor._in_forward = True
+  # Direct helper edge cases (`context_node=None`, `cst.Pass()`, `cst.Call`, unresolvable call)
+  helper_ex = GraphExtractor()
+  helper_ex._in_forward = True
+  helper_ex._scope_depth = 1
+  cst.parse_module(f"x = y{_NL}x = func(kwarg=1)").visit(helper_ex)
 
-  # Not Call (Line 278)
-  code: str = "x = y"  # BinOp or Name depending on RHS. Name is caught by top_level block if depth=0, but _scope_depth is 0 in tests unless we mock
-  extractor._scope_depth = 1  # ensure we bypass top level data flow
-  cst.parse_module(code).visit(extractor)
-
-  # Missing args kwargs (Line 331)
-  code2: str = "x = func(kwarg=1)"
-  cst.parse_module(code2).visit(extractor)
-
-  # Not context_node call (Line 319) - this is covered if we pass just cst.Call
-  call_node = cst.ensure_type(cst.parse_expression("func(1)"), cst.Call)
-  extractor._resolve_layer_or_func_name(call_node.func, context_node=call_node)
-
-  # Unresolved func name (Line 340, 360)
-  # E.g. a complex func node that get_full_name can't resolve
-  call_node_bad = cst.ensure_type(cst.parse_expression("func()[0]()"), cst.Call)
-  extractor._analyze_call_expression(call_node_bad, [])
-  assert "func_func" in extractor.layer_registry
-  assert extractor.layer_registry["func_func"].attributes == {"kwarg": "1"}
-
-
-def test_graph_extractor_context_node_call() -> None:
-  """Verify graph extractor context node call behavior."""
-  extractor = GraphExtractor()
   call_node = cst.ensure_type(cst.parse_expression("some_func(1)"), cst.Call)
-  # Since some_func is not in layer_registry, it will be added, hitting line 319
-  extractor._resolve_layer_or_func_name(call_node.func, context_node=call_node)
-  assert "func_some_func" in extractor.layer_registry
+  assert helper_ex._resolve_layer_or_func_name(call_node.func, context_node=call_node) == "func_some_func"
+  assert helper_ex._resolve_layer_or_func_name(cst.Name("relu"), context_node=None) == "func_relu"
+  assert helper_ex._resolve_layer_or_func_name(cst.Name("sigmoid"), context_node=cst.Pass()) == "func_sigmoid"
+  self_attr = cst.ensure_type(cst.parse_expression("self.conv"), cst.Attribute)
+  assert helper_ex._resolve_layer_or_func_name(self_attr, context_node=None) == "conv"
+
+  bad_call = cst.ensure_type(cst.parse_expression("func()[0]()"), cst.Call)
+  helper_ex._analyze_call_expression(bad_call, [])

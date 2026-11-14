@@ -1,8 +1,5 @@
 """Test suite for the Manager Distributed module."""
 
-from tests.conftest import _test_getattr
-
-import typing
 import json
 from pathlib import Path
 from unittest.mock import patch
@@ -13,13 +10,13 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 @pytest.fixture
-def mock_semantics_tree(tmp_path: Path) -> typing.Generator[Path, None, None]:
+def mock_semantics_tree(tmp_path: Path) -> Path:
   """Provides a mock semantics tree for testing.
 
   Args:
       tmp_path (Path): Tmp path pytest fixture.
 
-  Yields:
+  Returns:
       Path: Tmp path.
   """
   array_content = {"abs": {"description": "Math Abs", "variants": {"torch": {"api": "torch.abs"}}}}
@@ -42,75 +39,60 @@ def mock_semantics_tree(tmp_path: Path) -> typing.Generator[Path, None, None]:
   patch_content = {"Linear": {"description": "Patched Linear", "variants": {"custom": {"api": "mylib.Linear"}}}}
   patch_content["Linear"]["operation"] = "Linear"
   (patch_dir / "neural_patch.yaml").write_text(yaml.dump(patch_content["Linear"]))
-  yield tmp_path
+  return tmp_path
 
 
 def test_recursive_discovery(mock_semantics_tree: Path) -> None:
-  """Verifies the behavior of recursive discovery.
+  """Verify `SemanticsManager` emits `abs` for recursive discovery.
 
   Args:
       mock_semantics_tree (Path): Mock tree path.
   """
-  with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=mock_semantics_tree):
-    with patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]):
-      mgr: SemanticsManager = SemanticsManager()
-      mgr._reverse_index = {}
-      assert "abs" in mgr.data
-      assert "XGBClassifier" in mgr.data
-      assert "Linear" in mgr.data
+  with (
+    patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=mock_semantics_tree),
+    patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]),
+  ):
+    mgr: SemanticsManager = SemanticsManager()
+    mgr._reverse_index = {}
+    assert "abs" in mgr.data
+    assert "XGBClassifier" in mgr.data
+    assert "Linear" in mgr.data
 
 
 def test_tier_priority_override(mock_semantics_tree: Path) -> None:
-  """Verifies the behavior of tier priority override.
+  """Verify `SemanticsManager` handles tier priority override as expected.
 
   Args:
       mock_semantics_tree (Path): Mock tree path.
   """
-  with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=mock_semantics_tree):
-    with patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]):
-      mgr: SemanticsManager = SemanticsManager()
-      mgr._reverse_index = {}
-      assert mgr.data["Linear"]["description"] == "Patched Linear"
-      assert _test_getattr({"v": "custom"}, "__getitem__")("v") in _test_getattr(
-        {
-          "v": _test_getattr(
-            {"v": _test_getattr({"v": _test_getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v")["Linear"]},
-            "__getitem__",
-          )("v")["variants"]
-        },
-        "__getitem__",
-      )("v")
+  with (
+    patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=mock_semantics_tree),
+    patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]),
+  ):
+    mgr: SemanticsManager = SemanticsManager()
+    mgr._reverse_index = {}
+    assert mgr.data["Linear"]["description"] == "Patched Linear"
+    variants = mgr.data["Linear"]["variants"]
+    assert isinstance(variants, dict)
+    assert "custom" in variants
 
 
 def test_framework_config_merging(mock_semantics_tree: Path) -> None:
-  """Verifies the behavior of framework configuration merging.
+  """Verify `SemanticsManager` emits `xgboost` for framework config merging.
 
   Args:
       mock_semantics_tree (Path): Mock tree path.
   """
-  with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=mock_semantics_tree):
-    with patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]):
-      mgr: SemanticsManager = SemanticsManager()
-      mgr._reverse_index = {}
-      assert "xgboost" in mgr.framework_configs
-      assert _test_getattr(
-        {
-          "v": _test_getattr(
-            {
-              "v": _test_getattr(
-                {
-                  "v": _test_getattr(
-                    {"v": _test_getattr({"v": mgr}, "__getitem__")("v").framework_configs}, "__getitem__"
-                  )("v")["xgboost"]
-                },
-                "__getitem__",
-              )("v")["alias"]
-            },
-            "__getitem__",
-          )("v")["name"]
-        },
-        "__getitem__",
-      )("v") == _test_getattr({"v": "xgb"}, "__getitem__")("v")
+  with (
+    patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=mock_semantics_tree),
+    patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]),
+  ):
+    mgr: SemanticsManager = SemanticsManager()
+    mgr._reverse_index = {}
+    assert "xgboost" in mgr.framework_configs
+    alias_cfg = mgr.framework_configs["xgboost"]["alias"]
+    assert isinstance(alias_cfg, dict)
+    assert alias_cfg["name"] == "xgb"
 
 
 def test_test_templates_via_overlay(tmp_path: Path) -> None:
@@ -125,10 +107,12 @@ def test_test_templates_via_overlay(tmp_path: Path) -> None:
   sem.mkdir()
   tmpl_content = {"__framework__": "custom_fw", "templates": {"import": "import custom"}}
   (snap / "custom_fw_vlatest_map.json").write_text(json.dumps(tmpl_content))
-  with patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir", return_value=snap):
-    with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=sem):
-      with patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]):
-        mgr: SemanticsManager = SemanticsManager()
-        mgr._reverse_index = {}
-        assert "custom_fw" in mgr.test_templates
-        assert mgr.test_templates["custom_fw"]["import"] == "import custom"
+  with (
+    patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir", return_value=snap),
+    patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=sem),
+    patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]),
+  ):
+    mgr: SemanticsManager = SemanticsManager()
+    mgr._reverse_index = {}
+    assert "custom_fw" in mgr.test_templates
+    assert mgr.test_templates["custom_fw"]["import"] == "import custom"

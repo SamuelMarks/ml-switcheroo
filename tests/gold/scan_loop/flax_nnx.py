@@ -11,12 +11,12 @@ def rnn_loop(
   x: jnp.ndarray,
   init_state: jnp.ndarray,
 ) -> tuple[jnp.ndarray, jnp.ndarray]:
-  """Helper to rnn loop.
+  """Execute `scan` to support rnn loop in flax NNX tests.
 
   Args:
-      cell: The cell (typing.Callable[[jnp.ndarray, jnp.ndarray], tuple[jnp.ndarray, jnp.ndarray]]) for rnn loop.
+      cell: Input `cell` parameter value (`typing.Callable[[jnp.ndarray, jnp.ndarray], tuple[jnp.ndarray, jnp.ndarray]]`).
       x: Primary input tensor or array operand.
-      init_state: The init state (jnp.ndarray) for rnn loop.
+      init_state: Input `init_state` parameter value (`jnp.ndarray`).
 
   Returns:
       Resulting `tuple[jnp.ndarray, jnp.ndarray]` from rnn loop.
@@ -26,8 +26,8 @@ def rnn_loop(
     """Scans fn.
 
     Args:
-        carry: The carry (jnp.ndarray) for scan fn.
-        inputs: The inputs (jnp.ndarray) for scan fn.
+        carry: Input `carry` parameter value (`jnp.ndarray`).
+        inputs: Input `inputs` parameter value (`jnp.ndarray`).
 
     Returns:
         Resulting `tuple[jnp.ndarray, jnp.ndarray]` from scan fn.

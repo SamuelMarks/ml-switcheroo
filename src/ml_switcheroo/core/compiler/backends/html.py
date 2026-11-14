@@ -36,7 +36,6 @@ class HtmlBackend(CompilerBackend):
         semantics: Unused semantics manager (for protocol compatibility).
 
     """
-    pass
 
   def compile(self, graph: LogicalGraph) -> str:
     """Compile the graph into an HTML string document.

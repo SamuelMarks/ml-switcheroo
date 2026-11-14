@@ -1,0 +1,68 @@
+"""Test suite for plugin clipping."""
+
+from unittest.mock import MagicMock
+
+import libcst as cst
+
+from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.plugins.clipping import transform_grad_clipping
+
+
+def test_transform_grad_clipping_not_required() -> None:
+  """Verify `Call` handles transform grad clipping not required as expected."""
+  node: cst.Call = cst.Call(func=cst.Name("clip"), args=[])
+  ctx: MagicMock = MagicMock(spec=HookContext)
+  ctx.plugin_traits.requires_functional_state = False
+  result: cst.CSTNode = transform_grad_clipping(node, ctx)
+  assert result is node
+
+
+def test_transform_grad_clipping_missing_args() -> None:
+  """Verify transform grad clipping missing args and unmapped API safe aborts."""
+  node: cst.Call = cst.Call(func=cst.Name("clip"), args=[cst.Arg(value=cst.Name("grads"))])
+  ctx: MagicMock = MagicMock(spec=HookContext)
+  ctx.plugin_traits.requires_functional_state = True
+  ctx.semantics = MagicMock()
+  ctx.lookup_api.return_value = None
+  assert transform_grad_clipping(node, ctx) is node
+
+  ctx.lookup_api.return_value = "optax.clip_by_global_norm"
+  assert transform_grad_clipping(node, ctx) is node
+
+
+def test_transform_grad_clipping() -> None:
+  """Verify transform grad clipping behavior with positional and keyword arguments."""
+  node: cst.Call = cst.Call(
+    func=cst.Name("clip_grad_norm_"),
+    args=[
+      cst.Arg(value=cst.Name("grads")),
+      cst.Arg(value=cst.Float("1.0")),
+    ],
+  )
+  ctx: MagicMock = MagicMock(spec=HookContext)
+  ctx.plugin_traits.requires_functional_state = True
+  ctx.lookup_api.return_value = "optax.clip_by_global_norm"
+  result: cst.CSTNode = transform_grad_clipping(node, ctx)
+  assert isinstance(result, cst.Subscript)
+  assert isinstance(result.slice[0].slice, cst.Index)
+  assert isinstance(result.slice[0].slice.value, cst.Integer)
+  assert result.slice[0].slice.value.value == "0"
+  update_call: cst.BaseExpression = result.value
+  assert isinstance(update_call, cst.Call)
+  assert isinstance(update_call.func, cst.Attribute)
+  assert update_call.func.attr.value == "update"
+  assert isinstance(update_call.func.value, cst.Call)
+  assert isinstance(update_call.func.value.func, cst.Attribute)
+  assert update_call.func.value.func.attr.value == "clip_by_global_norm"
+  assert len(update_call.args) == 2
+  assert isinstance(update_call.args[0].value, cst.Name)
+  assert update_call.args[0].value.value == "grads"
+  assert isinstance(update_call.args[1].value, cst.Name)
+  assert update_call.args[1].value.value == "None"
+
+  kw_node = cst.ensure_type(
+    cst.parse_expression("clip(max_norm=2.0, parameters=g, norm_type=2, *extra)"),
+    cst.Call,
+  )
+  kw_res = transform_grad_clipping(kw_node, ctx)
+  assert isinstance(kw_res, cst.Subscript)

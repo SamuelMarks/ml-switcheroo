@@ -4,12 +4,12 @@ import torch
 
 
 def rnn_loop(cell: torch.Tensor, x: torch.Tensor, init_state: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-  """Helper to rnn loop.
+  """Execute `x.size` to support rnn loop in pytorch tests.
 
   Args:
-      cell: The cell (torch.Tensor) for rnn loop.
+      cell: Input `cell` parameter value (`torch.Tensor`).
       x: Primary input tensor or array operand.
-      init_state: The init state (torch.Tensor) for rnn loop.
+      init_state: Input `init_state` parameter value (`torch.Tensor`).
 
   Returns:
       Resulting `tuple[torch.Tensor, torch.Tensor]` from rnn loop.

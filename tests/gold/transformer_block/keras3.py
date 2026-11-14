@@ -4,28 +4,26 @@ import keras
 
 
 class TransformerBlock:
-  """Test helper class TransformerBlock."""
+  """Test double `TransformerBlock` implementing `call` for keras3 tests."""
 
   def __init__(self, embed_dim: int, num_heads: int, ff_dim: int, dropout: float = 0.1) -> None:
     """Initializes the TransformerBlock instance.
 
     Args:
-        embed_dim: The embed dim (int) for   init  .
-        num_heads: The num heads (int) for   init  .
-        ff_dim: The ff dim (int) for   init  .
-        dropout: The dropout (float) for   init  .
+        embed_dim: Input `embed_dim` parameter value (`int`).
+        num_heads: Input `num_heads` parameter value (`int`).
+        ff_dim: Input `ff_dim` parameter value (`int`).
+        dropout: Input `dropout` parameter value (`float`).
     """
     super().__init__()
-    pass
 
   def call(self, x: keras.KerasTensor, training: bool | None = None) -> keras.KerasTensor:
-    """Helper to call.
+    """Execute `call` on `TransformerBlock` for keras3 tests.
 
     Args:
         x: Primary input tensor or array operand.
-        training: The training (bool | None) for call.
+        training: Input `training` parameter value (`bool | None`).
 
     Returns:
         Resulting `keras.KerasTensor` from call.
     """
-    pass

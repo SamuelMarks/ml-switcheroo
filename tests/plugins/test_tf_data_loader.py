@@ -16,7 +16,7 @@ def test_get_arg_by_name() -> None:
 
 
 def test_extract_tensor_dataset_inputs() -> None:
-  """Verify extract tensor dataset inputs behavior."""
+  """Verify `Call` returns `2` for extract tensor dataset inputs."""
   node: cst.Call = cst.Call(func=cst.Name("TensorDataset"), args=[cst.Arg(cst.Name("x")), cst.Arg(cst.Name("y"))])
   res: list[cst.BaseExpression] | None = _extract_tensor_dataset_inputs(node)
   assert res is not None
@@ -24,7 +24,7 @@ def test_extract_tensor_dataset_inputs() -> None:
 
 
 def test_extract_tensor_dataset_inputs_attribute() -> None:
-  """Verify extract tensor dataset inputs attribute behavior."""
+  """Verify `Call` handles extract tensor dataset inputs attribute as expected."""
   node: cst.Call = cst.Call(
     func=cst.Attribute(value=cst.Name("data"), attr=cst.Name("TensorDataset")), args=[cst.Arg(cst.Name("x"))]
   )
@@ -34,7 +34,7 @@ def test_extract_tensor_dataset_inputs_attribute() -> None:
 
 
 def test_extract_tensor_dataset_inputs_other() -> None:
-  """Verify extract tensor dataset inputs other behavior."""
+  """Verify `Call` handles extract tensor dataset inputs other as expected."""
   node: cst.Call = cst.Call(func=cst.Name("OtherDataset"), args=[cst.Arg(cst.Name("x"))])
   res: list[cst.BaseExpression] | None = _extract_tensor_dataset_inputs(node)
   assert res is None
@@ -48,22 +48,26 @@ def test_extract_tensor_dataset_inputs_func_is_call() -> None:
 
 
 def test_extract_tensor_dataset_inputs_not_call() -> None:
-  """Verify extract tensor dataset inputs not call behavior."""
+  """Verify `Name` handles extract tensor dataset inputs not call as expected."""
   node: cst.Name = cst.Name("x")
   res: list[cst.BaseExpression] | None = _extract_tensor_dataset_inputs(node)
   assert res is None
 
 
 def test_transform_tf_dataloader_empty() -> None:
-  """Transforms tf dataloader empty."""
+  """Verify unmapped or empty DataLoader calls return original node safely."""
   node: cst.Call = cst.Call(func=cst.Name("DataLoader"), args=[])
-  ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  res: cst.CSTNode | cst.Call = transform_tf_dataloader(node, ctx)
-  assert res is node
+  unmapped_ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
+  assert transform_tf_dataloader(node, unmapped_ctx) is node
+
+  sem = MagicMock()
+  sem.resolve_variant.return_value = {"api": "tf.data.Dataset"}
+  mapped_ctx = HookContext(semantics=sem, config=MagicMock())
+  assert transform_tf_dataloader(node, mapped_ctx) is node
 
 
 def test_transform_tf_dataloader() -> None:
-  """Transforms tf dataloader."""
+  """Verify mapped DataLoader with TensorDataset and shuffle rewrites to pipeline."""
   node: cst.Call = cst.Call(
     func=cst.Name("DataLoader"),
     args=[
@@ -72,18 +76,33 @@ def test_transform_tf_dataloader() -> None:
       cst.Arg(keyword=cst.Name("shuffle"), value=cst.Name("True")),
     ],
   )
-  ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  res: cst.CSTNode | cst.Call = transform_tf_dataloader(node, ctx)
+  sem = MagicMock()
+  sem.resolve_variant.return_value = {"api": "tf.data.Dataset"}
+  ctx: HookContext = HookContext(semantics=sem, config=MagicMock())
+  res: cst.CSTNode = transform_tf_dataloader(node, ctx)
   assert isinstance(res, cst.Call)
   assert isinstance(res.func, cst.Attribute)
   assert res.func.attr.value == "prefetch"
 
 
 def test_transform_tf_dataloader_single() -> None:
-  """Transforms tf dataloader single."""
+  """Verify mapped DataLoader with positional and keyword dataset arguments."""
+  sem = MagicMock()
+  sem.resolve_variant.return_value = {"api": "tf.data.Dataset"}
+  ctx: HookContext = HookContext(semantics=sem, config=MagicMock())
+
   node: cst.Call = cst.Call(func=cst.Name("DataLoader"), args=[cst.Arg(value=cst.Name("dataset"))])
-  ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  res: cst.CSTNode | cst.Call = transform_tf_dataloader(node, ctx)
+  res: cst.CSTNode = transform_tf_dataloader(node, ctx)
   assert isinstance(res, cst.Call)
   assert isinstance(res.func, cst.Attribute)
   assert res.func.attr.value == "prefetch"
+
+  kw_node = cst.Call(
+    func=cst.Name("DataLoader"),
+    args=[cst.Arg(keyword=cst.Name("dataset"), value=cst.Name("dataset"))],
+  )
+  sem_bare = MagicMock()
+  sem_bare.resolve_variant.return_value = {"api": "Dataset"}
+  bare_ctx = HookContext(semantics=sem_bare, config=MagicMock())
+  res_kw = transform_tf_dataloader(kw_node, bare_ctx)
+  assert isinstance(res_kw, cst.Call)

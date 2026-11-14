@@ -1,152 +1,264 @@
-"""Support for ApiTransformer.
+"""State and Mapping Resolution Collaborators for ``ApiTransformer``.
 
-This module provides helper utilities and mixin classes used by ApiTransformer
-to perform CST string/node conversions, resolve API paths to FQNs, map APIs
-to target frameworks, inject imports, and handle version check constraints.
+Provides ``ApiPassState`` (holding scoped context and cached structural traits) and
+``MappingResolver`` (performing CST string/node conversion, FQN alias resolution,
+semantic variant lookup, preamble/argument injection, and version constraint checks).
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
+from __future__ import annotations
+
+import importlib.metadata
 import re
 import typing
+from dataclasses import dataclass
 
 import libcst as cst
 from pydantic import JsonValue
 
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.core.rewriter.calls.utils import is_neural_on_math_backend
+from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.core.tracer import get_tracer
+from ml_switcheroo.enums import RuntimeTensorOrValue
+from ml_switcheroo.semantics.schema import StructuralTraits
 
 if typing.TYPE_CHECKING:
-  from ml_switcheroo.config import RuntimeConfig
-  from ml_switcheroo.core.rewriter.context import RewriterContext
   from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 @typing.runtime_checkable
 class _ModuleBaseProtocol(typing.Protocol):
-  """Protocol for traits objects exposing `module_base`."""
+  """Protocol for traits objects exposing ``module_base``.
+
+  Attributes:
+      module_base: Framework base module class path string, if configured.
+  """
 
   module_base: str | None
 
 
-class ApiHelpersMixin:
-  """Mixin providing CST string/node conversions and alias resolutions.
+@dataclass
+class ApiPassState:
+  """Typed shared state for ``ApiTransformer`` and its composed rewrite handlers.
 
-  This class contains utility methods for traversing, querying, and transforming
-  CST nodes representing API calls, variables, modules, and signatures. It serves
-  as a support mixin for the `ApiTransformer`, exposing methods for fully qualified
-  name resolution, alias checking, target framework mappings, and version checks.
+  Attributes:
+      context: Shared ``RewriterContext`` for the current transpilation pass.
+      cached_source_traits: Lazily populated ``StructuralTraits`` for the source framework.
+      cached_target_traits: Lazily populated ``StructuralTraits`` for the target framework.
+      known_module_bases: Cached set of module base class names across registered frameworks.
   """
 
-  # Added for type checking
-  context: "RewriterContext"
+  context: RewriterContext
+  cached_source_traits: StructuralTraits | None = None
+  cached_target_traits: StructuralTraits | None = None
+  known_module_bases: set[str] | None = None
 
-  if typing.TYPE_CHECKING:
-
-    @property
-    def config(self) -> "RuntimeConfig":
-      """Return the runtime configuration.
-
-      Returns:
-          RuntimeConfig instance.
-      """
-      ...
-
-    @property
-    def semantics(self) -> "SemanticsManager":
-      """Return the semantics manager.
-
-      Returns:
-          SemanticsManager instance.
-      """
-      ...
-
-    @property
-    def source_framework(self) -> str:
-      """Return the source framework identifier.
-
-      Returns:
-          Source framework identifier.
-      """
-      ...
-
-    @property
-    def target_framework(self) -> str:
-      """Return the target framework identifier.
-
-      Returns:
-          Target framework identifier.
-      """
-      ...
-
-    @property
-    def strict_mode(self) -> bool:
-      """Return whether strict mode is enabled.
-
-      Returns:
-          True if strict mode is enabled.
-      """
-      ...
-
-    def _report_failure(self, msg: str) -> None:
-      """Record a failure message in the current statement error buffer.
-
-      Args:
-          msg: Failure description string.
-      """
-      ...
-
-  def _cst_to_string(self, node: cst.CSTNode) -> str | None:
-    """Flatten CST nodes (Name/Attribute) to string.
-
-    Args:
-        node (cst.CSTNode): The CST expression node to convert.
+  @property
+  def semantics(self) -> "SemanticsManager":
+    """Return the active ``SemanticsManager`` bound to ``self.context``.
 
     Returns:
-        Optional[str]: The flattened dotted string representation of the expression (e.g., 'foo.bar'),
-        or None if the node type is not supported.
+        Active ``SemanticsManager`` instance.
+    """
+    return self.context.semantics
+
+  @property
+  def config(self) -> RuntimeConfig:
+    """Return the active ``RuntimeConfig`` bound to ``self.context``.
+
+    Returns:
+        Active ``RuntimeConfig`` instance.
+    """
+    return self.context.config
+
+  @property
+  def source_framework(self) -> str:
+    """Return the effective source framework key.
+
+    Returns:
+        Source framework string identifier.
+    """
+    return str(self.context.source_framework)
+
+  @property
+  def target_framework(self) -> str:
+    """Return the effective target framework key.
+
+    Returns:
+        Target framework string identifier.
+    """
+    return str(self.context.target_framework)
+
+  @property
+  def strict_mode(self) -> bool:
+    """Return whether strict unmapped-API validation is enabled.
+
+    Returns:
+        ``True`` if strict mode is active, otherwise ``False``.
+    """
+    return self.config.strict_mode
+
+  @property
+  def ctx(self) -> HookContext:
+    """Return the ``HookContext`` exposed to plugin strategies.
+
+    Returns:
+        Bound ``HookContext`` instance.
+    """
+    return self.context.hook_context
+
+  @property
+  def source_traits(self) -> StructuralTraits:
+    """Lazily resolve and cache ``StructuralTraits`` for ``self.source_framework``.
+
+    Returns:
+        Resolved ``StructuralTraits`` for the source framework.
+    """
+    if self.cached_source_traits is not None:
+      return self.cached_source_traits
+
+    from ml_switcheroo.semantics.resolution import query_framework_traits
+
+    fw_traits = query_framework_traits(self.semantics, self.source_framework)
+    self.cached_source_traits = fw_traits.traits if fw_traits.traits is not None else StructuralTraits()
+    return self.cached_source_traits
+
+  @property
+  def target_traits(self) -> StructuralTraits:
+    """Lazily resolve and cache ``StructuralTraits`` for ``self.target_framework``.
+
+    Returns:
+        Resolved ``StructuralTraits`` for the target framework.
+    """
+    if self.cached_target_traits is not None:
+      return self.cached_target_traits
+
+    from ml_switcheroo.semantics.resolution import query_framework_traits
+
+    fw_traits = query_framework_traits(self.semantics, self.target_framework)
+    self.cached_target_traits = fw_traits.traits if fw_traits.traits is not None else StructuralTraits()
+    return self.cached_target_traits
+
+  def get_source_lifecycle_lists(self) -> tuple[set[str], set[str]]:
+    """Return strip and warning lifecycle method sets for the source framework.
+
+    Returns:
+        Tuple of ``(strip_methods, warn_methods)``.
+    """
+    traits = self.source_traits
+    return (set(traits.lifecycle_strip_methods), set(traits.lifecycle_warn_methods))
+
+  def report_failure(self, reason: str) -> None:
+    """Record a failure diagnostic on the current statement buffer.
+
+    Args:
+        reason: Failure description message.
+    """
+    self.context.current_stmt_errors.append(reason)
+
+  def report_warning(self, reason: str) -> None:
+    """Record a warning diagnostic on the current statement buffer.
+
+    Args:
+        reason: Warning description message.
+    """
+    self.context.current_stmt_warnings.append(reason)
+
+  def mark_stateful(self, var_name: str) -> None:
+    """Mark ``var_name`` as a stateful layer/object in the innermost scope.
+
+    Args:
+        var_name: Variable identifier to mark stateful.
+    """
+    if self.context.scope_stack:
+      self.context.scope_stack[-1].add(var_name)
+
+  def is_stateful(self, var_name: str) -> bool:
+    """Return whether ``var_name`` is marked stateful in any enclosing lexical scope.
+
+    Args:
+        var_name: Variable identifier to check.
+
+    Returns:
+        ``True`` if ``var_name`` is stateful in an active scope.
+    """
+    return any(var_name in scope for scope in reversed(self.context.scope_stack))
+
+
+class MappingResolver:
+  """Collaborator resolving CST expressions, aliases, semantic mappings, and signature injections.
+
+  Attributes:
+      state: Shared ``ApiPassState`` instance.
+  """
+
+  def __init__(self, state: ApiPassState) -> None:
+    """Initialize the mapping resolver over ``state``.
+
+    Args:
+        state: Shared ``ApiPassState`` instance.
+    """
+    self.state: ApiPassState = state
+
+  def cst_to_string(self, node: cst.CSTNode) -> str | None:
+    """Flatten ``Name`` / ``Attribute`` / ``BinaryOperation`` CST nodes into a dotted string.
+
+    Args:
+        node: CST expression node to flatten.
+
+    Returns:
+        Flattened dotted string representation or ``None`` if unsupported.
     """
     if isinstance(node, cst.Name):
       return node.value
-    elif isinstance(node, cst.Attribute):
-      base = self._cst_to_string(node.value)
+    if isinstance(node, cst.Attribute):
+      base = self.cst_to_string(node.value)
       if base:
         return f"{base}.{node.attr.value}"
     elif isinstance(node, cst.BinaryOperation):
-      # Fallback for operators if visited (shouldn't happen often in this path)
       return type(node.operator).__name__
     return None
 
-  def _get_qualified_name(self, node: cst.BaseExpression) -> str | None:
-    """Resolve aliases to get the Fully Qualified Name (FQN).
+  def get_qualified_name(
+    self,
+    node: cst.BaseExpression,
+    *,
+    cst_to_string_fn: typing.Callable[[cst.CSTNode], str | None] | None = None,
+  ) -> str | None:
+    """Resolve import aliases to produce the fully qualified API name for ``node``.
 
     Args:
-        node (cst.BaseExpression): The CST expression node representing the name or attribute.
+        node: CST expression node representing a name or attribute chain.
+        cst_to_string_fn: Optional override callback used to flatten ``node``.
 
     Returns:
-        Optional[str]: The resolved Fully Qualified Name (FQN) as a string, or None if resolving fails.
+        Resolved fully qualified name string, or ``None`` if ``node`` cannot be flattened.
     """
-    full_str = self._cst_to_string(node)
+    flattener = cst_to_string_fn if cst_to_string_fn is not None else self.cst_to_string
+    full_str = flattener(node)
     if not full_str:
       return None
 
     parts = full_str.split(".")
     root = parts[0]
 
-    if root in self.context.alias_map:
-      canonical_root = self.context.alias_map[root]
+    if root in self.state.context.alias_map:
+      canonical_root = self.state.context.alias_map[root]
       if len(parts) > 1:
         return f"{canonical_root}.{'.'.join(parts[1:])}"
       return str(canonical_root)
 
     return full_str
 
-  def _create_name_node(self, api_path: str) -> cst.Name | cst.Attribute:
-    """Construct a CST node structure for a dotted API path.
+  def create_name_node(self, api_path: str) -> cst.Name | cst.Attribute:
+    """Construct a CST ``Name`` or ``Attribute`` chain for ``api_path``.
 
     Args:
-        api_path (str): The dotted API path string (e.g., 'foo.bar.baz').
+        api_path: Dotted API path string (e.g. ``'jnp.abs'``).
 
     Returns:
-        Union[cst.Name, cst.Attribute]: The constructed CST expression node representing the path.
+        Constructed ``cst.Name`` or ``cst.Attribute`` node.
     """
     parts = api_path.split(".")
     node: cst.Name | cst.Attribute = cst.Name(parts[0])
@@ -154,43 +266,52 @@ class ApiHelpersMixin:
       node = cst.Attribute(value=node, attr=cst.Name(part))
     return node
 
-  def _create_dotted_name(self, name_str: str) -> cst.Name | cst.Attribute:
-    """Alias for create_name_node used by plugins.
+  def create_dotted_name(self, name_str: str) -> cst.Name | cst.Attribute:
+    """Construct a CST ``Name`` or ``Attribute`` chain for ``name_str``.
 
     Args:
-        name_str (str): The dotted name string to convert to a CST node structure.
+        name_str: Dotted name string.
 
     Returns:
-        Union[cst.Name, cst.Attribute]: A CST Name or Attribute representing the dotted name.
+        Constructed ``cst.Name`` or ``cst.Attribute`` node.
     """
-    return self._create_name_node(name_str)
+    return self.create_name_node(name_str)
 
-  def _is_module_alias(self, node: cst.CSTNode) -> bool:
-    """Determine if a node is a module reference (not a variable).
+  def is_module_alias(
+    self,
+    node: cst.CSTNode,
+    *,
+    cst_to_string_fn: typing.Callable[[cst.CSTNode], str | None] | None = None,
+  ) -> bool:
+    """Return whether ``node`` references an imported module alias or framework root.
 
     Args:
-        node (cst.CSTNode): The CST node to inspect.
+        node: CST node to inspect.
+        cst_to_string_fn: Optional override callback used to flatten ``node``.
 
     Returns:
-        bool: True if the node is identified as a module alias, False otherwise.
+        ``True`` if ``node`` resolves to a module alias or known framework root.
     """
-    name = self._cst_to_string(node)
+    flattener = cst_to_string_fn if cst_to_string_fn is not None else self.cst_to_string
+    name = flattener(node)
     if not name:
       return False
 
-    if name in self.context.alias_map:
+    if name in self.state.context.alias_map:
       return True
 
-    known_roots = set()
-    if self.config is not None:
-      known_roots.add(self.config.source_framework)
-      known_roots.add(self.config.target_framework)
-      if self.config.source_flavour:
-        known_roots.add(self.config.source_flavour.split(".")[0])
+    known_roots: set[str] = set()
+    cfg = self.state.config
+    if cfg is not None:
+      known_roots.add(cfg.source_framework)
+      known_roots.add(cfg.target_framework)
+      if cfg.source_flavour:
+        known_roots.add(cfg.source_flavour.split(".")[0])
 
-    if self.semantics is not None:
+    sem = self.state.semantics
+    if sem is not None:
       try:
-        configs = self.semantics.framework_configs
+        configs = sem.framework_configs
       except AttributeError:
         configs = {}
       for fw_key, conf in configs.items():
@@ -207,46 +328,58 @@ class ApiHelpersMixin:
     root = name.split(".")[0]
     return root in known_roots
 
-  def _apply_preamble(self, node: cst.FunctionDef, stmts_code: list[str]) -> cst.FunctionDef:
-    """Inject source code statements at the start of the function body.
+  @staticmethod
+  def _parse_preamble_snippet(
+    code: str,
+  ) -> typing.Sequence[cst.SimpleStatementLine | cst.BaseCompoundStatement]:
+    """Parse a single preamble source string into CST body statements.
 
     Args:
-        node (cst.FunctionDef): The target function definition node.
-        stmts_code (List[str]): A list of source code strings representing statements to inject.
+        code: Python statement source string to parse.
 
     Returns:
-        cst.FunctionDef: A new function definition node with the preamble statements injected.
+        Sequence of parsed CST statements, or an empty tuple if syntax is invalid.
+    """
+    try:
+      return cst.parse_module(code).body
+    except cst.ParserSyntaxError:
+      return ()
+
+  def apply_preamble(self, node: cst.FunctionDef, stmts_code: list[str]) -> cst.FunctionDef:
+    """Parse and inject source statement strings at the beginning of ``node``'s body.
+
+    Args:
+        node: Target ``cst.FunctionDef`` node.
+        stmts_code: Python statement strings to parse and inject.
+
+    Returns:
+        Updated ``cst.FunctionDef`` with preamble statements prepended after any docstring.
     """
     new_stmts: list[cst.SimpleStatementLine | cst.BaseCompoundStatement] = []
     for code in stmts_code:
-      try:
-        mod = cst.parse_module(code)
-        new_stmts.extend(mod.body)
-      except (cst.ParserSyntaxError, Exception):
-        pass
+      new_stmts.extend(self._parse_preamble_snippet(code))
 
-    return self._inject_stmts_to_body(node, new_stmts)
+    return self.inject_stmts_to_body(node, new_stmts)
 
-  def _inject_stmts_to_body(
+  def inject_stmts_to_body(
     self,
     node: cst.FunctionDef,
     new_stmts: typing.Sequence[cst.SimpleStatementLine | cst.BaseCompoundStatement],
   ) -> cst.FunctionDef:
-    """Support to insert statements respecting docstrings.
+    """Insert ``new_stmts`` into ``node``'s body immediately after any leading docstring.
 
     Args:
-        node (cst.FunctionDef): The function definition node where statements are injected.
-        new_stmts (Sequence[Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]]): The list of CST statements to insert into the function body.
+        node: Target ``cst.FunctionDef`` node.
+        new_stmts: Sequence of CST statements to insert.
 
     Returns:
-        cst.FunctionDef: The updated function definition node with the statements inserted.
+        Updated ``cst.FunctionDef`` node.
     """
     if isinstance(node.body, cst.SimpleStatementSuite):
-      node = self._convert_to_indented_block(node)
+      node = self.convert_to_indented_block(node)
 
     existing = list(node.body.body)
     idx = 0
-    # Skip docstring if exists
     if existing and isinstance(existing[0], cst.SimpleStatementLine) and len(existing[0].body) == 1:
       expr = existing[0].body[0]
       if isinstance(expr, cst.Expr) and isinstance(expr.value, (cst.SimpleString, cst.ConcatenatedString)):
@@ -255,49 +388,58 @@ class ApiHelpersMixin:
     final_body = existing[:idx] + list(new_stmts) + existing[idx:]
     return node.with_changes(body=node.body.with_changes(body=final_body))
 
-  def _convert_to_indented_block(self, node: cst.FunctionDef) -> cst.FunctionDef:
-    """Unwrap simple one-liners to indented blocks for injection.
+  def convert_to_indented_block(self, node: cst.FunctionDef) -> cst.FunctionDef:
+    """Convert a one-liner ``SimpleStatementSuite`` function body into an ``IndentedBlock``.
 
     Args:
-        node (cst.FunctionDef): The function definition node to convert.
+        node: ``cst.FunctionDef`` node to normalize.
 
     Returns:
-        cst.FunctionDef: The updated function definition node with an IndentedBlock body.
+        ``cst.FunctionDef`` with an ``IndentedBlock`` body.
     """
     if isinstance(node.body, cst.SimpleStatementSuite):
       new_stmts = [cst.SimpleStatementLine(body=[s]) for s in node.body.body]
       return node.with_changes(body=cst.IndentedBlock(body=new_stmts))
     return node
 
-  def _get_mapping(self, name: str, silent: bool = False) -> dict[str, JsonValue] | None:
-    """Query the Semantics Manager for the target implementation of the API.
+  def get_mapping(
+    self,
+    name: str,
+    silent: bool = False,
+    *,
+    report_failure_fn: typing.Callable[[str], None] | None = None,
+  ) -> dict[str, JsonValue] | None:
+    """Query ``SemanticsManager`` for the verified target variant mapping of ``name``.
 
     Args:
-        name (str): The fully qualified name of the API to map.
-        silent (bool, optional): If True, suppresses error/failure reports during lookup. Defaults to False.
+        name: Fully qualified source API name.
+        silent: When ``True``, suppresses failure reporting on unmapped or unverified APIs.
+        report_failure_fn: Optional callback override used to record failure messages.
 
     Returns:
-        Optional[dict]: The target implementation mapping dictionary if found and verified, otherwise None.
+        Target variant mapping dictionary if found and verified, else ``None``.
     """
-    lookup = self.semantics.get_definition(name)
+    reporter = report_failure_fn if report_failure_fn is not None else self.state.report_failure
+    sem = self.state.semantics
+    lookup = sem.get_definition(name)
     if not lookup:
       is_known_source_prefix = False
       root = name.split(".")[0]
-      if root == self.source_framework or (self.context.alias_map and root in self.context.alias_map):
+      if root == self.state.source_framework or (self.state.context.alias_map and root in self.state.context.alias_map):
         is_known_source_prefix = True
 
-      if self.strict_mode and is_known_source_prefix and not silent:
-        self._report_failure(f"API '{name}' not found in semantics.")
+      if self.state.strict_mode and is_known_source_prefix and not silent:
+        reporter(f"API '{name}' not found in semantics.")
       return None
 
-    abstract_id, details = lookup
+    abstract_id, _ = lookup
 
-    if not self.semantics.is_verified(abstract_id):
+    if not sem.is_verified(abstract_id):
       if not silent:
-        self._report_failure(f"Skipped '{name}': Marked unsafe by verification report.")
+        reporter(f"Skipped '{name}': Marked unsafe by verification report.")
       return None
 
-    target_impl = self.semantics.resolve_variant(abstract_id, self.target_framework)
+    target_impl = sem.resolve_variant(abstract_id, self.state.target_framework)
 
     if isinstance(target_impl, dict) and target_impl:
       raw_api = target_impl.get("api", "Plugin Logic")
@@ -308,70 +450,60 @@ class ApiHelpersMixin:
       )
       return dict(target_impl)
 
-    if self.strict_mode and not silent:
-      from ml_switcheroo.core.rewriter.calls.utils import is_neural_on_math_backend
-
+    if self.state.strict_mode and not silent:
       try:
-        origins = self.semantics._key_origins
+        origins = sem._key_origins
       except AttributeError:
         origins = {}
       tier = origins.get(abstract_id)
-      if is_neural_on_math_backend(tier, self.target_framework):
-        self._report_failure(
-          f"Cannot map neural network abstraction '{name}' directly to pure math backend '{self.target_framework}'. Use a framework like Flax or Keras."
+      if is_neural_on_math_backend(tier, self.state.target_framework):
+        reporter(
+          f"Cannot map neural network abstraction '{name}' directly to pure math backend "
+          f"'{self.state.target_framework}'. Use a framework like Flax or Keras."
         )
       else:
-        self._report_failure(f"No mapping available for '{name}' -> '{self.target_framework}'")
+        reporter(f"No mapping available for '{name}' -> '{self.state.target_framework}'")
     return None
 
-  def _handle_variant_imports(self, variant: typing.Mapping[str, RuntimeTensorOrValue]) -> None:
-    """Inject required imports defined in the variant mapping into the module context.
+  def handle_variant_imports(self, variant: typing.Mapping[str, RuntimeTensorOrValue]) -> None:
+    """Inject ``required_imports`` declared on ``variant`` into the active ``HookContext``.
 
     Args:
-        variant (Mapping[str, JsonValue]): The target variant dictionary mapping containing required imports.
+        variant: Target variant mapping dictionary.
     """
     raw_reqs = variant.get("required_imports", [])
-    assert isinstance(raw_reqs, list)
+    if not isinstance(raw_reqs, list):
+      return
     for r in raw_reqs:
       stmt = ""
       if isinstance(r, str):
         clean = r.strip()
-        if clean.startswith("import") or clean.startswith("from"):
-          stmt = clean
-        else:
-          stmt = f"import {clean}"
+        stmt = clean if (clean.startswith(("import", "from"))) else f"import {clean}"
       elif isinstance(r, dict):
         mod = r.get("module")
         alias = r.get("alias")
         if isinstance(mod, str) and mod:
-          if isinstance(alias, str) and alias:
-            stmt = f"import {mod} as {alias}"
-          else:
-            stmt = f"import {mod}"
+          stmt = f"import {mod} as {alias}" if (isinstance(alias, str) and alias) else f"import {mod}"
 
       if stmt:
-        self.context.hook_context.inject_preamble(stmt)
+        self.state.context.hook_context.inject_preamble(stmt)
 
-  def _is_framework_base(self, name: str) -> bool:
-    """Check if a class name corresponds to any known neural network framework Module base.
+  def is_framework_base(self, name: str) -> bool:
+    """Return whether ``name`` matches any registered framework neural module base class.
 
     Args:
-        name (str): The name of the class to check.
+        name: Candidate base class name string.
 
     Returns:
-        bool: True if the name matches a known framework module base (e.g., `nn.Module`), False otherwise.
+        ``True`` if ``name`` matches a known framework module base.
     """
     if not name:
       return False
 
-    try:
-      raw_known = self._known_module_bases
-    except AttributeError:
-      raw_known = None
-    known_bases: set[str] | None = raw_known if isinstance(raw_known, set) else None
+    known_bases = self.state.known_module_bases
     if known_bases is None:
       known_bases = set()
-      for _, config in self.semantics.framework_configs.items():
+      for config in self.state.semantics.framework_configs.values():
         traits = config.get("traits")
         if traits:
           base = (
@@ -381,108 +513,92 @@ class ApiHelpersMixin:
           )
           if isinstance(base, str) and base:
             known_bases.add(base)
-      self._known_module_bases: set[str] = known_bases
+      self.state.known_module_bases = known_bases
 
-    if name in self._known_module_bases:
+    if name in known_bases:
       return True
-    for known in self._known_module_bases:
-      if known.endswith(f".{name}"):
-        return True
-    return False
+    return any(known.endswith(f".{name}") for known in known_bases)
 
   def check_version_constraints(self, min_v: str | None, max_v: str | None) -> str | None:
-    """Check if target framework version requirements are met based on the mapping constraints.
+    """Validate whether the target framework version satisfies ``[min_v, max_v)``.
 
     Args:
-        min_v (Optional[str]): The minimum required version string, if any.
-        max_v (Optional[str]): The maximum supported version string (exclusive), if any.
+        min_v: Optional inclusive minimum version string.
+        max_v: Optional exclusive maximum version string.
 
     Returns:
-        Optional[str]: An error message string if version constraints are violated, or None if constraints are met.
+        Warning string if constraints are violated, or ``None`` if satisfied/unknown.
     """
     if not min_v and not max_v:
       return None
 
-    # Try Getting Version
     current: str | None = None
-    fw_conf = self.semantics.get_framework_config(self.target_framework)
+    target_fw = self.state.target_framework
+    fw_conf = self.state.semantics.get_framework_config(target_fw)
     if fw_conf and "version" in fw_conf and isinstance(fw_conf["version"], str):
       current = fw_conf["version"]
     else:
-      import importlib.metadata
       from ml_switcheroo.frameworks.base import get_adapter
 
-      tgt_adapter = get_adapter(self.target_framework)
+      tgt_adapter = get_adapter(target_fw)
       pkg = (
         tgt_adapter.structural_traits.package_name
         if (tgt_adapter and tgt_adapter.structural_traits.package_name)
-        else self.target_framework
+        else target_fw
       )
       try:
         current = importlib.metadata.version(pkg)
-      except (importlib.metadata.PackageNotFoundError, Exception):
+      except (importlib.metadata.PackageNotFoundError, ValueError, TypeError, RuntimeError):
         current = None
 
     if not current:
       return None
 
     def parse_v(v_str: str) -> tuple[int, ...]:
-      """Parse a version string into a tuple of integers for comparison.
+      """Split ``v_str`` into integer version segments.
 
       Args:
-          v_str (str): The version string (e.g., '1.2.3') or version-like object to parse.
+          v_str: Version string such as ``'1.2.3'``.
 
       Returns:
-          tuple: A tuple of integers representing the version segments.
+          Tuple of numeric version components.
       """
-      parts = []
-      # Fix: Use re module safely imported at global scope
-      tokens = re.split(r"[^\d]+", v_str)
-      for t in tokens:
-        if t:
-          parts.append(int(t))
-      return tuple(parts)
+      return tuple(int(t) for t in re.split(r"[^\d]+", v_str) if t)
 
     curr_tuple = parse_v(current)
 
-    if min_v:
-      if curr_tuple < parse_v(min_v):
-        return f"Target {self.target_framework}@{current} is older than required {min_v}"
+    if min_v and curr_tuple < parse_v(min_v):
+      return f"Target {target_fw}@{current} is older than required {min_v}"
 
-    if max_v:
-      if curr_tuple >= parse_v(max_v):
-        return f"Target {self.target_framework}@{current} exceeds max supported {max_v}"
+    if max_v and curr_tuple >= parse_v(max_v):
+      return f"Target {target_fw}@{current} exceeds max supported {max_v}"
 
     return None
 
-  def _inject_argument_to_signature(
+  def inject_argument_to_signature(
     self,
     node: cst.FunctionDef,
     arg_name: str,
     annotation: str | None,
   ) -> cst.FunctionDef:
-    """Inject a new argument after 'self' (or at the start if 'self' is not present).
+    """Inject a parameter ``arg_name`` after ``self`` (or at index 0) if not already present.
 
     Args:
-        node (cst.FunctionDef): The function definition node to modify.
-        arg_name (str): The name of the argument to inject.
-        annotation (Optional[str]): The optional type annotation string for the argument.
+        node: Function definition CST node to update.
+        arg_name: Parameter name to inject.
+        annotation: Optional type annotation expression string.
 
     Returns:
-        cst.FunctionDef: The modified function definition node with the new argument injected.
+        Modified ``cst.FunctionDef`` with the injected parameter.
     """
     params = list(node.params.params)
-    insert_idx = 0
-    if params and params[0].name.value == "self":
-      insert_idx = 1
+    insert_idx = 1 if (params and params[0].name.value == "self") else 0
 
-    # Avoid duplicate if already present
     if any(p.name.value == arg_name for p in params):
       return node
 
-    anno_node = cst.Annotation(annotation=self._create_dotted_name(annotation)) if annotation else None
+    anno_node = cst.Annotation(annotation=self.create_dotted_name(annotation)) if annotation else None
 
-    # Ensure comma on previous arg
     if insert_idx > 0 and params[insert_idx - 1].comma == cst.MaybeSentinel.DEFAULT:
       params[insert_idx - 1] = params[insert_idx - 1].with_changes(
         comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))
@@ -495,9 +611,10 @@ class ApiHelpersMixin:
     )
     params.insert(insert_idx, new_param)
 
-    # Fix trailing comma structure
     if params:
       params[-1] = params[-1].with_changes(comma=cst.MaybeSentinel.DEFAULT)
 
-    new_params_node = node.params.with_changes(params=params)
-    return node.with_changes(params=new_params_node)
+    return node.with_changes(params=node.params.with_changes(params=params))
+
+
+__all__ = ["ApiPassState", "MappingResolver"]

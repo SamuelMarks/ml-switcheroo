@@ -6,11 +6,11 @@ from scipy.special import erf
 
 
 def gelu_activation(x: np.typing.NDArray[np.float64], approximate: bool = False) -> np.typing.NDArray[np.float64]:
-  """Helper to gelu activation.
+  """Execute `np.asarray` to support gelu activation in numpy tests.
 
   Args:
       x: Primary input tensor or array operand.
-      approximate: The approximate (bool) for gelu activation.
+      approximate: Input `approximate` parameter value (`bool`).
 
   Returns:
       Resulting `np.typing.NDArray[np.float64]` from gelu activation.

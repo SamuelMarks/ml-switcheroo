@@ -17,7 +17,15 @@ from ml_switcheroo.core.compiler.isa.lifter import IsaLifter
 
 
 class NvidiaSassLifter(IsaLifter[NvidiaSassNode, NvidiaSassInstruction, NvidiaSassComment]):
-  """Reconstruct a LogicalGraph from a sequence of NVIDIA_SASS AST nodes."""
+  """Reconstruct a LogicalGraph from a sequence of NVIDIA_SASS AST nodes.
+
+  Attributes:
+      DEFAULT_GRAPH_NAME: The default graph name (`str`).
+      COMMENT_TYPE: The comment type (`type[NvidiaSassComment]`).
+      INSTRUCTION_TYPE: The instruction type (`type[NvidiaSassInstruction]`).
+      ANALYZER_CLS: The analyzer cls (`type[IsaAnalyzer]`).
+      ORPHAN_PREFIX: The orphan prefix (`str`).
+  """
 
   DEFAULT_GRAPH_NAME: str = "DecompiledModel"
   COMMENT_TYPE: type[NvidiaSassComment] = NvidiaSassComment
@@ -45,5 +53,7 @@ class NvidiaSassLifter(IsaLifter[NvidiaSassNode, NvidiaSassInstruction, NvidiaSa
       dest_name = node.operands[0].name
 
     kind = f"asm.{node.opcode}"
-    meta: dict[str, str | int | float] = {f"arg_{i}": str(op) for i, op in enumerate(node.operands)}
+    meta: dict[str, str | int | float] = {
+      f"arg_{i}": str(op).lstrip(", \t").strip() for i, op in enumerate(node.operands)
+    }
     return dest_name, kind, meta

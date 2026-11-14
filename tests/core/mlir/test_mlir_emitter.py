@@ -1,17 +1,36 @@
-"""Test suite for the Mlir Emitter module."""
+"""Unit tests for `PythonToMlirEmitter` and `SSAContext` (`ml_switcheroo.core.mlir.emitter`)."""
+
+import collections
+from unittest import mock
 
 import libcst as cst
 from libcst._nodes.internal import CodegenState
 
-from ml_switcheroo.core.mlir.cst import ModuleNode, ValueNode
+from ml_switcheroo.core.mlir.cst import ModuleNode, OperationNode
 from ml_switcheroo.core.mlir.emitter import PythonToMlirEmitter, SSAContext
 
+_NL = chr(10)
 
-def test_ssa_context() -> None:
-  """Verifies the behavior of ssa context."""
+
+def convert_code(code: str) -> str:
+  """Parse Python `code` and lower it to MLIR text via `PythonToMlirEmitter`.
+
+  Args:
+      code: Python source code snippet.
+
+  Returns:
+      Serialized MLIR text representation.
+  """
+  tree = cst.parse_module(code.strip())
+  mlir_node: ModuleNode = PythonToMlirEmitter().convert(tree)
+  return mlir_node.to_text()
+
+
+def test_ssa_context_scopes_and_lookups() -> None:
+  """Verify `SSAContext` lexical scope nesting, SSA allocation, and root-scope guard."""
   ctx = SSAContext()
   ctx.enter_scope()
-  val1: ValueNode = ctx.allocate_ssa()
+  val1 = ctx.allocate_ssa()
   assert val1.name == "%0"
   ctx.declare("foo", val1)
   assert ctx.lookup("foo") == val1
@@ -22,299 +41,199 @@ def test_ssa_context() -> None:
   assert len(ctx._scopes) == 1
 
 
-def test_emitter_empty_module() -> None:
-  """Verifies the behavior of emitter empty module."""
+def test_emitter_modules_trivia_and_blocks() -> None:
+  """Verify `PythonToMlirEmitter.convert`, `_extract_trivia`, and `_emit_block` across trivia shapes."""
   emitter = PythonToMlirEmitter()
-  tree: cst.Module = cst.parse_module("")
-  mod: ModuleNode = emitter.convert(tree)
-  assert len(mod.body.operations) == 0
+  assert emitter.convert(cst.parse_module("")).body.operations == []
 
+  header_only = emitter.convert(cst.parse_module(f"# header{_NL}# another{_NL}"))
+  assert header_only.body.operations == []
 
-def test_emitter_module_trivia() -> None:
-  """Verifies the behavior of emitter module trivia."""
-  emitter = PythonToMlirEmitter()
-  tree: cst.Module = cst.parse_module("# header\n\nx = 1")
-  mod: ModuleNode = emitter.convert(tree)
-  assert len(mod.body.operations) == 1
-  trivia = mod.body.operations[0].leading_trivia
-  assert len(trivia) >= 1
-  assert any((t.text.startswith("// header") for t in trivia))
-
-
-def test_emitter_import() -> None:
-  """Verifies the behavior of emitter import."""
-  emitter = PythonToMlirEmitter()
-  tree: cst.Module = cst.parse_module("import os\nfrom math import sqrt as root")
-  mod: ModuleNode = emitter.convert(tree)
-  ops = mod.body.operations
-  assert len(ops) == 2
-  assert ops[0].name == "sw.import"
-  assert ops[1].name == "sw.import"
-
-
-def test_emitter_import_star() -> None:
-  """Verifies the behavior of emitter import star."""
-  emitter = PythonToMlirEmitter()
-  tree: cst.Module = cst.parse_module("from os import *")
-  mod: ModuleNode = emitter.convert(tree)
-  ops = mod.body.operations
+  with_header_and_footer = emitter.convert(cst.parse_module(f"# header{_NL}{_NL}x = 1  # inline{_NL}# footer{_NL}"))
+  ops = with_header_and_footer.body.operations
   assert len(ops) == 1
-  assert ops[0].name == "sw.import"
-  assert any((a.name == "names" and a.value == ['"*"'] for a in ops[0].attributes))
+  assert any(t.text.startswith("// header") for t in ops[0].leading_trivia)
+  assert any(t.text.startswith("// inline") for t in ops[0].leading_trivia)
 
-
-def test_emitter_assign() -> None:
-  """Verifies the behavior of emitter assign."""
-  emitter = PythonToMlirEmitter()
-  tree: cst.Module = cst.parse_module("x = 1")
-  mod: ModuleNode = emitter.convert(tree)
-  assert len(mod.body.operations) == 1
-  assert emitter.ctx.lookup("x") is not None
-
-
-def test_emitter_assign_attr() -> None:
-  """Verifies the behavior of emitter assign attribute."""
-  emitter = PythonToMlirEmitter()
-  tree: cst.Module = cst.parse_module("self.x = 1")
-  mod: ModuleNode = emitter.convert(tree)
-  assert len(mod.body.operations) == 1
-
-
-def test_emitter_assign_attr_known() -> None:
-  """Verifies the behavior of emitter assign attribute known."""
-  emitter = PythonToMlirEmitter()
-  val: ValueNode = emitter.ctx.allocate_ssa()
-  emitter.ctx.declare("self", val)
-  tree: cst.Module = cst.parse_module("self.x = 1")
-  mod: ModuleNode = emitter.convert(tree)
-  assert len(mod.body.operations) == 2
-  assert mod.body.operations[1].name == "sw.setattr"
-
-
-def test_emitter_return() -> None:
-  """Verifies the behavior of emitter return."""
-  emitter = PythonToMlirEmitter()
-  tree: cst.Module = cst.parse_module("return 42")
-  mod: ModuleNode = emitter.convert(tree)
-  ops = mod.body.operations
-  assert len(ops) == 2
-  assert ops[1].name == "sw.return"
-
-
-def test_emitter_return_empty() -> None:
-  """Verifies the behavior of emitter return empty."""
-  emitter = PythonToMlirEmitter()
-  tree: cst.Module = cst.parse_module("return")
-  mod: ModuleNode = emitter.convert(tree)
-  assert len(mod.body.operations) == 1
-  assert mod.body.operations[0].name == "sw.return"
-
-
-def test_emitter_expr() -> None:
-  """Verifies the behavior of emitter expr."""
-  emitter = PythonToMlirEmitter()
-  tree: cst.Module = cst.parse_module("1 + 1")
-  mod: ModuleNode = emitter.convert(tree)
-  ops = mod.body.operations
-  assert len(ops) == 3
-
-
-def test_get_binop_str() -> None:
-  """Gets binop string."""
-  emitter = PythonToMlirEmitter()
-  assert emitter._get_binop_str(cst.Add()) == "add"
-  assert emitter._get_binop_str(cst.Subtract()) == "sub"
-  assert emitter._get_binop_str(cst.Multiply()) == "mul"
-  assert emitter._get_binop_str(cst.Divide()) == "div"
-  assert emitter._get_binop_str(cst.FloorDivide()) == "floordiv"
-  assert emitter._get_binop_str(cst.Modulo()) == "mod"
-  assert emitter._get_binop_str(cst.Power()) == "pow"
-  assert emitter._get_binop_str(cst.MatrixMultiply()) == "matmul"
-  assert emitter._get_binop_str(cst.LeftShift()) == "lshift"
-  assert emitter._get_binop_str(cst.RightShift()) == "rshift"
-  assert emitter._get_binop_str(cst.BitAnd()) == "and"
-  assert emitter._get_binop_str(cst.BitOr()) == "or"
-  assert emitter._get_binop_str(cst.BitXor()) == "xor"
-
-  class MockOp(cst.BaseBinaryOp):
-    """Mock."""
-
-    def _codegen_impl(self, state: CodegenState, default_indicator: str | None = None) -> None:
-      """Codegen.
-
-      Args:
-          state: The state (CodegenState) for  codegen impl.
-          default_indicator: The default indicator (str | None) for  codegen impl.
-      """
-      pass
-
-    def _visit_and_replace_children(self, visitor: cst.CSTVisitorT) -> "MockOp":
-      """Visit.
-
-      Args:
-          visitor: The visitor (cst.CSTVisitorT) for  visit and replace children.
-
-      Returns:
-          Resulting `'MockOp'` from visit and replace children.
-      """
-      return self
-
-  assert emitter._get_binop_str(MockOp()) == "unknown"
-
-
-def convert_code(code: str) -> str:
-  """Converts code.
-
-  Returns:
-      Resulting `str` from convert code.
-  """
-  tree: cst.Module = cst.parse_module(code.strip())
-  emitter = PythonToMlirEmitter()
-  mlir_node: ModuleNode = emitter.convert(tree)
-  return mlir_node.to_text()
-
-
-def test_module_header_newline_and_trivia() -> None:
-  """Verifies the behavior of module header newline and trivia."""
-  code: str = "\n# A leading comment\n\nclass A:\n    pass\n"
-  mlir: str = convert_code(code)
-  assert "sw.module" in mlir
-  assert "// A leading comment" in mlir
-
-
-def test_statement_leading_trivia() -> None:
-  """Verifies the behavior of statement leading trivia."""
-  code: str = "\ndef func(a):\n\n    # Statement leading comment\n    return a\n"
-  mlir: str = convert_code(code)
-  assert "// Statement leading comment" in mlir
-
-
-def test_expr_statement_and_func_call() -> None:
-  """Verifies the behavior of expr statement and function call."""
-  code: str = "\ndef func(a):\n    print(a)\n    return a\n"
-  mlir: str = convert_code(code)
-  assert "sw.op" in mlir
-  assert "print" in mlir
-
-
-def test_imports() -> None:
-  """Verifies the behavior of imports."""
-  code: str = "\nimport numpy as np\nimport os\nfrom math import pi as p, sqrt\nfrom some_module import *\n"
-  mlir: str = convert_code(code)
-  assert "sw.import" in mlir
-
-
-def test_class_inheritance() -> None:
-  """Verifies the behavior of class inheritance."""
-  code: str = "\nclass MyLayer(nn.Module, Base):\n    pass\n"
-  mlir: str = convert_code(code)
-  assert 'bases = ["nn.Module", "Base"]' in mlir
-
-
-def test_attribute_assignment_unresolved() -> None:
-  """Verifies the behavior of attribute assignment unresolved."""
-  code: str = "\ndef __init__(self):\n    unresolved.layer1 = 10\n"
-  mlir: str = convert_code(code)
-  assert "sw.setattr" not in mlir
-
-
-def test_attribute_assignment() -> None:
-  """Verifies the behavior of attribute assignment."""
-  code: str = "\ndef __init__(self):\n    self.layer1 = 10\n"
-  mlir: str = convert_code(code)
-  assert "sw.setattr" in mlir
-
-
-def test_flatten_attr_none() -> None:
-  """Verifies the behavior of flatten attribute none."""
-  code: str = "\ndef func(a):\n    return a().attr\n"
-  mlir: str = convert_code(code)
-  assert "sw.return" in mlir
-
-
-def test_all_binops() -> None:
-  """Verifies the behavior of all binops."""
-  code: str = "\ndef math_ops(a, b):\n    v1 = a - b\n    v2 = a // b\n    v3 = a % b\n    v4 = a ** b\n    v5 = a @ b\n    v6 = a << b\n    v7 = a >> b\n    v8 = a & b\n    v9 = a | b\n    v10 = a ^ b\n    return v10\n"
-  mlir: str = convert_code(code)
-  assert "binop.sub" in mlir
-
-
-def test_unknown_binop() -> None:
-  """Verifies the behavior of unknown binop."""
-
-  class DummyBinOp(cst.BaseBinaryOp):
-    """Test helper class DummyBinOp."""
-
-    def _visit_and_replace_children(self, visitor: cst.CSTVisitorT) -> "DummyBinOp":
-      """Mock implementation of  visit and replace children.
-
-      Args:
-          visitor: The visitor (cst.CSTVisitorT) for  visit and replace children.
-
-      Returns:
-          Resulting `'DummyBinOp'` from visit and replace children.
-      """
-      return self
-
-    def _codegen_impl(self, state: CodegenState, default_indicator: str | None = None) -> None:
-      """Mock implementation of  codegen impl.
-
-      Args:
-          state: The state (CodegenState) for  codegen impl.
-          default_indicator: The default indicator (str | None) for  codegen impl.
-      """
-      pass
-
-  emitter = PythonToMlirEmitter()
-  assert emitter._get_binop_str(DummyBinOp()) == "unknown"
-
-
-def test_kwargs_in_call() -> None:
-  """Verifies the behavior of keyword arguments in call."""
-  code: str = "\ndef forward(x):\n    return torch.nn.functional.relu(x, inplace=True)\n"
-  mlir: str = convert_code(code)
-  assert "arg_keywords" in mlir
-
-
-def test_call_local_variable() -> None:
-  """Verifies the behavior of call local variable."""
-  code: str = "\ndef apply_func(func, x):\n    return func(x)\n"
-  mlir: str = convert_code(code)
-  assert "sw.call" in mlir
-
-
-def test_unhandled_expression() -> None:
-  """Verifies the behavior of unhandled expression."""
-  code: str = "\ndef func():\n    return lambda y: y\n"
-  mlir: str = convert_code(code)
-  assert "%error" in mlir
-
-
-def test_complex_type_annotation() -> None:
-  """Verifies the behavior of complex type annotation."""
-  code: str = "\ndef f(x: torch.Tensor, y: List[int]):\n    pass\n"
-  mlir: str = convert_code(code)
-  assert '!sw.type<"torch.Tensor">' in mlir
-
-
-def test_flatten_attr_none_cases() -> None:
-  """Verifies the behavior of flatten attribute none cases."""
-  emitter = PythonToMlirEmitter()
-  code: str = "\nclass A(b()):\n    pass\n"
-  emitter.convert(cst.parse_module(code.strip()))
-  code = "\ndef f():\n    b().attr = 1\n"
-  emitter.convert(cst.parse_module(code.strip()))
-  code = "\ndef f():\n    b().attr()\n"
-  _res = emitter.convert(cst.parse_module(code.strip()))
-  assert "sw.call" in _res.to_text()
-
-
-def test_extract_trivia_newlines() -> None:
-  """Verify extract trivia newlines behavior."""
-  emitter = PythonToMlirEmitter()
-  node = cst.SimpleStatementLine(
-    body=[cst.Pass()], leading_lines=[cst.EmptyLine(indent=False, comment=None, newline=cst.Newline(value="\n"))]
+  # Module with blank header EmptyLine (comment=None)
+  blank_hdr_mod = cst.Module(
+    header=[cst.EmptyLine(comment=None, newline=cst.Newline(_NL)), cst.EmptyLine(comment=None, newline=cst.Newline(""))],
+    body=[],
+    footer=[],
   )
-  trivia = emitter._extract_trivia(node)
-  assert len(trivia) == 1
-  assert trivia[0].text == "\n"
+  assert emitter.convert(blank_hdr_mod).body.operations == []
+
+  # Node without `leading_lines` attribute and custom `_LeadingLinesProtocol` shapes
+  assert emitter._extract_trivia(cst.Pass()) == []
+
+  stmt_blank_nl = cst.SimpleStatementLine(
+    body=[cst.Pass()],
+    leading_lines=[
+      cst.EmptyLine(indent=False, comment=None, newline=cst.Newline(value="")),
+      cst.EmptyLine(indent=False, comment=None, newline=cst.Newline(value=_NL)),
+    ],
+  )
+  extracted = emitter._extract_trivia(stmt_blank_nl)
+  assert len(extracted) == 1
+  assert extracted[0].text == _NL
+
+  # Sequence that is neither Suite nor list/tuple hits the non-matching `_emit_block` branch cleanly
+  assert emitter._emit_block([]).operations == []
+  assert emitter._emit_block(collections.deque[cst.CSTNode]()).operations == []
+
+
+def test_emitter_imports_assignments_and_returns() -> None:
+  """Verify `sw.import`, `sw.setattr`, `sw.return`, and multi-target/unresolved assignments."""
+  import_mlir = convert_code(
+    _NL.join(
+      [
+        "import numpy as np",
+        "import os",
+        "from math import pi as p, sqrt",
+        "from some_module import *",
+        "from . import local_sym",
+      ]
+    )
+  )
+  assert import_mlir.count("sw.import") == 5
+
+  emitter = PythonToMlirEmitter()
+  alias = cst.ImportAlias(cst.Name("math"), asname=cst.AsName(cst.Name("m")))
+  with mock.patch.object(cst.AsName, "name", cst.Tuple([])):
+    assert emitter._emit_import(cst.Import(names=[alias])).name == "sw.import"
+
+  # Assignments: local, chained, subscript, unresolved attribute, dynamic base attribute, known `self` attribute
+  assert len(emitter.convert(cst.parse_module("x = y = 1")).body.operations) == 1
+  assert emitter.ctx.lookup("x") is not None
+  assert len(emitter.convert(cst.parse_module("a[0] = 1")).body.operations) == 1
+  assert "sw.setattr" not in convert_code("self.unknown.attr = 5")
+  assert "sw.setattr" not in convert_code("foo().attr = 1")
+
+  known_emitter = PythonToMlirEmitter()
+  known_emitter.ctx.declare("self", known_emitter.ctx.allocate_ssa())
+  known_mod = known_emitter.convert(cst.parse_module("self.x = 1"))
+  assert [op.name for op in known_mod.body.operations] == ["sw.constant", "sw.setattr"]
+
+  assert [op.name for op in PythonToMlirEmitter().convert(cst.parse_module("return 42")).body.operations] == [
+    "sw.constant",
+    "sw.return",
+  ]
+  assert [op.name for op in PythonToMlirEmitter().convert(cst.parse_module("return")).body.operations] == ["sw.return"]
+
+
+def test_emitter_declarations_control_flow_and_expressions() -> None:
+  """Verify class/function declarations, control-flow stubs, binary ops, calls, and unhandled expressions."""
+  cls_mlir = convert_code(
+    _NL.join(
+      [
+        "# A leading comment",
+        "class MyLayer(nn.Module, Base, dynamic_base()):",
+        "    pass",
+        "class BareLayer:",
+        "    pass",
+        "class DynamicOnly(dynamic_base()):",
+        "    pass",
+      ]
+    )
+  )
+  assert "// A leading comment" in cls_mlir
+  assert "sw.module" in cls_mlir
+  assert 'bases = ["nn.Module", "Base"]' in cls_mlir
+
+  fn_mlir = convert_code(
+    _NL.join(
+      [
+        "def f(x: torch.Tensor, y: List[int], z):",
+        "    # Statement leading comment",
+        "    print(x)",
+        "    return torch.nn.functional.relu(x, inplace=True)",
+      ]
+    )
+  )
+  assert '!sw.type<"torch.Tensor">' in fn_mlir
+  assert "// Statement leading comment" in fn_mlir
+  assert "arg_keywords" in fn_mlir
+
+  assert "sw.call" in convert_code(_NL.join(["def apply_func(func, x):", "    return func(x)"]))
+  assert "sw.call" in convert_code(_NL.join(["def chained(a):", "    return a().attr()"]))
+  assert "sw.return" in convert_code(_NL.join(["def chained_attr(a):", "    return a().attr"]))
+  assert "%error" in convert_code(_NL.join(["def lam():", "    return lambda y: y"]))
+
+  emitter = PythonToMlirEmitter()
+  assert emitter.convert(cst.parse_module(f"if True:{_NL}    pass")).body.operations == []
+  assert emitter.convert(cst.parse_module(f"while True:{_NL}    pass")).body.operations == []
+  assert emitter._emit_statement(cst.SimpleStatementLine(body=[])) == []
+  assert emitter._dispatch_small_stmt(cst.Pass()) == []
+  assert emitter._flatten_attr(cst.Pass()) is None
+
+  # Non-Name parameter defensive branch in `_emit_func_def`
+  parsed_fn = cst.ensure_type(cst.parse_statement("def f(x): pass"), cst.FunctionDef)
+  with mock.patch.object(cst.Param, "name", cst.Tuple([])):
+    assert emitter._emit_func_def(parsed_fn).name == "sw.func"
+
+  # Binary operators & custom fallback
+  binops_code = _NL.join(
+    [
+      "def math_ops(a, b):",
+      "    v0 = a + b",
+      "    v1 = a - b",
+      "    v2 = a * b",
+      "    v3 = a / b",
+      "    v4 = a // b",
+      "    v5 = a % b",
+      "    v6 = a ** b",
+      "    v7 = a @ b",
+      "    v8 = a << b",
+      "    v9 = a >> b",
+      "    v10 = a & b",
+      "    v11 = a | b",
+      "    v12 = a ^ b",
+      "    return v12",
+    ]
+  )
+  bin_mlir = convert_code(binops_code)
+  assert "binop.add" in bin_mlir
+  assert "binop.sub" in bin_mlir
+  assert "binop.xor" in bin_mlir
+
+  class _CustomBinaryOp(cst.BaseBinaryOp):
+    """Custom `BaseBinaryOp` subclass exercising the `'unknown'` operator fallback."""
+
+    def _codegen_impl(self, state: CodegenState, default_indicator: str | None = None) -> None:
+      """No-op codegen hook required by `BaseBinaryOp`.
+
+      Args:
+          state: LibCST codegen state.
+          default_indicator: Optional whitespace indicator.
+      """
+
+    def _visit_and_replace_children(self, visitor: cst.CSTVisitorT) -> "_CustomBinaryOp":
+      """Return `self` unchanged during child traversal.
+
+      Args:
+          visitor: LibCST visitor instance.
+
+      Returns:
+          Unchanged `_CustomBinaryOp` instance.
+      """
+      return self
+
+  assert emitter._get_binop_str(_CustomBinaryOp()) == "unknown"
+
+  class _CustomStmtEmitter(PythonToMlirEmitter):
+    """Subclass returning an `OperationNode` so statement trivia prepending is exercised."""
+
+    def _dispatch_small_stmt(self, node: cst.CSTNode) -> list[OperationNode]:
+      """Return a single dummy `OperationNode`.
+
+      Args:
+          node: Inner small statement CST node.
+
+      Returns:
+          Single-element `OperationNode` list.
+      """
+      return [OperationNode(name="dummy", leading_trivia=[])]
+
+  triv_ops = _CustomStmtEmitter()._emit_statement(cst.parse_statement(f"# comment{_NL}dummy()"))
+  assert len(triv_ops) == 1
+  assert any("// comment" in t.text for t in triv_ops[0].leading_trivia)

@@ -1,9 +1,6 @@
 """Test suite for the Injector Plugin module."""
 
-from tests.conftest import _test_getattr
-
 import pathlib
-
 from pathlib import Path
 
 import pytest
@@ -14,7 +11,7 @@ from ml_switcheroo.tools.injector_plugin import PluginGenerator
 
 @pytest.fixture
 def plugin_dir(tmp_path: pathlib.Path) -> pathlib.Path:
-  """Execute plugin dir helper logic.
+  """Create a configured `pathlib.Path` fixture for injector plugin tests.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
@@ -28,7 +25,7 @@ def plugin_dir(tmp_path: pathlib.Path) -> pathlib.Path:
 
 
 def test_filename_normalization(plugin_dir: pathlib.Path) -> None:
-  """Verifies the behavior of filename normalization.
+  """Verify `PluginGenerator` emits `def MyCustomHook(` for filename normalization.
 
   Args:
       plugin_dir: Temporary directory containing scaffolded plugin files.
@@ -59,7 +56,7 @@ def test_func_finder_other_func() -> None:
   tree = cst.parse_module(code)
   finder = BodyExtractor("target_func")
   tree.visit(finder)
-  assert _test_getattr(finder, "found") is True
+  assert finder.found is True
 
 
 def test_generate_call_plugin(plugin_dir: pathlib.Path) -> None:
@@ -144,7 +141,7 @@ def test_generate_plugin_with_rules(plugin_dir: pathlib.Path) -> None:
 
 
 def test_preserves_user_logic(plugin_dir: pathlib.Path) -> None:
-  """Verifies the behavior of preserves user logic.
+  """Verify `PluginGenerator` emits `Updated Docstring` for preserves user logic.
 
   Args:
       plugin_dir: Temporary directory containing scaffolded plugin files.
@@ -167,7 +164,7 @@ def test_preserves_user_logic(plugin_dir: pathlib.Path) -> None:
 
 
 def test_preserves_logic_with_complex_indentation(plugin_dir: pathlib.Path) -> None:
-  """Verifies the behavior of preserves logic with complex indentation.
+  """Verify `PluginGenerator` handles preserves logic with complex indentation as expected.
 
   Args:
       plugin_dir: Temporary directory containing scaffolded plugin files.
@@ -186,7 +183,7 @@ def test_preserves_logic_with_complex_indentation(plugin_dir: pathlib.Path) -> N
 
 
 def test_preserves_logic_with_simple_statement_suite(plugin_dir: pathlib.Path) -> None:
-  """Verify preserves logic with simple statement suite behavior.
+  """Verify `PluginGenerator` handles preserves logic with simple statement suite as expected.
 
   Args:
       plugin_dir: Temporary directory containing scaffolded plugin files.
@@ -205,7 +202,7 @@ def test_preserves_logic_with_simple_statement_suite(plugin_dir: pathlib.Path) -
 
 
 def test_preserves_logic_empty_body(plugin_dir: pathlib.Path) -> None:
-  """Verify preserves logic empty body behavior.
+  """Verify `PluginGenerator` emits `return node` for preserves logic empty body.
 
   Args:
       plugin_dir: Temporary directory containing scaffolded plugin files.
@@ -221,7 +218,7 @@ def test_preserves_logic_empty_body(plugin_dir: pathlib.Path) -> None:
 
 
 def test_injector_plugin_edge_cases(plugin_dir: pathlib.Path) -> None:
-  """Verify injector plugin edge cases behavior.
+  """Verify `PluginGenerator` handles injector plugin edge cases as expected.
 
   Args:
       plugin_dir: Temporary directory containing scaffolded plugin files.
@@ -253,7 +250,7 @@ def test_injector_plugin_edge_cases(plugin_dir: pathlib.Path) -> None:
 
 
 def test_user_logic_trumps_rules(plugin_dir: pathlib.Path) -> None:
-  """Verifies the behavior of user logic trumps rules.
+  """Verify `PluginGenerator` handles user logic trumps rules as expected.
 
   Args:
       plugin_dir: Temporary directory containing scaffolded plugin files.
@@ -272,7 +269,7 @@ def test_user_logic_trumps_rules(plugin_dir: pathlib.Path) -> None:
 
 
 def test_overwrite_on_syntax_error(plugin_dir: pathlib.Path, capsys: pytest.CaptureFixture[str]) -> None:
-  """Verifies the behavior of overwrite on syntax correctly handling an error.
+  """Verify `PluginGenerator` emits `Overwriting` for overwrite on syntax error.
 
   Args:
       plugin_dir: Temporary directory containing scaffolded plugin files.
@@ -292,7 +289,7 @@ def test_overwrite_on_syntax_error(plugin_dir: pathlib.Path, capsys: pytest.Capt
 
 
 def test_auto_wire_generation(plugin_dir: pathlib.Path) -> None:
-  """Verifies the behavior of auto wire generation.
+  """Verify `PluginGenerator` handles auto wire generation as expected.
 
   Args:
       plugin_dir: Temporary directory containing scaffolded plugin files.
@@ -318,7 +315,7 @@ def test_auto_wire_generation(plugin_dir: pathlib.Path) -> None:
 
 
 def test_injector_plugin_missing() -> None:
-  """Verifies the behavior of injector plugin missing."""
+  """Verify `BodyExtractor` handles injector plugin missing as expected."""
   from pathlib import Path
 
   import libcst as cst
@@ -327,12 +324,12 @@ def test_injector_plugin_missing() -> None:
 
   extractor = BodyExtractor("foo")
   extractor.visit_FunctionDef(cst.FunctionDef(name=cst.Name("bar"), params=cst.Parameters(), body=cst.IndentedBlock([])))
-  assert _test_getattr(extractor, "found") is False
+  assert extractor.found is False
   _ = PluginGenerator(Path("."))
 
 
 def test_injector_plugin_generate_body_logic() -> None:
-  """Verifies the behavior of injector plugin generate body logic."""
+  """Verify `PluginGenerator` handles injector plugin generate body logic as expected."""
   from pathlib import Path
 
   import libcst as cst

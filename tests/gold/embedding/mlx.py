@@ -1,19 +1,18 @@
 """Test suite for the Mlx module."""
 
 import mlx.core as mx
-
 import mlx.nn as nn
 
 
 class EmbeddingModel:
-  """Test helper class EmbeddingModel."""
+  """Sentinel `EmbeddingModel` fixture class used in MLX tests."""
 
   def __init__(self, num_embeddings: int, embedding_dim: int):
     """Initializes the EmbeddingModel instance.
 
     Args:
-        num_embeddings: The num embeddings (int) for   init  .
-        embedding_dim: The embedding dim (int) for   init  .
+        num_embeddings: Input `num_embeddings` parameter value (`int`).
+        embedding_dim: Input `embedding_dim` parameter value (`int`).
     """
     super().__init__()
     self.emb = nn.Embedding(num_embeddings, embedding_dim)

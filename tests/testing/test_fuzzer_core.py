@@ -1,21 +1,22 @@
 """Test suite for the Fuzzer Core module."""
 
 from unittest import mock
+
 from pydantic import JsonValue
 
 
 def test_fuzzer_core_coverage() -> None:
-  """Verifies the behavior of fuzzer core coverage."""
+  """Verify `InputFuzzer` returns `1` for fuzzer core coverage."""
   from ml_switcheroo.testing.fuzzer.core import InputFuzzer
 
   ig: InputFuzzer = InputFuzzer()
   ig.build_strategies(["shape", "axis", "mask", "indices", "alpha", "inputs"])
 
   class FailingAdapter:
-    """Test helper class FailingAdapter."""
+    """Test double `FailingAdapter` implementing `convert` for fuzzer core tests."""
 
     def convert(self, x: JsonValue) -> JsonValue:
-      """Converts .
+      """Convert input payload in test stub.
 
       Args:
           x: Primary input tensor or array operand.

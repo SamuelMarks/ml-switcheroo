@@ -11,18 +11,19 @@ It supports:
 4.  **Weight Migration**: Loading checkpoints via ``tf.train.load_checkpoint``.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
 import logging
 import textwrap
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.frameworks.base import (
+  FrameworkSnapshot,
   ImportConfig,
   InitMode,
   PluginTraits,
+  SnapshotBackedAdapter,
   StandardMap,
   StructuralTraits,
   load_snapshot_for_adapter,
@@ -45,6 +46,11 @@ class TensorFlowAdapter:
   -   mapping ``torch.nn.Module`` to ``keras.Layer``.
   -   mapping ``torch.*`` math to ``tf.math.*``.
   -   mapping IO operations to ``tf.io.*``.
+
+  Attributes:
+      display_name: The display name (`str`).
+      inherits_from: The inherits from (`str | None`).
+      ui_priority: The ui priority (`int`).
   """
 
   display_name: str = "TensorFlow"
@@ -59,13 +65,14 @@ class TensorFlowAdapter:
     -   **GHOST**: If missing, it attempts to load a ``tensorflow_v*.json`` snapshot
         to allow basic translation without dependencies.
     """
-    self._mode = InitMode.LIVE
-    self._snapshot_data = {}
-    if tf is None:
-      self._mode = InitMode.GHOST
-      self._snapshot_data = load_snapshot_for_adapter("tensorflow")
-      if not self._snapshot_data:
-        logging.debug("TensorFlow not installed and no snapshot found.")
+    self._snapshot = SnapshotBackedAdapter(
+      "tensorflow",
+      is_live_available=tf is not None,
+      loader=load_snapshot_for_adapter,
+      missing_message="TensorFlow not installed and no snapshot found.",
+    )
+    self._mode: InitMode = self._snapshot.mode
+    self._snapshot_data: FrameworkSnapshot | None = self._snapshot.snapshot
 
   @property
   def import_alias(self) -> tuple[str, str]:
@@ -280,7 +287,7 @@ class TensorFlowAdapter:
     """
     if "mappings" not in snapshot:
       return
-    for _, entry in snapshot["mappings"].items():
+    for entry in snapshot["mappings"].values():
       if not isinstance(entry, dict) or "api" not in entry:
         continue
       api = entry["api"]
@@ -371,7 +378,7 @@ class TensorFlowAdapter:
     """
     if op == "save" and object_arg:
       return f"tf.io.write_file({file_arg}, {object_arg})"
-    elif op == "load":
+    if op == "load":
       return f"tf.io.read_file({file_arg})"
     return ""
 

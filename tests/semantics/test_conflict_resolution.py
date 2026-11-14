@@ -1,21 +1,17 @@
 """Test suite for the Conflict Resolution module."""
 
-from tests.conftest import _test_getattr
-
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
-
 import warnings
 
 import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.merging import merge_tier_data
 
 
 class MockConflictSemantics(SemanticsManager):
-  """Test helper class MockConflictSemantics."""
+  """Minimal `SemanticsManager` test double used in conflict resolution tests."""
 
   def __init__(self) -> None:
     """Initializes the MockConflictSemantics instance."""
@@ -42,7 +38,7 @@ def test_merge_clean_insert() -> None:
 
 
 def test_array_vs_neural_silent_upgrade() -> None:
-  """Verifies the behavior of array vs neural silent upgrade."""
+  """Verify `merge_tier_data` returns `0` for array vs neural silent upgrade."""
   mgr = MockConflictSemantics()
   merge_tier_data(
     data=mgr.data,
@@ -67,7 +63,7 @@ def test_array_vs_neural_silent_upgrade() -> None:
 
 
 def test_extras_override_silence() -> None:
-  """Verify extras override silence behavior."""
+  """Verify `merge_tier_data` returns `2` for extras override silence."""
   mgr = MockConflictSemantics()
   merge_tier_data(
     data=mgr.data,
@@ -92,7 +88,7 @@ def test_extras_override_silence() -> None:
 
 
 def test_duplicate_same_tier_arg_count_upgrade_silent() -> None:
-  """Verifies the behavior of duplicate same tier argument count upgrade silent."""
+  """Verify `merge_tier_data` handles duplicate same tier arg count upgrade silent as expected."""
   mgr = MockConflictSemantics()
   content_a = {"add": {"std_args": ["a"]}}
   content_b = {"add": {"std_args": ["x", "y"]}}
@@ -118,7 +114,7 @@ def test_duplicate_same_tier_arg_count_upgrade_silent() -> None:
 
 
 def test_duplicate_same_tier_arg_count_downgrade_protects_old() -> None:
-  """Verifies the behavior of duplicate same tier argument count downgrade protects old."""
+  """Verify `merge_tier_data` handles duplicate same tier arg count downgrade protects old as expected."""
   mgr = MockConflictSemantics()
   content_rich = {"add": {"std_args": ["x", "y"], "description": "Rich"}}
   content_poor = {"add": {"std_args": ["x"], "description": "Poor"}}
@@ -141,7 +137,7 @@ def test_duplicate_same_tier_arg_count_downgrade_protects_old() -> None:
 
 
 def test_duplicate_same_tier_ambiguous_warning() -> None:
-  """Verifies the behavior of duplicate same tier ambiguous warning."""
+  """Verify `merge_tier_data` handles duplicate same tier ambiguous warning as expected."""
   mgr = MockConflictSemantics()
   content_a = {"add": {"std_args": ["x", "y"]}}
   content_b = {"add": {"std_args": ["a", "b"]}}
@@ -163,7 +159,7 @@ def test_duplicate_same_tier_ambiguous_warning() -> None:
 
 
 def test_duplicate_same_tier_identical_is_silent() -> None:
-  """Verifies the behavior of duplicate same tier identical is silent."""
+  """Verify `merge_tier_data` handles duplicate same tier identical is silent as expected."""
   mgr = MockConflictSemantics()
   content_a = {"add": {"std_args": ["x"], "description": "v1"}}
   content_b = {"add": {"std_args": ["x"], "description": "v2"}}
@@ -200,19 +196,9 @@ def test_build_index_refresh() -> None:
     tier=SemanticTier.ARRAY_API,
   )
   mgr._build_index()
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": mgr}, "__getitem__")("v").get_definition}, "__getitem__")("v")(
-            _test_getattr({"v": "torch.abs"}, "__getitem__")("v")
-          )
-        },
-        "__getitem__",
-      )("v")[0]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "abs"}, "__getitem__")("v")
+  defn_a = mgr.get_definition("torch.abs")
+  assert defn_a is not None
+  assert defn_a[0] == "abs"
   merge_tier_data(
     data=mgr.data,
     key_origins=mgr._key_origins,
@@ -221,17 +207,7 @@ def test_build_index_refresh() -> None:
     tier=SemanticTier.EXTRAS,
   )
   mgr._build_index()
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": mgr}, "__getitem__")("v").get_definition}, "__getitem__")("v")(
-            _test_getattr({"v": "torch.absolute"}, "__getitem__")("v")
-          )
-        },
-        "__getitem__",
-      )("v")[0]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "abs"}, "__getitem__")("v")
+  defn_c = mgr.get_definition("torch.absolute")
+  assert defn_c is not None
+  assert defn_c[0] == "abs"
   assert mgr.get_definition("torch.abs") is None

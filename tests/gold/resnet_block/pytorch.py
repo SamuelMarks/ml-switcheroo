@@ -5,13 +5,13 @@ import torch.nn as nn
 
 
 class ResidualBlock(nn.Module):
-  """Test helper class ResidualBlock."""
+  """Stub `nn.Module` subclass implementing `forward` for pytorch tests."""
 
   def __init__(self, channels: int):
     """Initializes the ResidualBlock instance.
 
     Args:
-        channels: The channels (int) for   init  .
+        channels: Input `channels` parameter value (`int`).
     """
     super().__init__()
     self.conv1 = nn.Conv2d(channels, channels, kernel_size=3, padding=1)
@@ -21,7 +21,7 @@ class ResidualBlock(nn.Module):
     self.bn2 = nn.BatchNorm2d(channels)
 
   def forward(self, x: torch.Tensor) -> torch.Tensor:
-    """Helper to forward.
+    """Compute the forward pass of `ResidualBlock` on input tensors.
 
     Args:
         x: Primary input tensor or array operand.
@@ -36,5 +36,4 @@ class ResidualBlock(nn.Module):
     out = self.conv2(out)
     out = self.bn2(out)
     out += residual
-    out = self.relu(out)
-    return out
+    return self.relu(out)

@@ -4,12 +4,12 @@ import tensorflow as tf
 
 
 def rnn_loop(cell: tf.Tensor, x: tf.Tensor, init_state: tf.Tensor) -> tf.Tensor:
-  """Helper to rnn loop.
+  """Execute `cell` to support rnn loop in tensorflow tests.
 
   Args:
-      cell: The cell (tf.Tensor) for rnn loop.
+      cell: Input `cell` parameter value (`tf.Tensor`).
       x: Primary input tensor or array operand.
-      init_state: The init state (tf.Tensor) for rnn loop.
+      init_state: Input `init_state` parameter value (`tf.Tensor`).
 
   Returns:
       Resulting `tf.Tensor` from rnn loop.
@@ -19,13 +19,11 @@ def rnn_loop(cell: tf.Tensor, x: tf.Tensor, init_state: tf.Tensor) -> tf.Tensor:
     """Scans fn.
 
     Args:
-        carry: The carry (tf.Tensor) for scan fn.
-        inputs: The inputs (tf.Tensor) for scan fn.
+        carry: Input `carry` parameter value (`tf.Tensor`).
+        inputs: Input `inputs` parameter value (`tf.Tensor`).
 
     Returns:
         Resulting `tf.Tensor` from scan fn.
     """
-    out, next_state = cell(inputs, carry)
+    _out, next_state = cell(inputs, carry)
     return next_state
-
-  pass

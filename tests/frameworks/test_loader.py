@@ -36,6 +36,9 @@ def test_load_definitions_json_error(tmp_path: Path) -> None:
     def joinpath(self, path: str) -> Path:
       """Return bad json path.
 
+      Args:
+          path: Relative resource filename.
+
       Returns:
           Resulting `Path` from joinpath.
       """
@@ -60,6 +63,9 @@ def test_load_definitions_success(tmp_path: Path) -> None:
 
     def joinpath(self, path: str) -> Path:
       """Return good json path.
+
+      Args:
+          path: Relative resource filename.
 
       Returns:
           Resulting `Path` from joinpath.
@@ -99,6 +105,6 @@ def test_get_definitions_path() -> None:
 
 def test_get_definitions_path_exception() -> None:
   """Test get_definitions_path fallback on exception."""
-  with patch("importlib.resources.files", side_effect=Exception("Failed")):
+  with patch("importlib.resources.files", side_effect=RuntimeError("Failed")):
     path: Path = get_definitions_path("test_fw")
     assert path == Path("test_fw.json")

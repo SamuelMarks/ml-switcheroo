@@ -1,7 +1,5 @@
 """Test suite for the Optimizer Step module."""
 
-from tests.conftest import _test_getattr
-
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -68,14 +66,7 @@ def test_transform_optimizer_step() -> None:
   """Transforms optimizer step."""
   ctx: HookContext = MagicMock(spec=HookContext)
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("opt"), attr=cst.Name("step")), args=[])
-  result: cst.CSTNode | cst.Call = _test_getattr(
-    {
-      "v": _test_getattr({"v": transform_optimizer_step}, "__getitem__")("v")(
-        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
-      )
-    },
-    "__getitem__",
-  )("v")
+  result: cst.CSTNode | cst.FlattenSentinel[cst.BaseStatement] = transform_optimizer_step(node, ctx)
   assert result is node
 
 
@@ -83,31 +74,18 @@ def test_transform_optimizer_step_no_leading_lines() -> None:
   """Transforms optimizer step no leading lines."""
   ctx: HookContext = MagicMock(spec=HookContext)
   node: cst.Call = cst.Call(func=cst.Name("step"), args=[])
-  result: cst.CSTNode | cst.Call = _test_getattr(
-    {
-      "v": _test_getattr({"v": transform_optimizer_step}, "__getitem__")("v")(
-        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
-      )
-    },
-    "__getitem__",
-  )("v")
+  result: cst.CSTNode | cst.FlattenSentinel[cst.BaseStatement] = transform_optimizer_step(node, ctx)
   assert result is node
 
 
 def test_strip_zero_grad() -> None:
-  """Verifies the behavior of strip zero grad."""
+  """Verify `Call` handles strip zero grad as expected."""
   ctx: HookContext = MagicMock(spec=HookContext)
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("opt"), attr=cst.Name("zero_grad")), args=[])
-  new_node: cst.CSTNode | cst.Name | cst.Call = _test_getattr(
-    {
-      "v": _test_getattr({"v": strip_zero_grad}, "__getitem__")("v")(
-        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
-      )
-    },
-    "__getitem__",
-  )("v")
+  new_node: cst.CSTNode | cst.FlattenSentinel[cst.BaseStatement] = strip_zero_grad(node, ctx)
   assert isinstance(new_node, cst.Call)
-  assert _test_getattr(new_node.func, "value") == "None"
+  assert isinstance(new_node.func, cst.Name)
+  assert new_node.func.value == "None"
 
 
 def test_optimizer_init_missing_api() -> None:
@@ -120,3 +98,21 @@ def test_optimizer_init_missing_api() -> None:
   assert cst.Module(body=[]).code_for_node(transform_optimizer_init(node, ctx)) == "opt(lr=0.1)"
   node_empty = cst.ensure_type(cst.parse_expression("opt()"), cst.Call)
   assert cst.Module(body=[]).code_for_node(transform_optimizer_init(node_empty, ctx)) == "opt()"
+
+
+def test_optimizer_init_keyword_params_and_scalar_arg() -> None:
+  """Verify keyword params stripping, variant arg mapping, and scalar lr preservation."""
+  from ml_switcheroo.core.dsl import FrameworkVariant
+
+  ctx = MagicMock(spec=HookContext)
+  ctx.current_op_id = "Adam"
+  ctx.lookup_api.return_value = "optax.adam"
+  ctx.current_variant = FrameworkVariant(api="optax.adam", args={"lr": "learning_rate"})
+
+  kw_node = cst.ensure_type(cst.parse_expression("Adam(params=p, lr=0.01)"), cst.Call)
+  kw_res = transform_optimizer_init(kw_node, ctx)
+  assert cst.Module(body=[]).code_for_node(kw_res) == "optax.adam(learning_rate=0.01)"
+
+  scalar_node = cst.ensure_type(cst.parse_expression("Adam(-0.01)"), cst.Call)
+  scalar_res = transform_optimizer_init(scalar_node, ctx)
+  assert cst.Module(body=[]).code_for_node(scalar_res) == "optax.adam(-0.01)"

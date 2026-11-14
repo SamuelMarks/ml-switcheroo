@@ -8,8 +8,6 @@ Extends the JAX core adapter with Flax's Neural Network Extensions (nnx).
 - Wires important plugins and structural traits.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
 import logging
 import textwrap
 from types import ModuleType
@@ -17,15 +15,22 @@ from types import ModuleType
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.frameworks.base import (
+  FrameworkSnapshot,
   GhostRef,
   ImportConfig,
-  InitMode as InitMode,
   PluginTraits,
-  StandardMap as StandardMap,
+  SnapshotBackedAdapter,
   StructuralTraits,
   load_snapshot_for_adapter,
   register_framework,
+)
+from ml_switcheroo.frameworks.base import (
+  InitMode as InitMode,
+)
+from ml_switcheroo.frameworks.base import (
+  StandardMap as StandardMap,
 )
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 from ml_switcheroo.frameworks.loader import load_definitions
@@ -55,6 +60,11 @@ class FlaxNNXAdapter(JAXStackMixin):
   - Explicit neural network layers and activations.
   - Correct import aliasing for `from flax import nnx`.
   - Structural traits targeting Flax's nnx Module base.
+
+  Attributes:
+      display_name: The display name (`str`).
+      inherits_from: The inherits from (`str`).
+      ui_priority: The ui priority (`int`).
   """
 
   display_name: str = "Flax NNX"
@@ -67,16 +77,15 @@ class FlaxNNXAdapter(JAXStackMixin):
     - Chooses LIVE mode if `flax.nnx` can be imported.
     - Otherwise, falls back to GHOST mode and loads an API snapshot.
     """
-    self._mode = InitMode.LIVE
-    self._snapshot_data: dict[str, JsonValue] = {}
-    if flax_nnx is not None:
-      self._flax_available = True
-    else:
-      self._flax_available = False
-      self._mode = InitMode.GHOST
-      self._snapshot_data = load_snapshot_for_adapter("flax_nnx")
-      if not self._snapshot_data:
-        logging.debug("Flax NNX not installed and no snapshot found.")
+    self._flax_available: bool = flax_nnx is not None
+    self._snapshot = SnapshotBackedAdapter(
+      "flax_nnx",
+      is_live_available=self._flax_available,
+      loader=load_snapshot_for_adapter,
+      missing_message="Flax NNX not installed and no snapshot found.",
+    )
+    self._mode: InitMode = self._snapshot.mode
+    self._snapshot_data: FrameworkSnapshot | None = self._snapshot.snapshot
 
   def _collect_ghost(self, category: SemanticTier) -> list[GhostRef]:
     """Hydrate API ghosts from snapshot data.
@@ -86,14 +95,8 @@ class FlaxNNXAdapter(JAXStackMixin):
 
     Returns:
         List[GhostRef]: Hydrated ghost references.
-
     """
-    if not self._snapshot_data:
-      return []
-    raw_cats = self._snapshot_data.get("categories", {})
-    raw_list = raw_cats.get(category.value, []) if isinstance(raw_cats, dict) else []
-    assert isinstance(raw_list, list)
-    return [GhostRef.model_validate(item) for item in raw_list]
+    return SnapshotBackedAdapter.collect_ghost_from(self._snapshot_data, category)
 
   @property
   def import_alias(self) -> tuple[str, str]:
@@ -308,7 +311,7 @@ class FlaxNNXAdapter(JAXStackMixin):
     """
     self._apply_stack_wiring(snapshot)
     mappings = snapshot.setdefault("mappings", {})
-    for key, variant in mappings.items():
+    for variant in mappings.values():
       if isinstance(variant, dict) and "api" in variant:
         api = variant["api"]
         if isinstance(api, str) and api.startswith("flax.nnx."):

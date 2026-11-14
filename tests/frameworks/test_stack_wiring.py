@@ -1,33 +1,26 @@
 """Test suite for the Stack Wiring module."""
 
-from tests.conftest import _test_getattr
-
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
-from pydantic import JsonValue
-
 import pytest
+from pydantic import JsonValue
 
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 
 
 class MockAdapter(JAXStackMixin):
-  """Test helper class MockAdapter."""
+  """Stub `JAXStackMixin` subclass implementing `apply_wiring` for stack wiring tests."""
 
-  def apply_wiring(self, snapshot: dict[str, JsonValue]) -> None:
-    """Mock implementation of apply wiring.
+  def apply_wiring(self, snapshot: dict[str, dict[str, JsonValue]]) -> None:
+    """Delegate wiring application to `_apply_stack_wiring`.
 
     Args:
-        snapshot: The snapshot (dict[str, JsonValue]) for apply wiring.
+        snapshot: Mapping snapshot dictionary to populate (`dict[str, dict[str, JsonValue]]`).
     """
-    _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v")._apply_stack_wiring}, "__getitem__")("v")(
-      _test_getattr({"v": snapshot}, "__getitem__")("v")
-    )
+    self._apply_stack_wiring(snapshot)
 
 
 @pytest.fixture
 def adapter() -> MockAdapter:
-  """Execute adapter helper logic.
+  """Create a configured `MockAdapter` fixture for stack wiring tests.
 
   Returns:
       Configured `adapter` fixture value (MockAdapter).
@@ -36,72 +29,49 @@ def adapter() -> MockAdapter:
 
 
 def test_core_math_mappings(adapter: MockAdapter) -> None:
-  """Verifies the behavior of core math mappings.
+  """Verify core math mappings produces the expected state.
 
   Args:
-      adapter: The adapter (MockAdapter) for test core math mappings.
+      adapter: Input `adapter` parameter value (`MockAdapter`).
   """
-  snapshot: dict[str, RuntimeTensorOrValue] = {}
-  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    _test_getattr({"v": snapshot}, "__getitem__")("v")
-  )
+  snapshot: dict[str, dict[str, JsonValue]] = {}
+  adapter.apply_wiring(snapshot)
   mappings = snapshot["mappings"]
-  assert _test_getattr({"v": "Adam"}, "__getitem__")("v") in _test_getattr({"v": mappings}, "__getitem__")("v")
-  assert _test_getattr(
-    {"v": _test_getattr({"v": _test_getattr({"v": mappings}, "__getitem__")("v")["Adam"]}, "__getitem__")("v")["api"]},
-    "__getitem__",
-  )("v") == _test_getattr({"v": "optax.adam"}, "__getitem__")("v")
-  assert _test_getattr({"v": "step"}, "__getitem__")("v") in _test_getattr({"v": mappings}, "__getitem__")("v")
-  assert _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": mappings}, "__getitem__")("v")["step"]}, "__getitem__")("v")[
-        "requires_plugin"
-      ]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "optimizer_step"}, "__getitem__")("v")
+  assert "Adam" in mappings
+  adam = mappings["Adam"]
+  assert isinstance(adam, dict)
+  assert adam["api"] == "optax.adam"
+  assert "step" in mappings
+  step = mappings["step"]
+  assert isinstance(step, dict)
+  assert step["requires_plugin"] == "optimizer_step"
 
 
 def test_optax_autowiring(adapter: MockAdapter) -> None:
-  """Verifies the behavior of optax autowiring.
+  """Verify optax autowiring produces the expected state.
 
   Args:
-      adapter: The adapter (MockAdapter) for test optax autowiring.
+      adapter: Input `adapter` parameter value (`MockAdapter`).
   """
-  snapshot: dict[str, RuntimeTensorOrValue] = {}
-  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    _test_getattr({"v": snapshot}, "__getitem__")("v")
-  )
+  snapshot: dict[str, dict[str, JsonValue]] = {}
+  adapter.apply_wiring(snapshot)
   mappings = snapshot["mappings"]
-  assert _test_getattr({"v": "Adam"}, "__getitem__")("v") in _test_getattr({"v": mappings}, "__getitem__")("v")
-  assert _test_getattr(
-    {"v": _test_getattr({"v": _test_getattr({"v": mappings}, "__getitem__")("v")["Adam"]}, "__getitem__")("v")["api"]},
-    "__getitem__",
-  )("v") == _test_getattr({"v": "optax.adam"}, "__getitem__")("v")
-  assert _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": mappings}, "__getitem__")("v")["Adam"]}, "__getitem__")("v")[
-        "requires_plugin"
-      ]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "optimizer_constructor"}, "__getitem__")("v")
-  assert _test_getattr({"v": "step"}, "__getitem__")("v") in _test_getattr({"v": mappings}, "__getitem__")("v")
-  assert _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": mappings}, "__getitem__")("v")["step"]}, "__getitem__")("v")[
-        "requires_plugin"
-      ]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "optimizer_step"}, "__getitem__")("v")
+  assert "Adam" in mappings
+  adam = mappings["Adam"]
+  assert isinstance(adam, dict)
+  assert adam["api"] == "optax.adam"
+  assert adam["requires_plugin"] == "optimizer_constructor"
+  assert "step" in mappings
+  step = mappings["step"]
+  assert isinstance(step, dict)
+  assert step["requires_plugin"] == "optimizer_step"
 
 
 def test_io_serialization_wiring(adapter: MockAdapter) -> None:
-  """Verifies the behavior of I/O serialization wiring.
+  """Verify I/O serialization wiring works as expected.
 
   Args:
-      adapter: The adapter (MockAdapter) for test io serialization wiring.
+      adapter: Input `adapter` parameter value (`MockAdapter`).
   """
   imports: list[str] = adapter.get_serialization_imports()
   assert "import orbax.checkpoint" in imports[0]
@@ -115,37 +85,35 @@ def test_io_serialization_wiring(adapter: MockAdapter) -> None:
 
 
 def test_control_flow_templates(adapter: MockAdapter) -> None:
-  """Verifies the behavior of control flow templates.
+  """Verify `snapshot.get` handles control flow templates as expected.
 
   Args:
-      adapter: The adapter (MockAdapter) for test control flow templates.
+      adapter: Input `adapter` parameter value (`MockAdapter`).
   """
-  snapshot: dict[str, RuntimeTensorOrValue] = {}
-  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    _test_getattr({"v": snapshot}, "__getitem__")("v")
-  )
+  snapshot: dict[str, dict[str, JsonValue]] = {}
+  adapter.apply_wiring(snapshot)
   templates = snapshot.get("templates", {})
-  assert _test_getattr({"v": "fori_loop"}, "__getitem__")("v") in _test_getattr({"v": templates}, "__getitem__")("v")
-  assert _test_getattr({"v": "jax.lax.fori_loop"}, "__getitem__")("v") in _test_getattr(
-    {"v": _test_getattr({"v": templates}, "__getitem__")("v")["fori_loop"]}, "__getitem__"
-  )("v")
-  assert _test_getattr({"v": "scan"}, "__getitem__")("v") in _test_getattr({"v": templates}, "__getitem__")("v")
-  assert _test_getattr({"v": "jax.lax.scan"}, "__getitem__")("v") in _test_getattr(
-    {"v": _test_getattr({"v": templates}, "__getitem__")("v")["scan"]}, "__getitem__"
-  )("v")
+  assert "fori_loop" in templates
+  fori_loop = templates["fori_loop"]
+  assert isinstance(fori_loop, str)
+  assert "jax.lax.fori_loop" in fori_loop
+  assert "scan" in templates
+  scan = templates["scan"]
+  assert isinstance(scan, str)
+  assert "jax.lax.scan" in scan
 
 
 def test_device_syntax_generation(adapter: MockAdapter) -> None:
-  """Verifies the behavior of device syntax generation.
+  """Verify `adapter.get_device_syntax` handles device syntax generation as expected.
 
   Args:
-      adapter: The adapter (MockAdapter) for test device syntax generation.
+      adapter: Input `adapter` parameter value (`MockAdapter`).
   """
   code_cuda: str = adapter.get_device_syntax("'cuda'")
-  assert "jax.devices('gpu')[0]" == code_cuda
+  assert code_cuda == "jax.devices('gpu')[0]"
   code_cpu: str = adapter.get_device_syntax("'cpu'")
-  assert "jax.devices('cpu')[0]" == code_cpu
+  assert code_cpu == "jax.devices('cpu')[0]"
   code_idx: str = adapter.get_device_syntax("'cuda'", device_index="1")
-  assert "jax.devices('gpu')[1]" == code_idx
+  assert code_idx == "jax.devices('gpu')[1]"
   code_var: str = adapter.get_device_syntax("my_device")
-  assert "jax.devices(my_device)[0]" == code_var
+  assert code_var == "jax.devices(my_device)[0]"

@@ -6,7 +6,7 @@ from torch.nn.utils import weight_norm
 
 
 class WNModel(nn.Module):
-  """Test helper class WNModel."""
+  """Stub `nn.Module` subclass implementing `forward` for pytorch tests."""
 
   def __init__(self, in_features: int, out_features: int):
     """Initializes the WNModel instance.
@@ -19,7 +19,7 @@ class WNModel(nn.Module):
     self.linear = weight_norm(nn.Linear(in_features, out_features))
 
   def forward(self, x: torch.Tensor) -> torch.Tensor:
-    """Helper to forward.
+    """Compute the forward pass of `WNModel` on input tensors.
 
     Args:
         x: Primary input tensor or array operand.

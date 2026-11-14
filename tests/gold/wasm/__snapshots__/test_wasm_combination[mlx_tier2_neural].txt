@@ -1,0 +1,112 @@
+--- Forward ---
+{
+  "edges": [
+    {
+      "source": "Input_x",
+      "target": "func_l"
+    },
+    {
+      "source": "func_l",
+      "target": "output"
+    }
+  ],
+  "name": "MLP",
+  "nodes": [
+    {
+      "attributes": {
+        "name": "model"
+      },
+      "domain": "ai.onnx",
+      "id": "Input_model",
+      "inputs": [],
+      "kind": "Input",
+      "metadata": {
+        "name": "model"
+      },
+      "op_type": "Input",
+      "version": 1
+    },
+    {
+      "attributes": {
+        "name": "optimizer"
+      },
+      "domain": "ai.onnx",
+      "id": "Input_optimizer",
+      "inputs": [],
+      "kind": "Input",
+      "metadata": {
+        "name": "optimizer"
+      },
+      "op_type": "Input",
+      "version": 1
+    },
+    {
+      "attributes": {
+        "name": "x"
+      },
+      "domain": "ai.onnx",
+      "id": "Input_x",
+      "inputs": [],
+      "kind": "Input",
+      "metadata": {
+        "name": "x"
+      },
+      "op_type": "Input",
+      "version": 1
+    },
+    {
+      "attributes": {
+        "name": "y"
+      },
+      "domain": "ai.onnx",
+      "id": "Input_y",
+      "inputs": [],
+      "kind": "Input",
+      "metadata": {
+        "name": "y"
+      },
+      "op_type": "Input",
+      "version": 1
+    },
+    {
+      "attributes": {
+        "arg_0": "x"
+      },
+      "domain": "ai.onnx",
+      "id": "func_l",
+      "inputs": [
+        "Input_x"
+      ],
+      "kind": "l",
+      "metadata": {
+        "arg_0": "x"
+      },
+      "op_type": "l",
+      "version": 1
+    },
+    {
+      "attributes": {},
+      "domain": "ai.onnx",
+      "id": "output",
+      "inputs": [
+        "func_l"
+      ],
+      "kind": "Output",
+      "metadata": {},
+      "op_type": "Output",
+      "version": 1
+    }
+  ]
+}
+--- Backward ---
+import mlx.core as mx
+import mlx.nn as nn
+
+class MLP(mlx.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.func_l = nn.l(x)
+
+    def __call__(self, model):
+        model = self.func_l(model)
+        return model

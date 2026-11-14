@@ -8,4 +8,4 @@ from ml_switcheroo.core.compiler.backends.nvidia_sass.backend import NvidiaSassB
 from ml_switcheroo.core.compiler.backends.nvidia_sass.emitter import NvidiaSassEmitter
 from ml_switcheroo.core.compiler.backends.nvidia_sass.synthesizer import NvidiaSassSynthesizer
 
-__all__ = ["NvidiaSassSynthesizer", "NvidiaSassBackend", "NvidiaSassEmitter"]
+__all__ = ["NvidiaSassBackend", "NvidiaSassEmitter", "NvidiaSassSynthesizer"]

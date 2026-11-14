@@ -5,13 +5,13 @@ import numpy.typing
 
 
 class FlattenModel:
-  """Test helper class FlattenModel."""
+  """Sentinel `FlattenModel` fixture class used in numpy tests."""
 
   def __init__(self, start_dim: int = 1):
     """Initializes the FlattenModel instance.
 
     Args:
-        start_dim: The start dim (int) for   init  .
+        start_dim: Input `start_dim` parameter value (`int`).
     """
     self.start_dim = start_dim
 

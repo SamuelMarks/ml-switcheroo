@@ -1,133 +1,199 @@
-"""Unit tests for the AttributeMixin class in the import fixer core module.
-
-This module validates that attributes referenced in source code nodes (such as
-`jax.numpy.abs`) are correctly simplified and resolved using configuration-driven
-mappings and re-export simplification logic.
-"""
+"""Unit tests for ``AttributeAliasSimplifier`` in the import fixer module."""
 
 import libcst as cst
 
-from ml_switcheroo.core.import_fixer.attributes_mixin import AttributeMixin
+from ml_switcheroo.core.import_fixer.attributes_mixin import AttributeAliasSimplifier
+from ml_switcheroo.core.import_fixer.base import ImportFixerState
+from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan
 
 
-class MockFixer(AttributeMixin):
-  """A mock import fixer class used to test the functionality of `AttributeMixin`.
+def _make_simplifier(
+  path_to_alias: dict[str, str] | None = None,
+  defined_names: set[str] | None = None,
+  target_framework: str | None = None,
+) -> AttributeAliasSimplifier:
+  """Construct an ``AttributeAliasSimplifier`` backed by configured ``ImportFixerState``.
 
-  This class implements the minimal interface and attribute state required to
-  test attribute-matching and rewriting capabilities of the mixin.
-  """
-
-  def __init__(self) -> None:
-    """Initializes the mock fixer with predefined namespace aliases and target frameworks.
-
-    Sets up internal maps to simulate alias resolutions and define target frameworks
-    during testing of attribute traversal.
-
-    Returns:
-        None
-    """
-    self._path_to_alias: dict[str, str] = {"jax.numpy": "jnp", "torch.nn.functional": "F"}
-    self._defined_names: set[str] = {"jnp", "F"}
-    self.target_framework: str = "jax"
-
-
-def test_attributemixin_leave_attribute() -> None:
-  """Verifies that `leave_Attribute` simplifies attributes to their aliased names.
-
-  This test parses an expression like `jax.numpy.abs` and checks that the fixer
-  rewrites it to use the `jnp` alias configured in `_path_to_alias`.
+  Args:
+      path_to_alias: Optional mapping from dotted module paths to local aliases.
+      defined_names: Optional set of already defined local identifier names.
+      target_framework: Optional target framework name.
 
   Returns:
-      None
+      Configured ``AttributeAliasSimplifier`` instance.
   """
-  fixer = MockFixer()
+  plan = ResolutionPlan(
+    path_to_alias=path_to_alias if path_to_alias is not None else {},
+    target_framework=target_framework,
+  )
+  state = ImportFixerState.create(plan)
+  if defined_names is not None:
+    state.defined_names.update(defined_names)
+  return AttributeAliasSimplifier(state)
 
-  # jax.numpy.abs -> jnp.abs
-  node = cst.parse_expression("jax.numpy.abs")
-  assert isinstance(node, cst.Attribute)
-  updated = node
 
-  result = fixer.leave_Attribute(node, updated)
+def test_simplify_reexports_non_attribute_value() -> None:
+  """Verify ``simplify_reexports`` ignores single-level attributes whose value is a ``cst.Name``."""
+  simplifier = _make_simplifier()
+  node = cst.Attribute(value=cst.Name("torch"), attr=cst.Name("nn"))
+  assert simplifier.simplify_reexports(node) is node
+
+
+def test_simplify_reexports_non_redundant_segment() -> None:
+  """Verify ``simplify_reexports`` leaves attributes unchanged when the middle segment is non-redundant."""
+  simplifier = _make_simplifier(defined_names={"jax"}, target_framework="jax")
+  node = cst.Attribute(
+    value=cst.Attribute(value=cst.Name("jax"), attr=cst.Name("numpy")),
+    attr=cst.Name("sum"),
+  )
+  assert simplifier.simplify_reexports(node) is node
+
+
+def test_simplify_reexports_unsafe_root() -> None:
+  """Verify ``simplify_reexports`` preserves redundant segments when the root is not a known framework root."""
+  simplifier_empty = _make_simplifier()
+  nnx_node = cst.Attribute(
+    value=cst.Attribute(value=cst.Name("nnx"), attr=cst.Name("module")),
+    attr=cst.Name("Module"),
+  )
+  assert simplifier_empty.simplify_reexports(nnx_node) is nnx_node
+
+  simplifier_other = _make_simplifier(defined_names={"my_module"})
+  unknown_node = cst.Attribute(
+    value=cst.Attribute(value=cst.Name("unknown"), attr=cst.Name("module")),
+    attr=cst.Name("X"),
+  )
+  assert simplifier_other.simplify_reexports(unknown_node) is unknown_node
+
+
+def test_simplify_reexports_safe_via_defined_names() -> None:
+  """Verify ``simplify_reexports`` strips redundant segments when root is in ``defined_names``."""
+  simplifier = _make_simplifier(defined_names={"nnx", "flax"}, target_framework="flax")
+
+  node = cst.Attribute(
+    value=cst.Attribute(value=cst.Name("nnx"), attr=cst.Name("module")),
+    attr=cst.Name("Module"),
+  )
+  simplified = simplifier.simplify_reexports(node)
+  assert isinstance(simplified, cst.Attribute)
+  assert isinstance(simplified.value, cst.Name)
+  assert simplified.value.value == "nnx"
+  assert simplified.attr.value == "Module"
+
+  deep_node = cst.ensure_type(cst.parse_expression("flax.nnx.module.Module"), cst.Attribute)
+  deep_res = simplifier.rewrite_attribute(deep_node, deep_node)
+  assert isinstance(deep_res, cst.Attribute)
+  assert isinstance(deep_res.value, cst.Attribute)
+  assert deep_res.value.attr.value == "nnx"
+  assert deep_res.attr.value == "Module"
+
+
+def test_simplify_reexports_safe_via_target_framework() -> None:
+  """Verify ``simplify_reexports`` strips redundant segments when root matches ``target_framework``."""
+  simplifier = _make_simplifier(target_framework="nnx")
+  node = cst.Attribute(
+    value=cst.Attribute(value=cst.Name("nnx"), attr=cst.Name("module")),
+    attr=cst.Name("Module"),
+  )
+  simplified = simplifier.simplify_reexports(node)
+  assert isinstance(simplified, cst.Attribute)
+  assert isinstance(simplified.value, cst.Name)
+  assert simplified.value.value == "nnx"
+  assert simplified.attr.value == "Module"
+
+
+def test_simplify_reexports_safe_via_path_to_alias_values() -> None:
+  """Verify ``simplify_reexports`` treats mapped alias values in ``path_to_alias`` as safe roots."""
+  simplifier = _make_simplifier(path_to_alias={"foo.bar": "bar"}, target_framework=None)
+  node = cst.Attribute(
+    value=cst.Attribute(value=cst.Name("bar"), attr=cst.Name("module")),
+    attr=cst.Name("Module"),
+  )
+  simplified = simplifier.rewrite_attribute(node, node)
+  assert simplified is not node
+  assert isinstance(simplified, cst.Attribute)
+  assert isinstance(simplified.value, cst.Name)
+  assert simplified.value.value == "bar"
+
+
+def test_rewrite_attribute_immediate_reexport_simplification() -> None:
+  """Verify ``rewrite_attribute`` returns immediately when ``simplify_reexports`` rewrites ``updated_node``."""
+  simplifier = _make_simplifier(target_framework="nnx")
+  node = cst.Attribute(
+    value=cst.Attribute(value=cst.Name("nnx"), attr=cst.Name("module")),
+    attr=cst.Name("Module"),
+  )
+  result = simplifier.rewrite_attribute(node, node)
+  assert result is not node
   assert isinstance(result, cst.Attribute)
   assert isinstance(result.value, cst.Name)
-  assert result.value.value == "jnp"
-  assert result.attr.value == "abs"
+  assert result.value.value == "nnx"
 
 
-def test_attributemixin_simplify_reexports() -> None:
-  """Ensures that nested or deep attributes are simplified correctly.
-
-  This test checks that when a nested package hierarchy (such as
-  `flax.nnx.module.Module`) is encountered, the fixer simplifies it
-  to `flax.nnx.Module` by stripping intermediate internal submodules when appropriate.
-
-  Returns:
-      None
-  """
-  fixer = MockFixer()
-
-  # flax.nnx.module.Module -> flax.nnx.Module (assuming nnx is defined)
-  fixer._defined_names.add("flax")
-  fixer.target_framework = "flax"
-  node = cst.parse_expression("flax.nnx.module.Module")
-  assert isinstance(node, cst.Attribute)
-  updated = node
-
-  result = fixer.leave_Attribute(node, updated)
-  # Since flax.nnx is not in path_to_alias, it falls through to _simplify_reexports
-  assert isinstance(result, cst.Attribute)
-  assert isinstance(result.value, cst.Attribute)
-  assert result.value.attr.value == "nnx"
+def test_rewrite_attribute_empty_path_to_alias() -> None:
+  """Verify ``rewrite_attribute`` leaves attributes unchanged when ``path_to_alias`` is empty."""
+  simplifier = _make_simplifier()
+  node = cst.ensure_type(cst.parse_expression("jax.numpy.abs"), cst.Attribute)
+  assert simplifier.rewrite_attribute(node, node) is node
 
 
-def test_attributemixin_no_alias() -> None:
-  """Validates that attributes without matching aliases are left unmodified.
+def test_rewrite_attribute_collapse_to_alias() -> None:
+  """Verify ``rewrite_attribute`` collapses qualified module paths to configured local aliases."""
+  simplifier = _make_simplifier(
+    path_to_alias={"jax.numpy": "jnp", "torch.nn.functional": "F"},
+    defined_names={"jnp", "F"},
+    target_framework="jax",
+  )
 
-  This test parses an attribute that has no predefined translation rule in the MockFixer
-  and verifies that the returned node is exactly the same reference as the input.
+  abs_node = cst.ensure_type(cst.parse_expression("jax.numpy.abs"), cst.Attribute)
+  abs_res = simplifier.rewrite_attribute(abs_node, abs_node)
+  assert isinstance(abs_res, cst.Attribute)
+  assert isinstance(abs_res.value, cst.Name)
+  assert abs_res.value.value == "jnp"
+  assert abs_res.attr.value == "abs"
 
-  Returns:
-      None
-  """
-  fixer = MockFixer()
-
-  # Something.else -> Something.else
-  node = cst.parse_expression("Something.other")
-  assert isinstance(node, cst.Attribute)
-  updated = node
-
-  result = fixer.leave_Attribute(node, updated)
-  assert result is updated
-
-
-def test_attributemixin_no_path_to_alias() -> None:
-  """Ensures the fixer fails gracefully when the path-to-alias dictionary is missing.
-
-  This test deletes `_path_to_alias` from the fixer and verifies that `leave_Attribute`
-  returns the original node unmodified without raising unexpected errors.
-
-  Returns:
-      None
-  """
-  fixer = MockFixer()
-  del fixer._path_to_alias
-
-  node = cst.parse_expression("jax.numpy.abs")
-  assert isinstance(node, cst.Attribute)
-  result = fixer.leave_Attribute(node, node)
-  assert result is node
+  sum_node = cst.Attribute(
+    value=cst.Attribute(value=cst.Name("jax"), attr=cst.Name("numpy")),
+    attr=cst.Name("sum"),
+  )
+  sum_res = simplifier.rewrite_attribute(sum_node, sum_node)
+  assert isinstance(sum_res, cst.Attribute)
+  assert isinstance(sum_res.value, cst.Name)
+  assert sum_res.value.value == "jnp"
+  assert sum_res.attr.value == "sum"
 
 
-def test_attributemixin_simplify_no_attribute() -> None:
-  """Verifies that non-Attribute nodes are ignored by `_simplify_reexports`.
+def test_rewrite_attribute_collapse_multi_part_suffix_and_simplify() -> None:
+  """Verify ``rewrite_attribute`` rebuilds multi-segment suffixes and runs re-export simplification."""
+  simplifier = _make_simplifier(path_to_alias={"flax.nnx": "nnx"}, defined_names={"nnx"})
+  original_node = cst.Attribute(
+    value=cst.Attribute(
+      value=cst.Attribute(value=cst.Name("flax"), attr=cst.Name("nnx")),
+      attr=cst.Name("module"),
+    ),
+    attr=cst.Name("Module"),
+  )
+  updated = simplifier.rewrite_attribute(original_node, original_node)
+  assert isinstance(updated, cst.Attribute)
+  assert isinstance(updated.value, cst.Name)
+  assert updated.value.value == "nnx"
+  assert updated.attr.value == "Module"
 
-  This test checks that passing a simple name node instead of an attribute hierarchy
-  returns the unmodified input node unchanged.
+  linalg_simplifier = _make_simplifier(path_to_alias={"jax": "j"}, defined_names={"j"})
+  svd_node = cst.ensure_type(cst.parse_expression("jax.scipy.linalg.svd"), cst.Attribute)
+  svd_res = linalg_simplifier.rewrite_attribute(svd_node, svd_node)
+  assert cst.Module([]).code_for_node(svd_res) == "j.scipy.linalg.svd"
 
-  Returns:
-      None
-  """
-  fixer = MockFixer()
-  node = cst.Attribute(value=cst.Name("my_var"), attr=cst.Name("sub"))
-  # Value is not an attribute, shouldn't be simplified
-  assert fixer._simplify_reexports(node) is node
+
+def test_rewrite_attribute_unmatched_prefix_and_call_receiver() -> None:
+  """Verify ``rewrite_attribute`` returns ``updated_node`` when no prefix matches or receiver is a call."""
+  simplifier = _make_simplifier(path_to_alias={"jax.numpy": "jnp"}, defined_names={"jnp"})
+
+  unmatched = cst.ensure_type(cst.parse_expression("Something.other"), cst.Attribute)
+  assert simplifier.rewrite_attribute(unmatched, unmatched) is unmatched
+
+  call_attr = cst.Attribute(value=cst.Call(func=cst.Name("a")), attr=cst.Name("b"))
+  assert simplifier.rewrite_attribute(call_attr, call_attr) is call_attr
+
+  empty_simplifier = _make_simplifier()
+  assert empty_simplifier.rewrite_attribute(call_attr, call_attr) is call_attr

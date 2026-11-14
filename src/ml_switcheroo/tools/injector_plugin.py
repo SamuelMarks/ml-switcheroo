@@ -62,12 +62,11 @@ class NameMangler:
 
     result: list[str] = []
     for i, char in enumerate(name):
-      if char.isupper():
-        if i > 0:
-          prev_char = name[i - 1]
-          next_char = name[i + 1] if i + 1 < len(name) else ""
-          if prev_char.islower() or prev_char.isdigit() or (next_char.islower() and next_char.isalpha()):
-            result.append("_")
+      if char.isupper() and i > 0:
+        prev_char = name[i - 1]
+        next_char = name[i + 1] if i + 1 < len(name) else ""
+        if prev_char.islower() or prev_char.isdigit() or (next_char.islower() and next_char.isalpha()):
+          result.append("_")
       result.append(char.lower())
 
     return "".join(result)
@@ -148,7 +147,7 @@ class PluginGenerator:
 
         if extractor.found and extractor.body_node:
           preserved_body_node = extractor.body_node
-      except Exception as e:
+      except (OSError, cst.ParserSyntaxError, ValueError, TypeError, RuntimeError) as e:
         print(f"⚠️ Failed to parse existing plugin {filename}: {e}. Overwriting.")
 
     if not self.plugins_dir.exists():
@@ -220,11 +219,11 @@ class PluginGenerator:
       if not stmts:
         stmts = [cst.parse_statement("return node")]
 
-      new_body = [doc_stmt] + stmts
+      new_body = [doc_stmt, *stmts]
       func_def = func_def.with_changes(body=cst.IndentedBlock(body=new_body))
     else:
       generated_stmts = self._generate_cst_body_logic(scaffold.rules)
-      func_def = func_def.with_changes(body=cst.IndentedBlock(body=[doc_stmt] + generated_stmts))
+      func_def = func_def.with_changes(body=cst.IndentedBlock(body=[doc_stmt, *generated_stmts]))
 
     final_body = list(module.body) + helpers_stmts + [func_def]
     module = module.with_changes(body=final_body)

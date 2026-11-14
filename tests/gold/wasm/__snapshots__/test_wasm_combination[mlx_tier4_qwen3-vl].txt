@@ -1,0 +1,161 @@
+--- Forward ---
+{
+  "edges": [
+    {
+      "source": "Input_hidden_states",
+      "target": "func_reshape"
+    },
+    {
+      "source": "func_reshape",
+      "target": "func_transpose"
+    },
+    {
+      "source": "func_reshape_1",
+      "target": "output"
+    },
+    {
+      "source": "func_transpose",
+      "target": "proj"
+    },
+    {
+      "source": "proj",
+      "target": "func_reshape_1"
+    }
+  ],
+  "name": "Qwen3VLPatchEmbed",
+  "nodes": [
+    {
+      "attributes": {
+        "name": "hidden_states"
+      },
+      "domain": "ai.onnx",
+      "id": "Input_hidden_states",
+      "inputs": [],
+      "kind": "Input",
+      "metadata": {
+        "name": "hidden_states"
+      },
+      "op_type": "Input",
+      "version": 1
+    },
+    {
+      "attributes": {},
+      "domain": "ai.onnx",
+      "id": "config",
+      "inputs": [],
+      "kind": "config",
+      "metadata": {},
+      "op_type": "config",
+      "version": 1
+    },
+    {
+      "attributes": {
+        "arg_0": "hidden_states",
+        "arg_1": "[seq_len, cfg.in_channels, cfg.temporal_patch_size, cfg.patch_size, cfg.patch_size]"
+      },
+      "domain": "ai.onnx",
+      "id": "func_reshape",
+      "inputs": [
+        "Input_hidden_states"
+      ],
+      "kind": "mx.reshape",
+      "metadata": {
+        "arg_0": "hidden_states",
+        "arg_1": "[seq_len, cfg.in_channels, cfg.temporal_patch_size, cfg.patch_size, cfg.patch_size]"
+      },
+      "op_type": "mx.reshape",
+      "version": 1
+    },
+    {
+      "attributes": {
+        "arg_0": "hidden_states",
+        "arg_1": "(0, 2, 3, 4, 1)"
+      },
+      "domain": "ai.onnx",
+      "id": "func_transpose",
+      "inputs": [
+        "func_reshape"
+      ],
+      "kind": "mx.transpose",
+      "metadata": {
+        "arg_0": "hidden_states",
+        "arg_1": "(0, 2, 3, 4, 1)"
+      },
+      "op_type": "mx.transpose",
+      "version": 1
+    },
+    {
+      "attributes": {
+        "bias": "True",
+        "in_channels": "config.in_channels",
+        "kernel_size": "kernel",
+        "out_channels": "config.hidden_size",
+        "padding": "0",
+        "stride": "kernel"
+      },
+      "domain": "ai.onnx",
+      "id": "proj",
+      "inputs": [
+        "func_transpose"
+      ],
+      "kind": "Conv3d",
+      "metadata": {
+        "bias": "True",
+        "in_channels": "config.in_channels",
+        "kernel_size": "kernel",
+        "out_channels": "config.hidden_size",
+        "padding": "0",
+        "stride": "kernel"
+      },
+      "op_type": "Conv3d",
+      "version": 1
+    },
+    {
+      "attributes": {
+        "arg_0": "out",
+        "arg_1": "[seq_len, cfg.hidden_size]"
+      },
+      "domain": "ai.onnx",
+      "id": "func_reshape_1",
+      "inputs": [
+        "proj"
+      ],
+      "kind": "mx.reshape",
+      "metadata": {
+        "arg_0": "out",
+        "arg_1": "[seq_len, cfg.hidden_size]"
+      },
+      "op_type": "mx.reshape",
+      "version": 1
+    },
+    {
+      "attributes": {},
+      "domain": "ai.onnx",
+      "id": "output",
+      "inputs": [
+        "func_reshape_1"
+      ],
+      "kind": "Output",
+      "metadata": {},
+      "op_type": "Output",
+      "version": 1
+    }
+  ]
+}
+--- Backward ---
+import mlx.core as mx
+import mlx.nn as nn
+
+class Qwen3VLPatchEmbed(mlx.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.config = nn.config()
+        self.proj = nn.Conv3d(bias=True, in_channels=config.in_channels, kernel_size=kernel, out_channels=config.hidden_size, padding=0, stride=kernel)
+
+    def __call__(self, hidden_states):
+        hidden_states = self.config(hidden_states)
+        hidden_states = mlx.core.reshape(hidden_states, hidden_states, [seq_len, cfg.in_channels, cfg.temporal_patch_size, cfg.patch_size, cfg.patch_size])
+        hidden_states = mlx.core.transpose(hidden_states, hidden_states, (0, 2, 3, 4, 1))
+        hidden_states = self.proj(hidden_states)
+        hidden_states = mlx.core.reshape(hidden_states, out, [seq_len, cfg.hidden_size])
+        return hidden_states

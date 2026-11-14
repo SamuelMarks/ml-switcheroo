@@ -4,7 +4,7 @@ import tensorflow as tf
 
 
 def bmm_einsum(x: tf.Tensor, y: tf.Tensor) -> tf.Tensor:
-  """Helper to bmm einsum.
+  """Execute `tf.einsum` to support bmm einsum in tensorflow tests.
 
   Args:
       x: Primary input tensor or array operand.

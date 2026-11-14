@@ -6,56 +6,34 @@ and standard `ast.parse` with `libcst` to enable safe, format-preserving
 automated refactoring of type hints.
 """
 
+import dataclasses
 import typing
 
 import libcst as cst
-import pydantic
 
 
-class ParsedType(pydantic.BaseModel):
-  """Base class for parsed type annotations."""
+@dataclasses.dataclass
+class ParsedType:
+  """Base class for parsed type annotations.
 
-  model_config = pydantic.ConfigDict(extra="forbid", arbitrary_types_allowed=True)
+  Attributes:
+      cst_node: Optional originating LibCST node (`cst.CSTNode | None`), excluded from equality.
+  """
 
-  cst_node: cst.CSTNode | None = pydantic.Field(default=None, exclude=True)
-
-  def __init__(
-    self,
-    cst_node: cst.CSTNode | None = None,
-    **kwargs: "ParsedType | typing.Sequence[ParsedType | str | int] | str | int | float | bool | None",
-  ) -> None:
-    """Initialize ParsedType.
-
-    Args:
-        cst_node: Optional CSTNode origin.
-        **kwargs: Subclass field values forwarded to BaseModel.
-    """
-    super().__init__(cst_node=cst_node, **kwargs)
-
-  def __eq__(self, other: "ParsedType | str | int | float | bool | None") -> bool:
-    """Compare equality ignoring cst_node.
-
-    Args:
-        other: Object to compare against.
-
-    Returns:
-        True if same type and fields match (excluding cst_node).
-    """
-    return isinstance(other, ParsedType) and type(self) is type(other) and self.model_dump() == other.model_dump()
+  cst_node: cst.CSTNode | None = dataclasses.field(default=None, compare=False)
 
 
+@dataclasses.dataclass
 class AnyType(ParsedType):
   """Represent 'Any' or unknown types."""
 
-  pass
 
-
+@dataclasses.dataclass
 class NoneType(ParsedType):
   """Represent 'None'."""
 
-  pass
 
-
+@dataclasses.dataclass
 class PrimitiveType(ParsedType):
   """Represent a primitive type like int, float, str, bool.
 
@@ -63,7 +41,7 @@ class PrimitiveType(ParsedType):
       name: The string name of the primitive type.
   """
 
-  name: str
+  name: str = ""
 
   def __init__(self, name: str, cst_node: cst.CSTNode | None = None) -> None:
     """Initialize PrimitiveType.
@@ -72,9 +50,11 @@ class PrimitiveType(ParsedType):
         name: The string name of the primitive type.
         cst_node: Optional CSTNode origin.
     """
-    super().__init__(name=name, cst_node=cst_node)
+    super().__init__(cst_node=cst_node)
+    self.name = name
 
 
+@dataclasses.dataclass
 class UnionType(ParsedType):
   """Represent a Union type (e.g., A | B or Union[A, B]).
 
@@ -82,7 +62,7 @@ class UnionType(ParsedType):
       types: A list of ParsedType elements that comprise the union.
   """
 
-  types: list[ParsedType]
+  types: list[ParsedType] = dataclasses.field(default_factory=list)
 
   def __init__(self, types: typing.Sequence[ParsedType], cst_node: cst.CSTNode | None = None) -> None:
     """Initialize UnionType.
@@ -91,9 +71,11 @@ class UnionType(ParsedType):
         types: A list of ParsedType elements that comprise the union.
         cst_node: Optional CSTNode origin.
     """
-    super().__init__(types=list(types), cst_node=cst_node)
+    super().__init__(cst_node=cst_node)
+    self.types = list(types)
 
 
+@dataclasses.dataclass
 class OptionalType(ParsedType):
   """Represent an Optional type (e.g., Optional[T]).
 
@@ -101,7 +83,7 @@ class OptionalType(ParsedType):
       inner: The ParsedType that is wrapped as optional.
   """
 
-  inner: ParsedType
+  inner: ParsedType = dataclasses.field(default_factory=AnyType)
 
   def __init__(self, inner: ParsedType, cst_node: cst.CSTNode | None = None) -> None:
     """Initialize OptionalType.
@@ -110,9 +92,11 @@ class OptionalType(ParsedType):
         inner: The ParsedType that is wrapped as optional.
         cst_node: Optional CSTNode origin.
     """
-    super().__init__(inner=inner, cst_node=cst_node)
+    super().__init__(cst_node=cst_node)
+    self.inner = inner
 
 
+@dataclasses.dataclass
 class TupleType(ParsedType):
   """Represent a Tuple type.
 
@@ -121,8 +105,8 @@ class TupleType(ParsedType):
       variadic: A boolean flag indicating if the tuple is variadic.
   """
 
-  elements: list[ParsedType]
-  variadic: bool
+  elements: list[ParsedType] = dataclasses.field(default_factory=list)
+  variadic: bool = False
 
   def __init__(
     self,
@@ -137,9 +121,12 @@ class TupleType(ParsedType):
         variadic: A boolean flag indicating if the tuple is variadic.
         cst_node: Optional CSTNode origin.
     """
-    super().__init__(elements=list(elements), variadic=variadic, cst_node=cst_node)
+    super().__init__(cst_node=cst_node)
+    self.elements = list(elements)
+    self.variadic = variadic
 
 
+@dataclasses.dataclass
 class ListType(ParsedType):
   """Represent a List or Sequence type.
 
@@ -147,7 +134,7 @@ class ListType(ParsedType):
       inner: The ParsedType representing the list element type.
   """
 
-  inner: ParsedType
+  inner: ParsedType = dataclasses.field(default_factory=AnyType)
 
   def __init__(self, inner: ParsedType, cst_node: cst.CSTNode | None = None) -> None:
     """Initialize ListType.
@@ -156,9 +143,11 @@ class ListType(ParsedType):
         inner: The ParsedType representing the list element type.
         cst_node: Optional CSTNode origin.
     """
-    super().__init__(inner=inner, cst_node=cst_node)
+    super().__init__(cst_node=cst_node)
+    self.inner = inner
 
 
+@dataclasses.dataclass
 class DictType(ParsedType):
   """Represent a Dict or Mapping type.
 
@@ -167,8 +156,8 @@ class DictType(ParsedType):
       value_type: The ParsedType representing the dictionary values.
   """
 
-  key_type: ParsedType
-  value_type: ParsedType
+  key_type: ParsedType = dataclasses.field(default_factory=AnyType)
+  value_type: ParsedType = dataclasses.field(default_factory=AnyType)
 
   def __init__(
     self,
@@ -183,9 +172,12 @@ class DictType(ParsedType):
         value_type: The ParsedType representing the dictionary values.
         cst_node: Optional CSTNode origin.
     """
-    super().__init__(key_type=key_type, value_type=value_type, cst_node=cst_node)
+    super().__init__(cst_node=cst_node)
+    self.key_type = key_type
+    self.value_type = value_type
 
 
+@dataclasses.dataclass
 class TensorType(ParsedType):
   """Represent an Array or Tensor type, optionally with symbolic dimensions.
 
@@ -206,18 +198,22 @@ class TensorType(ParsedType):
         dims: A list of strings representing the dimensions, or None.
         cst_node: Optional CSTNode origin.
     """
-    super().__init__(dims=list(dims) if dims is not None else None, cst_node=cst_node)
+    super().__init__(cst_node=cst_node)
+    self.dims = list(dims) if dims is not None else None
 
 
+@dataclasses.dataclass
 class CallableType(ParsedType):
   """Represent a Callable type."""
-
-  pass
 
 
 @typing.runtime_checkable
 class _ValueNodeProtocol(typing.Protocol):
-  """Protocol for CST nodes exposing a `value` attribute."""
+  """Protocol for CST nodes exposing a `value` attribute.
+
+  Attributes:
+      value: The value (`str | cst.CSTNode`).
+  """
 
   value: str | cst.CSTNode
 
@@ -257,15 +253,15 @@ class TypeAnnotationParser:
     """
     if isinstance(node, cst.Name):
       return self.visit_Name(node)
-    elif isinstance(node, (cst.Integer, cst.Float, cst.SimpleString)):
+    if isinstance(node, (cst.Integer, cst.Float, cst.SimpleString)):
       return self.visit_Constant(node)
-    elif isinstance(node, cst.Attribute):
+    if isinstance(node, cst.Attribute):
       return self.visit_Attribute(node)
-    elif isinstance(node, cst.Subscript):
+    if isinstance(node, cst.Subscript):
       return self.visit_Subscript(node)
-    elif isinstance(node, cst.BinaryOperation):
+    if isinstance(node, cst.BinaryOperation):
       return self.visit_BinOp(node)
-    elif isinstance(node, cst.Ellipsis):
+    if isinstance(node, cst.Ellipsis):
       res = PrimitiveType(name="Ellipsis")
       res.cst_node = node
       return res
@@ -339,10 +335,7 @@ class TypeAnnotationParser:
     """
     full_name = self._get_full_name(node)
     res: ParsedType
-    if full_name == "np.ndarray":
-      res = TensorType(dims=None)
-    else:
-      res = PrimitiveType(name=full_name)
+    res = TensorType(dims=None) if full_name == "np.ndarray" else PrimitiveType(name=full_name)
     res.cst_node = node
     return res
 
@@ -357,7 +350,7 @@ class TypeAnnotationParser:
     """
     if isinstance(node, cst.Name):
       return node.value
-    elif isinstance(node, cst.Attribute):
+    if isinstance(node, cst.Attribute):
       return f"{self._get_full_name(node.value)}.{node.attr.value}"
     return ""
 

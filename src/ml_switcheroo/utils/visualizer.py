@@ -9,6 +9,8 @@ The generator applies specific branding colors and handles complex node
 representation (like dotted imports) robustly.
 """
 
+import logging
+import typing
 import uuid
 
 import libcst as cst
@@ -21,12 +23,12 @@ class MermaidGenerator(cst.CSTVisitor):
   branding colors.
 
   Attributes:
-      COLORS (dict): A dictionary mapping color names to hex codes for branding.
+      COLORS (typing.ClassVar[dict[str, str]]): A dictionary mapping color names to hex codes for branding.
       STYLES (str): The Mermaid style definition block applied to the graphs.
   """
 
   # Branding Colors
-  COLORS = {
+  COLORS: typing.ClassVar[dict[str, str]] = {
     "blue": "#4285f4",
     "green": "#34a853",
     "yellow": "#f9ab00",
@@ -122,21 +124,21 @@ class MermaidGenerator(cst.CSTVisitor):
     """
     if isinstance(node, cst.Name):
       return node.value
-    elif isinstance(node, cst.Attribute):
+    if isinstance(node, cst.Attribute):
       return f"{self._node_to_str(node.value)}.{node.attr.value}"
-    elif isinstance(node, cst.Integer):
+    if isinstance(node, cst.Integer):
       return node.value
-    elif isinstance(node, cst.Float):
+    if isinstance(node, cst.Float):
       # Casting to str is safe
       return str(node.value)
-    elif isinstance(node, cst.SimpleString):
+    if isinstance(node, cst.SimpleString):
       # Strip quotes for display
       return node.value.strip("'").strip('"')
 
     # Fallback to code generator for complex expressions (e.g. calls, tuples)
     try:
       return self._renderer.code_for_node(node).strip()
-    except Exception:
+    except (cst.CSTValidationError, ValueError, TypeError, AttributeError, RuntimeError):
       return f"<{type(node).__name__}>"
 
   def visit_Module(self, node: cst.Module) -> bool | None:
@@ -217,13 +219,8 @@ class MermaidGenerator(cst.CSTVisitor):
     # Helper to get name
     try:
       name = self._node_to_str(node.func)
-      if "(" in name:
-        # Fallback if renderer made something too complex
-        name = "Call"
-      else:
-        # Standardize prefix "Call" to satisfy test expectations and clarity
-        name = f"Call: {name}()"
-    except Exception:
+      name = "Call" if "(" in name else f"Call: {name}()"
+    except (cst.CSTValidationError, ValueError, TypeError, AttributeError, RuntimeError):
       name = "Call"
 
     uid = self._add_node(name, "callNode")
@@ -249,12 +246,7 @@ class MermaidGenerator(cst.CSTVisitor):
         Optional[bool]: True to recurse into complex value nodes, False if simple literal.
     """
     # Try to summarize arg key
-    label = "arg"
-    if node.keyword:
-      label = f"{node.keyword.value}="
-    else:
-      # If no keyword, it's positional. Use empty suffix or 'arg'
-      label = "arg"
+    label = f"{node.keyword.value}=" if node.keyword else "arg"
 
     # Check for simple literals to inline them into the Arg label
     is_simple = False
@@ -267,17 +259,14 @@ class MermaidGenerator(cst.CSTVisitor):
         else:
           label += val_code
         is_simple = True
-      except Exception:
-        pass
+      except (cst.CSTValidationError, ValueError, TypeError, AttributeError, RuntimeError) as exc:
+        logging.getLogger(__name__).debug("Arg visualization label fallback: %s", exc)
 
     # Always add node and push to stack to maintain symmetry for leave_Arg
     uid = self._add_node(label, "argNode")
     self.stack.append(uid)
 
-    if is_simple:
-      return False  # Don't recurse into simple value nodes
-
-    return True
+    return not is_simple
 
   def leave_Arg(self, node: cst.Arg) -> None:
     """Leave Arguments.
@@ -313,13 +302,11 @@ class MermaidGenerator(cst.CSTVisitor):
         Optional[bool]: False to avoid recursing further.
     """
     mod = self._node_to_str(node.module) if node.module else "."
-    names = []
+    names: list[str] = []
     if isinstance(node.names, cst.ImportStar):
       names.append("*")
     else:
-      for n in node.names:
-        if isinstance(n.name, cst.Name):
-          names.append(str(n.name.value))
+      names.extend(str(n.name.value) for n in node.names if isinstance(n.name, cst.Name))
 
     display_names = ", ".join(names[:3])
     if len(names) > 3:

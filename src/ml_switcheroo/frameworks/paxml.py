@@ -8,21 +8,22 @@ It inherits Level 0 (Core JAX) and Level 1 (Optax/Orbax) capabilities from
 such as the ``setup()`` lifecycle method for layer definition.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
 import importlib
 import logging
 import textwrap
 from types import ModuleType
 
-from pydantic import JsonValue
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.frameworks.base import (
+  FrameworkSnapshot,
   GhostRef,
   ImportConfig,
   InitMode,
   PluginTraits,
+  SnapshotBackedAdapter,
   StandardMap,
   StructuralTraits,
   load_snapshot_for_adapter,
@@ -54,6 +55,11 @@ class PaxmlAdapter(JAXStackMixin):
   -   **Lifecycle Translation**: Maps standard ``__init__`` definitions to Praxis ``setup()`` methods.
   -   **Layer Mapping**: Maps Torch/Flax layers to ``praxis.layers.*``.
   -   **Stack Reuse**: Inherits optimization and math logic from the JAX Core adapter.
+
+  Attributes:
+      display_name: The display name (`str`).
+      inherits_from: The inherits from (`str`).
+      ui_priority: The ui priority (`int`).
   """
 
   display_name: str = "PaxML / Praxis"
@@ -66,13 +72,14 @@ class PaxmlAdapter(JAXStackMixin):
     Checks if ``praxis`` is importable. If not, falls back to Ghost Mode using
     cached snapshots to allow transpilation without installation.
     """
-    self._mode = InitMode.LIVE
-    self._snapshot_data = {}
-    if praxis is None:
-      self._mode = InitMode.GHOST
-      self._snapshot_data = load_snapshot_for_adapter("paxml")
-      if not self._snapshot_data:
-        logging.debug("PaxML (Praxis) not installed and no snapshot found.")
+    self._snapshot = SnapshotBackedAdapter(
+      "paxml",
+      is_live_available=praxis is not None,
+      loader=load_snapshot_for_adapter,
+      missing_message="PaxML (Praxis) not installed and no snapshot found.",
+    )
+    self._mode: InitMode = self._snapshot.mode
+    self._snapshot_data: FrameworkSnapshot | None = self._snapshot.snapshot
 
   def _collect_ghost(self, category: SemanticTier) -> list[GhostRef]:
     """Load API signatures from the JSON snapshot in Ghost Mode.
@@ -82,14 +89,8 @@ class PaxmlAdapter(JAXStackMixin):
 
     Returns:
         List[GhostRef]: Hydrated API references.
-
     """
-    if not self._snapshot_data:
-      return []
-    raw_cats = self._snapshot_data.get("categories", {})
-    raw_list = raw_cats.get(category.value, []) if isinstance(raw_cats, dict) else []
-    assert isinstance(raw_list, list)
-    return list(map(GhostRef.model_validate, raw_list))
+    return SnapshotBackedAdapter.collect_ghost_from(self._snapshot_data, category)
 
   @property
   def import_alias(self) -> tuple[str, str]:

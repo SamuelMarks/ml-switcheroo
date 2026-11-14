@@ -1,0 +1,21 @@
+--- Forward ---
+import jax.numpy as jnp
+
+def math_ops(x, y):
+    # Tier 1: Core Tensor Operations
+    a = jnp.abs(x)
+    b = jax.lax.add(a, y)
+
+    # Reduction
+    return jnp.mean(b)
+
+--- Backward ---
+import torch
+
+def math_ops(x, y):
+    # Tier 1: Core Tensor Operations
+    a = torch.abs(x)
+    b = torch.add(a, y)
+
+    # Reduction
+    return torch.mean(b)

@@ -13,7 +13,7 @@ HTML_INPUT: str = '\n<h3>Model: RestoredNet</h3>\n<div class="sw-grid">\n  <!-- 
 
 @pytest.fixture
 def semantics() -> SemanticsManager:
-  """Execute semantics helper logic.
+  """Create a configured `SemanticsManager` fixture for HTML roundtrip tests.
 
   Returns:
       Configured `semantics` fixture value (SemanticsManager).
@@ -24,7 +24,7 @@ def semantics() -> SemanticsManager:
 
 
 def test_torch_to_html_generation(semantics: SemanticsManager) -> None:
-  """Verifies the behavior of PyTorch to HTML generation.
+  """Verify `RuntimeConfig` emits `Model: Net</h3>` for torch to HTML generation.
 
   Args:
       semantics: SemanticsManager instance providing operation and trait definitions.
@@ -55,7 +55,7 @@ def test_torch_to_html_generation(semantics: SemanticsManager) -> None:
 
 
 def test_html_to_python_parsing(semantics: SemanticsManager) -> None:
-  """Verifies the behavior of HTML to python parsing.
+  """Verify `RuntimeConfig` emits `class RestoredNet(` for HTML to python parsing.
 
   Args:
       semantics: SemanticsManager instance providing operation and trait definitions.

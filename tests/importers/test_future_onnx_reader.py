@@ -7,7 +7,7 @@ from ml_switcheroo.importers.future_onnx_reader import OnnxSpecImporter
 
 
 def test_onnx_reader_missing_file(tmp_path: Path) -> None:
-  """Verify onnx reader missing file behavior.
+  """Verify `OnnxSpecImporter` handles ONNX reader missing file as expected.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
@@ -18,7 +18,7 @@ def test_onnx_reader_missing_file(tmp_path: Path) -> None:
 
 
 def test_onnx_reader_parse_markdown(tmp_path: Path) -> None:
-  """Verify onnx reader parse markdown behavior.
+  """Verify `OnnxSpecImporter` emits `Abs` for ONNX reader parse markdown.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
@@ -84,7 +84,7 @@ Adds two tensors.
 
 
 def test_map_onnx_type() -> None:
-  """Verify map onnx type behavior."""
+  """Verify `OnnxSpecImporter` handles map ONNX type as expected."""
   importer = OnnxSpecImporter()
 
   # Lists
@@ -110,7 +110,7 @@ def test_map_onnx_type() -> None:
 
 
 def test_long_summary(tmp_path: Path) -> None:
-  """Verify long summary behavior.
+  """Verify `OnnxSpecImporter` emits `Long` for long summary.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
@@ -132,7 +132,7 @@ def test_long_summary(tmp_path: Path) -> None:
 
 
 def test_onnx_reader_extra_branches(tmp_path: Path) -> None:
-  """Verify onnx reader extra branches behavior.
+  """Verify `OnnxSpecImporter` emits `Dup` for ONNX reader extra branches.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.

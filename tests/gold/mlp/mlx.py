@@ -1,19 +1,18 @@
 """Test suite for the Mlx module."""
 
 import mlx.core as mx
-
 import mlx.nn as nn
 
 
 class MLP:
-  """Test helper class MLP."""
+  """Sentinel `MLP` fixture class used in MLX tests."""
 
   def __init__(self, in_features: int, hidden_features: int, out_features: int):
     """Initializes the MLP instance.
 
     Args:
         in_features: Number of input linear features.
-        hidden_features: The hidden features (int) for   init  .
+        hidden_features: Input `hidden_features` parameter value (`int`).
         out_features: Number of output linear features.
     """
     super().__init__()
@@ -31,5 +30,4 @@ class MLP:
     """
     x = self.fc1(x)
     x = nn.relu(x)
-    x = self.fc2(x)
-    return x
+    return self.fc2(x)

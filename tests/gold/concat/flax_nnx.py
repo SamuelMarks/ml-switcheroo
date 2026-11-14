@@ -4,12 +4,12 @@ import jax.numpy as jnp
 
 
 def concat_tensors(x: jnp.ndarray, y: jnp.ndarray, axis: int = -1) -> jnp.ndarray:
-  """Helper to concat tensors.
+  """Execute `jnp.concatenate` to support concat tensors in flax NNX tests.
 
   Args:
       x: Primary input tensor or array operand.
       y: Secondary input tensor or target operand.
-      axis: The axis (int) for concat tensors.
+      axis: Input `axis` parameter value (`int`).
 
   Returns:
       Resulting `jnp.ndarray` from concat tensors.

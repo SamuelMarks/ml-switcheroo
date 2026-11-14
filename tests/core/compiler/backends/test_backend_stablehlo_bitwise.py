@@ -1,0 +1,66 @@
+"""Test suite for Bitwise & Logic operations in the StableHLO backend."""
+
+import pytest
+from pydantic import JsonValue
+
+from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
+from ml_switcheroo.semantics.manager import SemanticsManager
+
+BITWISE_OPS: list[tuple[str, str]] = [
+  ("And", "stablehlo.and"),
+  ("CountLeadingZeros", "stablehlo.count_leading_zeros"),
+  ("Not", "stablehlo.not"),
+  ("Or", "stablehlo.or"),
+  ("Popcnt", "stablehlo.popcnt"),
+  ("ShiftLeft", "stablehlo.shift_left"),
+  ("ShiftRightArithmetic", "stablehlo.shift_right_arithmetic"),
+  ("ShiftRightLogical", "stablehlo.shift_right_logical"),
+  ("Xor", "stablehlo.xor"),
+]
+
+
+class BitwiseSemanticsMock(SemanticsManager):
+  """Mock semantics manager for bitwise ops."""
+
+  def __init__(self) -> None:
+    """Initialize empty semantics manager without disk hydration."""
+    super().__init__(load_defaults=False)
+
+  def get_definition(self, api_name: str) -> tuple[str, dict[str, JsonValue]] | None:
+    """Mock lookup.
+
+    Args:
+        api_name: Kind string.
+
+    Returns:
+        Definition tuple if matched, otherwise None.
+    """
+    for abstract, stablehlo_api in BITWISE_OPS:
+      if api_name == abstract:
+        return abstract, {"variants": {"stablehlo": {"api": stablehlo_api}}}
+    return None
+
+
+@pytest.mark.parametrize(("abstract_name", "expected_api"), BITWISE_OPS)
+def test_bitwise_operations_backend(abstract_name: str, expected_api: str) -> None:
+  """Test generating StableHLO for bitwise operations via backend.
+
+  Args:
+      abstract_name: The Abstract operation name.
+      expected_api: The expected stablehlo string.
+  """
+  nodes: list[LogicalNode] = [
+    LogicalNode(id="in1", op_type="Input"),
+    LogicalNode(id="op1", op_type=abstract_name),
+    LogicalNode(id="out1", op_type="Output"),
+  ]
+  edges: list[LogicalEdge] = [
+    LogicalEdge(source="in1", target="op1"),
+    LogicalEdge(source="op1", target="out1"),
+  ]
+  graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
+  backend: StableHloBackend = StableHloBackend(semantics=BitwiseSemanticsMock())
+  code: str = backend.compile(graph)
+
+  assert expected_api in code

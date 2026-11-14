@@ -1,26 +1,27 @@
 """Test suite for the Discovery Inference module."""
 
-from tests.conftest import _test_setattr
-
 import types
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from ml_switcheroo.core.discovery import SimulatedReflection
 
 
-def mock_module_with_members(name: str, members: list[str]) -> types.ModuleType:
-  """Execute mock module with members helper logic.
+def mock_module_with_members(monkeypatch: pytest.MonkeyPatch, name: str, members: list[str]) -> types.ModuleType:
+  """Build a mock ``types.ModuleType`` populated with scoped ``MagicMock`` members.
 
   Args:
-      members: The members (list[str]) for mock module with members.
-      name: Identifier or operation name string.
+      monkeypatch: Pytest monkeypatch fixture used for scoped attribute assignment.
+      name: Module identifier string.
+      members: Member attribute names to attach to the module.
 
   Returns:
-      Resulting `types.ModuleType` from mock module with members.
+      Populated ``types.ModuleType`` instance.
   """
   mod = types.ModuleType(name)
   for m in members:
-    _test_setattr(mod, m, MagicMock())
+    monkeypatch.setattr(mod, m, MagicMock(), raising=False)
   return mod
 
 
@@ -28,7 +29,7 @@ def get_mock_adapter(modules: list[str] | None = None) -> MagicMock:
   """Gets mock adapter.
 
   Args:
-      modules: The modules (list[str] | None) for get mock adapter.
+      modules: Input `modules` parameter value (`list[str] | None`).
 
   Returns:
       Resulting `MagicMock` from get mock adapter.
@@ -38,14 +39,18 @@ def get_mock_adapter(modules: list[str] | None = None) -> MagicMock:
   return adp
 
 
-def test_exact_match() -> None:
-  """Verifies the behavior of exact match."""
+def test_exact_match(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify exact name matching discovers the target symbol in submodules.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   adapter = get_mock_adapter()
-  mod_root = mock_module_with_members("mock_fw", ["foo"])
-  mod_nn = mock_module_with_members("mock_fw.nn", ["LogSoftmax", "ReLU"])
+  mod_root = mock_module_with_members(monkeypatch, "mock_fw", ["foo"])
+  mod_nn = mock_module_with_members(monkeypatch, "mock_fw.nn", ["LogSoftmax", "ReLU"])
 
   def import_side_effect(name: str) -> types.ModuleType:
-    """Helper to import side effect.
+    """Execute `ImportError` to support import side effect in discovery inference tests.
 
     Args:
         name: Identifier or operation name string.
@@ -59,21 +64,27 @@ def test_exact_match() -> None:
       return mod_nn
     raise ImportError(f"No mock for {name}")
 
-  with patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter):
-    with patch("importlib.import_module", side_effect=import_side_effect):
-      reflector = SimulatedReflection("test_fw")
-      result: str | None = reflector.discover("LogSoftmax")
+  with (
+    patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter),
+    patch("importlib.import_module", side_effect=import_side_effect),
+  ):
+    reflector = SimulatedReflection("test_fw")
+    result: str | None = reflector.discover("LogSoftmax")
   assert result == "mock_fw.nn.LogSoftmax"
 
 
-def test_normalized_match() -> None:
-  """Verifies the behavior of normalized match."""
+def test_normalized_match(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify case/underscore-normalized matching resolves snake_case operations.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   adapter = get_mock_adapter()
-  mod_nn = mock_module_with_members("mock_fw.nn", ["log_softmax"])
-  mod_root = mock_module_with_members("mock_fw", [])
+  mod_nn = mock_module_with_members(monkeypatch, "mock_fw.nn", ["log_softmax"])
+  mod_root = mock_module_with_members(monkeypatch, "mock_fw", [])
 
   def side_effect(name: str) -> types.ModuleType:
-    """Helper to side effect.
+    """Execute `ImportError` to support side effect in discovery inference tests.
 
     Args:
         name: Identifier or operation name string.
@@ -87,54 +98,78 @@ def test_normalized_match() -> None:
       return mod_root
     raise ImportError(name)
 
-  with patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter):
-    with patch("importlib.import_module", side_effect=side_effect):
-      reflector = SimulatedReflection("test_fw")
-      result: str | None = reflector.discover("LogSoftmax")
+  with (
+    patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter),
+    patch("importlib.import_module", side_effect=side_effect),
+  ):
+    reflector = SimulatedReflection("test_fw")
+    result: str | None = reflector.discover("LogSoftmax")
   assert result == "mock_fw.nn.log_softmax"
 
 
-def test_fuzzy_match() -> None:
-  """Verifies the behavior of fuzzy match."""
+def test_fuzzy_match(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify fuzzy matching resolves close symbol variants when exact match is absent.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   adapter = get_mock_adapter(modules=["mock_fw"])
-  mod = mock_module_with_members("mock_fw", ["softmax_v2"])
-  with patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter):
-    with patch("importlib.import_module", return_value=mod):
-      reflector = SimulatedReflection("test_fw")
-      result: str | None = reflector.discover("softmax")
+  mod = mock_module_with_members(monkeypatch, "mock_fw", ["softmax_v2"])
+  with (
+    patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter),
+    patch("importlib.import_module", return_value=mod),
+  ):
+    reflector = SimulatedReflection("test_fw")
+    result: str | None = reflector.discover("softmax")
   assert result == "mock_fw.softmax_v2"
 
 
-def test_no_match_returns_none() -> None:
-  """Verifies the behavior of no match returns none."""
+def test_no_match_returns_none(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify discover returns None when no candidate matches.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   adapter = get_mock_adapter()
-  mod = mock_module_with_members("mock_fw", ["nothing_relevant"])
-  with patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter):
-    with patch("importlib.import_module", return_value=mod):
-      reflector = SimulatedReflection("test_fw")
-      result: str | None = reflector.discover("SpecificOp")
+  mod = mock_module_with_members(monkeypatch, "mock_fw", ["nothing_relevant"])
+  with (
+    patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter),
+    patch("importlib.import_module", return_value=mod),
+  ):
+    reflector = SimulatedReflection("test_fw")
+    result: str | None = reflector.discover("SpecificOp")
   assert result is None
 
 
-def test_missing_adapter_fallback() -> None:
-  """Verifies the behavior of missing adapter fallback."""
-  mod = mock_module_with_members("ghost_fw", ["Op"])
-  with patch("ml_switcheroo.core.discovery.get_adapter", return_value=None):
-    with patch("importlib.import_module", return_value=mod) as mock_import:
-      reflector = SimulatedReflection("ghost_fw")
-      assert reflector.search_modules == ["ghost_fw"]
-      result: str | None = reflector.discover("Op")
-      assert result == "ghost_fw.Op"
-      mock_import.assert_called_with("ghost_fw")
+def test_missing_adapter_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify SimulatedReflection falls back to root module name when no adapter is registered.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
+  mod = mock_module_with_members(monkeypatch, "ghost_fw", ["Op"])
+  with (
+    patch("ml_switcheroo.core.discovery.get_adapter", return_value=None),
+    patch("importlib.import_module", return_value=mod) as mock_import,
+  ):
+    reflector = SimulatedReflection("ghost_fw")
+    assert reflector.search_modules == ["ghost_fw"]
+    result: str | None = reflector.discover("Op")
+    assert result == "ghost_fw.Op"
+    mock_import.assert_called_with("ghost_fw")
 
 
-def test_import_error_handled_gracefully() -> None:
-  """Verifies the behavior of import correctly handling an error handled gracefully."""
+def test_import_error_handled_gracefully(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify broken submodule imports are skipped while healthy submodules still resolve.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   adapter = get_mock_adapter(modules=["bad_mod", "good_mod"])
-  mod_good = mock_module_with_members("good_mod", ["Target"])
+  mod_good = mock_module_with_members(monkeypatch, "good_mod", ["Target"])
 
   def side_effect(name: str) -> types.ModuleType | None:
-    """Helper to side effect.
+    """Execute `ImportError` to support side effect in discovery inference tests.
 
     Args:
         name: Identifier or operation name string.
@@ -148,20 +183,26 @@ def test_import_error_handled_gracefully() -> None:
       return mod_good
     return None
 
-  with patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter):
-    with patch("importlib.import_module", side_effect=side_effect):
-      reflector = SimulatedReflection("test_fw")
-      result: str | None = reflector.discover("Target")
+  with (
+    patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter),
+    patch("importlib.import_module", side_effect=side_effect),
+  ):
+    reflector = SimulatedReflection("test_fw")
+    result: str | None = reflector.discover("Target")
   assert result == "good_mod.Target"
 
 
-def test_fuzzy_match_import_error() -> None:
-  """Verifies the behavior of fuzzy match import correctly handling an error."""
+def test_fuzzy_match_import_error(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify fuzzy matching skips broken submodule imports gracefully.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   adapter = get_mock_adapter(modules=["bad_mod", "good_mod"])
-  mod_good = mock_module_with_members("good_mod", ["Target_v2"])
+  mod_good = mock_module_with_members(monkeypatch, "good_mod", ["Target_v2"])
 
   def side_effect(name: str) -> types.ModuleType | None:
-    """Helper to side effect.
+    """Execute `ImportError` to support side effect in discovery inference tests.
 
     Args:
         name: Identifier or operation name string.
@@ -175,30 +216,31 @@ def test_fuzzy_match_import_error() -> None:
       return mod_good
     return None
 
-  with patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter):
-    with patch("importlib.import_module", side_effect=side_effect):
-      reflector = SimulatedReflection("test_fw")
-      result: str | None = reflector.discover("Target")
+  with (
+    patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter),
+    patch("importlib.import_module", side_effect=side_effect),
+  ):
+    reflector = SimulatedReflection("test_fw")
+    result: str | None = reflector.discover("Target")
   assert result == "good_mod.Target_v2"
 
 
 def test_fuzzy_match_no_candidates() -> None:
-  """Verifies the behavior of fuzzy match no candidates."""
+  """Verify `get_mock_adapter` handles fuzzy match no candidates as expected."""
   adapter = get_mock_adapter(modules=["bad_mod"])
 
   def side_effect(name: str) -> None:
-    """Helper to side effect.
+    """Execute `ImportError` to support side effect in discovery inference tests.
 
     Args:
         name: Identifier or operation name string.
-
-    Returns:
-        Resulting `None` from side effect.
     """
     raise ImportError("Broken")
 
-  with patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter):
-    with patch("importlib.import_module", side_effect=side_effect):
-      reflector = SimulatedReflection("test_fw")
-      result: str | None = reflector.discover("Target")
+  with (
+    patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter),
+    patch("importlib.import_module", side_effect=side_effect),
+  ):
+    reflector = SimulatedReflection("test_fw")
+    result: str | None = reflector.discover("Target")
   assert result is None

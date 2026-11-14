@@ -175,9 +175,11 @@ class StableHloEmitter(PythonToMlirEmitter):
 
     # 2. Body Region
     body_block = self._emit_block(node.body)
-    if not body_block.operations:
-      body_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
-    elif body_block.operations[-1].name not in ("func.return", "sw.return", "stablehlo.return"):
+    if not body_block.operations or body_block.operations[-1].name not in (
+      "func.return",
+      "sw.return",
+      "stablehlo.return",
+    ):
       body_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
     body_region = RegionNode(blocks=[body_block])
 
@@ -211,9 +213,11 @@ class StableHloEmitter(PythonToMlirEmitter):
 
     # MLIR regions require a terminator. For now, we inject a dummy if none exists
     # A true implementation must track mutated state across branches.
-    if not true_block.operations:
-      true_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
-    elif true_block.operations[-1].name not in ("func.return", "sw.return", "stablehlo.return"):
+    if not true_block.operations or true_block.operations[-1].name not in (
+      "func.return",
+      "sw.return",
+      "stablehlo.return",
+    ):
       true_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
 
     true_region = RegionNode(blocks=[true_block])
@@ -223,9 +227,11 @@ class StableHloEmitter(PythonToMlirEmitter):
     if node.orelse is not None:
       if isinstance(node.orelse, cst.Else):
         false_block = self._emit_block(node.orelse.body)
-        if not false_block.operations:
-          false_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
-        elif false_block.operations[-1].name not in ("func.return", "sw.return", "stablehlo.return"):
+        if not false_block.operations or false_block.operations[-1].name not in (
+          "func.return",
+          "sw.return",
+          "stablehlo.return",
+        ):
           false_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
         false_region = RegionNode(blocks=[false_block])
         regions.append(false_region)
@@ -233,9 +239,11 @@ class StableHloEmitter(PythonToMlirEmitter):
         # To be strictly compliant with stablehlo.if vs case, we handle elif as nested here
         # Safe cast as we checked isinstance
         false_block = BlockNode(label="", operations=self._emit_if(node.orelse))
-        if not false_block.operations:
-          false_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
-        elif false_block.operations[-1].name not in ("func.return", "sw.return", "stablehlo.return"):
+        if not false_block.operations or false_block.operations[-1].name not in (
+          "func.return",
+          "sw.return",
+          "stablehlo.return",
+        ):
           false_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
         false_region = RegionNode(blocks=[false_block])
         regions.append(false_region)
@@ -380,20 +388,25 @@ class StableHloEmitter(PythonToMlirEmitter):
         StableHLO operation name (e.g. 'stablehlo.abs') or None.
 
     """
-    # 1. Reverse lookup to get Abstract ID
-    defn = self.semantics.get_definition(api_name)
-    if not defn:
+    try:
+      resolved = self.semantics.resolve_operation(api_name)
+    except AttributeError:
+      defn = self.semantics.get_definition(api_name)
+      if not defn:
+        return None
+      _abstract_id, details = defn
+      raw_variants = details.get("variants")
+      shlo_var = raw_variants.get("stablehlo") if isinstance(raw_variants, dict) else None
+      if isinstance(shlo_var, dict):
+        api = shlo_var.get("api")
+        return str(api) if api is not None else None
       return None
 
-    _abstract_id, details = defn
-    # 2. Check for 'stablehlo' variant
-    raw_variants = details.get("variants")
-    shlo_var = raw_variants.get("stablehlo") if isinstance(raw_variants, dict) else None
-    if isinstance(shlo_var, dict):
-      api = shlo_var.get("api")
-      return str(api) if api is not None else None
-
-    return None
+    if resolved is None:
+      return None
+    abstract_id, op_def = resolved
+    shlo_typed = self.semantics.get_variant(abstract_id, "stablehlo") or op_def.variants.get("stablehlo")
+    return shlo_typed.api if shlo_typed is not None else None
 
   def _map_py_type_to_mlir(self, type_str: str) -> str:
     """Map Python type strings to MLIR types.
@@ -508,16 +521,16 @@ class StableHloEmitter(PythonToMlirEmitter):
     """
     if isinstance(node, cst.Integer):
       return int(node.value)
-    elif (
+    if (
       isinstance(node, cst.UnaryOperation)
       and isinstance(node.operator, cst.Minus)
       and isinstance(node.expression, cst.Integer)
     ):
       return -int(node.expression.value)
-    elif isinstance(node, cst.Float):
+    if isinstance(node, cst.Float):
       return float(node.value)
-    elif isinstance(node, cst.SimpleString):
+    if isinstance(node, cst.SimpleString):
       return node.value.strip("\"'")
-    elif isinstance(node, (cst.List, cst.Tuple)):
+    if isinstance(node, (cst.List, cst.Tuple)):
       return [self._extract_literal(el.value) for el in node.elements]
     return "%error"

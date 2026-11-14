@@ -1,19 +1,29 @@
 """Test suite for cst base."""
 
-from tests.conftest import _test_getattr
-
+import pytest
 from pydantic import JsonValue
 
-import pytest
-
-from ml_switcheroo.core.cst.base import CSTNode, Trivia
+from ml_switcheroo.core.cst.base import CSTNode, Trivia, TriviaInput
 
 
 class MockCST(CSTNode):
-  """Test helper class MockCST."""
+  """Stub `CSTNode` subclass implementing `_get_name`, `_get_fields` for CST base tests."""
+
+  def __init__(
+    self,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
+  ) -> None:
+    """Initialize `MockCST` with optional leading and trailing trivia.
+
+    Args:
+        leading_trivia: Optional leading trivia input.
+        trailing_trivia: Optional trailing trivia input.
+    """
+    super().__init__(leading_trivia=leading_trivia, trailing_trivia=trailing_trivia)
 
   def _get_name(self) -> str:
-    """Execute get name helper logic.
+    """Execute `_get_name` on `MockCST` for CST base tests.
 
     Returns:
         Resulting `str` from get name.
@@ -21,7 +31,7 @@ class MockCST(CSTNode):
     return "Mock"
 
   def _get_fields(self) -> dict[str, JsonValue]:
-    """Execute get fields helper logic.
+    """Execute `_get_fields` on `MockCST` for CST base tests.
 
     Returns:
         Resulting `dict[str, JsonValue]` from get fields.
@@ -30,7 +40,7 @@ class MockCST(CSTNode):
 
 
 def test_cst_base_render() -> None:
-  """Verify cst base render behavior."""
+  """Verify `Trivia` raises `NotImplementedError` during CST base render."""
   t = Trivia(text=" ")
   m = MockCST(leading_trivia=[t], trailing_trivia=[t])
   # The default to_text raises NotImplementedError
@@ -42,59 +52,43 @@ def test_cst_base_render() -> None:
 
 
 def test_cst_base_trivia_convert() -> None:
-  """Verify cst base trivia convert behavior."""
-  m = _test_getattr(
-    {
-      "v": _test_getattr({"v": MockCST}, "__getitem__")("v")(leading_trivia=_test_getattr({"v": " "}, "__getitem__")("v"))
-    },
-    "__getitem__",
-  )("v")
+  """Verify CST base trivia convert produces the expected state."""
+  m = MockCST(leading_trivia=" ")
   assert len(m.leading_trivia) == 1
   assert m.leading_trivia[0].text == " "
 
-  m2 = _test_getattr(
-    {
-      "v": _test_getattr({"v": MockCST}, "__getitem__")("v")(
-        trailing_trivia=_test_getattr({"v": " "}, "__getitem__")("v")
-      )
-    },
-    "__getitem__",
-  )("v")
+  m2 = MockCST(trailing_trivia=" ")
   assert len(m2.trailing_trivia) == 1
   assert m2.trailing_trivia[0].text == " "
 
 
 def test_trivia_eq() -> None:
-  """Verify trivia eq behavior."""
+  """Verify `Trivia` handles eq as expected."""
   t1 = Trivia(text="a")
   t2 = Trivia(text="a")
   assert t1 == t2
-  assert _test_getattr({"v": t1}, "__getitem__")("v") != _test_getattr({"v": "a"}, "__getitem__")("v")
+  non_trivia: Trivia | str = "a"
+  assert t1 != non_trivia
 
 
 def test_cst_base_trivia_convert_none() -> None:
-  """Verify cst base trivia convert none behavior."""
-  m = _test_getattr(
-    {
-      "v": _test_getattr({"v": MockCST}, "__getitem__")("v")(
-        leading_trivia=_test_getattr({"v": None}, "__getitem__")("v"),
-        trailing_trivia=_test_getattr({"v": None}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
+  """Verify CST base trivia convert none produces the expected state."""
+  m = MockCST(
+    leading_trivia=None,
+    trailing_trivia=None,
+  )
   assert m.leading_trivia == []
   assert m.trailing_trivia == []
 
 
 def test_cst_base_str() -> None:
-  """Verify cst base str behavior."""
+  """Verify `MockStr` handles CST base str as expected."""
 
   class MockStr(MockCST):
-    """Test helper class MockStr."""
+    """Stub `MockCST` subclass implementing `to_text` for CST base tests."""
 
     def to_text(self) -> str:
-      """Execute to text helper logic.
+      """Execute `to_text` on `MockStr` for CST base tests.
 
       Returns:
           Resulting `str` from to text.
@@ -106,14 +100,20 @@ def test_cst_base_str() -> None:
 
 
 def test_cst_visitor() -> None:
-  """Verify cst visitor behavior."""
+  """Verify `v.visit` handles CST visitor as expected."""
   from ml_switcheroo.core.cst.base import CSTVisitor
 
   class MockVisitor(CSTVisitor):
-    """Test helper class MockVisitor."""
+    """Stub `CSTVisitor` subclass implementing `visit_MockCST` for CST base tests."""
 
-    def visit_MockCST(self, node: CSTNode) -> None:
-      """Execute visit MockCST helper logic.
+    def __init__(self) -> None:
+      """Initialize visitor and register `MockCST` handler."""
+      super().__init__()
+      self.visited = False
+      self.register_visitor(MockCST, self.visit_MockCST)
+
+    def visit_MockCST(self, node: MockCST) -> None:
+      """Execute `visit_MockCST` on `MockVisitor` for CST base tests.
 
       Args:
           node: CST or AST node under inspection or transformation.
@@ -123,22 +123,23 @@ def test_cst_visitor() -> None:
   v = MockVisitor()
   m = MockCST()
   v.visit(m)
-  assert _test_getattr(v, "visited", False) is True
+  assert v.visited is True
 
 
 def test_cst_visitor_generic() -> None:
-  """Verify cst visitor generic behavior."""
+  """Verify `v.visit` handles CST visitor generic as expected."""
   from ml_switcheroo.core.cst.base import CSTVisitor
 
   class MockVisitor(CSTVisitor):
-    """Test helper class MockVisitor."""
+    """Stub `CSTVisitor` subclass implementing `generic_visit` for CST base tests."""
 
     def __init__(self) -> None:
       """Initialize test helper instance."""
+      super().__init__()
       self.generic_visited = False
 
     def generic_visit(self, node: CSTNode) -> None:
-      """Execute generic visit helper logic.
+      """Execute `generic_visit` on `MockVisitor` for CST base tests.
 
       Args:
           node: CST or AST node under inspection or transformation.
@@ -148,24 +149,24 @@ def test_cst_visitor_generic() -> None:
   v = MockVisitor()
   m = MockCST()
   v.visit(m)
-  assert v.generic_visited
+  assert v.generic_visited is True
 
 
 def test_cst_visitor_generic_fields() -> None:
-  """Verify cst visitor generic fields behavior."""
+  """Verify `NodeA` returns `3` for CST visitor generic fields."""
   import pydantic
 
   from ml_switcheroo.core.cst.base import CSTVisitor
 
   class NodeA(CSTNode):
-    """Test helper class NodeA."""
+    """Stub `CSTNode` subclass implementing `_get_name`, `_get_fields` for CST base tests."""
 
     child: CSTNode | None = None
     children: list[CSTNode | str] = pydantic.Field(default_factory=list)
     other: int = 1
 
     def _get_name(self) -> str:
-      """Execute get name helper logic.
+      """Execute `_get_name` on `NodeA` for CST base tests.
 
       Returns:
           Resulting `str` from get name.
@@ -174,8 +175,8 @@ def test_cst_visitor_generic_fields() -> None:
 
     def _get_fields(
       self,
-    ) -> dict[str, CSTNode | None | list[CSTNode | str] | int]:
-      """Execute get fields helper logic.
+    ) -> dict[str, CSTNode | list[CSTNode | str] | int | None]:
+      """Execute `_get_fields` on `NodeA` for CST base tests.
 
       Returns:
           Resulting `dict[str, CSTNode | None | list[CSTNode | str] | int]` from get fields.
@@ -183,14 +184,15 @@ def test_cst_visitor_generic_fields() -> None:
       return {"child": self.child, "children": self.children, "other": self.other}
 
   class MockVisitor(CSTVisitor):
-    """Test helper class MockVisitor."""
+    """Stub `CSTVisitor` subclass implementing `generic_visit` for CST base tests."""
 
     def __init__(self) -> None:
       """Initialize test helper instance."""
+      super().__init__()
       self.visited_count = 0
 
     def generic_visit(self, node: CSTNode) -> None:
-      """Execute generic visit helper logic.
+      """Execute `generic_visit` on `MockVisitor` for CST base tests.
 
       Args:
           node: CST or AST node under inspection or transformation.
@@ -207,20 +209,20 @@ def test_cst_visitor_generic_fields() -> None:
 
 
 def test_cst_transformer_generic_fields() -> None:
-  """Verify cst transformer generic fields behavior."""
+  """Verify `NodeA` handles CST transformer generic fields as expected."""
   import pydantic
 
   from ml_switcheroo.core.cst.base import CSTTransformer
 
   class NodeA(CSTNode):
-    """Test helper class NodeA."""
+    """Stub `CSTNode` subclass implementing `_get_name`, `_get_fields` for CST base tests."""
 
     child: CSTNode | None = None
     children: list[CSTNode | str] = pydantic.Field(default_factory=list)
     other: int = 1
 
     def _get_name(self) -> str:
-      """Execute get name helper logic.
+      """Execute `_get_name` on `NodeA` for CST base tests.
 
       Returns:
           Resulting `str` from get name.
@@ -229,8 +231,8 @@ def test_cst_transformer_generic_fields() -> None:
 
     def _get_fields(
       self,
-    ) -> dict[str, CSTNode | None | list[CSTNode | str] | int]:
-      """Execute get fields helper logic.
+    ) -> dict[str, CSTNode | list[CSTNode | str] | int | None]:
+      """Execute `_get_fields` on `NodeA` for CST base tests.
 
       Returns:
           Resulting `dict[str, CSTNode | None | list[CSTNode | str] | int]` from get fields.
@@ -238,10 +240,15 @@ def test_cst_transformer_generic_fields() -> None:
       return {"child": self.child, "children": self.children, "other": self.other}
 
   class MockTransformer(CSTTransformer):
-    """Test helper class MockTransformer."""
+    """Stub `CSTTransformer` subclass implementing `transform_NodeA` for CST base tests."""
+
+    def __init__(self) -> None:
+      """Initialize transformer and register `NodeA` handler."""
+      super().__init__()
+      self.register_transformer(NodeA, self.transform_NodeA)
 
     def transform_NodeA(self, node: NodeA) -> NodeA:
-      """Execute transform NodeA helper logic.
+      """Execute `generic_transform` to support transform nodea in CST base tests.
 
       Args:
           node: CST or AST node under inspection or transformation.

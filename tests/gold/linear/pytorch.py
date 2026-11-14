@@ -5,7 +5,7 @@ import torch.nn as nn
 
 
 class Model(nn.Module):
-  """Test helper class Model."""
+  """Stub `nn.Module` subclass implementing `forward` for pytorch tests."""
 
   def __init__(self, in_features: int, out_features: int):
     """Initializes the Model instance.
@@ -18,7 +18,7 @@ class Model(nn.Module):
     self.linear = nn.Linear(in_features, out_features)
 
   def forward(self, x: torch.Tensor) -> torch.Tensor:
-    """Helper to forward.
+    """Compute the forward pass of `Model` on input tensors.
 
     Args:
         x: Primary input tensor or array operand.

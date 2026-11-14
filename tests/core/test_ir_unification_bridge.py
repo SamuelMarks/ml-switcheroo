@@ -1,12 +1,12 @@
 """Unit tests for Phase 10: Zero-Copy `ml-switcheroo-ir` (`LogicalGraph`) Bridge."""
 
 from __future__ import annotations
-from tests.conftest import _test_setattr
 
 import types
 from unittest import mock
 
 import libcst as cst
+import pytest
 from ml_switcheroo_ir import DType, LogicalEdge, LogicalGraph, LogicalNode
 
 from ml_switcheroo.config import (
@@ -17,6 +17,7 @@ from ml_switcheroo.config import (
   RuntimeConfig,
 )
 from ml_switcheroo.core.ir_bridge import (
+  ForwardGraphBuildRequest,
   _resolve_ir_dtype,
   build_hydrated_forward_graph,
   synthesize_backward_vjp_graph,
@@ -25,8 +26,12 @@ from ml_switcheroo.core.runtime_models import NodeRuntimeTelemetry
 from ml_switcheroo.core.runtime_tracer import _invoke_codegen, run_on_device_trace
 
 
-def test_build_hydrated_forward_graph_and_autodiff_grad() -> None:
-  """Verify build_hydrated_forward_graph and synthesize_backward_vjp_graph on shared LogicalGraph."""
+def test_build_hydrated_forward_graph_and_autodiff_grad(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify build_hydrated_forward_graph and synthesize_backward_vjp_graph on shared LogicalGraph.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   code = """def forward(x):
     y = x + x
     return y
@@ -55,11 +60,11 @@ def test_build_hydrated_forward_graph_and_autodiff_grad() -> None:
   parsed_g.nodes["x"] = LogicalNode(id="x", op_type="Input", shape_metadata=(2, 4), dtype=DType.float32)
   parsed_g.nodes["y"] = LogicalNode(id="y", op_type="Add", dtype=DType.float32)
   parsed_g.edges.append(LogicalEdge(source="x", target="y"))
-  _test_setattr(stub_ast_to_ir, "parse_ast_to_ir", lambda _code: parsed_g)
+  monkeypatch.setattr(stub_ast_to_ir, "parse_ast_to_ir", lambda _code: parsed_g, raising=False)
 
   stub_shape_inf = types.ModuleType("ml_switcheroo_compiler.transforms.passes.shape_inference")
-  _test_setattr(stub_shape_inf, "shape_inference_pass", lambda _g: None)
-  _test_setattr(stub_shape_inf, "annotate_learned_shapes", lambda _g, _s: None)
+  monkeypatch.setattr(stub_shape_inf, "shape_inference_pass", lambda _g: None, raising=False)
+  monkeypatch.setattr(stub_shape_inf, "annotate_learned_shapes", lambda _g, _s: None, raising=False)
 
   stub_autodiff = types.ModuleType("ml_switcheroo_compiler.transforms.autodiff")
 
@@ -78,7 +83,7 @@ def test_build_hydrated_forward_graph_and_autodiff_grad() -> None:
     bg.nodes["grad_x"] = LogicalNode(id="grad_x", op_type="Mul", shape_metadata=(2, 4), dtype=DType.float32)
     return bg
 
-  _test_setattr(stub_autodiff, "grad", _stub_grad)
+  monkeypatch.setattr(stub_autodiff, "grad", _stub_grad, raising=False)
 
   def _stub_import(name: str) -> types.ModuleType:
     """Import stub for ast_to_ir, shape_inference, and autodiff.
@@ -99,14 +104,16 @@ def test_build_hydrated_forward_graph_and_autodiff_grad() -> None:
 
   with mock.patch("importlib.import_module", side_effect=_stub_import):
     fwd_g, passes = build_hydrated_forward_graph(
-      code=code,
-      tree=tree,
-      input_shapes=[(2, 4)],
-      output_shape=(2, 4),
-      dtype="float32",
-      node_telemetry=tel,
-      observed_shapes={"y": [2, 4]},
-      config=cfg,
+      ForwardGraphBuildRequest(
+        code=code,
+        tree=tree,
+        input_shapes=[(2, 4)],
+        output_shape=(2, 4),
+        dtype="float32",
+        config=cfg,
+        node_telemetry=tel,
+        observed_shapes={"y": [2, 4]},
+      )
     )
     assert isinstance(fwd_g, LogicalGraph)
     assert len(fwd_g.nodes) >= 1
@@ -126,7 +133,7 @@ def test_build_hydrated_forward_graph_and_autodiff_grad() -> None:
   stub_no_in_ast_to_ir = types.ModuleType("ml_switcheroo_compiler.backends.ast_to_ir")
   no_in_g = LogicalGraph(name="NoInputNet")
   no_in_g.nodes["op1"] = LogicalNode(id="op1", op_type="Relu", dtype=DType.float32)
-  _test_setattr(stub_no_in_ast_to_ir, "parse_ast_to_ir", lambda _code: no_in_g)
+  monkeypatch.setattr(stub_no_in_ast_to_ir, "parse_ast_to_ir", lambda _code: no_in_g, raising=False)
   with mock.patch(
     "importlib.import_module",
     side_effect=lambda name: (
@@ -136,19 +143,21 @@ def test_build_hydrated_forward_graph_and_autodiff_grad() -> None:
     ),
   ):
     fwd_no_in, _ = build_hydrated_forward_graph(
-      code=code,
-      tree=tree,
-      input_shapes=[(2, 4)],
-      output_shape=(2, 4),
-      dtype="float32",
-      node_telemetry=tel,
-      observed_shapes={"y": [2, 4]},
-      config=cfg,
+      ForwardGraphBuildRequest(
+        code=code,
+        tree=tree,
+        input_shapes=[(2, 4)],
+        output_shape=(2, 4),
+        dtype="float32",
+        config=cfg,
+        node_telemetry=tel,
+        observed_shapes={"y": [2, 4]},
+      )
     )
     assert fwd_no_in.inputs == ["op1"]
 
   stub_empty_ast_to_ir = types.ModuleType("ml_switcheroo_compiler.backends.ast_to_ir")
-  _test_setattr(stub_empty_ast_to_ir, "parse_ast_to_ir", lambda _code: LogicalGraph())
+  monkeypatch.setattr(stub_empty_ast_to_ir, "parse_ast_to_ir", lambda _code: LogicalGraph(), raising=False)
   with mock.patch(
     "importlib.import_module",
     side_effect=lambda name: (
@@ -158,14 +167,16 @@ def test_build_hydrated_forward_graph_and_autodiff_grad() -> None:
     ),
   ):
     fwd_g2, _ = build_hydrated_forward_graph(
-      code=code,
-      tree=tree,
-      input_shapes=[(2, 4)],
-      output_shape=(2, 4),
-      dtype="float32",
-      node_telemetry=tel,
-      observed_shapes={"y": [2, 4]},
-      config=cfg,
+      ForwardGraphBuildRequest(
+        code=code,
+        tree=tree,
+        input_shapes=[(2, 4)],
+        output_shape=(2, 4),
+        dtype="float32",
+        config=cfg,
+        node_telemetry=tel,
+        observed_shapes={"y": [2, 4]},
+      )
     )
     assert len(fwd_g2.nodes) >= 1
 
@@ -178,14 +189,14 @@ def test_build_hydrated_forward_graph_fallbacks() -> None:
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
   with mock.patch("importlib.import_module", side_effect=ImportError("no compiler")):
     fwd_g, _ = build_hydrated_forward_graph(
-      code=empty_code,
-      tree=tree,
-      input_shapes=[(2, 4)],
-      output_shape=(2, 4),
-      dtype="float32",
-      node_telemetry={},
-      observed_shapes={},
-      config=cfg,
+      ForwardGraphBuildRequest(
+        code=empty_code,
+        tree=tree,
+        input_shapes=[(2, 4)],
+        output_shape=(2, 4),
+        dtype="float32",
+        config=cfg,
+      )
     )
     assert "x" in fwd_g.nodes
     assert "out" in fwd_g.nodes
@@ -225,8 +236,12 @@ def test_synthesize_backward_vjp_graph_with_output_and_parameter_nodes() -> None
   assert len(bwd_g.nodes) >= len(g.nodes)
 
 
-def test_run_shared_ir_bridge_across_multiple_backends() -> None:
-  """Verify run_shared_ir_bridge emits kernels for webgpu, wasm_simd, webgl, and cuda."""
+def test_run_shared_ir_bridge_across_multiple_backends(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify run_shared_ir_bridge emits kernels for webgpu, wasm_simd, webgl, and cuda.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   code = """import torch
 def f(x):
     return torch.relu(x)
@@ -268,7 +283,7 @@ def f(x):
       return "zero_arg_kernel"
 
   dummy_gen_mod = types.ModuleType("dummy_gen")
-  _test_setattr(dummy_gen_mod, "ZeroArgGen", ZeroArgGen)
+  monkeypatch.setattr(dummy_gen_mod, "ZeroArgGen", ZeroArgGen, raising=False)
   assert _invoke_codegen(dummy_gen_mod, "ZeroArgGen", LogicalGraph()) == "zero_arg_kernel"
   assert _resolve_ir_dtype(DType.float16) == DType.float16
   assert _resolve_ir_dtype("int32") == DType.int32

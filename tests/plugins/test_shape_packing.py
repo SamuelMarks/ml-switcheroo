@@ -1,17 +1,15 @@
 """Test suite for the Shape Packing module."""
 
-from tests.conftest import _test_getattr
-
 import typing
-from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
 import pytest
+from pydantic import JsonValue
 
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.frameworks.base import register_framework
+from ml_switcheroo.frameworks.base import StructuralTraits, register_framework
 from ml_switcheroo.plugins.shape_packing import transform_shape_packing
 from tests.conftest import TestRewriter as PivotRewriter
 
@@ -30,13 +28,21 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   return rewriter.convert(tree).code
 
 
-@register_framework("custom_fw")
 class CustomAdapter:
-  """Test helper class CustomAdapter."""
+  """Test double `CustomAdapter` used in shape packing tests."""
+
+  @property
+  def structural_traits(self) -> StructuralTraits:
+    """Return default structural traits for `CustomAdapter`.
+
+    Returns:
+        Default `StructuralTraits` instance.
+    """
+    return StructuralTraits()
 
   @property
   def harness_imports(self) -> list[JsonValue]:
-    """Helper to harness imports.
+    """Return the `harness_imports` property from `CustomAdapter`.
 
     Returns:
         list: List of imports.
@@ -61,7 +67,7 @@ class CustomAdapter:
 
   @property
   def declared_magic_args(self) -> list[JsonValue]:
-    """Helper to declared magic arguments.
+    """Return the `declared_magic_args` property from `CustomAdapter`.
 
     Returns:
         list: Empty list.
@@ -76,18 +82,16 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   Returns:
       Callable[[str], PivotRewriter]: The factory function.
   """
-  _test_getattr(
-    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
-  )("pack_shape_args", _test_getattr({"v": transform_shape_packing}, "__getitem__")("v"))
-  hooks._PLUGINS_LOADED = True
+  register_framework("custom_fw")(CustomAdapter)
+  hooks.register_hook("pack_shape_args")(transform_shape_packing)
+  hooks.set_plugins_loaded(True)
   mgr: MagicMock = MagicMock()
-  def_map = {
-    "variants": {
-      "torch": {"api": "torch.view"},
-      "jax": {"api": "jnp.reshape", "requires_plugin": "pack_shape_args"},
-      "custom_fw": {"api": "custom.ops.reshape", "requires_plugin": "pack_shape_args"},
-    }
+  variants_map: dict[str, dict[str, JsonValue]] = {
+    "torch": {"api": "torch.view"},
+    "jax": {"api": "jnp.reshape", "requires_plugin": "pack_shape_args"},
+    "custom_fw": {"api": "custom.ops.reshape", "requires_plugin": "pack_shape_args"},
   }
+  def_map = {"variants": variants_map}
   mgr.get_known_apis.return_value = {"Reshape": def_map}
 
   def resolve(aid: str, fw: str) -> dict[str, JsonValue] | None:
@@ -98,22 +102,10 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
         fw (str): Target framework.
 
     Returns:
-        Any: Variant definition.
+        dict[str, JsonValue] | None: Variant definition.
     """
     if aid == "Reshape":
-      _ret_v: dict[str, JsonValue] | None = _test_getattr(
-        {
-          "v": _test_getattr(
-            {
-              "v": _test_getattr({"v": _test_getattr({"v": def_map}, "__getitem__")("v")["variants"]}, "__getitem__")(
-                "v"
-              ).get
-            },
-            "__getitem__",
-          )("v")(_test_getattr({"v": fw}, "__getitem__")("v"))
-        },
-        "__getitem__",
-      )("v")
+      _ret_v: dict[str, JsonValue] | None = variants_map.get(fw)
       return _ret_v
     return None
 
@@ -137,7 +129,7 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
 
 
 def test_packing_jax(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of packing JAX.
+  """Verify `rewriter_factory` emits `jnp.reshape(x` for packing JAX.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): Factory instance.
@@ -150,7 +142,7 @@ def test_packing_jax(rewriter_factory: typing.Callable[[str], PivotRewriter]) ->
 
 
 def test_packing_custom_fw(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of packing custom framework.
+  """Verify `rewriter_factory` emits `custom.ops.reshape(x` for packing custom fw.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): Factory instance.
@@ -163,7 +155,7 @@ def test_packing_custom_fw(rewriter_factory: typing.Callable[[str], PivotRewrite
 
 
 def test_packing_missing_passthrough(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of packing missing passthrough.
+  """Verify `rewriter_factory` emits `x.view(1, 2)` for packing missing passthrough.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): Factory instance.

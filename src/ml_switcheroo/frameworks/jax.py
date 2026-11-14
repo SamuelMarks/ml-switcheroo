@@ -9,8 +9,6 @@ to a high-level neural network library like Flax or Haiku. It maps:
 It specifically enables `requires_explicit_rng` in plugin traits.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
 import logging
 import textwrap
 from types import ModuleType
@@ -18,11 +16,14 @@ from types import ModuleType
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.frameworks.base import (
+  FrameworkSnapshot,
   GhostRef,
   ImportConfig,
   InitMode,
   PluginTraits,
+  SnapshotBackedAdapter,
   StandardMap,
   StructuralTraits,
   load_snapshot_for_adapter,
@@ -51,6 +52,11 @@ class JaxCoreAdapter(JAXStackMixin):
   -   **Types**: `jnp.float32`, `jnp.int32`, `jnp.bfloat16`.
   -   **Casting**: `.astype(...)` synthesis via plugins.
   -   **Optimization**: `optax.adam`, `optax.sgd`.
+
+  Attributes:
+      display_name: The display name (`str`).
+      inherits_from: The inherits from (`str | None`).
+      ui_priority: The ui priority (`int`).
   """
 
   display_name: str = "JAX (no framework)"
@@ -62,13 +68,14 @@ class JaxCoreAdapter(JAXStackMixin):
 
     Detects installation status to toggle between LIVE and GHOST modes.
     """
-    self._mode = InitMode.LIVE
-    self._snapshot_data: dict[str, JsonValue] = {}
-    if jax is None:
-      self._mode = InitMode.GHOST
-      self._snapshot_data = load_snapshot_for_adapter("jax")
-      if not self._snapshot_data:
-        logging.debug("JAX not installed and no snapshot found. Scanning unavailable.")
+    self._snapshot = SnapshotBackedAdapter(
+      "jax",
+      is_live_available=jax is not None,
+      loader=load_snapshot_for_adapter,
+      missing_message="JAX not installed and no snapshot found. Scanning unavailable.",
+    )
+    self._mode: InitMode = self._snapshot.mode
+    self._snapshot_data: FrameworkSnapshot | None = self._snapshot.snapshot
 
   @property
   def import_alias(self) -> tuple[str, str]:
@@ -235,12 +242,7 @@ class JaxCoreAdapter(JAXStackMixin):
     Returns:
         List[GhostRef]: A list of matching ghost references.
     """
-    if not self._snapshot_data:
-      return []
-    raw_cats = self._snapshot_data.get("categories", {})
-    raw_list = raw_cats.get(category.value, []) if isinstance(raw_cats, dict) else []
-    assert isinstance(raw_list, list)
-    return [GhostRef.model_validate(item) for item in raw_list]
+    return SnapshotBackedAdapter.collect_ghost_from(self._snapshot_data, category)
 
   def _scan_optax_losses(self) -> list[GhostRef]:
     """Scan installed Optax loss functions when available.

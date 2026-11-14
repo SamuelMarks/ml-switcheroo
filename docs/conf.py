@@ -8,7 +8,6 @@ import typing
 import warnings
 from datetime import datetime
 
-
 InspectableTarget: typing.TypeAlias = (
   types.ModuleType
   | type
@@ -173,21 +172,22 @@ def linkcode_resolve(domain: str, info: dict[str, str]) -> str | None:
   obj: InspectableTarget | property | str | int | float | bool | None = mod
 
   for part in info["fullname"].split("."):
-    try:
-      obj = inspect.getattr_static(obj, part)
-    except (AttributeError, TypeError):
+    members = dict(inspect.getmembers_static(obj))
+    if part not in members:
       return None
+    obj = members[part]
 
   # Unwrap decorators if needed
   while isinstance(obj, _WrappedProtocol):
     obj = obj.__wrapped__
 
   # Introspect source file and lines
+  if not _is_inspectable(obj):
+    return None
   try:
-    assert _is_inspectable(obj)
     fn = inspect.getsourcefile(obj)
     source, lineno = inspect.getsourcelines(obj)
-  except (TypeError, OSError, AssertionError):
+  except (TypeError, OSError):
     return None
 
   if not fn:
@@ -209,8 +209,7 @@ def linkcode_resolve(domain: str, info: dict[str, str]) -> str | None:
   end_lineno = lineno + len(source) - 1
 
   # Construct GitHub URL (assuming master branch)
-  blob_url = f"https://github.com/SamuelMarks/ml-switcheroo/blob/master/{rel_path}#L{lineno}-L{end_lineno}"
-  return blob_url
+  return f"https://github.com/SamuelMarks/ml-switcheroo/blob/master/{rel_path}#L{lineno}-L{end_lineno}"
 
 
 napoleon_use_ivar = True

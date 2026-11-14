@@ -1,57 +1,46 @@
 """Test suite for the Trait Rewriting module."""
 
-from tests.conftest import _test_setattr
-
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
 import typing
-from pydantic import JsonValue
 
 import libcst as cst
 import pytest
+from pydantic import JsonValue
 
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.frameworks import register_framework
 from ml_switcheroo.semantics.manager import SemanticsManager
 from tests.conftest import TestRewriter as PivotRewriter
 
 
 class MockTraitSemantics(SemanticsManager):
-  """Test helper class MockTraitSemantics."""
+  """Stub `SemanticsManager` subclass implementing `get_framework_config` for trait rewriting tests."""
 
   def __init__(self) -> None:
     """Initializes the MockTraitSemantics instance."""
-    self.data = {}
-    self._reverse_index = {}
+    super().__init__(load_defaults=False)
     self.import_data: dict[str, RuntimeTensorOrValue] = {}
-    self.test_templates = {}
-    _test_setattr(
-      self,
-      "framework_configs",
-      {
-        "custom_nn": {
-          "traits": {
-            "module_base": "custom.Layer",
-            "forward_method": "predict",
-            "requires_super_init": True,
-            "init_method_name": "__init__",
-            "inject_magic_args": [
-              (
-                "ctx",
-                "custom.Context",
-              )
-            ],
-            "strip_magic_args": ["rngs"],
-          }
-        },
-        "jax": {"traits": {"module_base": "flax.nnx.Module", "forward_method": "__call__"}},
-        "torch": {"traits": {"module_base": "torch.nn.Module", "requires_super_init": True}},
-        "ghost_fw": {"traits": {"module_base": "ghost.Network", "forward_method": "ghost_fwd"}},
+    self.framework_configs = {
+      "custom_nn": {
+        "traits": {
+          "module_base": "custom.Layer",
+          "forward_method": "predict",
+          "requires_super_init": True,
+          "init_method_name": "__init__",
+          "inject_magic_args": [["ctx", "custom.Context"]],
+          "strip_magic_args": ["rngs"],
+        }
       },
-    )
+      "jax": {"traits": {"module_base": "flax.nnx.Module", "forward_method": "__call__"}},
+      "torch": {"traits": {"module_base": "torch.nn.Module", "requires_super_init": True}},
+      "ghost_fw": {"traits": {"module_base": "ghost.Network", "forward_method": "ghost_fwd"}},
+    }
 
   def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
+
+    Args:
+        framework: Framework identifier string.
 
     Returns:
         Configuration dictionary for the specified framework.
@@ -61,17 +50,17 @@ class MockTraitSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
-  """Execute rewriter factory helper logic.
+  """Create a configured `rewriter_factory` fixture for trait rewriting tests.
 
   Returns:
       Configured `rewriter_factory` fixture value (typing.Callable[[str], PivotRewriter]).
   """
 
   class CustomNNAdapter:
-    """Test helper class CustomNNAdapter."""
+    """Test double `CustomNNAdapter` implementing `convert` for trait rewriting tests."""
 
     def convert(self, x: JsonValue) -> JsonValue:
-      """Converts .
+      """Convert input payload in test stub.
 
       Args:
           x: Primary input tensor or array operand.
@@ -87,7 +76,7 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   semantics = MockTraitSemantics()
 
   def create(target_framework: str) -> PivotRewriter:
-    """Creates .
+    """Execute `RuntimeConfig` to support create in trait rewriting tests.
 
     Args:
         target_framework: Target framework identifier string.
@@ -117,7 +106,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 
 def test_trait_module_inheritance_rewrite(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of trait module inheritance rewrite.
+  """Verify `rewriter_factory` emits `class Model(custom.Layer):` for trait module inheritance rewrite.
 
   Args:
       rewriter_factory: Factory callable producing configured rewriter instances.
@@ -129,7 +118,7 @@ def test_trait_module_inheritance_rewrite(rewriter_factory: typing.Callable[[str
 
 
 def test_dynamic_base_discovery(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of dynamic base discovery.
+  """Verify `RuntimeConfig` emits `class MyGhost(custom.Layer):` for dynamic base discovery.
 
   Args:
       rewriter_factory: Factory callable producing configured rewriter instances.
@@ -144,7 +133,7 @@ def test_dynamic_base_discovery(rewriter_factory: typing.Callable[[str], PivotRe
 
 
 def test_trait_method_renaming(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of trait method renaming.
+  """Verify `rewriter_factory` emits `def predict(self, x):` for trait method renaming.
 
   Args:
       rewriter_factory: Factory callable producing configured rewriter instances.
@@ -157,7 +146,7 @@ def test_trait_method_renaming(rewriter_factory: typing.Callable[[str], PivotRew
 
 
 def test_trait_argument_injection(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of trait argument injection.
+  """Verify `rewriter_factory` handles trait argument injection as expected.
 
   Args:
       rewriter_factory: Factory callable producing configured rewriter instances.
@@ -169,7 +158,7 @@ def test_trait_argument_injection(rewriter_factory: typing.Callable[[str], Pivot
 
 
 def test_trait_super_init_requirement(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of trait super initialization requirement.
+  """Verify `rewriter_factory` emits `super().__init__()` for trait super init requirement.
 
   Args:
       rewriter_factory: Factory callable producing configured rewriter instances.
@@ -181,7 +170,7 @@ def test_trait_super_init_requirement(rewriter_factory: typing.Callable[[str], P
 
 
 def test_trait_arg_stripping(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of trait argument stripping.
+  """Verify `rewriter_factory` handles trait arg stripping as expected.
 
   Args:
       rewriter_factory: Factory callable producing configured rewriter instances.

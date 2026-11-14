@@ -30,7 +30,7 @@ class SwiGLUFusionPass:
     if not (gate_nodes and up_nodes):
       return graph
 
-    for gate_id, gate_node in list(gate_nodes.items()):
+    for gate_id, _gate_node in list(gate_nodes.items()):
       prefix = gate_id.replace("gate_proj", "")
       up_id = prefix + "up_proj"
 
@@ -86,7 +86,7 @@ class SwiGLUDefusionPass:
     """
     swiglu_nodes = {n.id: n for n in graph.nodes.values() if n.op_type == "SwiGLU"}
 
-    for fused_id, fused_node in list(swiglu_nodes.items()):
+    for fused_id, _fused_node in list(swiglu_nodes.items()):
       # Snapshot current edges before mutating nodes
       current_edges = list(graph.edges)
 

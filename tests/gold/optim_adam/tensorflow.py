@@ -4,11 +4,11 @@ import tensorflow as tf
 
 
 def setup_adam(model: tf.keras.Model, lr: float = 0.001) -> tf.Tensor:
-  """Helper to setup adam.
+  """Execute `Adam` to support setup adam in tensorflow tests.
 
   Args:
       model: Neural network model instance under test.
-      lr: The lr (float) for setup adam.
+      lr: Input `lr` parameter value (`float`).
 
   Returns:
       Resulting `tf.Tensor` from setup adam.

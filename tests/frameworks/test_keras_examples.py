@@ -9,7 +9,7 @@ from ml_switcheroo.frameworks.keras import KerasAdapter
 
 @pytest.fixture
 def adapter() -> KerasAdapter:
-  """Execute adapter helper logic.
+  """Create a configured `KerasAdapter` fixture for keras examples tests.
 
   Returns:
       Configured `adapter` fixture value (KerasAdapter).
@@ -18,7 +18,7 @@ def adapter() -> KerasAdapter:
 
 
 def test_keras_examples_structure(adapter: KerasAdapter) -> None:
-  """Verifies the behavior of Keras examples structure.
+  """Verify `adapter.get_tiered_examples` emits `tier1_math` for keras examples structure.
 
   Args:
       adapter: FrameworkAdapter instance under test.
@@ -31,7 +31,7 @@ def test_keras_examples_structure(adapter: KerasAdapter) -> None:
 
 
 def test_tier1_math_validity(adapter: KerasAdapter) -> None:
-  """Verifies the behavior of tier1 math validity.
+  """Verify `parse` emits `import keras` for tier1 math validity.
 
   Args:
       adapter: FrameworkAdapter instance under test.
@@ -43,7 +43,7 @@ def test_tier1_math_validity(adapter: KerasAdapter) -> None:
 
 
 def test_tier2_neural_validity(adapter: KerasAdapter) -> None:
-  """Verifies the behavior of tier2 neural validity.
+  """Verify `parse` emits `keras.Sequential` for tier2 neural validity.
 
   Args:
       adapter: FrameworkAdapter instance under test.
@@ -54,7 +54,7 @@ def test_tier2_neural_validity(adapter: KerasAdapter) -> None:
 
 
 def test_tier3_extras_validity(adapter: KerasAdapter) -> None:
-  """Verify tier3 extras validity behavior.
+  """Verify `parse` emits `random.SeedGenerator` for tier3 extras validity.
 
   Args:
       adapter: FrameworkAdapter instance under test.

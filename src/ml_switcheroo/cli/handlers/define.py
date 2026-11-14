@@ -9,8 +9,10 @@ import shutil
 from pathlib import Path
 
 import yaml
+from pydantic import ValidationError
 
 from ml_switcheroo.core.dsl import OperationDef
+from ml_switcheroo.exceptions import MLSwitcherooError
 from ml_switcheroo.semantics.paths import resolve_semantics_dir
 from ml_switcheroo.utils.console import log_error, log_success
 
@@ -49,6 +51,15 @@ def handle_define(path: Path) -> int:
     log_success(f"Successfully defined '{op_def.operation}' and saved to {target_path}")
     return 0
 
-  except Exception as e:
+  except (
+    OSError,
+    yaml.YAMLError,
+    ValidationError,
+    ValueError,
+    TypeError,
+    KeyError,
+    RuntimeError,
+    MLSwitcherooError,
+  ) as e:
     log_error(f"Failed to define operation: {e}")
     return 1

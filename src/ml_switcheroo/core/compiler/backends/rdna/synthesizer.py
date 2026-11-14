@@ -37,7 +37,17 @@ MAX_SGPR = 106
 
 
 class RdnaSynthesizer(IsaSynthesizer[RdnaNode, RdnaVGPR]):
-  """Bidirectional transpiler component for RDNA ISA."""
+  """Bidirectional transpiler component for RDNA ISA.
+
+  Attributes:
+      TARGET_NAME: The target name (`str`).
+      COMMENT_CLS: The comment cls (`type[RdnaComment]`).
+      INSTRUCTION_CLS: The instruction cls (`type[RdnaInstruction]`).
+      LABEL_CLS: The label cls (`type[RdnaLabel]`).
+      IMMEDIATE_CLS: The immediate cls (`type[RdnaImmediate]`).
+      LABEL_COMMENT_PREFIX: The label comment prefix (`str`).
+      EMIT_BEGIN_END_COMMENTS_IN_PY: The emit begin end comments in py (`bool`).
+  """
 
   TARGET_NAME: str = "rdna"
   COMMENT_CLS: type[RdnaComment] = RdnaComment
@@ -170,6 +180,14 @@ class RdnaBackend(CompilerBackend):
     self.synthesizer = RdnaSynthesizer(semantics)
     self.emitter = RdnaEmitter()
     self.target_arch = "gfx1030"
+
+  def configure_emission(self, *, emit_trivia_comments: bool) -> None:
+    """Configure trivia comment emission on the underlying RDNA synthesizer.
+
+    Args:
+        emit_trivia_comments: Whether non-runtime trivia comments should be emitted.
+    """
+    self.synthesizer.emit_trivia_comments = emit_trivia_comments
 
   def compile(self, graph: LogicalGraph) -> str:
     """Compile LogicalGraph to RDNA Assembly string.

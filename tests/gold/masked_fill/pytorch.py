@@ -4,12 +4,12 @@ import torch
 
 
 def causal_mask_fill(scores: torch.Tensor, mask: torch.Tensor, value: float = -1000000000.0) -> torch.Tensor:
-  """Helper to causal mask fill.
+  """Execute `scores.masked_fill` to support causal mask fill in pytorch tests.
 
   Args:
-      mask: The mask (torch.Tensor) for causal mask fill.
-      scores: The scores (torch.Tensor) for causal mask fill.
-      value: The value (float) for causal mask fill.
+      mask: Input `mask` parameter value (`torch.Tensor`).
+      scores: Input `scores` parameter value (`torch.Tensor`).
+      value: Input `value` parameter value (`float`).
 
   Returns:
       Resulting `torch.Tensor` from causal mask fill.

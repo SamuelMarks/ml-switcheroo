@@ -70,10 +70,7 @@ def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_
   priority_order = get_framework_priority_order()
   available_roots = set(hierarchy.keys())
 
-  if "torch" in available_roots:
-    def_source = "torch"
-  else:
-    def_source = priority_order[0] if priority_order else "source_placeholder"
+  def_source = "torch" if "torch" in available_roots else priority_order[0] if priority_order else "source_placeholder"
 
   if "jax" in available_roots and def_source != "jax":
     def_target = "jax"

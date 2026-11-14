@@ -32,11 +32,14 @@ Usage:
             print(f"Errors: {res.errors}")
 """
 
+from pydantic import BaseModel, ConfigDict
+
 from ml_switcheroo.config import (
   ConversionMode,
   ExecutionBackend,
   OptimizationLevel,
   RuntimeConfig,
+  RuntimeConfigOverrides,
 )
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -44,17 +47,34 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 __version__ = "0.0.6"
 
 
+class ConvertOptions(BaseModel):
+  """Optional compilation, optimization, and backend settings for ``ml_switcheroo.convert``.
+
+  Attributes:
+      plugin_settings: Optional plugin configuration flags passed to plugin hooks.
+      mode: Conversion mode (``'preserve_trivia'`` or ``'optimized'``).
+      opt_level: Optimization level (``'O0'``, ``'O1'``, ``'O2'``, ``'O3'``).
+      backend: Execution backend identifier (defaults to ``'webgpu'``).
+      on_device: Whether to execute forward and backward passes on the configured backend.
+  """
+
+  model_config = ConfigDict(extra="forbid", frozen=True)
+
+  plugin_settings: dict[str, str | int | float | bool] | None = None
+  mode: str | ConversionMode = ConversionMode.PRESERVE_TRIVIA
+  opt_level: str | OptimizationLevel = OptimizationLevel.O2
+  backend: str | ExecutionBackend = ExecutionBackend.WEBGPU
+  on_device: bool = False
+
+
 def convert(
   code: str,
   source: str | None = None,
   target: str | None = None,
   strict: bool = False,
-  plugin_settings: dict[str, str | int | float | bool] | None = None,
+  *,
   semantics: SemanticsManager | None = None,
-  mode: str | ConversionMode = ConversionMode.PRESERVE_TRIVIA,
-  opt_level: str | OptimizationLevel = OptimizationLevel.O2,
-  backend: str | ExecutionBackend = ExecutionBackend.WEBGPU,
-  on_device: bool = False,
+  options: ConvertOptions | None = None,
 ) -> str:
   """Transpile a string of Python code from one framework to another.
 
@@ -71,15 +91,10 @@ def convert(
       strict: If True, the engine will return an error if an API
           cannot be mapped. If False (default), the original code
           is preserved wrapped in escape hatch comments.
-      plugin_settings: Specific configuration flags passed to
-          plugin hooks (e.g., `{"rng_arg_name": "seed"}`).
       semantics: An existing Knowledge Base instance.
           If None, a new one is initialized from disk.
-      mode: Conversion mode ('preserve_trivia' for 1:1 whitespace/comments, or 'optimized'
-          for multi-pass constant folding, CSE, DCE, and operator fusion).
-      opt_level: Optimization level ('O0', 'O1', 'O2', 'O3') when running in 'optimized' mode.
-      backend: Execution backend from `ml-switcheroo-compiler` (defaults to 'webgpu').
-      on_device: If True, executes forward and backward passes on the configured backend.
+      options: Optional ``ConvertOptions`` bundle for plugin settings, optimization mode,
+          optimization level, execution backend, and on-device tracing.
 
   Returns:
       The transpiled source code string.
@@ -88,28 +103,25 @@ def convert(
       ValueError: If the conversion fails (e.g. syntax errors or strict mode violations).
 
   """
-  # 1. Configure
-  # RuntimeConfig.load handles dynamic resolution if source/target are None
+  opts = options if options is not None else ConvertOptions()
   config: RuntimeConfig = RuntimeConfig.load(
-    source=source,
-    target=target,
-    strict_mode=strict,
-    plugin_settings=plugin_settings or {},
-    mode=mode,
-    opt_level=opt_level,
-    execution_backend=backend,
-    enable_on_device_execution=on_device,
+    RuntimeConfigOverrides(
+      source=source,
+      target=target,
+      strict_mode=strict,
+      plugin_settings=opts.plugin_settings or {},
+      mode=opts.mode,
+      opt_level=opts.opt_level,
+      execution_backend=opts.backend,
+      enable_on_device_execution=opts.on_device,
+    )
   )
 
-  # 2. Initialize Engine
-  # Note: SemanticsManager loads the knowledge base from JSONs on init.
   manager: SemanticsManager = semantics or SemanticsManager()
   engine: ASTEngine = ASTEngine(semantics=manager, config=config)
 
-  # 3. Execute
   result: ConversionResult = engine.run(code)
 
-  # 4. Handle Result
   if not result.success:
     error_msg: str = "\n".join(result.errors)
     raise ValueError(f"Transpilation failed:\n{error_msg}")
@@ -118,13 +130,15 @@ def convert(
 
 
 __all__: list[str] = [
-  "convert",
-  "__version__",
-  "ConversionMode",
-  "OptimizationLevel",
-  "ExecutionBackend",
-  "RuntimeConfig",
   "ASTEngine",
+  "ConversionMode",
   "ConversionResult",
+  "ConvertOptions",
+  "ExecutionBackend",
+  "OptimizationLevel",
+  "RuntimeConfig",
+  "RuntimeConfigOverrides",
   "SemanticsManager",
+  "__version__",
+  "convert",
 ]

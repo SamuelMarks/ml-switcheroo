@@ -5,13 +5,14 @@ passes must implement to be compatible with ``RewriterPipeline``, as well as the
 ``RewriterHost`` structural protocol used across call/attribute mixins and strategies.
 """
 
-from abc import ABC, abstractmethod
 import typing
+from abc import ABC, abstractmethod
 
 import libcst as cst
 from pydantic import JsonValue
 
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.schema import StructuralTraits
@@ -24,6 +25,9 @@ if typing.TYPE_CHECKING:
     Provides a strongly-typed contract for call/attribute rewriting helpers,
     pre/post checks, dispatch rules, and strict guards without circular imports
     or type-ignore suppressions.
+
+    Attributes:
+        context: The context (`RewriterContext`).
     """
 
     context: RewriterContext
@@ -43,6 +47,15 @@ if typing.TYPE_CHECKING:
 
       Returns:
           RuntimeConfig instance.
+      """
+      ...
+
+    @property
+    def ctx(self) -> HookContext:
+      """Return the hook context bound to the rewriter context.
+
+      Returns:
+          HookContext instance.
       """
       ...
 
@@ -79,6 +92,15 @@ if typing.TYPE_CHECKING:
 
       Returns:
           StructuralTraits instance for the source framework.
+      """
+      ...
+
+    @property
+    def target_traits(self) -> StructuralTraits:
+      """Return structural traits for the target framework.
+
+      Returns:
+          StructuralTraits instance for the target framework.
       """
       ...
 
@@ -229,4 +251,3 @@ class RewriterPass(ABC):
         The transformed LibCST module.
 
     """
-    pass

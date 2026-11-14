@@ -29,7 +29,7 @@ def get_full_name(node: cst.Name | cst.Attribute | cst.BaseExpression) -> str:
   """
   if isinstance(node, cst.Name):
     return node.value
-  elif isinstance(node, cst.Attribute):
+  if isinstance(node, cst.Attribute):
     prefix = get_full_name(node.value)
     return f"{prefix}.{node.attr.value}" if prefix else node.attr.value
   return ""
@@ -102,9 +102,8 @@ class SimpleNameScanner(cst.CSTVisitor):
         node: The name node being visited.
 
     """
-    if not self._in_import and not self.found:
-      if node.value == self.target_name:
-        self.found = True
+    if not self._in_import and not self.found and node.value == self.target_name:
+      self.found = True
 
   def should_traverse(self, _node: cst.CSTNode) -> bool:
     """Optimization hook to stop traversal once found.

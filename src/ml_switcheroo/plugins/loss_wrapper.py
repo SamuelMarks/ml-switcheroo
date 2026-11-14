@@ -125,6 +125,4 @@ def transform_loss_reduction(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
   wrapper_func = _create_dotted_name(wrapper_api)
 
-  wrapper_call = cst.Call(func=wrapper_func, args=[cst.Arg(value=inner_call)])
-
-  return wrapper_call
+  return cst.Call(func=wrapper_func, args=[cst.Arg(value=inner_call)])

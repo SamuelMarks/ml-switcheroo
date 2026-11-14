@@ -30,7 +30,11 @@ class _OperationGetterProtocol(typing.Protocol):
 
 @typing.runtime_checkable
 class _ShardingOpProtocol(typing.Protocol):
-  """Protocol for operation definitions exposing `sharding_supported`."""
+  """Protocol for operation definitions exposing `sharding_supported`.
+
+  Attributes:
+      sharding_supported: The sharding supported (`bool`).
+  """
 
   sharding_supported: bool
 
@@ -99,7 +103,7 @@ def wrap_with_sharding(node: cst.Call, ctx: HookContext) -> cst.Call | cst.BaseE
     ]
     return cst.Call(func=wrapper_func, args=args)
 
-  elif "pjit" in sharding_api.lower():
+  if "pjit" in sharding_api.lower():
     # Wrap: pjit(node, in_axis_resources=..., out_axis_resources=...)
     # We would use a mesh topology here.
     args = [

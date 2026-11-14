@@ -1,0 +1,28 @@
+--- Forward ---
+import jax.numpy as jnp
+import flax.nnx as nnx
+
+class ConvNet(nnx.Module):
+    def __init__(self, rngs: nnx.Rngs):
+        self.conv = nnx.Conv(1, 32, 3, rngs=rngs)
+        self.fc = nnx.Linear(32 * 26 * 26, 10, rngs=rngs)
+
+    def __call__(self, x):
+        x = self.conv(x)
+        x = jnp.ravel(x)
+        return self.fc(x)
+
+--- Backward ---
+import torch
+import torch.nn as nn
+
+class ConvNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv = nn.Conv2d(1, 32, 3)
+        self.fc = nn.Linear(32 * 26 * 26, 10)
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = torch.flatten(x)
+        return self.fc(x)

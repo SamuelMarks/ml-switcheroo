@@ -4,7 +4,7 @@ import keras
 
 
 class SameConvModel:
-  """Test helper class SameConvModel."""
+  """Test double `SameConvModel` implementing `call` for keras3 tests."""
 
   def __init__(self, in_channels: int, out_channels: int, kernel_size: int = 3) -> None:
     """Initializes the SameConvModel instance.
@@ -18,7 +18,7 @@ class SameConvModel:
     self.conv = keras.layers.Conv2D(out_channels, kernel_size, padding="same")
 
   def call(self, x: keras.KerasTensor) -> keras.KerasTensor:
-    """Helper to call.
+    """Execute `conv` to support call in keras3 tests.
 
     Args:
         x: Primary input tensor or array operand.

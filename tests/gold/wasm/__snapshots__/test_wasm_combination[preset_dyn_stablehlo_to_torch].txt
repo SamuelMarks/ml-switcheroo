@@ -1,0 +1,17 @@
+--- Forward ---
+import torch
+import torch.nn as nn
+
+class GeneratedNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, x):
+        # StableHLO elementwise + custom_call lifted on-device
+        x = torch.abs(x, _x)
+        x = stablehlo.op(x)
+        return x
+
+--- Backward ---
+module {sym_name = "GeneratedNet"} {func.func {sym_name = "__init__", function_type = (tensor<*xf32>) -> ()} {^entry(%self0: tensor<*xf32>):%1 = sw.op {type = "super"}%2 = sw.getattr (%1) {name = "__init__"}%3 = sw.call (%2)}func.func {sym_name = "forward", function_type = (tensor<*xf32>, tensor<*xf32>) -> tensor<*xf32>} : tensor<*xf32> {^entry(%self4: tensor<*xf32>, %x5: tensor<*xf32>):// StableHLO elementwise + custom_call lifted on-device
+%6 = stablehlo.abs (%x5, @_x) : tensor<*xf32>%7 = sw.op (%6) {type = "stablehlo.op"}func.return (%7)}}

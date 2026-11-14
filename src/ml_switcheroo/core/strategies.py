@@ -14,7 +14,14 @@ if typing.TYPE_CHECKING:
   from ml_switcheroo.core.tracer import TraceLogger
 
   class EngineHost(typing.Protocol):
-    """Typed protocol for the orchestration engine executing pipeline strategies."""
+    """Typed protocol for the orchestration engine executing pipeline strategies.
+
+    Attributes:
+        source: The source (`str`).
+        target: The target (`str`).
+        config: The config (`RuntimeConfig`).
+        semantics: The semantics (`SemanticsManager`).
+    """
 
     source: str
     target: str
@@ -57,6 +64,9 @@ class PipelineStrategy:
 
     Returns:
         True if this strategy supports the configured conversion, False otherwise.
+
+    Raises:
+        NotImplementedError: Must be implemented by concrete strategy subclasses.
     """
     raise NotImplementedError()
 
@@ -70,8 +80,101 @@ class PipelineStrategy:
 
     Returns:
         A ConversionResult with the generated code, status, and trace events.
+
+    Raises:
+        NotImplementedError: Must be implemented by concrete strategy subclasses.
     """
     raise NotImplementedError()
+
+
+class IntermediateMlirStrategy(PipelineStrategy):
+  """Strategy for ``intermediate='mlir'`` and ``intermediate='stablehlo'`` multi-hop roundtrips."""
+
+  def can_handle(self, engine: "EngineHost") -> bool:
+    """Check whether the engine requests an MLIR or StableHLO intermediate bridge.
+
+    Args:
+        engine: The orchestration engine instance.
+
+    Returns:
+        True when ``intermediate`` is ``'mlir'`` or ``'stablehlo'`` between non-MLIR endpoints.
+    """
+    return (
+      engine.config.intermediate in ("mlir", "stablehlo")
+      and engine.source not in ("mlir", "stablehlo")
+      and engine.target not in ("mlir", "stablehlo")
+    )
+
+  def execute(self, engine: "EngineHost", code: str, tracer: "TraceLogger") -> ConversionResult:
+    """Lower ``code`` to MLIR or StableHLO, parse/lift back, and emit target framework code.
+
+    Args:
+        engine: The orchestration engine instance.
+        code: Input source code string.
+        tracer: Scoped execution tracer instance.
+
+    Returns:
+        A ConversionResult produced after roundtripping through MLIR or StableHLO.
+    """
+    from ml_switcheroo.core.engine import ASTEngine, EngineExecutionContext
+    from ml_switcheroo.core.ingestion import ingest_code
+    from ml_switcheroo.core.mlir.emitter import PythonToMlirEmitter
+    from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
+    from ml_switcheroo.core.mlir.parser import MlirParser
+    from ml_switcheroo.frameworks.base import get_adapter
+
+    exec_ctx = EngineExecutionContext(tracer=tracer)
+
+    if engine.config.intermediate == "stablehlo":
+      tracer.start_phase("StableHLO Bridge", f"{engine.source} -> StableHLO -> {engine.target}")
+      to_shlo_cfg = engine.config.model_copy(
+        update={
+          "target_framework": "stablehlo",
+          "target_flavour": None,
+          "intermediate": None,
+        }
+      )
+      to_shlo_res = ASTEngine(semantics=engine.semantics, config=to_shlo_cfg).run(
+        code,
+        execution_context=exec_ctx,
+      )
+      if not to_shlo_res.success:
+        tracer.end_phase()
+        return to_shlo_res
+
+      from_shlo_cfg = engine.config.model_copy(
+        update={
+          "source_framework": "stablehlo",
+          "source_flavour": None,
+          "intermediate": None,
+        }
+      )
+      final_shlo_res = ASTEngine(semantics=engine.semantics, config=from_shlo_cfg).run(
+        to_shlo_res.code,
+        execution_context=exec_ctx,
+      )
+      tracer.end_phase()
+      return final_shlo_res
+
+    tracer.start_phase("MLIR Bridge", f"{engine.source} -> MLIR -> {engine.target}")
+    source_adapter = get_adapter(engine.source)
+    source_tree = ingest_code(code, engine.source, "mlir", source_adapter, tracer)
+    mlir_module = PythonToMlirEmitter().convert(source_tree)
+    mlir_text = mlir_module.to_text()
+    tracer.log_mutation("MLIR Lowering", code, mlir_text)
+
+    parsed_mlir = MlirParser(mlir_text).parse()
+    lifted_tree = MlirToPythonGenerator().generate(parsed_mlir)
+    lifted_code = lifted_tree.code
+    tracer.log_mutation("MLIR Lifting", mlir_text, lifted_code)
+
+    direct_cfg = engine.config.model_copy(update={"intermediate": None})
+    final_mlir_res = ASTEngine(semantics=engine.semantics, config=direct_cfg).run(
+      lifted_code,
+      execution_context=exec_ctx,
+    )
+    tracer.end_phase()
+    return final_mlir_res
 
 
 class VisualStrategy(PipelineStrategy):
@@ -206,9 +309,12 @@ class IsaCompilationStrategy(PipelineStrategy):
     from ml_switcheroo.core.compiler.registry import _FRONTENDS, is_isa_target
     from ml_switcheroo.core.mlir.stablehlo_parser import StableHloParser
 
-    if engine.config.enable_on_device_execution and not is_isa_target(engine.target):
-      if _FRONTENDS.get(engine.source) is StableHloParser:
-        return engine.run_rewriter_pipeline(code, tracer)
+    if (
+      engine.config.enable_on_device_execution
+      and not is_isa_target(engine.target)
+      and _FRONTENDS.get(engine.source) is StableHloParser
+    ):
+      return engine.run_rewriter_pipeline(code, tracer)
     return engine.run_compiler_pipeline(code, tracer)
 
 
@@ -242,6 +348,7 @@ class CstRewriterStrategy(PipelineStrategy):
 
 # Registry of strategies, order matters (Fallback should be last)
 STRATEGY_REGISTRY: list[PipelineStrategy] = [
+  IntermediateMlirStrategy(),
   VisualStrategy(),
   MlirCompilationStrategy(),
   IsaCompilationStrategy(),

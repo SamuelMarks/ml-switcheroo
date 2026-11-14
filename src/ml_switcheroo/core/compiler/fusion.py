@@ -28,7 +28,7 @@ class QKVFusionPass:
     if not (q_nodes and k_nodes and v_nodes):
       return graph
 
-    for q_id, q_node in q_nodes.items():
+    for q_id in q_nodes:
       prefix = q_id.replace("q_proj", "")
       k_id = prefix + "k_proj"
       v_id = prefix + "v_proj"
@@ -85,7 +85,7 @@ class QKVDefusionPass:
     """
     qkv_nodes = {n.id: n for n in graph.nodes.values() if n.op_type == "Linear" and "qkv_proj" in n.id.lower()}
 
-    for qkv_id, qkv_node in qkv_nodes.items():
+    for qkv_id in qkv_nodes:
       # Snapshot current edges before mutating nodes
       current_edges = list(graph.edges)
 

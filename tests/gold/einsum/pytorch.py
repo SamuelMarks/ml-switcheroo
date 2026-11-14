@@ -4,7 +4,7 @@ import torch
 
 
 def bmm_einsum(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
-  """Helper to bmm einsum.
+  """Execute `torch.einsum` to support bmm einsum in pytorch tests.
 
   Args:
       x: Primary input tensor or array operand.

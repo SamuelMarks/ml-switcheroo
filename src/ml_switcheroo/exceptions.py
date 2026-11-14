@@ -8,7 +8,11 @@ class MLSwitcherooError(Exception):
 SwitcherooError = MLSwitcherooError
 
 
-class CSTValidationError(MLSwitcherooError):
+class ConfigurationError(MLSwitcherooError):
+  """Raised when RuntimeConfig or engine options specify invalid or unsupported settings."""
+
+
+class CSTValidationError(MLSwitcherooError, TypeError, ValueError):
   """Raised when a Concrete Syntax Tree (CST) node or structure is invalid."""
 
 
@@ -20,7 +24,7 @@ class TranspilationError(TranslationError):
   """Alias for TranslationError raised during code transpilation."""
 
 
-class SnapshotLoadError(MLSwitcherooError):
+class SnapshotLoadError(MLSwitcherooError, ValueError):
   """Raised when loading or validating a framework API snapshot fails."""
 
 
@@ -28,7 +32,7 @@ class SnapshotGroundingError(SnapshotLoadError):
   """Raised when an operator mapping or variant fails snapshot grounding validation."""
 
 
-class SemanticsResolutionError(MLSwitcherooError):
+class SemanticsResolutionError(MLSwitcherooError, ValueError):
   """Raised when resolving an abstract operation or framework variant fails."""
 
 
@@ -36,11 +40,11 @@ class SemanticLoadError(SemanticsResolutionError):
   """Raised when ODL specifications, overlays, or framework configurations fail to load or validate."""
 
 
-class MacroExpansionError(TranslationError):
+class MacroExpansionError(TranslationError, ValueError):
   """Raised when expanding a declarative macro template fails."""
 
 
-class PreambleInjectionError(TranslationError):
+class PreambleInjectionError(TranslationError, ValueError):
   """Raised when parsing or injecting preamble statements into a CST fails."""
 
 
@@ -48,14 +52,14 @@ class PluginLoadError(MLSwitcherooError):
   """Raised when dynamically loading or registering a plugin hook fails."""
 
 
-class PluginExecutionError(TranslationError):
+class PluginExecutionError(TranslationError, RuntimeError):
   """Raised when a plugin hook encounters an unrecoverable transformation error."""
 
 
 HookExecutionError = PluginExecutionError
 
 
-class GraphExtractionError(MLSwitcherooError):
+class GraphExtractionError(MLSwitcherooError, ValueError):
   """Raised when extracting a LogicalGraph IR from source AST fails."""
 
 
@@ -63,7 +67,7 @@ class TopologicalSortError(GraphExtractionError, ValueError):
   """Raised when a LogicalGraph contains a cycle or invalid topological ordering."""
 
 
-class DialectLoweringError(TranslationError):
+class DialectLoweringError(TranslationError, ValueError):
   """Raised when lowering between IR dialects (e.g., MLIR, StableHLO, ISA) fails."""
 
 
@@ -79,13 +83,14 @@ class IngestionParseError(SyntaxParseError):
   """Raised when source code or intermediate representation fails to parse during ingestion."""
 
 
-class VerificationExecutionError(MLSwitcherooError):
+class VerificationExecutionError(MLSwitcherooError, ValueError):
   """Raised when equivalence verification or fuzzing fails during target execution."""
 
 
 __all__ = [
   "BackendEmissionError",
   "CSTValidationError",
+  "ConfigurationError",
   "DialectLoweringError",
   "GraphExtractionError",
   "HookExecutionError",

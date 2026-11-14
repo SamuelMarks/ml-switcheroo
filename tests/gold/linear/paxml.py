@@ -1,19 +1,18 @@
 """Test suite for the Paxml module."""
 
-from praxis import base_layer
 import jax.numpy as jnp
-
+from praxis import base_layer
 from praxis.layers import linears
 
 
 class Model(base_layer.BaseLayer):
-  """Test helper class Model."""
+  """Stub `base_layer.BaseLayer` subclass implementing `setup` for PaxML tests."""
 
   in_features = 0
   out_features = 0
 
   def setup(self) -> None:
-    """Helper to setup."""
+    """Execute `create_child` to support setup in PaxML tests."""
     self.create_child("linear", linears.Linear.HParams(input_dims=self.in_features, output_dims=self.out_features))
 
   def __call__(self, x: jnp.ndarray) -> jnp.ndarray:

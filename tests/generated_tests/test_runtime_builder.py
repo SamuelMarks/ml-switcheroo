@@ -1,51 +1,61 @@
 """Tests for the Runtime Module Logic Generator."""
 
-from ml_switcheroo.semantics.manager import SemanticsManager
-
 import pathlib
 from unittest import mock
 
 from ml_switcheroo.generated_tests.runtime_builder import ensure_runtime_module, get_required_packages
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_get_required_packages_simple() -> None:
-  """Verify get required packages simple behavior."""
+  """Verify `get_required_packages` handles simple as expected."""
   packages = get_required_packages("import torch\nimport jax")
   assert packages == ["torch", "jax"]
 
 
 def test_get_required_packages_from() -> None:
-  """Verify get required packages from behavior."""
+  """Verify `get_required_packages` handles from as expected."""
   packages = get_required_packages("from torch import nn\nfrom jax.numpy import abs")
   assert packages == ["torch", "jax"]
 
 
 def test_get_required_packages_aliases() -> None:
-  """Verify get required packages aliases behavior."""
+  """Verify `get_required_packages` handles aliases as expected."""
   packages = get_required_packages("import torch as t\nimport jax.numpy as jnp")
   assert packages == ["torch", "jax"]
 
 
 def test_get_required_packages_deduplication() -> None:
-  """Verify get required packages deduplication behavior."""
+  """Verify `get_required_packages` handles deduplication as expected."""
   packages = get_required_packages("import torch\nfrom torch import nn")
   assert packages == ["torch"]
 
 
 def test_get_required_packages_syntax_error() -> None:
-  """Verify get required packages syntax error behavior."""
+  """Verify `get_required_packages` handles syntax error as expected."""
   packages = get_required_packages("import class")
   assert packages == []
+  assert get_required_packages("import a, b\x0ax = 1\x0afrom . import sibling\x0a") == ["a", "b"]
 
 
-def test_ensure_runtime_module(tmp_path: pathlib.Path) -> None:
-  """Verify ensure runtime module behavior.
+def test_ensure_runtime_module_custom_semantics_no_req_pkgs(tmp_path: pathlib.Path) -> None:
+  """Verify ensure_runtime_module handles custom SemanticsManager returning non-package imports.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
+  """
+  sem = SemanticsManager()
+  with mock.patch.object(sem, "get_test_template", return_value={"import": "import"}):
+    ensure_runtime_module(tmp_path, frameworks=["dummy"], mgr=sem)
+  content = (tmp_path / "runtime.py").read_text(encoding="utf-8")
+  assert "DUMMY_AVAILABLE = True" in content
 
-  Returns:
-      Resulting `None` from test ensure runtime module.
+
+def test_ensure_runtime_module(tmp_path: pathlib.Path) -> None:
+  """Verify `runtime_file.exists` emits `import sys` for ensure runtime module.
+
+  Args:
+      tmp_path: Pytest temporary directory path fixture.
   """
   out_dir = tmp_path / "tests"
 
@@ -54,7 +64,7 @@ def test_ensure_runtime_module(tmp_path: pathlib.Path) -> None:
     """Mock get template.
 
     Args:
-        mgr: The mgr (SemanticsManager) for mock get template.
+        mgr: Semantics manager test instance (`SemanticsManager`).
         fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
@@ -62,9 +72,9 @@ def test_ensure_runtime_module(tmp_path: pathlib.Path) -> None:
     """
     if fw == "torch":
       return {"import": "import torch"}
-    elif fw == "jax":
+    if fw == "jax":
       return {"import": "import jax.numpy as jnp"}
-    elif fw == "tensorflow":
+    if fw == "tensorflow":
       return {"import": "import tensorflow as tf"}
     return None
 
@@ -99,13 +109,10 @@ def test_ensure_runtime_module(tmp_path: pathlib.Path) -> None:
 
 
 def test_ensure_runtime_module_no_frameworks(tmp_path: pathlib.Path) -> None:
-  """Verify ensure runtime module no frameworks behavior.
+  """Verify `ensure_runtime_module` emits `# --- torch ---` for no frameworks.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
-
-  Returns:
-      Resulting `None` from test ensure runtime module no frameworks.
   """
   out_dir = tmp_path / "tests"
 
@@ -113,7 +120,7 @@ def test_ensure_runtime_module_no_frameworks(tmp_path: pathlib.Path) -> None:
     """Mock get template.
 
     Args:
-        mgr: The mgr (SemanticsManager) for mock get template.
+        mgr: Semantics manager test instance (`SemanticsManager`).
         fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
@@ -121,7 +128,7 @@ def test_ensure_runtime_module_no_frameworks(tmp_path: pathlib.Path) -> None:
     """
     if fw == "torch":
       return {"import": "import torch"}
-    elif fw == "jax":
+    if fw == "jax":
       return {"import": "import jax.numpy as jnp"}
     return {"import": f"import {fw}"}
 
@@ -137,13 +144,10 @@ def test_ensure_runtime_module_no_frameworks(tmp_path: pathlib.Path) -> None:
 
 
 def test_ensure_runtime_module_empty_template_import(tmp_path: pathlib.Path) -> None:
-  """Verify ensure runtime module empty template import behavior.
+  """Verify `ensure_runtime_module` emits `TORCH_AVAILABLE = True` for empty template import.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
-
-  Returns:
-      Resulting `None` from test ensure runtime module empty template import.
   """
   out_dir = tmp_path / "tests"
 
@@ -151,7 +155,7 @@ def test_ensure_runtime_module_empty_template_import(tmp_path: pathlib.Path) -> 
     """Mock get template.
 
     Args:
-        mgr: The mgr (SemanticsManager) for mock get template.
+        mgr: Semantics manager test instance (`SemanticsManager`).
         fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:

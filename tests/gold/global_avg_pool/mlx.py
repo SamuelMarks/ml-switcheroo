@@ -4,7 +4,7 @@ import mlx.core as mx
 
 
 class GAPModel:
-  """Test helper class GAPModel."""
+  """Sentinel `GAPModel` fixture class used in MLX tests."""
 
   def __call__(self, x: mx.array) -> mx.array:
     """Executes the callable instance.

@@ -1,399 +1,381 @@
-"""Test suite for strategy.py"""
-
-from tests.conftest import _test_getattr
-
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
-from unittest.mock import MagicMock, patch
+"""Unit tests for call strategy execution (`ml_switcheroo.core.rewriter.calls.strategy`)."""
 
 import libcst as cst
+from pydantic import JsonValue
 
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.dsl import Rule
+from ml_switcheroo.core.hooks import HookContext, register_hook
+from ml_switcheroo.core.hooks_registry import clear_hooks
 from ml_switcheroo.core.rewriter.calls.strategy import _apply_layout_permutation, execute_strategy
+from ml_switcheroo.core.rewriter.context import RewriterContext
+from ml_switcheroo.core.rewriter.passes.api import ApiTransformer
+from ml_switcheroo.enums import LogicOp, SemanticTier
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-def parse_call(code: str) -> cst.Call:
-  """Execute parse call helper logic.
+def _parse_call(code: str) -> cst.Call:
+  """Parse a Python call expression into `cst.Call`.
 
   Args:
-      code: Python or DSL source code string to parse or transpile.
+      code: Python call expression string.
 
   Returns:
-      Resulting `cst.Call` from parse call.
+      Parsed `cst.Call` node.
   """
-  module = cst.parse_module(code)
-  expr = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
-  return cst.ensure_type(expr, cst.Call)
+  return cst.ensure_type(cst.parse_expression(code), cst.Call)
 
 
-class MockContext:
-  """Test helper class MockContext."""
+def _expr_code(node: cst.CSTNode) -> str:
+  """Serialize a rewritten CST expression to stripped Python source code.
 
-  def __init__(self) -> None:
-    """Initialize test helper instance."""
-    self.hook_context = MagicMock()
-    self.hook_context.current_op_id = None
+  Args:
+      node: Rewritten CST expression node.
+
+  Returns:
+      Formatted Python expression string.
+  """
+  assert isinstance(node, cst.BaseExpression)
+  return cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=node)])]).code.strip()
 
 
-class MockRewriter:
-  """Test helper class MockRewriter."""
+def _make_transformer(*, strict_mode: bool = False) -> ApiTransformer:
+  """Construct a real `ApiTransformer` backed by `SemanticsManager` and `RewriterContext`.
 
-  def __init__(self) -> None:
-    """Initialize test helper instance."""
-    self.context = MockContext()
-    self.source_framework = "torch"
-    self.target_framework = "jax"
-    self.strict_mode = False
-    self._report_failure = MagicMock()
-    self.semantics = MagicMock()
-    self._handle_variant_imports = MagicMock()
+  Args:
+      strict_mode: Whether to enable strict argument/rank guard wrapping.
 
-  def _create_name_node(self, api_str: str) -> cst.Name:
-    """Execute create name node helper logic.
+  Returns:
+      Configured `ApiTransformer` instance.
+  """
+  sem = SemanticsManager()
+  cfg = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=strict_mode)
+  ctx = RewriterContext(semantics=sem, config=cfg)
+  return ApiTransformer(ctx)
+
+
+def test_execute_strategy_standard_dispatch_and_strict_guards() -> None:
+  """Verify standard API rewriting, conditional `dispatch_rules`, `required_imports`, and `strict_mode` guards."""
+  transformer = _make_transformer(strict_mode=False)
+  call = _parse_call("torch.add(x, y)")
+  details: dict[str, JsonValue] = {"std_args": ["a", "b"]}
+  mapping: dict[str, JsonValue] = {
+    "api": "jnp.add",
+    "required_imports": [{"module": "jax.numpy", "alias": "jnp"}],
+  }
+
+  res = execute_strategy(transformer, call, call, mapping, details, "Add")
+  assert _expr_code(res) == "jnp.add(x, y)"
+  assert "import jax.numpy as jnp" in transformer.context.module_preamble
+
+  # Conditional dispatch rule overrides `api` when matched, and falls back to `api` when unmatched
+  rules = [Rule(if_arg="mode", op=LogicOp.EQ, is_val="nearest", use_api="jax.image.resize_nearest")]
+  dispatch_details: dict[str, JsonValue] = {"std_args": ["x", "mode"]}
+  matched = execute_strategy(
+    transformer,
+    _parse_call("interp(img, 'nearest')"),
+    _parse_call("interp(img, 'nearest')"),
+    {"api": "jax.image.resize", "dispatch_rules": rules},
+    dispatch_details,
+    "Interp",
+  )
+  assert _expr_code(matched) == "jax.image.resize_nearest(img, 'nearest')"
+
+  unmatched = execute_strategy(
+    transformer,
+    _parse_call("interp(img, 'cubic')"),
+    _parse_call("interp(img, 'cubic')"),
+    {"api": "jax.image.resize", "dispatch_rules": rules},
+    dispatch_details,
+    "Interp",
+  )
+  assert _expr_code(unmatched) == "jax.image.resize(img, 'cubic')"
+
+  # Strict mode injects rank assertion guard helper when `rank` constraint is specified
+  strict_transformer = _make_transformer(strict_mode=True)
+  strict_details: dict[str, JsonValue] = {"std_args": [{"name": "x", "rank": 4}]}
+  strict_res = execute_strategy(
+    strict_transformer,
+    _parse_call("conv(x=img)"),
+    _parse_call("conv(x=img)"),
+    {"api": "lax.conv"},
+    strict_details,
+    "Conv",
+  )
+  assert _expr_code(strict_res) == "lax.conv(x=_check_rank(img, 4))"
+
+
+def test_execute_strategy_infix_inline_lambda_and_macro() -> None:
+  """Verify real `infix`, `inline_lambda`, and `macro_template` strategies and error fallbacks."""
+  transformer = _make_transformer()
+
+  # Infix binary operator and invalid operator fallback
+  infix_call = _parse_call("torch.add(x, y)")
+  infix_res = execute_strategy(
+    transformer,
+    infix_call,
+    infix_call,
+    {"transformation_type": "infix", "operator": "+"},
+    {"std_args": ["a", "b"]},
+    "Add",
+  )
+  assert _expr_code(infix_res) == "x + y"
+
+  transformer.context.current_stmt_errors.clear()
+  bad_infix = execute_strategy(
+    transformer,
+    infix_call,
+    infix_call,
+    {"transformation_type": "infix", "operator": "???"},
+    {"std_args": ["a", "b"]},
+    "Add",
+  )
+  assert bad_infix is infix_call
+  assert any("Infix/Prefix transformation failed" in e for e in transformer.context.current_stmt_errors)
+
+  # Inline lambda and syntax-error fallback
+  lam_call = _parse_call("relu6(val)")
+  lam_res = execute_strategy(
+    transformer,
+    lam_call,
+    lam_call,
+    {"transformation_type": "inline_lambda", "api": "lambda x: jnp.minimum(jnp.maximum(x, 0), 6)"},
+    {"std_args": ["x"]},
+    "Relu6",
+  )
+  assert _expr_code(lam_res) == "(lambda x: jnp.minimum(jnp.maximum(x, 0), 6))(val)"
+
+  transformer.context.current_stmt_errors.clear()
+  bad_lam = execute_strategy(
+    transformer,
+    lam_call,
+    lam_call,
+    {"transformation_type": "inline_lambda", "api": "lambda: ????"},
+    {"std_args": ["x"]},
+    "Relu6",
+  )
+  assert bad_lam is lam_call
+  assert any("Inline lambda transformation failed" in e for e in transformer.context.current_stmt_errors)
+
+  # Macro template expansion (supporting str, list/tuple, and dict `std_args`) and failure fallback
+  macro_call = _parse_call("add_scaled(u, v, 2)")
+  macro_res = execute_strategy(
+    transformer,
+    macro_call,
+    macro_call,
+    {"macro_template": "{a} + {b} * {scale}"},
+    {"std_args": ["a", ["b", "Tensor"], {"name": "scale"}]},
+    "AddScaled",
+  )
+  assert _expr_code(macro_res) == "u + v * 2"
+
+  transformer.context.current_stmt_errors.clear()
+  bad_macro = execute_strategy(
+    transformer,
+    _parse_call("add_scaled()"),
+    _parse_call("add_scaled()"),
+    {"macro_template": "{missing_arg} + 1"},
+    {"std_args": ["missing_arg"]},
+    "AddScaled",
+  )
+  assert _expr_code(bad_macro) == "add_scaled()"
+  assert any("Macro expansion failed" in e for e in transformer.context.current_stmt_errors)
+
+
+def test_execute_strategy_plugins_missing_mappings_and_normalization_errors() -> None:
+  """Verify plugin hooks, missing plugins, neural vs non-neural missing mappings, and norm failures."""
+  transformer = _make_transformer()
+  call = _parse_call("custom_op(x)")
+
+  clear_hooks(mark_loaded=True)
+
+  @register_hook("test_custom_double")
+  def _double_hook(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
+    """Rewrite `custom_op(x)` into `x * 2`.
 
     Args:
-        api_str: The api str (str) for create name node.
+        node: Input `cst.Call` node.
+        ctx: Active `HookContext`.
 
     Returns:
-        Resulting `cst.Name` from create name node.
+        Binary multiplication CST node.
     """
-    return cst.Name(api_str)
+    assert ctx.current_op_id == "CustomOp"
+    return cst.BinaryOperation(left=node.args[0].value, operator=cst.Multiply(), right=cst.Integer("2"))
 
-  def _is_module_alias(self, node: cst.CSTNode) -> bool:
-    """Execute is module alias helper logic.
+  @register_hook("test_noop_none")
+  def _none_hook(_node: cst.Call, _ctx: HookContext) -> None:
+    """Return `None` so `execute_strategy` preserves `updated_node`.
 
     Args:
-        node: CST or AST node under inspection or transformation.
+        _node: Input `cst.Call` node.
+        _ctx: Active `HookContext`.
+    """
+
+  assert (
+    _expr_code(execute_strategy(transformer, call, call, {"requires_plugin": "test_custom_double"}, {}, "CustomOp"))
+    == "x * 2"
+  )
+  assert execute_strategy(transformer, call, call, {"requires_plugin": "test_noop_none"}, {}, "CustomOp") is call
+
+  transformer.context.current_stmt_errors.clear()
+  assert execute_strategy(transformer, call, call, {"requires_plugin": "nonexistent_hook"}, {}, "CustomOp") is call
+  assert any("Missing required plugin" in e for e in transformer.context.current_stmt_errors)
+
+  clear_hooks(mark_loaded=False)
+
+  # Missing API: custom message, default message, and neural tier message
+  transformer.context.current_stmt_errors.clear()
+  execute_strategy(transformer, call, call, {"missing_message": "Custom unsupported reason"}, {}, "CustomOp")
+  assert transformer.context.current_stmt_errors == ["Custom unsupported reason"]
+
+  transformer.context.current_stmt_errors.clear()
+  execute_strategy(transformer, call, call, {}, {}, "CustomOp")
+  assert "No mapping available for 'CustomOp' -> 'jax'" in transformer.context.current_stmt_errors[0]
+
+  transformer.semantics._key_origins["NeuralLayer"] = SemanticTier.NEURAL.value
+  transformer.context.current_stmt_errors.clear()
+  execute_strategy(transformer, call, call, {}, {}, "NeuralLayer")
+  assert "Cannot map neural network abstraction" in transformer.context.current_stmt_errors[0]
+
+  # Standard normalization / guard ValueError failure
+  strict_err_transformer = _make_transformer(strict_mode=True)
+  res_bad_norm = execute_strategy(
+    strict_err_transformer,
+    _parse_call("foo(a=x)"),
+    _parse_call("foo(a=x)"),
+    {"api": "jnp.foo"},
+    {"std_args": [{"name": "a", "rank": "not_an_int"}]},
+    "Foo",
+  )
+  assert _expr_code(res_bad_norm) == "foo(a=x)"
+  assert any("Argument normalization failed" in e for e in strict_err_transformer.context.current_stmt_errors)
+
+  # Host without `context.hook_context` raises PluginExecutionError on plugin, handles missing `_key_origins`, and executes standard calls
+  import pytest
+
+  from ml_switcheroo.exceptions import PluginExecutionError
+
+  class _ContextWithoutHook:
+    """Minimal context lacking `hook_context`."""
+
+  class _NoOriginsSemantics:
+    """Semantics stub without `_key_origins`."""
+
+  class _MinimalHost:
+    """Minimal strategy host lacking `hook_context`, `_handle_variant_imports`, and `semantics`."""
+
+    context = _ContextWithoutHook()
+    source_framework = "torch"
+    target_framework = "jax"
+    strict_mode = False
+
+    def _is_module_alias(self, _node: cst.CSTNode) -> bool:
+      """Return `False` for alias check.
+
+      Args:
+          _node: Candidate CST node.
+
+      Returns:
+          Always `False`.
+      """
+      return False
+
+    def _create_name_node(self, name: str) -> cst.BaseExpression:
+      """Construct `cst.Name` from `name`.
+
+      Args:
+          name: Function name string.
+
+      Returns:
+          `cst.Name` node.
+      """
+      return cst.Name(name)
+
+    def _report_failure(self, _msg: str) -> None:
+      """No-op failure reporter.
+
+      Args:
+          _msg: Failure message.
+      """
+
+  class _NoOriginsHost(_MinimalHost):
+    """Host exposing `semantics` without `_key_origins`."""
+
+    semantics = _NoOriginsSemantics()
+
+  min_res = execute_strategy(
+    _MinimalHost(), _parse_call("f(x)"), _parse_call("f(x)"), {"api": "g"}, {"std_args": ["x"]}, "F"
+  )
+  assert _expr_code(min_res) == "g(x)"
+  assert _apply_layout_permutation(
+    _parse_call("f(x)"), {"layout_map": {"x": "NCHW->NHWC"}}, {"std_args": ["x"]}, _MinimalHost()
+  ).deep_equals(_parse_call("f(x)"))
+  execute_strategy(_NoOriginsHost(), _parse_call("f(x)"), _parse_call("f(x)"), {}, {}, "F")
+
+  clear_hooks(mark_loaded=True)
+
+  @register_hook("test_needs_ctx")
+  def _needs_ctx(node: cst.Call, _ctx: HookContext) -> cst.CSTNode:
+    """No-op hook requiring a non-None `HookContext`.
+
+    Args:
+        node: Input call node.
+        _ctx: Hook context.
 
     Returns:
-        Resulting `bool` from is module alias.
+        Unchanged call node.
     """
-    return False
+    return node
+
+  with pytest.raises(PluginExecutionError, match="requires a valid HookContext"):
+    execute_strategy(
+      _MinimalHost(), _parse_call("f(x)"), _parse_call("f(x)"), {"requires_plugin": "test_needs_ctx"}, {}, "F"
+    )
+  clear_hooks(mark_loaded=False)
 
 
-@patch("ml_switcheroo.core.rewriter.calls.strategy.evaluate_dispatch_rules", return_value="dispatched_api")
-@patch("ml_switcheroo.core.rewriter.calls.strategy.normalize_arguments", return_value=[cst.Arg(value=cst.Name("x"))])
-def test_execute_strategy_dispatch_and_standard(mock_norm: MagicMock, mock_eval: MagicMock) -> None:
-  """Verify execute strategy dispatch and standard behavior.
-
-  Args:
-      mock_norm: The mock norm (MagicMock) for test execute strategy dispatch and standard.
-      mock_eval: The mock eval (MagicMock) for test execute strategy dispatch and standard.
-  """
-  rewriter = MockRewriter()
-  original = parse_call("func(x)")
-  updated = parse_call("func(x)")
-  mapping = {"dispatch_rules": ["rule"]}
-  details: dict[str, RuntimeTensorOrValue] = {}
-
-  result = execute_strategy(rewriter, original, updated, mapping, details, "id")
-  assert isinstance(result, cst.Call)
-  assert cst.ensure_type(result.func, cst.Name).value == "dispatched_api"
-  rewriter._handle_variant_imports.assert_called_once()
-
-
-@patch("ml_switcheroo.core.rewriter.calls.strategy.normalize_arguments")
-@patch("ml_switcheroo.core.rewriter.calls.strategy.rewrite_as_infix", return_value=cst.Name("infix_res"))
-def test_execute_strategy_infix(mock_rewrite: MagicMock, mock_norm: MagicMock) -> None:
-  """Verify execute strategy infix behavior.
-
-  Args:
-      mock_rewrite: The mock rewrite (MagicMock) for test execute strategy infix.
-      mock_norm: The mock norm (MagicMock) for test execute strategy infix.
-  """
-  rewriter = MockRewriter()
-  original = parse_call("add(x, y)")
-  updated = parse_call("add(x, y)")
-  mapping = {"transformation_type": "infix", "operator": "+"}
-  details: dict[str, RuntimeTensorOrValue] = {}
-
-  result = execute_strategy(rewriter, original, updated, mapping, details, "add")
-  assert isinstance(result, cst.Name)
-  assert result.value == "infix_res"
-
-
-@patch("ml_switcheroo.core.rewriter.calls.strategy.normalize_arguments", side_effect=ValueError("fail"))
-def test_execute_strategy_infix_fail(mock_norm: MagicMock) -> None:
-  """Verify execute strategy infix fail behavior.
-
-  Args:
-      mock_norm: The mock norm (MagicMock) for test execute strategy infix fail.
-  """
-  rewriter = MockRewriter()
-  original = parse_call("add(x, y)")
-  updated = parse_call("add(x, y)")
-  mapping = {"transformation_type": "infix"}
-
-  result = execute_strategy(rewriter, original, updated, mapping, {}, "add")
-  assert result == updated
-  rewriter._report_failure.assert_called_once()
-
-
-@patch("ml_switcheroo.core.rewriter.calls.strategy.normalize_arguments")
-@patch("ml_switcheroo.core.rewriter.calls.strategy.rewrite_as_inline_lambda", return_value=cst.Name("lambda_res"))
-def test_execute_strategy_inline_lambda(mock_rewrite: MagicMock, mock_norm: MagicMock) -> None:
-  """Verify execute strategy inline lambda behavior.
-
-  Args:
-      mock_rewrite: The mock rewrite (MagicMock) for test execute strategy inline lambda.
-      mock_norm: The mock norm (MagicMock) for test execute strategy inline lambda.
-  """
-  rewriter = MockRewriter()
-  original = parse_call("func()")
-  updated = parse_call("func()")
-  mapping = {"transformation_type": "inline_lambda", "api": "lambda x: x"}
-
-  result = execute_strategy(rewriter, original, updated, mapping, {}, "id")
-  assert _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").value}, "__getitem__")(
-    "v"
-  ) == _test_getattr({"v": "lambda_res"}, "__getitem__")("v")
-
-
-@patch("ml_switcheroo.core.rewriter.calls.strategy.normalize_arguments", side_effect=ValueError)
-def test_execute_strategy_inline_lambda_fail(mock_norm: MagicMock) -> None:
-  """Verify execute strategy inline lambda fail behavior.
-
-  Args:
-      mock_norm: The mock norm (MagicMock) for test execute strategy inline lambda fail.
-  """
-  rewriter = MockRewriter()
-  original = parse_call("func()")
-  updated = parse_call("func()")
-  mapping = {"transformation_type": "inline_lambda", "api": "lambda x: x"}
-
-  result = execute_strategy(rewriter, original, updated, mapping, {}, "id")
-  assert result == updated
-  rewriter._report_failure.assert_called_once()
-
-
-@patch("ml_switcheroo.core.rewriter.calls.strategy.get_hook")
-def test_execute_strategy_plugin(mock_get_hook: MagicMock) -> None:
-  """Verify execute strategy plugin behavior.
-
-  Args:
-      mock_get_hook: The mock get hook (MagicMock) for test execute strategy plugin.
-  """
-  rewriter = MockRewriter()
-  original = parse_call("func()")
-  updated = parse_call("func()")
-  mapping = {"requires_plugin": "my_plugin"}
-
-  mock_hook = MagicMock(return_value=cst.Name("plugin_res"))
-  mock_get_hook.return_value = mock_hook
-
-  result = execute_strategy(rewriter, original, updated, mapping, {}, "id")
-  assert _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").value}, "__getitem__")(
-    "v"
-  ) == _test_getattr({"v": "plugin_res"}, "__getitem__")("v")
-
-  mock_get_hook.return_value = None
-  result_fail = execute_strategy(rewriter, original, updated, mapping, {}, "id")
-  assert result_fail == updated
-  rewriter._report_failure.assert_called_once()
-
-
-@patch("ml_switcheroo.core.rewriter.calls.strategy.normalize_arguments")
-@patch("ml_switcheroo.core.rewriter.calls.strategy.rewrite_as_macro", return_value=cst.Name("macro_res"))
-def test_execute_strategy_macro(mock_rewrite: MagicMock, mock_norm: MagicMock) -> None:
-  """Verify execute strategy macro behavior.
-
-  Args:
-      mock_rewrite: The mock rewrite (MagicMock) for test execute strategy macro.
-      mock_norm: The mock norm (MagicMock) for test execute strategy macro.
-  """
-  rewriter = MockRewriter()
-  original = parse_call("func()")
-  updated = parse_call("func()")
-  mapping = {"macro_template": "mac"}
-  details = {"std_args": ["a", ["b", "int"], {"name": "c"}]}
-
-  result = execute_strategy(rewriter, original, updated, mapping, details, "id")
-  assert _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").value}, "__getitem__")(
-    "v"
-  ) == _test_getattr({"v": "macro_res"}, "__getitem__")("v")
-  mock_rewrite.assert_called_once()
-  assert mock_rewrite.call_args[0][2] == ["a", "b", "c"]
-
-
-@patch("ml_switcheroo.core.rewriter.calls.strategy.normalize_arguments", side_effect=Exception)
-def test_execute_strategy_macro_fail(mock_norm: MagicMock) -> None:
-  """Verify execute strategy macro fail behavior.
-
-  Args:
-      mock_norm: The mock norm (MagicMock) for test execute strategy macro fail.
-  """
-  rewriter = MockRewriter()
-  original = parse_call("func()")
-  updated = parse_call("func()")
-  mapping = {"macro_template": "mac"}
-
-  result = execute_strategy(rewriter, original, updated, mapping, {}, "id")
-  assert result == updated
-  rewriter._report_failure.assert_called_once()
-
-
-def test_execute_strategy_standard_missing_api() -> None:
-  """Verify execute strategy standard missing api behavior."""
-  rewriter = MockRewriter()
-  original = parse_call("func()")
-  updated = parse_call("func()")
-  mapping: dict[str, RuntimeTensorOrValue] = {}
-
-  result = execute_strategy(rewriter, original, updated, mapping, {}, "id")
-  assert result == updated
-  rewriter._report_failure.assert_called_once()
-
-
-@patch("ml_switcheroo.core.rewriter.calls.strategy.normalize_arguments")
-@patch("ml_switcheroo.core.rewriter.calls.strategy._apply_layout_permutation", return_value=parse_call("permuted()"))
-@patch("ml_switcheroo.core.rewriter.calls.strategy.apply_strict_guards", return_value=[cst.Arg(value=cst.Name("y"))])
-def test_execute_strategy_standard_success(mock_guards: MagicMock, mock_permute: MagicMock, mock_norm: MagicMock) -> None:
-  """Verify execute strategy standard success behavior.
-
-  Args:
-      mock_guards: The mock guards (MagicMock) for test execute strategy standard success.
-      mock_permute: The mock permute (MagicMock) for test execute strategy standard success.
-      mock_norm: The mock norm (MagicMock) for test execute strategy standard success.
-  """
-  mock_norm.return_value = [cst.Arg(value=cst.Name("x"))]
-  rewriter = MockRewriter()
-  rewriter.strict_mode = True
-
-  original = parse_call("func(x)")
-  updated = parse_call("func(x)")
-  mapping = {"api": "new_func", "layout_map": {}}
-
-  result = execute_strategy(rewriter, original, updated, mapping, {}, "id")
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-            _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v"),
-            _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
-          )
-        },
-        "__getitem__",
-      )("v").value
+def test_layout_permutation_rewriting_and_edge_cases() -> None:
+  """Verify real NCHW<->NHWC argument and return permutation injection as well as invalid/out-of-bounds rules."""
+  transformer = _make_transformer()
+  conv_call = _parse_call("conv(x, w)")
+  mapping: dict[str, JsonValue] = {
+    "api": "lax_conv",
+    "layout_map": {
+      "input": "NCHW->NHWC",
+      "return": "NHWC->NCHW",
+      "missing_param": "NCHW->NHWC",
     },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "new_func"}, "__getitem__")("v")
-  mock_guards.assert_called_once()
+  }
+  details: dict[str, JsonValue] = {"std_args": [{"name": "input"}, ["weight", "Tensor"], "bias"]}
 
+  rewritten = execute_strategy(transformer, conv_call, conv_call, mapping, details, "Conv2d")
+  code = _expr_code(rewritten)
+  assert "lax_conv(" in code
+  assert "(0, 2, 3, 1)" in code
+  assert "(0, 3, 1, 2)" in code
 
-@patch("ml_switcheroo.core.rewriter.calls.strategy.normalize_arguments", side_effect=ValueError)
-def test_execute_strategy_standard_norm_fail(mock_norm: MagicMock) -> None:
-  """Verify execute strategy standard norm fail behavior.
+  # Invalid layout rules (no `->`, mismatched rank, or out-of-bounds positional argument) leave call intact
+  no_arrow = _apply_layout_permutation(
+    _parse_call("f(x)"),
+    {"layout_map": {"x": "NCHW", "return": "NHWC"}},
+    {"std_args": ["x"]},
+    transformer,
+  )
+  assert _expr_code(no_arrow) == "f(x)"
 
-  Args:
-      mock_norm: The mock norm (MagicMock) for test execute strategy standard norm fail.
-  """
-  rewriter = MockRewriter()
-  original = parse_call("func()")
-  updated = parse_call("func()")
-  mapping = {"api": "new_func"}
+  bad_perm = _apply_layout_permutation(
+    _parse_call("f(x)"),
+    {"layout_map": {"x": "NCHW->NHW", "return": "NHW->NCHW"}},
+    {"std_args": ["x"]},
+    transformer,
+  )
+  assert _expr_code(bad_perm) == "f(x)"
 
-  result = execute_strategy(rewriter, original, updated, mapping, {}, "id")
-  assert result == updated
-  rewriter._report_failure.assert_called_once()
-
-
-@patch(
-  "ml_switcheroo.core.rewriter.calls.strategy.inject_permute_call", side_effect=lambda v, p, s, t: cst.Name("permuted")
-)
-@patch("ml_switcheroo.core.rewriter.calls.strategy.compute_permutation", return_value=(0, 2, 1))
-def test_apply_layout_permutation(mock_compute: MagicMock, mock_inject: MagicMock) -> None:
-  """Verify apply layout permutation behavior.
-
-  Args:
-      mock_compute: The mock compute (MagicMock) for test apply layout permutation.
-      mock_inject: The mock inject (MagicMock) for test apply layout permutation.
-  """
-  rewriter = MockRewriter()
-  node = parse_call("func(a, b)")
-  mapping = {"layout_map": {"a": "NCHW->NHWC", "return": "NHWC->NCHW", "not_found": "A->B"}}
-  details = {"std_args": [{"name": "a"}, ["b", "int"]]}
-
-  result = _apply_layout_permutation(node, mapping, details, rewriter)
-  assert cst.ensure_type(result, cst.Name).value == "permuted"
-
-  assert mock_compute.call_count == 2
-  assert mock_inject.call_count == 2
-
-
-@patch("ml_switcheroo.core.rewriter.calls.strategy.compute_permutation", return_value=None)
-def test_apply_layout_permutation_invalid(mock_compute: MagicMock) -> None:
-  """Verify apply layout permutation invalid behavior.
-
-  Args:
-      mock_compute: The mock compute (MagicMock) for test apply layout permutation invalid.
-  """
-  rewriter = MockRewriter()
-  node = parse_call("func(a)")
-  mapping = {"layout_map": {"a": "NCHW->NHWC", "return": "NHWC->NCHW"}}
-  details = {"std_args": ["a"]}
-
-  result = _apply_layout_permutation(node, mapping, details, rewriter)
-  # Original node because permutations are invalid
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-            _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v"),
-            _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
-          )
-        },
-        "__getitem__",
-      )("v").value
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "func"}, "__getitem__")("v")
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-            _test_getattr(
-              {
-                "v": _test_getattr(
-                  {
-                    "v": _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").args}, "__getitem__")("v")[
-                      0
-                    ]
-                  },
-                  "__getitem__",
-                )("v").value
-              },
-              "__getitem__",
-            )("v"),
-            _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
-          )
-        },
-        "__getitem__",
-      )("v").value
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "a"}, "__getitem__")("v")
-
-
-def test_execute_strategy_standard_success_layout() -> None:
-  """Verify execute strategy standard success layout behavior."""
-  rewriter = MockRewriter()
-  original = parse_call("func(x)")
-  updated = parse_call("func(x)")
-  mapping = {"api": "new_func", "layout_map": {"return": "A->B"}}
-  result = execute_strategy(rewriter, original, updated, mapping, {}, "id")
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-            _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v"),
-            _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
-          )
-        },
-        "__getitem__",
-      )("v").value
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "new_func"}, "__getitem__")("v")
+  oob = _apply_layout_permutation(
+    _parse_call("f()"),
+    {"layout_map": {"x": "NCHW->NHWC"}},
+    {"std_args": ["x"]},
+    transformer,
+  )
+  assert _expr_code(oob) == "f()"

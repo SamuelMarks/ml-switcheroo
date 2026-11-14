@@ -1,8 +1,8 @@
-"""MLIR Emitter Declaration Mixin.
+"""MLIR SSA Context and Declaration Emitter Delegate.
 
-This module provides the MlirEmitterDeclMixin class, which is a mixin
-offering capabilities to convert Python class and function definitions
-into MLIR operation nodes (such as sw.module and sw.func).
+Provides ``SSAContext`` (managing lexical SSA symbol tables and ID allocation)
+and ``MlirDeclEmitter`` (converting Python ``ClassDef`` and ``FunctionDef`` CST
+nodes into ``sw.module`` and ``sw.func`` MLIR operations).
 """
 
 import typing
@@ -13,156 +13,172 @@ from ml_switcheroo.core.mlir.cst import AttributeNode, BlockNode, OperationNode,
 from ml_switcheroo.core.mlir.types import format_mlir_tensor_type
 from ml_switcheroo.core.runtime_models import RuntimeTraceReport
 
-if typing.TYPE_CHECKING:
-  # To avoid circular imports, we just assert the structural existence of the context
-  class ContextDummy(typing.Protocol):
-    """Context structural type for type checking MLIR declaration emission."""
 
-    def enter_scope(self) -> None:
-      """Push a new lexical symbol scope onto the MLIR emission context stack."""
-      ...
+class SSAContext:
+  """Manage Single Static Assignment (SSA) variable scopes and ID allocation."""
 
-    def exit_scope(self) -> None:
-      """Pop the current lexical symbol scope from the MLIR emission context stack."""
-      ...
+  def __init__(self) -> None:
+    """Initialize the context with a root scope."""
+    self._scopes: list[dict[str, ValueNode]] = [{}]
+    self._counter: int = 0
 
-    def allocate_ssa(self, prefix: str = "%") -> ValueNode:
-      """Allocate a fresh SSA ValueNode with the given prefix.
+  def enter_scope(self) -> None:
+    """Push a new variable scope onto the stack."""
+    self._scopes.append({})
 
-      Args:
-          prefix: SSA identifier prefix string.
+  def exit_scope(self) -> None:
+    """Pop the current variable scope from the stack."""
+    if len(self._scopes) > 1:
+      self._scopes.pop()
 
-      Returns:
-          Newly allocated ValueNode.
-      """
-      ...
-
-    def declare(self, name: str, value: ValueNode) -> None:
-      """Bind a Python variable name to an MLIR SSA ValueNode in the current scope.
-
-      Args:
-          name: Python variable name.
-          value: MLIR SSA ValueNode to bind.
-      """
-      ...
-
-    def lookup(self, name: str) -> ValueNode | None:
-      """Look up the MLIR SSA ValueNode bound to a Python variable name.
-
-      Args:
-          name: Python variable name to look up.
-
-      Returns:
-          Bound ValueNode if found, else None.
-      """
-      ...
-
-
-class MlirEmitterDeclMixin:
-  """Mixin class providing MLIR emission capabilities for Python declarations.
-
-  This mixin contains methods for converting Python high-level AST constructs
-  like class definitions and function definitions into corresponding MLIR
-  structural constructs (operations, regions, and blocks).
-  """
-
-  # This is provided by the mixed-in classes
-  ctx: "ContextDummy"
-  runtime_trace: RuntimeTraceReport | None = None
-
-  if typing.TYPE_CHECKING:
-
-    def _flatten_attr(self, attr: cst.BaseExpression) -> str | None:
-      """Flatten a Name or Attribute chain into a string.
-
-      Args:
-          attr: A LibCST Name or Attribute node representing an identifier chain.
-
-      Returns:
-          A dotted string representation of the chain (e.g. "self.layer"),
-          or None if the attribute chain cannot be flattened.
-      """
-      ...
-
-    def _emit_block(self, block: cst.BaseSuite | typing.Sequence[cst.CSTNode], label: str = "^bb0") -> BlockNode:
-      """Convert a sequence of statements or a suite into an MLIR Block.
-
-      Args:
-          block: A CST Suite or list of statement nodes.
-          label: Optional label for the generated block (defaults to "^bb0").
-
-      Returns:
-          A BlockNode representing the populated MLIR Block.
-      """
-      ...
-
-    def _annotation_to_string(self, ann: cst.BaseExpression) -> str:
-      """Convert a type annotation node to its string representation.
-
-      Args:
-          ann: The type annotation CST node (typically a Name or Attribute).
-
-      Returns:
-          The string representation of the type annotation, or "Any" if not flattenable.
-      """
-      ...
-
-  def _emit_class_def(self, node: cst.ClassDef) -> OperationNode:
-    """Convert a Python class definition to `sw.module`.
+  def declare(self, name: str, value: ValueNode) -> None:
+    """Register a variable name in the current scope.
 
     Args:
-        node: The ClassDef node.
+        name: Python variable identifier.
+        value: MLIR ``ValueNode`` (SSA value) associated with ``name``.
+    """
+    self._scopes[-1][name] = value
+
+  def lookup(self, name: str) -> ValueNode | None:
+    """Resolve a Python variable name to its current SSA value from innermost to outermost scope.
+
+    Args:
+        name: Python identifier to look up.
 
     Returns:
-        An `sw.module` OperationNode containing the class body region.
-
+        Associated ``ValueNode`` or ``None`` if unbound.
     """
-    self.ctx.enter_scope()
-    name_obj = AttributeNode(name="sym_name", value=f'"{node.name.value}"')
+    for scope in reversed(self._scopes):
+      if name in scope:
+        return scope[name]
+    return None
 
-    attributes = [name_obj]
+  def allocate_ssa(self, prefix: str = "%") -> ValueNode:
+    """Generate a new unique SSA ``ValueNode``.
 
-    # Capture Bases (Inheritance)
+    Args:
+        prefix: String prefix for the SSA identifier (defaults to ``'%'``).
+
+    Returns:
+        Newly allocated ``ValueNode`` (e.g. ``%0``, ``%1``).
+    """
+    val = ValueNode(name=f"{prefix}{self._counter}")
+    self._counter += 1
+    return val
+
+
+class MlirDeclEmitterHost(typing.Protocol):
+  """Structural protocol required by ``MlirDeclEmitter``.
+
+  Attributes:
+      ctx: Active ``SSAContext`` instance.
+      runtime_trace: Optional ``RuntimeTraceReport`` for shape telemetry.
+  """
+
+  ctx: SSAContext
+  runtime_trace: RuntimeTraceReport | None
+
+  def _flatten_attr(self, node: cst.CSTNode) -> str | None:
+    """Flatten a ``Name`` or ``Attribute`` chain into a dotted string.
+
+    Args:
+        node: CST node to flatten.
+
+    Returns:
+        Dotted string or ``None``.
+    """
+    ...
+
+  def _emit_block(self, body_enc: cst.BaseSuite | typing.Sequence[cst.CSTNode], label: str = "") -> BlockNode:
+    """Emit a ``BlockNode`` from a CST suite or statement sequence.
+
+    Args:
+        body_enc: CST suite or statement sequence.
+        label: Optional block label.
+
+    Returns:
+        Emitted ``BlockNode``.
+    """
+    ...
+
+  def _annotation_to_string(self, node: cst.CSTNode) -> str:
+    """Flatten a CST type annotation node into a string.
+
+    Args:
+        node: CST type annotation node.
+
+    Returns:
+        Flattened annotation string.
+    """
+    ...
+
+
+class MlirDeclEmitter:
+  """Single-responsibility delegate lowering Python class and function declarations to MLIR.
+
+  Attributes:
+      host: Bound ``MlirDeclEmitterHost`` instance.
+  """
+
+  def __init__(self, host: MlirDeclEmitterHost) -> None:
+    """Initialize ``MlirDeclEmitter`` bound to ``host``.
+
+    Args:
+        host: Bound ``MlirDeclEmitterHost`` instance.
+    """
+    self.host: MlirDeclEmitterHost = host
+
+  def emit_class_def(self, node: cst.ClassDef) -> OperationNode:
+    """Convert a Python ``cst.ClassDef`` into an ``sw.module`` ``OperationNode``.
+
+    Args:
+        node: ``cst.ClassDef`` node to lower.
+
+    Returns:
+        Constructed ``sw.module`` ``OperationNode``.
+    """
+    self.host.ctx.enter_scope()
+    attributes: list[AttributeNode] = [AttributeNode(name="sym_name", value=f'"{node.name.value}"')]
+
     if node.bases:
-      base_names = []
+      base_names: list[str] = []
       for b in node.bases:
-        flat_name = self._flatten_attr(b.value)
+        flat_name = self.host._flatten_attr(b.value)
         if flat_name:
           base_names.append(f'"{flat_name}"')
-
       if base_names:
         attributes.append(AttributeNode(name="bases", value=base_names))
 
-    region = RegionNode(blocks=[self._emit_block(node.body)])
+    region = RegionNode(blocks=[self.host._emit_block(node.body)])
     op = OperationNode(name="sw.module", attributes=attributes, regions=[region])
-    self.ctx.exit_scope()
+    self.host.ctx.exit_scope()
     return op
 
-  def _emit_func_def(self, node: cst.FunctionDef) -> OperationNode:
-    """Convert a Python function definition to `sw.func`.
+  def emit_func_def(self, node: cst.FunctionDef) -> OperationNode:
+    """Convert a Python ``cst.FunctionDef`` into an ``sw.func`` ``OperationNode``.
 
     Args:
-        node: The FunctionDef node.
+        node: ``cst.FunctionDef`` node to lower.
 
     Returns:
-        An `sw.func` OperationNode with arguments mapped to block arguments.
-
+        Constructed ``sw.func`` ``OperationNode`` with block arguments.
     """
-    self.ctx.enter_scope()
+    self.host.ctx.enter_scope()
     func_name = node.name.value
-    block_args = []
-    trace = self.runtime_trace
+    block_args: list[tuple[ValueNode, TypeNode]] = []
+    trace = self.host.runtime_trace
     is_inf = func_name not in ("__init__", "setup")
     in_idx = 0
 
     for param in node.params.params:
       if isinstance(param.name, cst.Name):
         p_name = param.name.value
-        val = self.ctx.allocate_ssa(prefix=f"%{p_name}")
-        self.ctx.declare(p_name, val)
+        val = self.host.ctx.allocate_ssa(prefix=f"%{p_name}")
+        self.host.ctx.declare(p_name, val)
         t_str = "!sw.unknown"
         if param.annotation:
-          t_str = f'!sw.type<"{self._annotation_to_string(param.annotation.annotation)}">'
+          t_str = f'!sw.type<"{self.host._annotation_to_string(param.annotation.annotation)}">'
         elif (
           is_inf and p_name not in ("self", "cls", "rngs") and trace is not None and trace.executed and trace.input_shapes
         ):
@@ -171,12 +187,15 @@ class MlirEmitterDeclMixin:
           in_idx += 1
         block_args.append((val, TypeNode(body=t_str)))
 
-    body_block = self._emit_block(node.body, label="^entry")
+    body_block = self.host._emit_block(node.body, label="^entry")
     body_block.arguments = block_args
     op = OperationNode(
       name="sw.func",
       attributes=[AttributeNode(name="sym_name", value=f'"{func_name}"')],
       regions=[RegionNode(blocks=[body_block])],
     )
-    self.ctx.exit_scope()
+    self.host.ctx.exit_scope()
     return op
+
+
+__all__ = ["MlirDeclEmitter", "MlirDeclEmitterHost", "SSAContext"]

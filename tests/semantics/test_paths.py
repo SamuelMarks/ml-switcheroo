@@ -1,8 +1,7 @@
 """Test suite for the Paths module."""
 
-import pathlib
-
 import os
+import pathlib
 from pathlib import Path
 from unittest.mock import patch
 
@@ -27,10 +26,12 @@ def test_resolve_semantics_dir_fallback(tmp_path: pathlib.Path) -> None:
   Args:
       tmp_path: Temporary directory fixture.
   """
-  with patch("ml_switcheroo.semantics.paths.__file__", str(tmp_path / "paths.py")):
-    with patch("ml_switcheroo.semantics.paths.files") as mock_files:
-      mock_files.return_value = "mock_path"
-      assert resolve_semantics_dir() == Path("mock_path")
+  with (
+    patch("ml_switcheroo.semantics.paths.__file__", str(tmp_path / "paths.py")),
+    patch("ml_switcheroo.semantics.paths.files") as mock_files,
+  ):
+    mock_files.return_value = "mock_path"
+    assert resolve_semantics_dir() == Path("mock_path")
 
 
 def test_resolve_semantics_dir_fallback_exception(tmp_path: pathlib.Path) -> None:
@@ -39,10 +40,12 @@ def test_resolve_semantics_dir_fallback_exception(tmp_path: pathlib.Path) -> Non
   Args:
       tmp_path: Temporary directory fixture.
   """
-  with patch("ml_switcheroo.semantics.paths.__file__", str(tmp_path / "paths.py")):
-    with patch("ml_switcheroo.semantics.paths.files") as mock_files:
-      mock_files.side_effect = OSError("Test Exception")
-      assert resolve_semantics_dir() == tmp_path
+  with (
+    patch("ml_switcheroo.semantics.paths.__file__", str(tmp_path / "paths.py")),
+    patch("ml_switcheroo.semantics.paths.files") as mock_files,
+  ):
+    mock_files.side_effect = OSError("Test Exception")
+    assert resolve_semantics_dir() == tmp_path
 
 
 def test_resolve_snapshots_dir_priority_env_ecosystem(tmp_path: pathlib.Path) -> None:
@@ -65,13 +68,15 @@ def test_resolve_snapshots_dir_env_ecosystem_nonexistent(tmp_path: pathlib.Path)
   """
   non_existent = tmp_path / "non_existent_eco"
   fake_home = tmp_path / "home"
-  with patch.dict(os.environ, {"ML_ECOSYSTEM_SNAPSHOTS_DIR": str(non_existent)}, clear=True):
-    with patch("pathlib.Path.home", return_value=fake_home):
-      with patch("ml_switcheroo.semantics.paths.resolve_semantics_dir") as mock_resolve:
-        mock_resolve.return_value = tmp_path / "src" / "ml_switcheroo" / "semantics"
-        # Should not resolve to non_existent
-        res = resolve_snapshots_dir()
-        assert res != non_existent
+  with (
+    patch.dict(os.environ, {"ML_ECOSYSTEM_SNAPSHOTS_DIR": str(non_existent)}, clear=True),
+    patch("pathlib.Path.home", return_value=fake_home),
+    patch("ml_switcheroo.semantics.paths.resolve_semantics_dir") as mock_resolve,
+  ):
+    mock_resolve.return_value = tmp_path / "src" / "ml_switcheroo" / "semantics"
+    # Should not resolve to non_existent
+    res = resolve_snapshots_dir()
+    assert res != non_existent
 
 
 def test_resolve_snapshots_dir_sibling_ecosystem(tmp_path: pathlib.Path) -> None:
@@ -86,10 +91,12 @@ def test_resolve_snapshots_dir_sibling_ecosystem(tmp_path: pathlib.Path) -> None
   eco_snapshots.mkdir(parents=True)
 
   fake_home = tmp_path / "empty_home"
-  with patch.dict(os.environ, {}, clear=True):
-    with patch("pathlib.Path.home", return_value=fake_home):
-      with patch("ml_switcheroo.semantics.paths.resolve_semantics_dir", return_value=sem_dir):
-        assert resolve_snapshots_dir() == eco_snapshots
+  with (
+    patch.dict(os.environ, {}, clear=True),
+    patch("pathlib.Path.home", return_value=fake_home),
+    patch("ml_switcheroo.semantics.paths.resolve_semantics_dir", return_value=sem_dir),
+  ):
+    assert resolve_snapshots_dir() == eco_snapshots
 
 
 def test_resolve_snapshots_dir_sibling_ecosystem_direct(tmp_path: pathlib.Path) -> None:
@@ -104,10 +111,12 @@ def test_resolve_snapshots_dir_sibling_ecosystem_direct(tmp_path: pathlib.Path) 
   eco_snapshots.mkdir(parents=True)
 
   fake_home = tmp_path / "empty_home"
-  with patch.dict(os.environ, {}, clear=True):
-    with patch("pathlib.Path.home", return_value=fake_home):
-      with patch("ml_switcheroo.semantics.paths.resolve_semantics_dir", return_value=sem_dir):
-        assert resolve_snapshots_dir() == eco_snapshots
+  with (
+    patch.dict(os.environ, {}, clear=True),
+    patch("pathlib.Path.home", return_value=fake_home),
+    patch("ml_switcheroo.semantics.paths.resolve_semantics_dir", return_value=sem_dir),
+  ):
+    assert resolve_snapshots_dir() == eco_snapshots
 
 
 def test_resolve_snapshots_dir_user_cache(tmp_path: pathlib.Path) -> None:
@@ -122,10 +131,12 @@ def test_resolve_snapshots_dir_user_cache(tmp_path: pathlib.Path) -> None:
   cache_snap = fake_home / ".cache" / "ml_ecosystem_snapshots" / "snapshots"
   cache_snap.mkdir(parents=True)
 
-  with patch.dict(os.environ, {}, clear=True):
-    with patch("pathlib.Path.home", return_value=fake_home):
-      with patch("ml_switcheroo.semantics.paths.resolve_semantics_dir", return_value=sem_dir):
-        assert resolve_snapshots_dir() == cache_snap
+  with (
+    patch.dict(os.environ, {}, clear=True),
+    patch("pathlib.Path.home", return_value=fake_home),
+    patch("ml_switcheroo.semantics.paths.resolve_semantics_dir", return_value=sem_dir),
+  ):
+    assert resolve_snapshots_dir() == cache_snap
 
 
 def test_resolve_snapshots_dir_user_cache_dir(tmp_path: pathlib.Path) -> None:
@@ -140,10 +151,12 @@ def test_resolve_snapshots_dir_user_cache_dir(tmp_path: pathlib.Path) -> None:
   cache_dir = fake_home / ".cache" / "ml_ecosystem_snapshots"
   cache_dir.mkdir(parents=True)
 
-  with patch.dict(os.environ, {}, clear=True):
-    with patch("pathlib.Path.home", return_value=fake_home):
-      with patch("ml_switcheroo.semantics.paths.resolve_semantics_dir", return_value=sem_dir):
-        assert resolve_snapshots_dir() == cache_dir
+  with (
+    patch.dict(os.environ, {}, clear=True),
+    patch("pathlib.Path.home", return_value=fake_home),
+    patch("ml_switcheroo.semantics.paths.resolve_semantics_dir", return_value=sem_dir),
+  ):
+    assert resolve_snapshots_dir() == cache_dir
 
 
 def test_resolve_snapshots_dir_fallback(tmp_path: Path) -> None:
@@ -156,11 +169,13 @@ def test_resolve_snapshots_dir_fallback(tmp_path: Path) -> None:
   sem_dir: Path = repos_root / "ml-switcheroo" / "src" / "ml_switcheroo" / "semantics"
   fake_home: Path = tmp_path / "empty_home"
 
-  with patch.dict(os.environ, {}, clear=True):
-    with patch("pathlib.Path.home", return_value=fake_home):
-      with patch("ml_switcheroo.semantics.paths.resolve_semantics_dir", return_value=sem_dir):
-        expected: Path = repos_root / "ml-ecosystem-snapshots"
-        assert resolve_snapshots_dir() == expected
+  with (
+    patch.dict(os.environ, {}, clear=True),
+    patch("pathlib.Path.home", return_value=fake_home),
+    patch("ml_switcheroo.semantics.paths.resolve_semantics_dir", return_value=sem_dir),
+  ):
+    expected: Path = repos_root / "ml-ecosystem-snapshots"
+    assert resolve_snapshots_dir() == expected
 
 
 def test_resolve_snapshots_dir_custom_paths(tmp_path: pathlib.Path) -> None:
@@ -207,10 +222,25 @@ def test_resolve_snapshots_dir_env_snapshots_path_nonexistent(tmp_path: pathlib.
 
 
 def test_paths_import_fallback() -> None:
-  """Verifies the behavior of fallback when ml_ecosystem_snapshots.network_env is missing."""
+  """Verify `importlib.reload` handles paths import fallback as expected."""
   import importlib
 
   with patch.dict("sys.modules", {"ml_ecosystem_snapshots.network_env": None}):
     importlib.reload(paths)
     assert paths.get_custom_snapshots_paths() == []
   importlib.reload(paths)
+
+
+def test_resolve_semantics_dir_files_oserror_fallback(tmp_path: Path) -> None:
+  """Verify `resolve_semantics_dir` falls back to `local_path` when `importlib.resources.files` raises `OSError`.
+
+  Args:
+      tmp_path: Pytest temporary directory fixture.
+  """
+  fake_paths_py = tmp_path / "paths.py"
+  fake_paths_py.touch()
+  with (
+    patch.object(paths, "__file__", str(fake_paths_py)),
+    patch("ml_switcheroo.semantics.paths.files", side_effect=OSError("missing resource")),
+  ):
+    assert resolve_semantics_dir() == tmp_path

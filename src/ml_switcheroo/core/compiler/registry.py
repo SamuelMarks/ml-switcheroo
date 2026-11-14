@@ -32,7 +32,128 @@ from ml_switcheroo.core.compiler.frontends.ir import IrFrontend
 from ml_switcheroo.core.compiler.frontends.nvidia_sass import NvidiaSassLifter, NvidiaSassParser
 from ml_switcheroo.core.compiler.frontends.python import PythonFrontend
 from ml_switcheroo.core.compiler.frontends.rdna import RdnaLifter, RdnaParser
+from ml_switcheroo.core.cst.base import CSTNode
 from ml_switcheroo.core.mlir.stablehlo_parser import StableHloParser
+
+_IsaStmtT = typing.TypeVar("_IsaStmtT", bound=CSTNode)
+_IsaStmtT_co = typing.TypeVar("_IsaStmtT_co", bound=CSTNode, covariant=True)
+_IsaStmtT_contra = typing.TypeVar("_IsaStmtT_contra", bound=CSTNode, contravariant=True)
+
+
+class IsaParsedProgramProtocol(typing.Protocol[_IsaStmtT_co]):
+  """Protocol for parsed ISA AST containers exposing `statements`."""
+
+  @property
+  def statements(self) -> typing.Sequence[_IsaStmtT_co]:
+    """Return parsed ISA statement sequence.
+
+    Returns:
+        Sequence of parsed ISA statement nodes.
+    """
+
+
+class _IsaParserInstanceProtocol(typing.Protocol[_IsaStmtT_co]):
+  """Protocol for instantiated ISA parsers."""
+
+  def parse(self) -> IsaParsedProgramProtocol[_IsaStmtT_co]:
+    """Parse raw assembly text into a program container.
+
+    Returns:
+        Parsed program containing `statements`.
+    """
+
+
+class IsaParserClassProtocol(typing.Protocol[_IsaStmtT_co]):
+  """Protocol for ISA parser classes registered as `(ParserCls, LifterCls)` in `_FRONTENDS`."""
+
+  def __call__(self, code: str) -> _IsaParserInstanceProtocol[_IsaStmtT_co]:
+    """Instantiate parser with raw assembly source text.
+
+    Args:
+        code: Raw ISA assembly text.
+
+    Returns:
+        Initialized ISA parser instance.
+    """
+
+
+class _IsaLifterInstanceProtocol(typing.Protocol[_IsaStmtT_contra]):
+  """Protocol for instantiated ISA lifters."""
+
+  def lift(self, nodes: typing.Sequence[_IsaStmtT_contra]) -> "LogicalGraph":
+    """Lift parsed ISA statements into a `LogicalGraph`.
+
+    Args:
+        nodes: Sequence of parsed ISA statement nodes.
+
+    Returns:
+        Lifted `LogicalGraph`.
+    """
+
+
+class IsaLifterClassProtocol(typing.Protocol[_IsaStmtT_contra]):
+  """Protocol for ISA lifter classes registered as `(ParserCls, LifterCls)` in `_FRONTENDS`."""
+
+  def __call__(self) -> _IsaLifterInstanceProtocol[_IsaStmtT_contra]:
+    """Instantiate lifter.
+
+    Returns:
+        Initialized ISA lifter instance.
+    """
+
+
+@typing.runtime_checkable
+class IsaFrontendProtocol(typing.Protocol):
+  """Protocol for registered `(ParserCls, LifterCls)` ISA frontend entries."""
+
+  def lift_code(self, code: str) -> "LogicalGraph":
+    """Parse and lift raw ISA source text into a `LogicalGraph`.
+
+    Args:
+        code: Raw ISA assembly text.
+
+    Returns:
+        Lifted `LogicalGraph`.
+    """
+
+
+class IsaFrontendEntry(typing.Generic[_IsaStmtT]):
+  """Typed `(ParserCls, LifterCls)` pair registered in `_FRONTENDS`.
+
+  Attributes:
+      parser_cls: ISA parser constructor.
+      lifter_cls: ISA lifter constructor.
+  """
+
+  def __init__(
+    self,
+    parser_cls: IsaParserClassProtocol[_IsaStmtT],
+    lifter_cls: IsaLifterClassProtocol[_IsaStmtT],
+  ) -> None:
+    """Bind an ISA parser class and lifter class together.
+
+    Args:
+        parser_cls: ISA parser constructor.
+        lifter_cls: ISA lifter constructor.
+    """
+    self.parser_cls = parser_cls
+    self.lifter_cls = lifter_cls
+
+  def lift_code(self, code: str) -> "LogicalGraph":
+    """Parse ``code`` with ``parser_cls`` and lift statements with ``lifter_cls``.
+
+    Args:
+        code: Raw ISA source code string.
+
+    Returns:
+        Lifted `LogicalGraph` instance.
+    """
+    return self.lifter_cls().lift(self.parser_cls(code).parse().statements)
+
+
+FrontendSpec: typing.TypeAlias = (
+  type[PythonFrontend] | type[IrFrontend] | type[StableHloParser] | type["GraphFrontend"] | IsaFrontendProtocol
+)
 
 
 class BaseFrontend:
@@ -40,8 +161,6 @@ class BaseFrontend:
 
   This class serves as a marker/typing base for all source-to-IR frontends.
   """
-
-  pass
 
 
 class GraphFrontend(BaseFrontend):
@@ -59,6 +178,9 @@ class GraphFrontend(BaseFrontend):
 
     Returns:
         The generated logical graph or equivalent representation.
+
+    Raises:
+        NotImplementedError: Must be implemented by concrete frontend subclasses.
     """
     raise NotImplementedError
 
@@ -80,15 +202,31 @@ _BACKENDS: dict[str, type[CompilerBackend]] = {
 }
 
 # Frontend mappings for the Compiler (Text -> Graph) pipeline
-_FRONTENDS = {
+_FRONTENDS: dict[str, FrontendSpec] = {
   "python": PythonFrontend,
   "ir": IrFrontend,
   "ml_switcheroo_ir": IrFrontend,
-  # ISAs use Parser+Lifter tuple strategy handled by engine
-  "nvidia_sass": (NvidiaSassParser, NvidiaSassLifter),
-  "rdna": (RdnaParser, RdnaLifter),
+  "nvidia_sass": IsaFrontendEntry(NvidiaSassParser, NvidiaSassLifter),
+  "rdna": IsaFrontendEntry(RdnaParser, RdnaLifter),
   "stablehlo": StableHloParser,
 }
+
+
+def lift_isa_pair(
+  pair: tuple[IsaParserClassProtocol[_IsaStmtT], IsaLifterClassProtocol[_IsaStmtT]],
+  code: str,
+) -> "LogicalGraph":
+  """Parse and lift ISA source code using a `(ParserCls, LifterCls)` pair.
+
+  Args:
+      pair: `(ParserCls, LifterCls)` tuple.
+      code: Raw ISA source code string.
+
+  Returns:
+      Lifted `LogicalGraph` instance.
+  """
+  parser_cls, lifter_cls = pair
+  return IsaFrontendEntry(parser_cls, lifter_cls).lift_code(code)
 
 
 def get_backend_class(target: str) -> type[CompilerBackend] | None:

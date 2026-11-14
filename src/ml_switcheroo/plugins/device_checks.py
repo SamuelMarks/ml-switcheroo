@@ -41,19 +41,19 @@ def transform_cuda_check(node: cst.Call, ctx: HookContext) -> cst.BaseExpression
   target_framework = ctx.target_framework
   try:
     adapter = get_adapter(target_framework)
-  except Exception:
+  except (ImportError, KeyError, ValueError, TypeError, AttributeError, RuntimeError):
     return node
 
   if not adapter:
     # Fallback to original if adapter not found
     return node
 
-  # 2. Get Syntax String from Adapter
+  # 3. Query Adapter Syntax
   try:
     check_code = adapter.get_device_check_syntax()
   except NotImplementedError:
     return node
-  except Exception:
+  except (AttributeError, ValueError, TypeError, KeyError, RuntimeError):
     # Safety catch for adapter logic errors
     return node
 
@@ -62,7 +62,6 @@ def transform_cuda_check(node: cst.Call, ctx: HookContext) -> cst.BaseExpression
 
   # 3. Parse into CST
   try:
-    new_expression = cst.parse_expression(check_code)
-    return new_expression
+    return cst.parse_expression(check_code)
   except cst.ParserSyntaxError:
     return node

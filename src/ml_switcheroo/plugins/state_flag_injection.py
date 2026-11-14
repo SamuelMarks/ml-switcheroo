@@ -18,6 +18,7 @@ import typing
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, PluginMetadataValue, register_hook
+from ml_switcheroo.exceptions import PluginExecutionError
 
 # unique key for storing state in context metadata
 _PLUGIN_KEY = "state_flag_injection"
@@ -151,6 +152,8 @@ def capture_eval_state(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
       cst.Name("None") effectively replacing the statement with a no-op `None`,
       which is valid Python expression statement (does nothing).
 
+  Raises:
+      PluginExecutionError: If the state-flag metadata dictionary on ``ctx`` is corrupted.
   """
   # 1. Validation: Must be an attribute call (obj.method())
   if not isinstance(node.func, cst.Attribute):
@@ -181,7 +184,8 @@ def capture_eval_state(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
   # 3. persist State in Context
   raw_store = ctx.metadata.setdefault(_PLUGIN_KEY, {})
-  assert _is_flag_store(raw_store)
+  if not _is_flag_store(raw_store):
+    raise PluginExecutionError("Corrupted state_flag_injection metadata store in HookContext.")
   if obj_name not in raw_store:
     raw_store[obj_name] = {}
   raw_store[obj_name].update(state_updates)

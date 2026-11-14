@@ -12,19 +12,11 @@ Transformation:
 5. Generates an `.astype(...)` call using the retrieved dtype API.
 """
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
 from ml_switcheroo.plugins.utils import create_dotted_name
-
-
-@typing.runtime_checkable
-class _NumpyCompatibleTraitsProtocol(typing.Protocol):
-  """Protocol for traits objects exposing `has_numpy_compatible_arrays`."""
-
-  has_numpy_compatible_arrays: bool
+from ml_switcheroo.semantics.resolution import query_framework_traits, query_operation
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
@@ -55,20 +47,8 @@ def _supports_numpy_casting(ctx: HookContext) -> bool:
   if ctx.semantics is None:
     return False
 
-  conf = ctx.semantics.get_framework_config(ctx.target_framework)
-  if not conf:
-    return False
-
-  traits = conf.get("plugin_traits")
-  if not traits:
-    return False
-
-  if isinstance(traits, dict):
-    return bool(traits.get("has_numpy_compatible_arrays", False))
-
-  if isinstance(traits, _NumpyCompatibleTraitsProtocol):
-    return bool(traits.has_numpy_compatible_arrays)
-  return False
+  fw_traits = query_framework_traits(ctx.semantics, ctx.target_framework)
+  return bool(fw_traits.plugin_traits is not None and fw_traits.plugin_traits.has_numpy_compatible_arrays)
 
 
 @register_hook("type_methods")
@@ -103,34 +83,28 @@ def transform_casting(node: cst.Call, ctx: HookContext) -> cst.Call:
   if not op_id or ctx.semantics is None:
     return node
 
-  # Retrieve definition from Semantics Manager
-  # This dictionary comes from standards_internal.py (or overrides)
-  defn = ctx.semantics.get_definition_by_id(op_id)
-  if not defn:
+  op_model = query_operation(ctx.semantics, op_id)
+  if op_model is None:
     return node
-
-  # Extract Metadata: "metadata": {"target_type": "Float32"}
-  raw_meta = defn.get("metadata", {})
-  raw_tgt_type = raw_meta.get("target_type") if isinstance(raw_meta, dict) else None
+  raw_tgt_type = op_model.metadata.get("target_type")
   target_type_id: str | None = str(raw_tgt_type) if isinstance(raw_tgt_type, str) and raw_tgt_type else None
 
   # Fallback: Infer type from Op ID if metadata missing (e.g. CastFloat -> Float32)
   # Useful for legacy or partial definitions.
-  if not target_type_id:
-    if op_id.startswith("Cast"):
-      target_type_id = op_id[4:]
-      # Mapping suffix to Abstract Type ID if different
-      suffix_map = {
-        "Float": "Float32",
-        "Long": "Int64",
-        "Half": "Float16",
-        "Int": "Int32",
-        "Short": "Int16",
-        "Bool": "Bool",
-        "Byte": "UInt8",
-      }
-      if target_type_id in suffix_map:
-        target_type_id = suffix_map[target_type_id]
+  if not target_type_id and op_id.startswith("Cast"):
+    target_type_id = op_id[4:]
+    # Mapping suffix to Abstract Type ID if different
+    suffix_map = {
+      "Float": "Float32",
+      "Long": "Int64",
+      "Half": "Float16",
+      "Int": "Int32",
+      "Short": "Int16",
+      "Bool": "Bool",
+      "Byte": "UInt8",
+    }
+    if target_type_id in suffix_map:
+      target_type_id = suffix_map[target_type_id]
 
   if not target_type_id:
     # If metadata is missing/resolvable, we cannot safely transform.

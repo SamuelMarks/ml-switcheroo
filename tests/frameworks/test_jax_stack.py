@@ -6,20 +6,18 @@ from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 
 
 class MockHighLevelAdapter(JAXStackMixin):
-  """Test helper class MockHighLevelAdapter."""
-
-  pass
+  """Minimal `JAXStackMixin` test double used in JAX stack tests."""
 
 
 def test_get_serialization_imports() -> None:
-  """Verifies the behavior of get_serialization_imports."""
+  """Verify `adapter.get_serialization_imports` emits `import orbax.checkpoint` across JAX stack inputs."""
   adapter = MockHighLevelAdapter()
   imports: list[str] = adapter.get_serialization_imports()
   assert "import orbax.checkpoint" in imports
 
 
 def test_get_weight_conversion_imports() -> None:
-  """Verifies the behavior of get_weight_conversion_imports."""
+  """Verify get weight conversion imports works as expected."""
   adapter = MockHighLevelAdapter()
   imports: list[str] = adapter.get_weight_conversion_imports()
   assert "import jax.numpy as jnp" in imports
@@ -28,21 +26,21 @@ def test_get_weight_conversion_imports() -> None:
 
 
 def test_device_syntax_cuda() -> None:
-  """Verifies the behavior of device syntax cuda."""
+  """Verify `adapter.get_device_syntax` handles device syntax cuda as expected."""
   adapter = MockHighLevelAdapter()
   syntax: str = adapter.get_device_syntax("'cuda'")
-  assert "jax.devices('gpu')[0]" == syntax
+  assert syntax == "jax.devices('gpu')[0]"
 
 
 def test_device_syntax_cpu_index() -> None:
-  """Verifies the behavior of device syntax cpu index."""
+  """Verify `adapter.get_device_syntax` handles device syntax cpu index as expected."""
   adapter = MockHighLevelAdapter()
   syntax: str = adapter.get_device_syntax("'cpu'", "1")
-  assert "jax.devices('cpu')[1]" == syntax
+  assert syntax == "jax.devices('cpu')[1]"
 
 
 def test_serialization_syntax_orbax() -> None:
-  """Verifies the behavior of serialization syntax orbax."""
+  """Verify serialization syntax orbax works as expected."""
   adapter = MockHighLevelAdapter()
 
   # test direct call branch
@@ -59,7 +57,7 @@ def test_serialization_syntax_orbax() -> None:
 
 
 def test_weight_load_code() -> None:
-  """Verify weight load code behavior."""
+  """Verify `adapter.get_weight_load_code` emits `flatten_dict` for weight load code."""
   adapter = MockHighLevelAdapter()
   code: str = adapter.get_weight_load_code("path")
   assert "orbax.checkpoint.PyTreeCheckpointer" in code
@@ -68,14 +66,14 @@ def test_weight_load_code() -> None:
 
 
 def test_tensor_conversion_syntax() -> None:
-  """Verify tensor conversion syntax behavior."""
+  """Verify `adapter.get_tensor_to_numpy_expr` handles tensor conversion syntax as expected."""
   adapter = MockHighLevelAdapter()
   code: str = adapter.get_tensor_to_numpy_expr("x")
   assert code == "np.array(x)"
 
 
 def test_weight_save_code() -> None:
-  """Verify weight save code behavior."""
+  """Verify `adapter.get_weight_save_code` emits `tuple_params =` for weight save code."""
   adapter = MockHighLevelAdapter()
   code: str = adapter.get_weight_save_code("state", "path")
   assert "tuple_params =" in code
@@ -85,16 +83,19 @@ def test_weight_save_code() -> None:
 
 
 def test_wiring_injection() -> None:
-  """Verifies the behavior of wiring injection."""
+  """Verify `adapter._apply_stack_wiring` emits `import chex` for wiring injection."""
   adapter = MockHighLevelAdapter()
   snapshot: dict[str, dict[str, JsonValue]] = {}
   adapter._apply_stack_wiring(snapshot)
   mappings = snapshot.get("mappings", {})
   templates = snapshot.get("templates", {})
-  assert isinstance(templates["import"], str) and "import chex" in templates["import"]
+  assert isinstance(templates["import"], str)
+  assert "import chex" in templates["import"]
   assert templates["to_numpy"] == "{res_var}"
-  assert isinstance(mappings["Adam"], dict) and mappings["Adam"]["api"] == "optax.adam"
-  assert isinstance(mappings["step"], dict) and mappings["step"]["requires_plugin"] == "optimizer_step"
+  assert isinstance(mappings["Adam"], dict)
+  assert mappings["Adam"]["api"] == "optax.adam"
+  assert isinstance(mappings["step"], dict)
+  assert mappings["step"]["requires_plugin"] == "optimizer_step"
 
 
 def test_get_to_numpy_code() -> None:
@@ -106,13 +107,13 @@ def test_get_to_numpy_code() -> None:
 def test_get_device_check_syntax() -> None:
   """Gets device check syntax."""
   adapter = MockHighLevelAdapter()
-  assert "len(jax.devices('gpu')) > 0" == adapter.get_device_check_syntax()
+  assert adapter.get_device_check_syntax() == "len(jax.devices('gpu')) > 0"
 
 
 def test_get_rng_split_syntax() -> None:
   """Gets rng split syntax."""
   adapter = MockHighLevelAdapter()
-  assert "rng, key = jax.random.split(rng)" == adapter.get_rng_split_syntax("rng", "key")
+  assert adapter.get_rng_split_syntax("rng", "key") == "rng, key = jax.random.split(rng)"
 
 
 def test_get_doc_url() -> None:
@@ -124,7 +125,7 @@ def test_get_doc_url() -> None:
 
 
 def test_wiring_injection_existing_templates() -> None:
-  """Verifies the behavior of wiring injection existing templates."""
+  """Verify `adapter._apply_stack_wiring` handles wiring injection existing templates as expected."""
   adapter = MockHighLevelAdapter()
   snapshot: dict[str, dict[str, JsonValue]] = {"templates": {"existing": "template"}}
   adapter._apply_stack_wiring(snapshot)
@@ -133,6 +134,6 @@ def test_wiring_injection_existing_templates() -> None:
 
 
 def test_serialization_syntax_invalid_op() -> None:
-  """Verifies the behavior of serialization syntax invalid op."""
+  """Verify serialization syntax invalid operation works as expected."""
   adapter = MockHighLevelAdapter()
-  assert "" == adapter.get_serialization_syntax("invalid", "dir")
+  assert adapter.get_serialization_syntax("invalid", "dir") == ""

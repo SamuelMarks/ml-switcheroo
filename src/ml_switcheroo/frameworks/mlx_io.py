@@ -41,7 +41,7 @@ class MlxIOMixin:
     """
     if op == "save" and object_arg:
       return f"mx.save({file_arg}, {object_arg})"
-    elif op == "load":
+    if op == "load":
       return f"mx.load({file_arg})"
     return ""
 

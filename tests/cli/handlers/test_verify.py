@@ -1,221 +1,134 @@
-"""Test suite for the Verify module."""
+"""Unit tests for `handle_ci` using real `tmp_path` files and mini-configurations (`ml_switcheroo.cli.handlers.verify`)."""
 
-import typing
+import json
+import textwrap
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+from pydantic import JsonValue
 
+import ml_switcheroo.cli.handlers.verify as verify_mod
 from ml_switcheroo.cli.handlers.verify import handle_ci
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.semantics.manager import SemanticsManager
+
+_NL = chr(10)
 
 
-@pytest.fixture
-def mock_config() -> typing.Generator[MagicMock, None, None]:
-  """Execute mock config helper logic.
-
-  Returns:
-      Configured `mock_config` fixture value (typing.Generator[MagicMock, None, None]).
-  """
-  with patch("ml_switcheroo.config.RuntimeConfig.load") as mock_load:
-    mock_conf: MagicMock = MagicMock()
-    mock_conf.plugin_paths = ["some/plugin"]
-    mock_load.return_value = mock_conf
-    yield mock_load
-
-
-@pytest.fixture
-def mock_semantics() -> typing.Generator[MagicMock, None, None]:
-  """Execute mock semantics helper logic.
+def _make_mini_semantics() -> SemanticsManager:
+  """Build a compact `SemanticsManager` with `ManualOp` and `BrokenOp` definitions.
 
   Returns:
-      Configured `mock_semantics` fixture value (typing.Generator[MagicMock, None, None]).
+      Configured in-memory `SemanticsManager`.
   """
-  with patch("ml_switcheroo.cli.handlers.verify.SemanticsManager") as mock:
-    yield mock
+  sem = SemanticsManager(load_defaults=False)
+  sem.data = {
+    "manual_op": {
+      "operation": "manual_op",
+      "std_args": ["x"],
+      "variants": {"numpy": {"api": "numpy.abs"}},
+    }
+  }
+  return sem
 
 
-@pytest.fixture
-def mock_validator() -> typing.Generator[MagicMock, None, None]:
-  """Execute mock validator helper logic.
-
-  Returns:
-      Configured `mock_validator` fixture value (typing.Generator[MagicMock, None, None]).
-  """
-  with patch("ml_switcheroo.cli.handlers.verify.BatchValidator") as mock:
-    yield mock
-
-
-@pytest.fixture
-def mock_load_plugins() -> typing.Generator[MagicMock, None, None]:
-  """Execute mock load plugins helper logic.
-
-  Returns:
-      Configured `mock_load_plugins` fixture value (typing.Generator[MagicMock, None, None]).
-  """
-  with patch("ml_switcheroo.cli.handlers.verify.load_plugins") as mock:
-    yield mock
-
-
-def test_handle_ci_success(
-  mock_config: MagicMock, mock_semantics: MagicMock, mock_validator: MagicMock, mock_load_plugins: MagicMock
-) -> None:
-  """Handles ci successfully.
+def test_handle_ci_real_files_plugins_readme_and_json_report(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `handle_ci` runs real `BatchValidator`, `ReadmeEditor`, plugin loading, and JSON report writing.
 
   Args:
-      mock_config: ...
-      mock_semantics: ...
-      mock_validator: ...
-      mock_load_plugins: ...
+      tmp_path: Pytest temporary directory fixture.
+      monkeypatch: Pytest monkeypatch fixture.
   """
-  mock_load_plugins.return_value = 1
-  mock_val_instance: MagicMock = mock_validator.return_value
-  mock_val_instance.run_all.return_value = {"Op1": True, "Op2": False}
-  assert handle_ci(False, Path("README.md"), None, False) == 0
+  monkeypatch.chdir(tmp_path)
+
+  # Real `pyproject.toml` with custom `plugin_paths` and manual `tests/` directory
+  plug_dir = tmp_path / "extra_plugins"
+  plug_dir.mkdir()
+  (plug_dir / "ci_plug.py").write_text(
+    textwrap.dedent(
+      """
+      from ml_switcheroo.core.hooks import register_hook
+
+      @register_hook("ci_custom_hook")
+      def _hook(node, ctx):
+        return node
+      """
+    ),
+    encoding="utf-8",
+  )
+  (tmp_path / "pyproject.toml").write_text(
+    f'[tool.ml_switcheroo]{_NL}plugin_paths = ["extra_plugins"]{_NL}',
+    encoding="utf-8",
+  )
+
+  tests_dir = tmp_path / "tests"
+  tests_dir.mkdir()
+  (tests_dir / "test_manual_op.py").write_text("def test_manual_op(): pass", encoding="utf-8")
+
+  readme_path = tmp_path / "README.md"
+  readme_path.write_text(f"# Project{_NL}{_NL}## ✅ Compatibility Matrix{_NL}{_NL}Old table{_NL}", encoding="utf-8")
+  report_path = tmp_path / "reports" / "ci.json"
+
+  mini_sem = _make_mini_semantics()
+  monkeypatch.setattr(verify_mod, "SemanticsManager", lambda: mini_sem)
+
+  assert handle_ci(update_readme=True, readme_path=readme_path, json_report=report_path, repair=False) == 0
+  assert json.loads(report_path.read_text(encoding="utf-8")) == {"manual_op": True}
+  assert "✅ Passing" in readme_path.read_text(encoding="utf-8")
+
+  # Configured `plugin_paths` returning 0 newly loaded plugins (already loaded)
+  with patch.object(verify_mod, "load_plugins", return_value=0):
+    assert handle_ci(update_readme=False, readme_path=readme_path, json_report=None, repair=False) == 0
+
+  # Directory without `tests/` and with 0 newly loaded plugins -> `manual_test_dir=None`
+  empty_ws = tmp_path / "empty_ws"
+  empty_ws.mkdir()
+  monkeypatch.chdir(empty_ws)
+  assert handle_ci(update_readme=False, readme_path=readme_path, json_report=None, repair=False) == 0
+
+  # Report write error when `json_report` points to an existing directory
+  bad_report_dir = tmp_path / "report_is_dir"
+  bad_report_dir.mkdir()
+  assert handle_ci(update_readme=False, readme_path=readme_path, json_report=bad_report_dir, repair=False) == 1
+
+  # `RuntimeConfig.load` raising an exception logs warning and continues cleanly
+  with patch.object(RuntimeConfig, "load", side_effect=RuntimeError("bad toml")):
+    assert handle_ci(update_readme=False, readme_path=readme_path, json_report=None, repair=False) == 0
 
 
-def test_handle_ci_plugin_load_none(
-  mock_config: MagicMock, mock_semantics: MagicMock, mock_validator: MagicMock, mock_load_plugins: MagicMock
-) -> None:
-  """Handles ci when loaded plugins is 0.
+def test_handle_ci_repair_mode_branches(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `handle_ci(..., repair=True)` handles proposed fixes, unfixable ops, and missing definitions.
 
   Args:
-      mock_config: ...
-      mock_semantics: ...
-      mock_validator: ...
-      mock_load_plugins: ...
+      tmp_path: Pytest temporary directory fixture.
+      monkeypatch: Pytest monkeypatch fixture.
   """
-  mock_load_plugins.return_value = 0
-  mock_val_instance: MagicMock = mock_validator.return_value
-  mock_val_instance.run_all.return_value = {}
-  assert handle_ci(False, Path("README.md"), None, False) == 0
+  monkeypatch.chdir(tmp_path)
+  sem = _make_mini_semantics()
+  sem.data["fixable_op"] = {"operation": "fixable_op", "variants": {}}
+  sem.data["unfixable_op"] = {"operation": "unfixable_op", "variants": {}}
+  updated_calls: list[tuple[str, dict[str, JsonValue]]] = []
 
+  monkeypatch.setattr(verify_mod, "SemanticsManager", lambda: sem)
+  monkeypatch.setattr(sem, "update_definition", lambda op_id, d: updated_calls.append((op_id, d)))
 
-def test_handle_ci_repair_no_defn(mock_config: MagicMock, mock_semantics: MagicMock, mock_validator: MagicMock) -> None:
-  """Handles ci repair when no definition is found.
+  mock_val = MagicMock()
+  mock_val.run_all.return_value = {
+    "manual_op": True,
+    "fixable_op": False,
+    "unfixable_op": False,
+    "ghost_missing_op": False,
+  }
+  monkeypatch.setattr(verify_mod, "BatchValidator", lambda _s: mock_val)
 
-  Args:
-      mock_config: ...
-      mock_semantics: ...
-      mock_validator: ...
-  """
-  mock_val_instance: MagicMock = mock_validator.return_value
-  mock_val_instance.run_all.return_value = {"Op1": False}
-  mock_sem_instance: MagicMock = mock_semantics.return_value
-  mock_sem_instance.get_definition_by_id.return_value = None
-  assert handle_ci(False, Path("README.md"), None, True) == 0
+  mock_bisector = MagicMock()
+  mock_bisector.propose_fix.side_effect = lambda op_id, _defn: {"rtol": 0.1} if op_id == "fixable_op" else None
+  monkeypatch.setattr(verify_mod, "SemanticsBisector", lambda _r: mock_bisector)
 
+  assert handle_ci(update_readme=False, readme_path=tmp_path / "README.md", json_report=None, repair=True) == 0
+  assert updated_calls == [("fixable_op", {"rtol": 0.1})]
 
-def test_handle_ci_config_error(mock_config: MagicMock, mock_semantics: MagicMock, mock_validator: MagicMock) -> None:
-  """Handles ci configuration correctly handling an error.
-
-  Args:
-      mock_config: ...
-      mock_semantics: ...
-      mock_validator: ...
-  """
-  mock_config.side_effect = Exception("boom")
-  mock_val_instance: MagicMock = mock_validator.return_value
-  mock_val_instance.run_all.return_value = {}
-  assert handle_ci(False, Path("README.md"), None, False) == 0
-
-
-def test_handle_ci_repair(mock_config: MagicMock, mock_semantics: MagicMock, mock_validator: MagicMock) -> None:
-  """Handles ci repair.
-
-  Args:
-      mock_config: ...
-      mock_semantics: ...
-      mock_validator: ...
-  """
-  mock_val_instance: MagicMock = mock_validator.return_value
-  mock_val_instance.run_all.return_value = {"Op1": True, "Op2": False, "Op3": False}
-  mock_sem_instance: MagicMock = mock_semantics.return_value
-  mock_sem_instance.get_definition_by_id.side_effect = [{"variants": {}}, None]
-  with patch("ml_switcheroo.cli.handlers.verify.SemanticsBisector") as mock_bisector:
-    mock_bis_inst: MagicMock = mock_bisector.return_value
-    mock_bis_inst.propose_fix.side_effect = [{"test_rtol": 0.1}, None]
-    assert handle_ci(False, Path("README.md"), None, True) == 0
-    assert mock_sem_instance.update_definition.call_count == 1
-
-
-def test_handle_ci_repair_no_fixes(mock_config: MagicMock, mock_semantics: MagicMock, mock_validator: MagicMock) -> None:
-  """Handles ci repair no fixes.
-
-  Args:
-      mock_config: ...
-      mock_semantics: ...
-      mock_validator: ...
-  """
-  mock_val_instance: MagicMock = mock_validator.return_value
-  mock_val_instance.run_all.return_value = {"Op1": True, "Op2": False}
-  mock_sem_instance: MagicMock = mock_semantics.return_value
-  mock_sem_instance.get_definition_by_id.return_value = {"some": "definition"}
-  with patch("ml_switcheroo.cli.handlers.verify.SemanticsBisector") as mock_bisector:
-    mock_bis_inst: MagicMock = mock_bisector.return_value
-    mock_bis_inst.propose_fix.return_value = None
-    assert handle_ci(False, Path("README.md"), None, True) == 0
-
-
-def test_handle_ci_update_readme(mock_config: MagicMock, mock_semantics: MagicMock, mock_validator: MagicMock) -> None:
-  """Handles ci update readme.
-
-  Args:
-      mock_config: ...
-      mock_semantics: ...
-      mock_validator: ...
-  """
-  mock_val_instance: MagicMock = mock_validator.return_value
-  mock_val_instance.run_all.return_value = {}
-  with patch("ml_switcheroo.cli.handlers.verify.ReadmeEditor") as mock_editor:
-    assert handle_ci(True, Path("README.md"), None, False) == 0
-    mock_editor.return_value.update_matrix.assert_called_once()
-
-
-def test_handle_ci_json_report(
-  mock_config: MagicMock, mock_semantics: MagicMock, mock_validator: MagicMock, tmp_path: Path
-) -> None:
-  """Handles ci JSON report.
-
-  Args:
-      mock_config: ...
-      mock_semantics: ...
-      mock_validator: ...
-      tmp_path: ...
-  """
-  mock_val_instance: MagicMock = mock_validator.return_value
-  mock_val_instance.run_all.return_value = {"Op1": True}
-  report_path: Path = tmp_path / "report.json"
-  assert handle_ci(False, Path("README.md"), report_path, False) == 0
-  assert report_path.exists()
-
-
-def test_handle_ci_json_report_error(
-  mock_config: MagicMock, mock_semantics: MagicMock, mock_validator: MagicMock, tmp_path: Path
-) -> None:
-  """Handles ci JSON report correctly handling an error.
-
-  Args:
-      mock_config: ...
-      mock_semantics: ...
-      mock_validator: ...
-      tmp_path: ...
-  """
-  mock_val_instance: MagicMock = mock_validator.return_value
-  mock_val_instance.run_all.return_value = {"Op1": True}
-  report_path: Path = tmp_path / "report.json"
-  with patch("pathlib.Path.mkdir", side_effect=Exception("boom")):
-    assert handle_ci(False, Path("README.md"), report_path, False) == 1
-
-
-def test_handle_ci_no_tests_dir(mock_config: MagicMock, mock_semantics: MagicMock, mock_validator: MagicMock) -> None:
-  """Handles ci no tests directory.
-
-  Args:
-      mock_config: ...
-      mock_semantics: ...
-      mock_validator: ...
-  """
-  mock_val_instance: MagicMock = mock_validator.return_value
-  mock_val_instance.run_all.return_value = {}
-  with patch("pathlib.Path.exists", return_value=False):
-    assert handle_ci(False, Path("README.md"), None, False) == 0
+  # All failed ops returning `None` from `propose_fix` (`fixed_count == 0`)
+  mock_val.run_all.return_value = {"unfixable_op": False}
+  assert handle_ci(update_readme=False, readme_path=tmp_path / "README.md", json_report=None, repair=True) == 0

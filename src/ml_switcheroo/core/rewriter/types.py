@@ -8,6 +8,13 @@ class SignatureContext(pydantic.BaseModel):
 
   Used by the StructureMixin to maintain context about arguments,
   injections, and initialization status during AST traversal.
+
+  Attributes:
+      existing_args: The existing args (`set[str]`).
+      injected_args: The injected args (`list[tuple[str, str | None]]`).
+      preamble_stmts: The preamble stmts (`list[str]`).
+      is_init: The is init (`bool`).
+      is_module_method: The is module method (`bool`).
   """
 
   model_config = pydantic.ConfigDict(extra="forbid")

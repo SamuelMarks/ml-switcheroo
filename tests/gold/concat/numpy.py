@@ -7,12 +7,12 @@ import numpy.typing
 def concat_tensors(
   x: np.typing.NDArray[np.float64], y: np.typing.NDArray[np.float64], axis: int = -1
 ) -> np.typing.NDArray[np.float64]:
-  """Helper to concat tensors.
+  """Execute `np.concatenate` to support concat tensors in numpy tests.
 
   Args:
       x: Primary input tensor or array operand.
       y: Secondary input tensor or target operand.
-      axis: The axis (int) for concat tensors.
+      axis: Input `axis` parameter value (`int`).
 
   Returns:
       Resulting `np.typing.NDArray[np.float64]` from concat tensors.

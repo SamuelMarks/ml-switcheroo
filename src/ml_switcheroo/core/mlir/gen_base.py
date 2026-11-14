@@ -1,6 +1,7 @@
-"""MLIR Generator Base Utilities.
+"""MLIR Generator Common Utilities.
 
-Defines the mixin with common helper functions used by Expression and Statement generators.
+Provides ``MlirGenHelpers``, stateless helper utilities shared by
+``MlirExpressionGenerator``, ``MlirStatementGenerator``, and ``MlirToPythonGenerator``.
 """
 
 import libcst as cst
@@ -8,19 +9,19 @@ import libcst as cst
 from ml_switcheroo.core.mlir.cst import OperationNode
 
 
-class BaseGeneratorMixin:
-  """Base class providing common string manipulation and attribute retrieval helpers for code generation."""
+class MlirGenHelpers:
+  """Stateless helper utilities for extracting MLIR attributes and building dotted CST names."""
 
-  def _get_attr(self, op: OperationNode, key: str) -> str | None:
-    """Retrieve the value of a specific attribute from an OperationNode.
+  @staticmethod
+  def get_attr(op: OperationNode, key: str) -> str | None:
+    """Retrieve the string representation of attribute ``key`` on ``op``.
 
     Args:
-        op: The operation node to inspect.
-        key: The attribute name key.
+        op: MLIR ``OperationNode`` to inspect.
+        key: Attribute name key.
 
     Returns:
-        The attribute value as string, or None if not found.
-
+        Attribute value string, or ``None`` if absent.
     """
     for attr in op.attributes:
       if attr.name == key:
@@ -29,15 +30,15 @@ class BaseGeneratorMixin:
         return str(attr.value)
     return None
 
-  def _create_dotted_name(self, path: str) -> cst.Name | cst.Attribute:
-    """Create a LibCST Name/Attribute chain from a dot-separated string.
+  @staticmethod
+  def create_dotted_name(path: str) -> cst.Name | cst.Attribute:
+    """Construct a LibCST ``Name`` or ``Attribute`` chain from a dot-separated path.
 
     Args:
-        path: The python path string (e.g. "torch.nn.Conv2d").
+        path: Dotted Python identifier path (e.g. ``'torch.nn.Conv2d'``).
 
     Returns:
-        A CST expression node representing the name.
-
+        Constructed ``cst.Name`` or ``cst.Attribute`` expression.
     """
     if not path:
       return cst.Name("unknown")
@@ -46,3 +47,6 @@ class BaseGeneratorMixin:
     for p in parts[1:]:
       node = cst.Attribute(value=node, attr=cst.Name(p))
     return node
+
+
+__all__ = ["MlirGenHelpers"]

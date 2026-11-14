@@ -21,7 +21,6 @@ def generate_imports(framework: str) -> list[cst.SimpleStatementLine]:
   stmt_strs = adapter.structural_traits.default_imports if adapter else []
   out: list[cst.SimpleStatementLine] = []
   for s in stmt_strs:
-    stmt = cst.parse_statement(s)
-    assert isinstance(stmt, cst.SimpleStatementLine)
+    stmt = cst.ensure_type(cst.parse_statement(s), cst.SimpleStatementLine)
     out.append(stmt)
   return out

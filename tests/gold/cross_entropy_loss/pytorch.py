@@ -8,8 +8,8 @@ def compute_loss(logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
   """Computes loss.
 
   Args:
-      logits: The logits (torch.Tensor) for compute loss.
-      targets: The targets (torch.Tensor) for compute loss.
+      logits: Input `logits` parameter value (`torch.Tensor`).
+      targets: Input `targets` parameter value (`torch.Tensor`).
 
   Returns:
       Resulting `torch.Tensor` from compute loss.

@@ -19,6 +19,9 @@ from pydantic import JsonValue
 from ml_switcheroo.core.mlir.cst import OperationNode
 from ml_switcheroo.utils.console import log_error, log_info
 
+if typing.TYPE_CHECKING:
+  from markdown_it.token import Token
+
 OpDraftVal: typing.TypeAlias = list[str] | str | list[tuple[str, str]] | OperationNode
 
 
@@ -41,6 +44,45 @@ class StableHloSpecImporter:
     log_info(f"Parsing StableHLO Spec: {target_file.name}...")
     return self._parse_markdown(target_file)
 
+  @staticmethod
+  def _extract_h3_raw_op_name(inline_token: "Token") -> str | None:
+    """Extract snake_case operator name from a StableHLO ``<h3>`` inline token.
+
+    Args:
+        inline_token: ``markdown_it`` inline token following ``<h3>``.
+
+    Returns:
+        Raw snake_case operator identifier if matched, otherwise ``None``.
+    """
+    if inline_token.children and len(inline_token.children) >= 1:
+      child = inline_token.children[0]
+      if child.type in ("code_inline", "text") and re.match(r"^[a-z0-9_]+$", child.content.strip()):
+        return child.content.strip()
+    return None
+
+  @staticmethod
+  def _parse_syntax_fence(fence_token: "Token", current_def: dict[str, OpDraftVal]) -> None:
+    """Populate ``raw_syntax`` and ``parsed_op`` on ``current_def`` from a Markdown code fence.
+
+    Args:
+        fence_token: ``markdown_it`` fence token.
+        current_def: Mutable draft definition dictionary for the active operator.
+    """
+    if "mlir" not in fence_token.info.lower() and "stablehlo" not in fence_token.content:
+      return
+    from ml_switcheroo.core.mlir.parser import MlirParser
+
+    for line in fence_token.content.splitlines():
+      if "stablehlo." in line:
+        stripped = line.strip()
+        try:
+          module = MlirParser(stripped).parse()
+          if module.body.operations:
+            current_def["raw_syntax"] = stripped
+            current_def["parsed_op"] = module.body.operations[0]
+        except (ValueError, TypeError, KeyError, IndexError, RuntimeError):
+          current_def["raw_syntax"] = stripped
+
   def _parse_markdown(self, fpath: Path) -> dict[str, dict[str, JsonValue]]:
     """Parse markdown structures directly into semantic definitions.
 
@@ -52,10 +94,7 @@ class StableHloSpecImporter:
     """
     from markdown_it import MarkdownIt
 
-    content = fpath.read_text(encoding="utf-8")
-    md = MarkdownIt()
-    tokens = md.parse(content)
-
+    tokens = MarkdownIt().parse(fpath.read_text(encoding="utf-8"))
     semantics: dict[str, dict[str, JsonValue]] = {}
     current_op: str | None = None
     current_def: dict[str, OpDraftVal] = {}
@@ -63,38 +102,19 @@ class StableHloSpecImporter:
     for i, token in enumerate(tokens):
       if token.type == "heading_open" and token.tag == "h3":
         if i + 1 < len(tokens) and tokens[i + 1].type == "inline":
-          inline = tokens[i + 1]
-          if inline.children and len(inline.children) >= 1:
-            child = inline.children[0]
-            if child.type in ("code_inline", "text") and re.match(r"^[a-z0-9_]+$", child.content.strip()):
-              raw_name = child.content.strip()
-              if current_op and current_def:
-                self._finalize_op(semantics, current_op, current_def)
-              current_op = self._normalize_op_name(raw_name)
-              current_def = {"description": [], "raw_syntax": "", "std_args": []}
+          raw_name = self._extract_h3_raw_op_name(tokens[i + 1])
+          if raw_name is not None:
+            if current_op and current_def:
+              self._finalize_op(semantics, current_op, current_def)
+            current_op = self._normalize_op_name(raw_name)
+            current_def = {"description": [], "raw_syntax": "", "std_args": []}
       elif current_op:
-        if token.type == "paragraph_open":
-          if i + 1 < len(tokens) and tokens[i + 1].type == "inline":
-            desc_list = current_def.get("description")
-            if isinstance(desc_list, list) and not desc_list:
-              current_def["description"] = [tokens[i + 1].content]
+        if token.type == "paragraph_open" and i + 1 < len(tokens) and tokens[i + 1].type == "inline":
+          desc_list = current_def.get("description")
+          if isinstance(desc_list, list) and not desc_list:
+            current_def["description"] = [tokens[i + 1].content]
         elif token.type == "fence":
-          # Syntax Block
-          if "mlir" in token.info.lower() or "stablehlo" in token.content:
-            from ml_switcheroo.core.mlir.parser import MlirParser
-
-            for line in token.content.splitlines():
-              if "stablehlo." in line:
-                try:
-                  parser = MlirParser(line.strip())
-                  module = parser.parse()
-                  if module.body.operations:
-                    parsed_op = module.body.operations[0]
-                    current_def["raw_syntax"] = line.strip()
-                    current_def["parsed_op"] = parsed_op
-                except Exception:
-                  # Fallback to saving raw string if parse fails
-                  current_def["raw_syntax"] = line.strip()
+          self._parse_syntax_fence(token, current_def)
 
     if current_op and current_def:
       self._finalize_op(semantics, current_op, current_def)

@@ -5,7 +5,7 @@ import numpy.typing
 
 
 class MaxPoolModel:
-  """Test helper class MaxPoolModel."""
+  """Sentinel `MaxPoolModel` fixture class used in numpy tests."""
 
   def __init__(self, kernel_size: int = 2, stride: int = 2):
     """Initializes the MaxPoolModel instance.

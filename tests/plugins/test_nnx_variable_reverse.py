@@ -1,9 +1,6 @@
 """Test suite for the Nnx Variable Reverse module."""
 
-from tests.conftest import _test_getattr, _test_setattr
-
 import typing
-
 from unittest.mock import MagicMock
 
 import libcst as _cst
@@ -38,8 +35,8 @@ def rewriter() -> typing.Iterator[PivotRewriter]:
   Yields:
       PivotRewriter: A mock rewriter instance.
   """
-  _test_getattr(hooks._HOOKS, "__setitem__")("nnx_param_to_torch", transform_nnx_param)
-  hooks._PLUGINS_LOADED = True
+  hooks.register_hook("nnx_param_to_torch")(transform_nnx_param)
+  hooks.set_plugins_loaded(True)
   mgr = MagicMock()
   op_def = {
     "variants": {
@@ -51,20 +48,23 @@ def rewriter() -> typing.Iterator[PivotRewriter]:
   mgr.resolve_variant.side_effect = lambda aid, fw: op_def["variants"].get(fw)
   mgr.get_framework_config.return_value = {}
 
+  from ml_switcheroo.frameworks.base import get_default_adapter_registry
+
   @register_framework("custom_fw")
   class CustomFW:
-    """Test helper class CustomFW."""
+    """Sentinel `CustomFW` fixture class used in NNX variable reverse tests."""
 
-    pass
-
-  cfg = RuntimeConfig(source_framework="jax", target_framework="custom_fw")
-  rw = PivotRewriter(mgr, cfg)
-  rw.ctx.current_op_id = "Param"
-  yield rw
+  try:
+    cfg = RuntimeConfig(source_framework="jax", target_framework="custom_fw")
+    rw = PivotRewriter(mgr, cfg)
+    rw.ctx.current_op_id = "Param"
+    yield rw
+  finally:
+    get_default_adapter_registry().adapters.pop("custom_fw", None)
 
 
 def test_param_conversion_custom(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of parameter conversion custom.
+  """Verify `rewrite_code` emits `custom.Parameter(x)` for param conversion custom.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
@@ -74,7 +74,7 @@ def test_param_conversion_custom(rewriter: PivotRewriter) -> None:
 
 
 def test_batch_stat_conversion_custom(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of batch statistic conversion custom.
+  """Verify `rewrite_code` emits `custom.Parameter(z` for batch stat conversion custom.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
@@ -84,16 +84,19 @@ def test_batch_stat_conversion_custom(rewriter: PivotRewriter) -> None:
   assert "requires_grad=False" in res
 
 
-def test_fallback_defaults(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of fallback defaults.
+def test_fallback_defaults(rewriter: PivotRewriter, monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `ensure_type` emits `nnx.Param(x)` for fallback defaults.
 
   Args:
       rewriter (PivotRewriter): The rewriter instance.
+      monkeypatch: Pytest monkeypatch fixture.
   """
   code = "w = nnx.Param(x)"
   module = cst.parse_module(code)
-  call_node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
-  _test_setattr(rewriter.ctx, "lookup_api", MagicMock(return_value=None))
+  stmt = cst.ensure_type(module.body[0], cst.SimpleStatementLine)
+  assign = cst.ensure_type(stmt.body[0], cst.Assign)
+  call_node = cst.ensure_type(assign.value, cst.Call)
+  monkeypatch.setattr(rewriter.ctx, "lookup_api", MagicMock(return_value=None), raising=False)
   res_node = transform_nnx_param(call_node, rewriter.ctx)
   res_code = cst.Module(body=[cst.SimpleStatementLine([cst.Expr(res_node)])]).code
   assert "nnx.Param(x)" in res_code
@@ -117,6 +120,9 @@ def test_param_conversion_unsupported_func(rewriter: PivotRewriter) -> None:
       rewriter (PivotRewriter): The rewriter instance.
   """
   code = "w = func_list[0](x)"
-  call_node = cst.ensure_type(_test_getattr(_test_getattr(cst.parse_module(code).body[0], "body")[0], "value"), cst.Call)
+  stmt = cst.ensure_type(cst.parse_module(code).body[0], cst.SimpleStatementLine)
+  assign = cst.ensure_type(stmt.body[0], cst.Assign)
+  call_node = cst.ensure_type(assign.value, cst.Call)
   res = transform_nnx_param(call_node, rewriter.ctx)
   assert isinstance(res, cst.Call)
+  assert cst.Module([]).code_for_node(res) == "custom.Parameter(x)"

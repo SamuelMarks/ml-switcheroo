@@ -46,10 +46,9 @@ def transform_gather(node: cst.Call, ctx: HookContext) -> cst.Call:
   # If called as function `torch.gather(x, ...)`, input is arg 0.
 
   is_method_call = False
-  if isinstance(node.func, cst.Attribute):
-    # Distinguish x.gather vs torch.gather using centralized util
-    if not is_framework_module_node(node.func.value, ctx):
-      is_method_call = True
+  # Distinguish x.gather vs torch.gather using centralized util
+  if isinstance(node.func, cst.Attribute) and not is_framework_module_node(node.func.value, ctx):
+    is_method_call = True
 
   # Placeholders
   input_arg = None

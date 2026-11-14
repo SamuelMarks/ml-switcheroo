@@ -1,15 +1,12 @@
 """Test suite for the Harness Generator Missing module."""
 
-from tests.conftest import _test_getattr, _test_hasattr
-
 import types
-
-
 from pathlib import Path
+from typing import ClassVar
 
 
 def test_harness_generate_template(tmp_path: Path) -> None:
-  """Verifies the behavior of harness generate template.
+  """Verify `HarnessGenerator` handles harness generate template as expected.
 
   Args:
       tmp_path: Pytest temporary directory fixture.
@@ -32,8 +29,9 @@ def test_harness_generate_template(tmp_path: Path) -> None:
 
 
 def test_harness_adapter_shim_exceptions() -> None:
-  """Verifies the behavior of harness adapter shim exceptions."""
+  """Verify `HarnessGenerator` handles harness adapter shim exceptions as expected."""
   from unittest import mock
+
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
   hg = HarnessGenerator()
@@ -42,7 +40,7 @@ def test_harness_adapter_shim_exceptions() -> None:
     assert res == ("", "", "pass")
 
   class MockAdapter:
-    """Test helper class MockAdapter."""
+    """Test double `MockAdapter` implementing `get_to_numpy_code` for harness generator tests."""
 
     def get_to_numpy_code(self) -> str:
       """Mock implementation of get to NumPy code.
@@ -61,33 +59,36 @@ def test_harness_adapter_shim_exceptions() -> None:
 
 
 def test_harness_extractor_oserror() -> None:
-  """Verify harness extractor oserror behavior."""
+  """Verify `HarnessGenerator` raises `OSError` during harness extractor oserror."""
+  from unittest import mock
+
   import pytest
 
-  from unittest import mock
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
   hg = HarnessGenerator()
-  with mock.patch("ml_switcheroo.utils.code_extractor.CodeExtractor.extract_class", side_effect=OSError("fail")):
-    with pytest.raises(OSError, match="fail"):
-      hg._bundle_fuzzer_dependencies()
+  with (
+    mock.patch("ml_switcheroo.utils.code_extractor.CodeExtractor.extract_class", side_effect=OSError("fail")),
+    pytest.raises(OSError, match="fail"),
+  ):
+    hg._bundle_fuzzer_dependencies()
 
 
 def test_harness_extract_module_functions_oserror() -> None:
-  """Verify harness extract module functions oserror behavior."""
+  """Verify `HarnessGenerator` handles harness extract module functions oserror as expected."""
   import inspect
-
   from unittest import mock
+
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
   hg = HarnessGenerator()
   original_getsource = inspect.getsource
 
   def mock_getsource(obj: type | types.FunctionType | types.MethodType) -> str:
-    """Execute mock getsource helper logic.
+    """Execute `inspect.isfunction` to support mock getsource in harness generator tests.
 
     Args:
-        obj: The obj (type | types.FunctionType | types.MethodType) for mock getsource.
+        obj: Input `obj` parameter value (`type | types.FunctionType | types.MethodType`).
 
     Returns:
         Resulting `str` from mock getsource.
@@ -99,10 +100,13 @@ def test_harness_extract_module_functions_oserror() -> None:
   with mock.patch("inspect.getsource", side_effect=mock_getsource):
     res = hg._bundle_fuzzer_dependencies()
   assert isinstance(res, str)
+  assert "class InputFuzzer" in res
+  assert "class TypeAnnotationParser" in res
+  assert "def strategies_from_spec(" not in res
 
 
 def test_harness_build_result_normalization_flax() -> None:
-  """Verifies the behavior of harness build result normalization Flax."""
+  """Verify `HarnessGenerator` handles harness build result normalization flax as expected."""
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
   hg = HarnessGenerator()
@@ -111,63 +115,69 @@ def test_harness_build_result_normalization_flax() -> None:
 
 
 def test_harness_generate_adapter_shim_oserror() -> None:
-  """Verifies the behavior of harness generate adapter shim oserror."""
+  """Verify `HarnessGenerator` handles harness generate adapter shim oserror as expected."""
   import inspect
-
   from unittest import mock
+
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
   hg = HarnessGenerator()
   original_getsource = inspect.getsource
 
   def mock_getsource(obj: type | types.FunctionType | types.MethodType) -> str:
-    """Execute mock getsource helper logic.
+    """Execute `original_getsource` to support mock getsource in harness generator tests.
 
     Args:
-        obj: The obj (type | types.FunctionType | types.MethodType) for mock getsource.
+        obj: Input `obj` parameter value (`type | types.FunctionType | types.MethodType`).
 
     Returns:
         Resulting `str` from mock getsource.
     """
-    if _test_hasattr(obj, "__name__") and _test_getattr(obj, "__name__") == "convert":
+    if obj.__name__ == "convert":
       raise OSError("fail")
     return original_getsource(obj)
 
   with mock.patch("inspect.getsource", side_effect=mock_getsource):
     res = hg._generate_adapter_shim()
   assert isinstance(res, str)
+  assert "def get_adapter(framework: str)" in res
+  assert "class GenericAdapter:" in res
+  assert "return GenericAdapter()" in res
+  assert "framework ==" not in res
 
 
 def test_harness_generate_adapter_shim_no_convert() -> None:
-  """Verifies the behavior of harness generate adapter shim no convert."""
-  from ml_switcheroo.frameworks.base import _ADAPTER_REGISTRY
+  """Verify `get_default_adapter_registry` handles harness generate adapter shim no convert as expected."""
+  from unittest import mock
+
+  from ml_switcheroo.frameworks.base import get_default_adapter_registry
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
-  class NoConvertAdapter:
-    """Test helper class NoConvertAdapter."""
-
-    pass
-
-  _test_getattr(_ADAPTER_REGISTRY, "__setitem__")("fake_fw", NoConvertAdapter)
+  no_convert_cls = mock.MagicMock(spec=[])
+  reg = get_default_adapter_registry()
+  reg.adapters["fake_fw"] = no_convert_cls
   try:
     hg = HarnessGenerator()
     res = hg._generate_adapter_shim()
   finally:
-    del _ADAPTER_REGISTRY["fake_fw"]
+    del reg.adapters["fake_fw"]
   assert isinstance(res, str)
+  assert "def get_adapter(framework: str)" in res
+  assert "return GenericAdapter()" in res
+  assert "framework == 'fake_fw'" not in res
 
 
 def test_harness_build_dynamic_init_with_magic_args() -> None:
-  """Verify harness build dynamic init with magic args behavior."""
+  """Verify `HarnessGenerator` handles harness build dynamic init with magic args as expected."""
   import unittest.mock as mock
 
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
   class MockAdapter:
-    """Test helper class MockAdapter."""
+    """Test double `MockAdapter` implementing `get_harness_init_code` for harness generator tests."""
 
-    harness_imports = ["import something"]
-    declared_magic_args = ["my_magic_arg"]
+    harness_imports: ClassVar[list[str]] = ["import something"]
+    declared_magic_args: ClassVar[list[str]] = ["my_magic_arg"]
 
     def get_harness_init_code(self) -> str:
       """Get harness init code.
@@ -178,34 +188,38 @@ def test_harness_build_dynamic_init_with_magic_args() -> None:
       return "def my_helper(): pass"
 
   hg = HarnessGenerator()
-  with mock.patch("ml_switcheroo.testing.harness_generator.get_adapter", return_value=MockAdapter()):
-    with mock.patch(
+  with (
+    mock.patch("ml_switcheroo.testing.harness_generator.get_adapter", return_value=MockAdapter()),
+    mock.patch(
       "ml_switcheroo.testing.signature_extractor.SignatureExtractor.extract_first_function_name", return_value="my_helper"
-    ):
-      imports_str, init_code, final_logic = hg._build_dynamic_init("mock_fw")
-      assert "import something" in imports_str
-      assert "my_helper" in init_code
-      assert "tgt_inputs[tp] = val" in final_logic
-      assert "val = None" in final_logic
+    ),
+  ):
+    imports_str, init_code, final_logic = hg._build_dynamic_init("mock_fw")
+    assert "import something" in imports_str
+    assert "my_helper" in init_code
+    assert "tgt_inputs[tp] = val" in final_logic
+    assert "val = None" in final_logic
 
 
 def test_harness_injector_leave_module() -> None:
-  """Verify harness injector leave module behavior."""
+  """Verify `HarnessInjector` emits `import sys` for harness injector leave module."""
   import libcst as cst
 
-  from ml_switcheroo.testing.harness_generator import HarnessInjector
+  from ml_switcheroo.testing.harness_generator import HarnessConfig, HarnessInjector
 
   injector = HarnessInjector(
-    imports_block="import sys\n",
-    init_helpers_block="def helper(): pass\n",
-    fuzzer_block="",
-    to_numpy_block="",
-    injection_block="",
-    source_framework="jax",
-    target_framework="torch",
-    source_path="in.py",
-    target_path="out.py",
-    hints_json="{}",
+    HarnessConfig(
+      imports_block="import sys\n",
+      init_helpers_block="def helper(): pass\n",
+      fuzzer_block="",
+      to_numpy_block="",
+      injection_block="",
+      source_framework="jax",
+      target_framework="torch",
+      source_path="in.py",
+      target_path="out.py",
+      hints_json="{}",
+    )
   )
   module_code = "def to_numpy(): pass\n"
   module = cst.parse_module(module_code)
@@ -216,22 +230,24 @@ def test_harness_injector_leave_module() -> None:
 
 
 def test_harness_injector_leave_functiondef_no_block() -> None:
-  """Verify harness injector leave functiondef no block behavior."""
+  """Verify `HarnessInjector` handles harness injector leave functiondef no block as expected."""
   import libcst as cst
 
-  from ml_switcheroo.testing.harness_generator import HarnessInjector
+  from ml_switcheroo.testing.harness_generator import HarnessConfig, HarnessInjector
 
   injector = HarnessInjector(
-    imports_block="",
-    init_helpers_block="",
-    fuzzer_block="",
-    to_numpy_block="   ",
-    injection_block="",
-    source_framework="jax",
-    target_framework="torch",
-    source_path="in.py",
-    target_path="out.py",
-    hints_json="{}",
+    HarnessConfig(
+      imports_block="",
+      init_helpers_block="",
+      fuzzer_block="",
+      to_numpy_block="   ",
+      injection_block="",
+      source_framework="jax",
+      target_framework="torch",
+      source_path="in.py",
+      target_path="out.py",
+      hints_json="{}",
+    )
   )
   module_code = "def to_numpy(): pass\n"
   module = cst.parse_module(module_code)
@@ -240,22 +256,24 @@ def test_harness_injector_leave_functiondef_no_block() -> None:
 
 
 def test_harness_injector_leave_if_with_injection() -> None:
-  """Verify harness injector leave if with injection behavior."""
+  """Verify `HarnessInjector` handles harness injector leave if with injection as expected."""
   import libcst as cst
 
-  from ml_switcheroo.testing.harness_generator import HarnessInjector
+  from ml_switcheroo.testing.harness_generator import HarnessConfig, HarnessInjector
 
   injector = HarnessInjector(
-    imports_block="",
-    init_helpers_block="",
-    fuzzer_block="",
-    to_numpy_block="",
-    injection_block="tgt_inputs[tp] = 42\n",
-    source_framework="jax",
-    target_framework="torch",
-    source_path="in.py",
-    target_path="out.py",
-    hints_json="{}",
+    HarnessConfig(
+      imports_block="",
+      init_helpers_block="",
+      fuzzer_block="",
+      to_numpy_block="",
+      injection_block="tgt_inputs[tp] = 42\n",
+      source_framework="jax",
+      target_framework="torch",
+      source_path="in.py",
+      target_path="out.py",
+      hints_json="{}",
+    )
   )
   module_code = "if tp not in tgt_inputs:\n    pass\n"
   module = cst.parse_module(module_code)

@@ -6,25 +6,33 @@ string representation via a ``to_text()`` method, allowing for precise control
 over formatting (whitespace, indentation) during code generation.
 """
 
-from abc import ABC
 import typing
+from abc import ABC
 
 import pydantic
 
-from ml_switcheroo.core.cst.base import CstFieldValue
+from ml_switcheroo.core.cst.base import CstFieldValue, TriviaInput
 from ml_switcheroo.core.markup.cst import MarkupNode
+from ml_switcheroo.core.markup.cst import TriviaNode as MarkupTriviaNode
 
 
 class TikzBaseNode(MarkupNode, ABC):
   """Abstract base class for all TikZ CST nodes."""
 
-  def __init__(self, **kwargs: CstFieldValue) -> None:
+  def __init__(
+    self,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
+    **kwargs: CstFieldValue,
+  ) -> None:
     """Initialize TikzBaseNode.
 
     Args:
+        leading_trivia: Optional leading trivia preceding this node.
+        trailing_trivia: Optional trailing trivia following this node.
         **kwargs: Subclass field values forwarded to MarkupNode.
     """
-    super().__init__(**kwargs)
+    super().__init__(leading_trivia=leading_trivia, trailing_trivia=trailing_trivia, **kwargs)
 
   def emit(self, indent_level: int = 0) -> str:
     """Render this node to its string representation with indentation.
@@ -46,21 +54,15 @@ class TikzBaseNode(MarkupNode, ABC):
     return self.emit(0)
 
 
-class TriviaNode(TikzBaseNode):
+class TriviaNode(MarkupTriviaNode, TikzBaseNode):
   """Represent non-semantic textual elements (whitespace, newlines, comments)."""
-
-  content: str = ""
-  """Execute raw text content."""
-
-  kind: str = "whitespace"
-  """Either 'whitespace' or 'comment'."""
 
   def __init__(
     self,
     content: str = "",
     kind: str = "whitespace",
-    leading_trivia: typing.Sequence["TriviaNode"] | None = None,
-    trailing_trivia: typing.Sequence["TriviaNode"] | None = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize TriviaNode.
 
@@ -70,18 +72,12 @@ class TriviaNode(TikzBaseNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(content=content, kind=kind)
-
-  def emit(self, indent_level: int = 0) -> str:
-    """Return the raw whitespace/comment content verbatim.
-
-    Args:
-        indent_level: Current indentation depth.
-
-    Returns:
-        str: The raw trivia content.
-    """
-    return self.content
+    super().__init__(
+      content=content,
+      kind=kind,
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
+    )
 
 
 class TikzOption(TikzBaseNode):
@@ -97,8 +93,8 @@ class TikzOption(TikzBaseNode):
     self,
     key: str = "",
     value: str | None = None,
-    leading_trivia: typing.Sequence[TriviaNode] | None = None,
-    trailing_trivia: typing.Sequence[TriviaNode] | None = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize TikzOption.
 
@@ -108,7 +104,7 @@ class TikzOption(TikzBaseNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(key=key, value=value)
+    super().__init__(key=key, value=value, leading_trivia=leading_trivia, trailing_trivia=trailing_trivia)
 
   def emit(self, indent_level: int = 0) -> str:
     """Return ``key=value`` or just ``key``.
@@ -141,8 +137,8 @@ class TikzTextNode(TikzBaseNode):
     content: str = "",
     bold: bool = False,
     italic: bool = False,
-    leading_trivia: typing.Sequence[TriviaNode] | None = None,
-    trailing_trivia: typing.Sequence[TriviaNode] | None = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize TikzTextNode.
 
@@ -153,7 +149,13 @@ class TikzTextNode(TikzBaseNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(content=content, bold=bold, italic=italic)
+    super().__init__(
+      content=content,
+      bold=bold,
+      italic=italic,
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
+    )
 
   def emit(self, indent_level: int = 0) -> str:
     """Emit the text node with styling.
@@ -194,18 +196,12 @@ class TikzTable(TikzBaseNode):
   align: str = "c"
   """Column alignment (c=center, l=left, r=right)."""
 
-  leading_trivia: list[TriviaNode] = pydantic.Field(default_factory=list)
-  """Trivia elements appearing before the table environment."""
-
-  trailing_trivia: list[TriviaNode] = pydantic.Field(default_factory=list)
-  """Trivia elements appearing after the table environment."""
-
   def __init__(
     self,
     rows: typing.Sequence[typing.Sequence[TikzCellItem]] | None = None,
     align: str = "c",
-    leading_trivia: typing.Sequence[TriviaNode] | None = None,
-    trailing_trivia: typing.Sequence[TriviaNode] | None = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize TikzTable.
 
@@ -218,8 +214,8 @@ class TikzTable(TikzBaseNode):
     super().__init__(
       rows=[list(r) for r in rows] if rows is not None else [],
       align=align,
-      leading_trivia=list(leading_trivia) if leading_trivia is not None else [],
-      trailing_trivia=list(trailing_trivia) if trailing_trivia is not None else [],
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
     )
 
   def emit(self, indent_level: int = 0) -> str:
@@ -232,22 +228,17 @@ class TikzTable(TikzBaseNode):
         str: The formatted LaTeX tabular string.
     """
     # We ignore indent_level for pure roundtripping if trivia exists, but it's kept for API compatibility.
-    parts = []
-    for t in self.leading_trivia:
-      parts.append(t.emit())
+    parts = [self.leading_trivia_text()]
 
     parts.append(f"\\begin{{tabular}}{{{self.align}}}")
     # For now, to keep it simple, we just format the rows standardly
     # In a full CST this would also have row trivia.
     for row in self.rows:
-      emitted_row = []
-      for cell in row:
-        emitted_row.append(cell.emit() if isinstance(cell, TikzBaseNode) else str(cell))
+      emitted_row = [cell.emit() if isinstance(cell, TikzBaseNode) else str(cell) for cell in row]
       parts.append(" & ".join(emitted_row) + r" \\")
     parts.append(r"\end{tabular}")
 
-    for t in self.trailing_trivia:
-      parts.append(t.emit())
+    parts.append(self.trailing_trivia_text())
     return "".join(parts)
 
 
@@ -274,12 +265,6 @@ class TikzNode(TikzBaseNode):
   options: list[TikzOption] = pydantic.Field(default_factory=list)
   """List of TikZ options."""
 
-  leading_trivia: list[TriviaNode] = pydantic.Field(default_factory=list)
-  """Whitespace/Comments before the node command."""
-
-  trailing_trivia: list[TriviaNode] = pydantic.Field(default_factory=list)
-  """Whitespace/Comments after the node command."""
-
   def __init__(
     self,
     node_id: str = "",
@@ -287,8 +272,8 @@ class TikzNode(TikzBaseNode):
     y: int | float = 0,
     content: TikzBaseNode | str = "",
     options: typing.Sequence[TikzOption] | None = None,
-    leading_trivia: typing.Sequence[TriviaNode] | None = None,
-    trailing_trivia: typing.Sequence[TriviaNode] | None = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize TikzNode.
 
@@ -307,8 +292,8 @@ class TikzNode(TikzBaseNode):
       y=y,
       content=content,
       options=list(options) if options is not None else [],
-      leading_trivia=list(leading_trivia) if leading_trivia is not None else [],
-      trailing_trivia=list(trailing_trivia) if trailing_trivia is not None else [],
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
     )
 
   def emit(self, indent_level: int = 0) -> str:
@@ -320,11 +305,7 @@ class TikzNode(TikzBaseNode):
     Returns:
         str: The full LaTeX/TikZ node command.
     """
-    parts = []
-    for t in self.leading_trivia:
-      parts.append(t.emit())
-
-    parts.append(r"\node")
+    parts = [self.leading_trivia_text(), r"\node"]
 
     if self.options:
       opts_str = ", ".join([o.emit() for o in self.options])
@@ -339,8 +320,7 @@ class TikzNode(TikzBaseNode):
     parts.append(content_str)
     parts.append("};")
 
-    for t in self.trailing_trivia:
-      parts.append(t.emit())
+    parts.append(self.trailing_trivia_text())
     return "".join(parts)
 
 
@@ -364,20 +344,14 @@ class TikzEdge(TikzBaseNode):
   connector: str = "--"
   """Connector style (e.g. ``--`` or ``->``)."""
 
-  leading_trivia: list[TriviaNode] = pydantic.Field(default_factory=list)
-  """Whitespace before the draw command."""
-
-  trailing_trivia: list[TriviaNode] = pydantic.Field(default_factory=list)
-  """Whitespace/Comments after the draw command."""
-
   def __init__(
     self,
     source_id: str = "",
     target_id: str = "",
     options: typing.Sequence[TikzOption] | None = None,
     connector: str = "--",
-    leading_trivia: typing.Sequence[TriviaNode] | None = None,
-    trailing_trivia: typing.Sequence[TriviaNode] | None = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize TikzEdge.
 
@@ -394,8 +368,8 @@ class TikzEdge(TikzBaseNode):
       target_id=target_id,
       options=list(options) if options is not None else [],
       connector=connector,
-      leading_trivia=list(leading_trivia) if leading_trivia is not None else [],
-      trailing_trivia=list(trailing_trivia) if trailing_trivia is not None else [],
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
     )
 
   def emit(self, indent_level: int = 0) -> str:
@@ -407,11 +381,7 @@ class TikzEdge(TikzBaseNode):
     Returns:
         str: The full LaTeX/TikZ draw command.
     """
-    parts = []
-    for t in self.leading_trivia:
-      parts.append(t.emit())
-
-    parts.append(r"\draw")
+    parts = [self.leading_trivia_text(), r"\draw"]
 
     if self.options:
       opts_str = ", ".join([o.emit() for o in self.options])
@@ -421,8 +391,7 @@ class TikzEdge(TikzBaseNode):
     parts.append(f" {self.connector}")
     parts.append(f" ({self.target_id});")
 
-    for t in self.trailing_trivia:
-      parts.append(t.emit())
+    parts.append(self.trailing_trivia_text())
     return "".join(parts)
 
 
@@ -442,18 +411,12 @@ class TikzGraph(TikzBaseNode):
   options: list[TikzOption] = pydantic.Field(default_factory=list)
   """Global environment options."""
 
-  leading_trivia: list[TriviaNode] = pydantic.Field(default_factory=list)
-  """Whitespace/Comments before the tikzpicture environment."""
-
-  trailing_trivia: list[TriviaNode] = pydantic.Field(default_factory=list)
-  """Whitespace/Comments after the tikzpicture environment."""
-
   def __init__(
     self,
     children: typing.Sequence[TikzBaseNode] | None = None,
     options: typing.Sequence[TikzOption] | None = None,
-    leading_trivia: typing.Sequence[TriviaNode] | None = None,
-    trailing_trivia: typing.Sequence[TriviaNode] | None = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize TikzGraph.
 
@@ -466,8 +429,8 @@ class TikzGraph(TikzBaseNode):
     super().__init__(
       children=list(children) if children is not None else [],
       options=list(options) if options is not None else [],
-      leading_trivia=list(leading_trivia) if leading_trivia is not None else [],
-      trailing_trivia=list(trailing_trivia) if trailing_trivia is not None else [],
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
     )
 
   def emit(self, indent_level: int = 0) -> str:
@@ -479,9 +442,7 @@ class TikzGraph(TikzBaseNode):
     Returns:
         str: The complete formatted tikzpicture environment.
     """
-    parts = []
-    for t in self.leading_trivia:
-      parts.append(t.emit())
+    parts = [self.leading_trivia_text()]
 
     if self.options:
       opts_str = ", ".join([o.emit() for o in self.options])
@@ -489,11 +450,8 @@ class TikzGraph(TikzBaseNode):
     else:
       parts.append(r"\begin{tikzpicture}")
 
-    for child in self.children:
-      parts.append(child.emit(indent_level))
+    parts.extend(child.emit(indent_level) for child in self.children)
 
     parts.append(r"\end{tikzpicture}")
-
-    for t in self.trailing_trivia:
-      parts.append(t.emit())
+    parts.append(self.trailing_trivia_text())
     return "".join(parts)

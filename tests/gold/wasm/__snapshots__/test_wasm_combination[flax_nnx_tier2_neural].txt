@@ -1,0 +1,23 @@
+--- Forward ---
+from flax import nnx
+import numpy as np
+
+class Net(nnx.Module):
+    def __init__(self):
+        self.linear = nnx.Linear(10, 10, rngs=rngs)
+
+    def __call__(self, x):
+        x = self.linear(x)
+        return nnx.relu(x)
+
+--- Backward ---
+from flax import nnx
+import jax.numpy as jnp
+
+class Net(nnx.Module):
+    def __init__(self, rngs: nnx.Rngs):
+        self.linear = nnx.Linear(10, 10, rngs=rngs)
+
+    def __call__(self, x):
+        x = self.linear(x)
+        return nnx.relu(x, inplace=False)

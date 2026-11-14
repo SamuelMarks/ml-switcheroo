@@ -5,14 +5,14 @@ from flax import nnx
 
 
 class EmbeddingModel(nnx.Module):
-  """Test helper class EmbeddingModel."""
+  """Minimal `nnx.Module` test double used in flax NNX tests."""
 
   def __init__(self, num_embeddings: int, embedding_dim: int, rngs: nnx.Rngs):
     """Initializes the EmbeddingModel instance.
 
     Args:
-        num_embeddings: The num embeddings (int) for   init  .
-        embedding_dim: The embedding dim (int) for   init  .
+        num_embeddings: Input `num_embeddings` parameter value (`int`).
+        embedding_dim: Input `embedding_dim` parameter value (`int`).
         rngs: Flax NNX Rngs container for stochastic parameter initialization.
     """
     self.emb = nnx.Embed(num_embeddings, embedding_dim, rngs=rngs)

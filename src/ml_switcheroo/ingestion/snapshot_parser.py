@@ -208,12 +208,12 @@ def parse_snapshot_file(file_path: str | Path) -> FrameworkSnapshot:
     with open(path, "r", encoding="utf-8") as f:
       data = json.load(f)
   except json.JSONDecodeError as e:
-    raise ValueError(f"Failed to decode JSON from {path}: {e}")
+    raise ValueError(f"Failed to decode JSON from {path}: {e}") from e
 
   try:
     return FrameworkSnapshot(**data)
   except ValidationError as e:
-    raise ValueError(f"Snapshot data does not match expected schema: {e}")
+    raise ValueError(f"Snapshot data does not match expected schema: {e}") from e
 
 
 def parse_snapshot_string(json_data: str) -> FrameworkSnapshot:
@@ -231,9 +231,9 @@ def parse_snapshot_string(json_data: str) -> FrameworkSnapshot:
   try:
     data = json.loads(json_data)
   except json.JSONDecodeError as e:
-    raise ValueError(f"Failed to decode JSON string: {e}")
+    raise ValueError(f"Failed to decode JSON string: {e}") from e
 
   try:
     return FrameworkSnapshot(**data)
   except ValidationError as e:
-    raise ValueError(f"Snapshot data does not match expected schema: {e}")
+    raise ValueError(f"Snapshot data does not match expected schema: {e}") from e

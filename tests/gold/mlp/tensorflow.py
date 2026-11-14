@@ -4,14 +4,14 @@ import tensorflow as tf
 
 
 class MLP:
-  """Test helper class MLP."""
+  """Test double `MLP` implementing `call` for tensorflow tests."""
 
   def __init__(self, in_features: int, hidden_features: int, out_features: int):
     """Initializes the MLP instance.
 
     Args:
         in_features: Number of input linear features.
-        hidden_features: The hidden features (int) for   init  .
+        hidden_features: Input `hidden_features` parameter value (`int`).
         out_features: Number of output linear features.
     """
     super().__init__()
@@ -19,7 +19,7 @@ class MLP:
     self.fc2 = tf.keras.layers.Dense(out_features)
 
   def call(self, x: tf.Tensor) -> tf.Tensor:
-    """Helper to call.
+    """Execute `fc1` to support call in tensorflow tests.
 
     Args:
         x: Primary input tensor or array operand.
@@ -29,5 +29,4 @@ class MLP:
     """
     x = self.fc1(x)
     x = tf.nn.relu(x)
-    x = self.fc2(x)
-    return x
+    return self.fc2(x)

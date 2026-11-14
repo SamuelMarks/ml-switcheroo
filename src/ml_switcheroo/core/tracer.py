@@ -11,7 +11,10 @@ of the transpiler. It captures:
 The output is a structured list of Event Log dictionaries suitable for JSON serialization.
 """
 
+import contextlib
+import contextvars
 import time
+import typing
 import uuid
 from enum import Enum
 
@@ -247,16 +250,40 @@ class TraceLogger:
     return [e.model_dump() for e in self._events]
 
 
-# Global/Contextual instance for ease of access in deep mixins
+# Global fallback instance when no execution-scoped tracer is bound
 _GLOBAL_TRACER = TraceLogger()
+_ACTIVE_TRACER: contextvars.ContextVar[TraceLogger | None] = contextvars.ContextVar(
+  "ml_switcheroo_active_tracer",
+  default=None,
+)
+
+
+@contextlib.contextmanager
+def bind_tracer(tracer: TraceLogger) -> typing.Iterator[TraceLogger]:
+  """Bind ``tracer`` as the active execution-scoped tracer for the current context.
+
+  Args:
+      tracer: Scoped ``TraceLogger`` instance to activate.
+
+  Yields:
+      The bound ``TraceLogger`` instance.
+  """
+  token = _ACTIVE_TRACER.set(tracer)
+  try:
+    yield tracer
+  finally:
+    _ACTIVE_TRACER.reset(token)
 
 
 def get_tracer() -> TraceLogger:
-  """Return the global singleton TraceLogger instance.
+  """Return the active execution-scoped ``TraceLogger``, falling back to the global tracer.
 
   Returns:
-      TraceLogger: The global singleton tracer instance.
+      TraceLogger: Active scoped tracer if bound, otherwise the fallback singleton tracer.
   """
+  scoped = _ACTIVE_TRACER.get()
+  if scoped is not None:
+    return scoped
   return _GLOBAL_TRACER
 
 

@@ -8,8 +8,8 @@ def compute_loss(logits: jnp.ndarray, targets: jnp.ndarray) -> jnp.ndarray:
   """Computes loss.
 
   Args:
-      logits: The logits (jnp.ndarray) for compute loss.
-      targets: The targets (jnp.ndarray) for compute loss.
+      logits: Input `logits` parameter value (`jnp.ndarray`).
+      targets: Input `targets` parameter value (`jnp.ndarray`).
 
   Returns:
       Resulting `jnp.ndarray` from compute loss.

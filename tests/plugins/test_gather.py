@@ -1,18 +1,16 @@
 """Test suite for the Gather module."""
 
-from tests.conftest import _test_getattr
-
 import typing
-from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
 import pytest
+from pydantic import JsonValue
 
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.hooks import HookContext
-from ml_switcheroo.frameworks.base import register_framework
+from ml_switcheroo.frameworks.base import StructuralTraits, register_framework
 from ml_switcheroo.plugins.gather import transform_gather
 from tests.conftest import TestRewriter as PivotRewriter
 
@@ -30,13 +28,21 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   return str(rewriter.convert(cst.parse_module(code)).code)
 
 
-@register_framework("custom_fw")
 class CustomAdapter:
-  """Test helper class CustomAdapter."""
+  """Test double `CustomAdapter` used in gather tests."""
+
+  @property
+  def structural_traits(self) -> StructuralTraits:
+    """Return default structural traits for `CustomAdapter`.
+
+    Returns:
+        Default `StructuralTraits` instance.
+    """
+    return StructuralTraits()
 
   @property
   def harness_imports(self) -> list[str]:
-    """Helper to harness imports.
+    """Return the `harness_imports` property from `CustomAdapter`.
 
     Returns:
         Resulting `list[str]` from harness imports.
@@ -61,7 +67,7 @@ class CustomAdapter:
 
   @property
   def declared_magic_args(self) -> list[str]:
-    """Helper to declared magic arguments.
+    """Return the `declared_magic_args` property from `CustomAdapter`.
 
     Returns:
         Resulting `list[str]` from declared magic args.
@@ -71,21 +77,25 @@ class CustomAdapter:
 
 @pytest.fixture
 def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
-  """Execute rewriter factory helper logic.
+  """Create a configured `rewriter_factory` fixture for gather tests.
 
   Returns:
       Configured `rewriter_factory` fixture value (typing.Callable[[str], PivotRewriter]).
   """
-  _test_getattr(
-    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
-  )("gather_adapter", _test_getattr({"v": transform_gather}, "__getitem__")("v"))
-  hooks._PLUGINS_LOADED = True
+  register_framework("custom_fw")(CustomAdapter)
+  hooks.register_hook("gather_adapter")(transform_gather)
+  hooks.set_plugins_loaded(True)
   mgr = MagicMock()
-  gather_def = {
+  variants_map: dict[str, dict[str, JsonValue]] = {
+    "torch": {"api": "torch.gather"},
+    "jax": {"api": "jnp.take_along_axis", "requires_plugin": "gather_adapter"},
+    "custom_fw": {"api": "custom.gather_nd", "requires_plugin": "gather_adapter"},
+  }
+  gather_def: dict[str, JsonValue] = {
     "variants": {
-      "torch": {"api": "torch.gather"},
-      "jax": {"api": "jnp.take_along_axis", "requires_plugin": "gather_adapter"},
-      "custom_fw": {"api": "custom.gather_nd", "requires_plugin": "gather_adapter"},
+      "torch": variants_map["torch"],
+      "jax": variants_map["jax"],
+      "custom_fw": variants_map["custom_fw"],
     }
   }
 
@@ -99,17 +109,13 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
         Resulting `tuple[str, dict[str, JsonValue]] | None` from get def.
     """
     if "gather" in name:
-      _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
-        {"v": (_test_getattr({"v": "Gather"}, "__getitem__")("v"), _test_getattr({"v": gather_def}, "__getitem__")("v"))},
-        "__getitem__",
-      )("v")
-      return _ret_v
+      return ("Gather", gather_def)
     return None
 
   mgr.get_definition.side_effect = get_def
 
   def resolve(aid: str, fw: str) -> dict[str, JsonValue] | None:
-    """Resolves .
+    """Execute `resolve` helper in gather tests.
 
     Args:
         aid: Abstract operation identifier string.
@@ -118,12 +124,8 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
     Returns:
         Resulting `dict[str, JsonValue] | None` from resolve.
     """
-    if aid == "Gather" and fw in gather_def["variants"]:
-      res = gather_def["variants"][fw]
-      _ret_v: dict[str, JsonValue] | None = _test_getattr(
-        {"v": res if isinstance(_test_getattr({"v": res}, "__getitem__")("v"), dict) else {}}, "__getitem__"
-      )("v")
-      return _ret_v
+    if aid == "Gather" and fw in variants_map:
+      return variants_map[fw]
     return None
 
   mgr.resolve_variant.side_effect = resolve
@@ -132,7 +134,7 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   mgr.framework_configs = {"torch": {}, "jax": {}, "custom_fw": {}}
 
   def create(target: str) -> PivotRewriter:
-    """Creates .
+    """Execute `RuntimeConfig` to support create in gather tests.
 
     Args:
         target: Target framework or dialect identifier string.
@@ -147,10 +149,10 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
 
 
 def test_gather_method_reorder_jax(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of gather method reorder JAX.
+  """Verify `rewriter_factory` emits `jnp.take_along_axis` for gather method reorder JAX.
 
   Args:
-      rewriter_factory: The rewriter factory (typing.Callable[[str], PivotRewriter]) for test gather method reorder jax.
+      rewriter_factory: Input `rewriter_factory` parameter value (`typing.Callable[[str], PivotRewriter]`).
   """
   rw: PivotRewriter = rewriter_factory("jax")
   code: str = "y = x.gather(1, indices)"
@@ -161,10 +163,10 @@ def test_gather_method_reorder_jax(rewriter_factory: typing.Callable[[str], Pivo
 
 
 def test_gather_missing_target_passthrough(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of gather missing target passthrough.
+  """Verify `rewriter_factory` handles gather missing target passthrough as expected.
 
   Args:
-      rewriter_factory: The rewriter factory (typing.Callable[[str], PivotRewriter]) for test gather missing target passthrough.
+      rewriter_factory: Input `rewriter_factory` parameter value (`typing.Callable[[str], PivotRewriter]`).
   """
   rw: PivotRewriter = rewriter_factory("numpy")
   rw.context.hook_context.target_framework = "numpy"
@@ -176,10 +178,10 @@ def test_gather_missing_target_passthrough(rewriter_factory: typing.Callable[[st
 
 
 def test_gather_custom_fw_transpilation(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of gather custom framework transpilation.
+  """Verify `rewriter_factory` emits `custom.gather_nd` for gather custom fw transpilation.
 
   Args:
-      rewriter_factory: The rewriter factory (typing.Callable[[str], PivotRewriter]) for test gather custom fw transpilation.
+      rewriter_factory: Input `rewriter_factory` parameter value (`typing.Callable[[str], PivotRewriter]`).
   """
   rw: PivotRewriter = rewriter_factory("custom_fw")
   code: str = "y = torch.gather(x, 1, idx)"
@@ -188,7 +190,7 @@ def test_gather_custom_fw_transpilation(rewriter_factory: typing.Callable[[str],
 
 
 def test_gather_no_target_api() -> None:
-  """Verifies the behavior of gather no target API."""
+  """Verify `Call` handles gather no target API as expected."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = None
   node = cst.Call(func=cst.Name("gather"))
@@ -197,7 +199,7 @@ def test_gather_no_target_api() -> None:
 
 
 def test_gather_kwargs() -> None:
-  """Verifies the behavior of gather keyword arguments."""
+  """Verify `Call` handles gather kwargs as expected."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "jax.numpy.take_along_axis"
   ctx.target_framework = "jax"
@@ -215,7 +217,7 @@ def test_gather_kwargs() -> None:
 
 
 def test_gather_missing_args() -> None:
-  """Verifies the behavior of gather missing arguments."""
+  """Verify `Call` handles gather missing args as expected."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "jax.numpy.take_along_axis"
   ctx.target_framework = "jax"

@@ -282,7 +282,7 @@ def log_info(msg: str) -> None:
   Returns:
       None
   """
-  logging.info(f"ℹ️  {msg}")
+  logging.info(f"\u2139\ufe0f  {msg}")
 
 
 def log_success(msg: str) -> None:

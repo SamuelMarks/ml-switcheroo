@@ -1,13 +1,11 @@
 """Test suite for the Device Allocator module."""
 
-from tests.conftest import _test_getattr
-
 import typing
-from pydantic import JsonValue
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
 import pytest
+from pydantic import JsonValue
 
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.config import RuntimeConfig
@@ -38,23 +36,26 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> typing.Generator[PivotRewriter, None, None]:
-  """Execute rewriter helper logic.
+  """Create a configured `rewriter` fixture for device allocator tests.
 
-  Returns:
+  Yields:
       Configured `rewriter` fixture value (typing.Generator[PivotRewriter, None, None]).
   """
-  _test_getattr(
-    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
-  )("device_allocator", _test_getattr({"v": transform_device_allocator}, "__getitem__")("v"))
-  hooks._PLUGINS_LOADED = True
+  hooks.register_hook("device_allocator")(transform_device_allocator)
+  hooks.set_plugins_loaded(True)
   mgr = MagicMock()
-  device_def = {
+  variants_map: dict[str, dict[str, JsonValue]] = {
+    "torch": {"api": "torch.device"},
+    "jax": {"api": "jax.devices", "requires_plugin": "device_allocator"},
+    "numpy": {"api": "cpu", "requires_plugin": "device_allocator"},
+  }
+  device_def: dict[str, JsonValue] = {
     "requires_plugin": "device_allocator",
     "std_args": ["type"],
     "variants": {
-      "torch": {"api": "torch.device"},
-      "jax": {"api": "jax.devices", "requires_plugin": "device_allocator"},
-      "numpy": {"api": "cpu", "requires_plugin": "device_allocator"},
+      "torch": variants_map["torch"],
+      "jax": variants_map["jax"],
+      "numpy": variants_map["numpy"],
     },
   }
   mgr.get_definition.side_effect = lambda name: ("device", device_def) if name == "torch.device" else None
@@ -71,16 +72,8 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
     Returns:
         Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
-    if aid == "device" and fw in device_def["variants"]:
-      res = _test_getattr(
-        {
-          "v": _test_getattr({"v": _test_getattr({"v": device_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
-            fw
-          ]
-        },
-        "__getitem__",
-      )("v")
-      return res if isinstance(res, dict) else {}
+    if aid == "device" and fw in variants_map:
+      return variants_map[fw]
     return None
 
   mgr.resolve_variant.side_effect = resolve_variant
@@ -88,7 +81,7 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   with patch("ml_switcheroo.plugins.device_allocator.get_adapter") as mock_get_adapter:
 
     def adapter_side_effect(name: str) -> JaxCoreAdapter | NumpyAdapter | None:
-      """Helper to adapter side effect.
+      """Execute `JaxCoreAdapter` to support adapter side effect in device allocator tests.
 
       Args:
           name: Identifier or operation name string.
@@ -107,7 +100,7 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
 
 
 def test_cuda_mapping_default_index(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of cuda mapping default index.
+  """Verify `rewrite_code` emits `jax.devices('gpu')[0]` for cuda mapping default index.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -118,7 +111,7 @@ def test_cuda_mapping_default_index(rewriter: PivotRewriter) -> None:
 
 
 def test_cuda_mapping_explicit_colon_index(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of cuda mapping explicit colon index.
+  """Verify `rewrite_code` handles cuda mapping explicit colon index as expected.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -129,7 +122,7 @@ def test_cuda_mapping_explicit_colon_index(rewriter: PivotRewriter) -> None:
 
 
 def test_cpu_mapping(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of cpu mapping.
+  """Verify `rewrite_code` emits `jax.devices('cpu')[0]` for cpu mapping.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -140,7 +133,7 @@ def test_cpu_mapping(rewriter: PivotRewriter) -> None:
 
 
 def test_variable_passthrough(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of variable passthrough.
+  """Verify `rewrite_code` emits `jax.devices(my_backend)[0]` for variable passthrough.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -151,7 +144,7 @@ def test_variable_passthrough(rewriter: PivotRewriter) -> None:
 
 
 def test_second_arg_index(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of second argument index.
+  """Verify `rewrite_code` emits `jax.devices('gpu')[2]` for second arg index.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -162,7 +155,7 @@ def test_second_arg_index(rewriter: PivotRewriter) -> None:
 
 
 def test_mps_mapping(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of mps mapping.
+  """Verify `rewrite_code` emits `jax.devices('gpu')[0]` for mps mapping.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -173,7 +166,7 @@ def test_mps_mapping(rewriter: PivotRewriter) -> None:
 
 
 def test_ignore_wrong_fw(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of ignore wrong framework.
+  """Verify `rewrite_code` emits `'cpu'` for ignore wrong fw.
 
   Args:
       rewriter: Configured CST rewriter test helper instance.
@@ -213,7 +206,7 @@ def test_device_allocator_adapter_exception(rewriter: PivotRewriter) -> None:
   ctx.target_framework = "jax"
   with patch("ml_switcheroo.plugins.device_allocator.get_adapter") as mock_get:
     mock_adapter = MagicMock()
-    mock_adapter.get_device_syntax.side_effect = Exception("Adapter error")
+    mock_adapter.get_device_syntax.side_effect = RuntimeError("Adapter error")
     mock_get.return_value = mock_adapter
     res: cst.CSTNode = transform_device_allocator(node, ctx)
     assert res is node
@@ -231,7 +224,7 @@ def test_device_allocator_invalid_colon_index(rewriter: PivotRewriter) -> None:
 
 
 def test_device_allocator_no_adapter() -> None:
-  """Verify device allocator no adapter behavior."""
+  """Verify `RuntimeConfig` handles device allocator no adapter as expected."""
   node = cst.parse_expression("torch.device('cuda', 0)")
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   semantics_mock = MagicMock()
@@ -243,7 +236,7 @@ def test_device_allocator_no_adapter() -> None:
 
 
 def test_parse_device_args_no_args() -> None:
-  """Verify parse device args no args behavior."""
+  """Verify `_parse_device_args` handles no args as expected."""
   node = cst.parse_expression("torch.device()")
   t, idx = _parse_device_args(cst.ensure_type(node, cst.Call))
   assert t is None
@@ -251,14 +244,14 @@ def test_parse_device_args_no_args() -> None:
 
 
 def test_device_allocator_adapter_exception_extra() -> None:
-  """Verify device allocator adapter exception extra behavior."""
+  """Verify `RuntimeConfig` handles device allocator adapter exception extra as expected."""
   node = cst.parse_expression("torch.device('cuda')")
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   semantics_mock = MagicMock()
   ctx = HookContext(semantics=semantics_mock, config=config)
 
   mock_adapter = MagicMock()
-  mock_adapter.get_device_syntax.side_effect = Exception("Adapter failure")
+  mock_adapter.get_device_syntax.side_effect = RuntimeError("Adapter failure")
   with patch("ml_switcheroo.plugins.device_allocator.get_adapter", return_value=mock_adapter):
     res = transform_device_allocator(cst.ensure_type(node, cst.Call), ctx)
     assert res is node
@@ -269,11 +262,14 @@ def test_device_allocator_value_error() -> None:
   expr1 = cst.parse_expression("torch.device('cuda:foo')")
   assert isinstance(expr1, cst.Call)
   dev_type1, idx1 = _parse_device_args(expr1)
-  assert dev_type1 is not None and cst.Module(body=[]).code_for_node(dev_type1) == "'cuda:foo'"
+  assert dev_type1 is not None
+  assert cst.Module(body=[]).code_for_node(dev_type1) == "'cuda:foo'"
   assert idx1 is None
 
   expr2 = cst.parse_expression("torch.device('cuda', 1)")
   assert isinstance(expr2, cst.Call)
   dev_type2, idx2 = _parse_device_args(expr2)
-  assert dev_type2 is not None and cst.Module(body=[]).code_for_node(dev_type2) == "'cuda'"
-  assert idx2 is not None and cst.Module(body=[]).code_for_node(idx2) == "1"
+  assert dev_type2 is not None
+  assert cst.Module(body=[]).code_for_node(dev_type2) == "'cuda'"
+  assert idx2 is not None
+  assert cst.Module(body=[]).code_for_node(idx2) == "1"

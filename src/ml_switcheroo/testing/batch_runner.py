@@ -8,14 +8,15 @@ Updated to handle Rich Parameter Constraints (dict items in std_args),
 including Dtype, Rank, and Symbolic Shape constraints.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
 import ast
+import logging
 import typing
 from pathlib import Path
 
 from pydantic import JsonValue
 from rich.progress import track
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.testing.runner import EquivalenceRunner
 
@@ -185,7 +186,6 @@ class BatchValidator:
             # Extract 'matmul' from 'test_matmul'
             op = node.name[5:]
             found.add(op)
-      except Exception:
-        # Ignore parse errors in user files
-        pass
+      except (OSError, UnicodeError, SyntaxError, ValueError) as exc:
+        logging.getLogger(__name__).debug("Skipping unparseable test file %s: %s", py_file, exc)
     return found

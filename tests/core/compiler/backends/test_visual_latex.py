@@ -1,6 +1,6 @@
 """Tests for visual_latex.py."""
 
-from tests.conftest import _test_setattr
+import pytest
 
 import ml_switcheroo.core.compiler.backends.visual_latex as visual_latex
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
@@ -23,7 +23,7 @@ def create_sample_graph() -> LogicalGraph:
 
 
 def test_latex_backend_basic() -> None:
-  """Verifies the behavior of latex backend basic."""
+  """Verify `visual_latex.LatexBackend` emits `documentclass` for latex backend basic."""
   backend = visual_latex.LatexBackend()
   nodes = {
     "in": LogicalNode("in", op_type="Input", attributes={}),
@@ -39,7 +39,7 @@ def test_latex_backend_basic() -> None:
 
 
 def test_latex_backend_empty() -> None:
-  """Verifies the behavior of LaTeX backend empty."""
+  """Verify `visual_latex.LatexBackend` emits `documentclass` for latex backend empty."""
   backend = visual_latex.LatexBackend()
   graph = LogicalGraph()
   res: str = backend.compile(graph)
@@ -48,7 +48,7 @@ def test_latex_backend_empty() -> None:
 
 
 def test_latex_backend_sample() -> None:
-  """Verifies the behavior of LaTeX backend sample."""
+  """Verify `visual_latex.LatexBackend` emits `documentclass` for latex backend sample."""
   backend = visual_latex.LatexBackend()
   graph: LogicalGraph = create_sample_graph()
   res: str = backend.compile(graph)
@@ -59,7 +59,7 @@ def test_latex_backend_sample() -> None:
 
 
 def test_latex_backend_custom() -> None:
-  """Verifies the behavior of LaTeX backend custom."""
+  """Verify `visual_latex.LatexBackend` emits `Missing` for latex backend custom."""
   backend = visual_latex.LatexBackend()
   nodes = {
     "in": LogicalNode("in", op_type="Input", attributes={}),
@@ -73,7 +73,7 @@ def test_latex_backend_custom() -> None:
 
 
 def test_latex_backend_no_out_edges() -> None:
-  """Verifies the behavior of LaTeX backend no output edges."""
+  """Verify `visual_latex.LatexBackend` handles latex backend no out edges as expected."""
   backend = visual_latex.LatexBackend()
   nodes = {
     "in": LogicalNode("in", op_type="Input", attributes={}),
@@ -105,25 +105,25 @@ def test_latex_backend_output_node_bypass() -> None:
   assert "non_arg=123" in res
 
 
-def test_visual_latex_no_node_data() -> None:
-  """Verify visual latex no node data behavior."""
+def test_visual_latex_no_node_data(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `LogicalGraph` emits `op_target` for visual latex no node data.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   # Hit 125->131
   from ml_switcheroo.core.compiler.backends.visual_latex import LatexBackend
   from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph
 
   g = LogicalGraph("Test", nodes={}, edges=[LogicalEdge("in", "target")])
-  _test_setattr(
-    g,
-    "_pending_edges",
-    [LogicalEdge("in", "target")],
-  )
+  monkeypatch.setattr(g, "_pending_edges", [LogicalEdge("in", "target")], raising=False)
   backend = LatexBackend()
   code: str = backend.compile(g)
   assert "op_target" in code
 
 
 def test_visual_latex_clean_type_no_dot_no_func() -> None:
-  """Verify visual latex clean type no dot no func behavior."""
+  """Verify `LogicalGraph` handles visual latex clean type no dot no func as expected."""
   # Hit 135->137
   from ml_switcheroo.core.compiler.backends.visual_latex import LatexBackend
   from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode

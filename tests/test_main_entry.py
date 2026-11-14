@@ -1,7 +1,6 @@
 """Test suite for the Main Entry module."""
 
 import pathlib
-
 import sys
 from unittest.mock import patch
 
@@ -9,7 +8,7 @@ import pytest
 
 
 def test_main_entry() -> None:
-  """Verifies the behavior of main entry."""
+  """Verify `pop` raises `SystemExit` during main entry."""
   import runpy
 
   sys.modules.pop("ml_switcheroo.__main__", None)
@@ -26,7 +25,7 @@ def test_main_entry() -> None:
 
 
 def test_main_entry_define(tmp_path: pathlib.Path) -> None:
-  """Verifies the behavior of main entry for the define command.
+  """Verify `main` returns `0` for entry define.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
@@ -36,10 +35,7 @@ def test_main_entry_define(tmp_path: pathlib.Path) -> None:
   with patch("ml_switcheroo.cli.__main__.commands.handle_define") as mock_define:
     mock_define.return_value = 0
     with patch.object(sys, "argv", ["ml_switcheroo", "define", str(tmp_path / "test.yaml")]):
-      try:
-        assert ml_switcheroo.cli.__main__.main() == 0
-      except SystemExit as e:
-        assert e.code == 0
+      assert ml_switcheroo.cli.__main__.main() == 0
     mock_define.assert_called_once()
 
 

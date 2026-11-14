@@ -1,164 +1,130 @@
-"""Test suite for mlx."""
+"""Unit tests for `MLXAdapter` and `MlxIOMixin` (`ml_switcheroo.frameworks.mlx`)."""
 
-from tests.conftest import _test_getattr, _test_hasattr
+import importlib
+import importlib.util
+import sys
+from unittest.mock import MagicMock, patch
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
-from pydantic import JsonValue
-
+import numpy as np
 import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
 
+import ml_switcheroo.frameworks.mlx as mlx_mod
+from ml_switcheroo.frameworks.base import FrameworkSnapshot, InitMode, StandardMap
 from ml_switcheroo.frameworks.mlx import MLXAdapter
+from ml_switcheroo.frameworks.mlx_io import MlxIOMixin
 
 
-def test_mlx_adapter_basic() -> None:
-  """Verify mlx adapter basic behavior."""
+def test_mlx_adapter_metadata_traits_syntax_and_io() -> None:
+  """Verify `MLXAdapter` metadata, traits, device/RNG/serialization/weight syntax, docs, and `MlxIOMixin`."""
   adapter = MLXAdapter()
-
   assert adapter.import_alias == ("mlx.core", "mx")
+
   ns = adapter.import_namespaces
-  assert "mlx.core" in ns
   assert ns["mlx.core"].recommended_alias == "mx"
   assert ns["mlx.nn"].recommended_alias == "nn"
   assert ns["mlx.optimizers"].recommended_alias == "optim"
-
   assert SemanticTier.NEURAL in adapter.supported_tiers
 
   cfg = adapter.test_config
   assert "import mlx.core as mx" in cfg["import"]
   assert "array" in cfg["convert_input"]
-
   assert adapter.harness_imports == []
   assert adapter.get_harness_init_code() == ""
   assert "tolist" in adapter.get_to_numpy_code()
 
-  traits = adapter.structural_traits
-  assert traits.module_base == "mlx.nn.Module"
-  assert "__call__" in traits.known_inference_methods
+  s_traits = adapter.structural_traits
+  assert s_traits.module_base == "mlx.nn.Module"
+  assert "__call__" in s_traits.known_inference_methods
 
-  ptraits = adapter.plugin_traits
-  assert ptraits.has_numpy_compatible_arrays is True
-  assert ptraits.requires_explicit_rng is False
-  assert ptraits.requires_functional_state is False
-
+  p_traits = adapter.plugin_traits
+  assert p_traits.has_numpy_compatible_arrays is True
+  assert p_traits.requires_explicit_rng is False
+  assert p_traits.requires_functional_state is False
   assert adapter.rng_seed_methods == ["seed", "random.seed"]
   assert adapter.declared_magic_args == []
+  assert isinstance(adapter.definitions, dict)
 
-  defs = adapter.definitions
-  assert isinstance(defs, dict)
-
-
-def test_mlx_adapter_syntax() -> None:
-  """Verify mlx adapter syntax behavior."""
-  adapter = MLXAdapter()
+  with patch.object(
+    mlx_mod,
+    "load_definitions",
+    return_value={"Linear": StandardMap(api="mlx.nn.Linear"), "Conv2d": StandardMap(api="mlx.nn.Conv2d")},
+  ):
+    assert "Linear" in adapter.definitions
 
   assert adapter.get_device_syntax("gpu", "0") == "mx.Device(mx.gpu, 0)"
+  assert adapter.get_device_syntax("gpu") == "mx.Device(mx.gpu)"
   assert adapter.get_device_syntax("cpu", None) == "mx.Device(mx.cpu)"
-
   assert adapter.get_device_check_syntax() == "mx.default_device() == mx.gpu"
   assert adapter.get_rng_split_syntax("rng", "key") == "pass"
 
+  assert MlxIOMixin().get_serialization_imports() == ["import mlx.core as mx"]
+  assert adapter.get_serialization_imports() == ["import mlx.core as mx"]
+  assert len(adapter.get_serialization_syntax("load", "path", "obj")) > 0
+  assert len(adapter.get_serialization_syntax("load", "path")) > 0
+  assert len(adapter.get_serialization_syntax("save", "path", "obj")) > 0
+  assert adapter.get_serialization_syntax("other", "path") == ""
 
-def test_mlx_adapter_docs() -> None:
-  """Verify mlx adapter docs behavior."""
-  adapter = MLXAdapter()
-  url: str | None = adapter.get_doc_url("mlx.core.abs")
-  assert url is not None
-  assert "ml-explore.github.io" in url
+  assert len(adapter.get_weight_conversion_imports()) > 0
+  assert len(adapter.get_weight_load_code("path")) > 0
+  assert len(adapter.get_tensor_to_numpy_expr("t")) > 0
+  assert len(adapter.get_weight_save_code("s", "path")) > 0
 
-  url2: str | None = adapter.get_doc_url("unknown")
-  assert url2 is not None
-  assert "unknown.html" in url2
-
-  examples: dict[str, str] = adapter.get_tiered_examples()
-  assert len(examples) > 0
-
-
-def test_mlx_adapter_convert() -> None:
-  """Verify mlx adapter convert behavior."""
-  pytest.importorskip("mlx")
-  adapter = MLXAdapter()
-  import mlx.core as mx
-  import numpy as np
-
-  t = adapter.convert([1, 2, 3])
-  assert isinstance(t, mx.array)
-
-  t2 = adapter.convert(np.array([1, 2, 3]))
-  assert isinstance(t2, mx.array)
-
-  t3 = adapter.convert(1)
-  assert t3 == 1
-
-
-def test_mlx_adapter_wiring() -> None:
-  """Verify mlx adapter wiring behavior."""
-  adapter = MLXAdapter()
-  snapshot: dict[str, RuntimeTensorOrValue] = {}
-  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    _test_getattr({"v": snapshot}, "__getitem__")("v")
-  )
+  snapshot: dict[str, dict[str, JsonValue]] = {}
+  adapter.apply_wiring(snapshot)
   assert snapshot == {}
 
+  url_core = adapter.get_doc_url("mlx.core.abs")
+  assert url_core is not None
+  assert "ml-explore.github.io" in url_core
+  assert adapter.get_doc_url("mlx.nn.Linear") is not None
+  url_unk = adapter.get_doc_url("unknown")
+  assert url_unk is not None
+  assert "unknown.html" in url_unk
+  assert len(adapter.get_tiered_examples()) > 0
 
-def test_convert() -> None:
-  """Verify convert behavior."""
-  import sys
-  from unittest.mock import MagicMock
 
-  from ml_switcheroo.frameworks.mlx import MLXAdapter
+def test_mlx_adapter_convert_and_ghost_fallbacks(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `MLXAdapter.convert`, `find_spec` error fallback, and missing `numpy` reload.
 
-  sys.modules["mlx.core"] = MagicMock()
-  sys.modules["mlx"] = MagicMock()
-  import numpy as np
-
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   adapter = MLXAdapter()
-  res_arr = adapter.convert(np.array([1, 2, 3]))
-  res_scalar = adapter.convert(1)
-  del sys.modules["mlx.core"]
-  del sys.modules["mlx"]
-  assert res_arr is not None
-  assert res_scalar == 1
 
+  with pytest.MonkeyPatch.context() as mp:
+    mp.setitem(sys.modules, "mlx", None)
+    mp.setitem(sys.modules, "mlx.core", None)
+    assert adapter.convert([1, 2]) == [1, 2]
 
-def test_mlx_no_numpy() -> None:
-  """Verify mlx no numpy behavior."""
-  import importlib
-  import types
-  from unittest.mock import patch
+  mock_mlx = MagicMock()
+  mock_core = MagicMock()
+  mock_mlx.core = mock_core
+  with pytest.MonkeyPatch.context() as mp:
+    mp.setitem(sys.modules, "mlx", mock_mlx)
+    mp.setitem(sys.modules, "mlx.core", mock_core)
+    mock_core.array.return_value = "mlx_tensor"
+    assert adapter.convert([1, 2]) == "mlx_tensor"
+    assert adapter.convert(np.array([1, 2])) == "mlx_tensor"
+    assert adapter.convert(1) == 1
 
-  import ml_switcheroo.frameworks.mlx as mlx_mod
+    mock_core.array.side_effect = RuntimeError("err")
+    assert adapter.convert([1, 2]) == [1, 2]
 
-  orig_import = importlib.__import__
+  # `find_spec` raising `ValueError` falls back to GHOST mode cleanly
+  monkeypatch.delitem(sys.modules, "mlx", raising=False)
+  with (
+    patch.object(importlib.util, "find_spec", side_effect=ValueError("bad spec")),
+    patch.object(mlx_mod, "load_snapshot_for_adapter", return_value={"version": "0.18"}),
+  ):
+    ghost_adapter = MLXAdapter()
+    assert ghost_adapter._mode == InitMode.GHOST
+    assert ghost_adapter._snapshot_data == FrameworkSnapshot(version="0.18")
 
-  def mock_import(name: str, *args: JsonValue, **kwargs: JsonValue) -> types.ModuleType:
-    """Execute mock import helper logic.
-
-    Args:
-        name: Identifier or operation name string.
-        args: The args (JsonValue) for mock import.
-        kwargs: The kwargs (JsonValue) for mock import.
-
-    Returns:
-        Resulting `types.ModuleType` from mock import.
-    """
-    if name == "numpy":
-      raise ImportError("no numpy")
-    _ret_v: types.ModuleType = _test_getattr(
-      {
-        "v": _test_getattr({"v": orig_import}, "__getitem__")("v")(
-          _test_getattr({"v": name}, "__getitem__")("v"), *args, **_test_getattr({"v": kwargs}, "__getitem__")("v")
-        )
-      },
-      "__getitem__",
-    )("v")
-    return _ret_v
-
-  with patch("builtins.__import__", side_effect=mock_import):
-    try:
-      importlib.reload(mlx_mod)
-    except Exception:
-      pass
-  _res = importlib.reload(mlx_mod)
-  assert _test_hasattr(_res, "MLXAdapter")
+  # Missing `numpy` at module import time sets `np = None`
+  with pytest.MonkeyPatch.context() as mp:
+    mp.setitem(sys.modules, "numpy", None)
+    importlib.reload(mlx_mod)
+    assert mlx_mod.np is None
+  importlib.reload(mlx_mod)

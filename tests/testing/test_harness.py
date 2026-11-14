@@ -1,0 +1,69 @@
+"""Test suite for the Harness module."""
+
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+from ml_switcheroo.testing.harness_generator import HarnessGenerator
+
+
+def test_harness_generation_file_creation(tmp_path: Path) -> None:
+  """Verify `HarnessGenerator` emits `class InputFuzzer` for harness generation file creation.
+
+  Args:
+      tmp_path: Pytest temporary directory path fixture.
+  """
+  src_file: Path = tmp_path / "source.py"
+  src_file.write_text("def fn(x): return x")
+  tgt_file: Path = tmp_path / "target.py"
+  tgt_file.write_text("def fn(x): return x")
+  harness_path: Path = tmp_path / "verify.py"
+  gen = HarnessGenerator()
+  gen.generate(src_file, tgt_file, harness_path)
+  assert harness_path.exists()
+  content: str = harness_path.read_text()
+  assert "class InputFuzzer" in content
+  assert "class StandaloneFuzzer" in content
+  assert "from ml_switcheroo.testing.fuzzer" not in content
+
+
+def test_harness_execution_standalone(tmp_path: Path) -> None:
+  """Verify `HarnessGenerator` returns `0` for harness execution standalone.
+
+  Args:
+      tmp_path: Pytest temporary directory path fixture.
+  """
+  src_file: Path = tmp_path / "mod_src.py"
+  src_file.write_text("\nimport numpy as np\ndef my_op(x):\n    return x * 2\n")
+  tgt_file: Path = tmp_path / "mod_tgt.py"
+  tgt_file.write_text("\nimport numpy as np\ndef my_op(x):\n    return x * 2\n")
+  harness_path: Path = tmp_path / "verify_match.py"
+  gen = HarnessGenerator()
+  gen.generate(src_file, tgt_file, harness_path, source_framework="numpy", target_framework="numpy")
+  env: dict[str, str] = os.environ.copy()
+  env.pop("PYTHONPATH", None)
+  result = subprocess.run([sys.executable, str(harness_path)], capture_output=True, text=True, env=env)
+  assert result.returncode == 0
+  assert "✅ my_op: Match" in result.stdout
+
+
+def test_harness_execution_mismatch(tmp_path: Path) -> None:
+  """Verify `HarnessGenerator` returns `1` for harness execution mismatch.
+
+  Args:
+      tmp_path: Pytest temporary directory path fixture.
+  """
+  src_file: Path = tmp_path / "mod_src.py"
+  src_file.write_text("def my_op(x): return x + 1")
+  tgt_file: Path = tmp_path / "mod_tgt.py"
+  tgt_file.write_text("def my_op(x): return x + 100")
+  harness_path: Path = tmp_path / "verify_fail.py"
+  gen = HarnessGenerator()
+  semantics = {"my_op": {"std_args": [{"name": "x", "type": "float"}]}}
+  gen.generate(src_file, tgt_file, harness_path, source_framework="numpy", target_framework="numpy", semantics=semantics)
+  env: dict[str, str] = os.environ.copy()
+  env.pop("PYTHONPATH", None)
+  result = subprocess.run([sys.executable, str(harness_path)], capture_output=True, text=True, env=env)
+  assert result.returncode == 1
+  assert "❌ my_op: Mismatch" in result.stdout

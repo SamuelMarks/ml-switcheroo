@@ -5,14 +5,14 @@ import numpy.typing
 
 
 class EmbeddingModel:
-  """Test helper class EmbeddingModel."""
+  """Sentinel `EmbeddingModel` fixture class used in numpy tests."""
 
   def __init__(self, num_embeddings: int, embedding_dim: int):
     """Initializes the EmbeddingModel instance.
 
     Args:
-        num_embeddings: The num embeddings (int) for   init  .
-        embedding_dim: The embedding dim (int) for   init  .
+        num_embeddings: Input `num_embeddings` parameter value (`int`).
+        embedding_dim: Input `embedding_dim` parameter value (`int`).
     """
     self.weight = np.random.randn(num_embeddings, embedding_dim)
 

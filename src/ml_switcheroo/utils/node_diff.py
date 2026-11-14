@@ -28,7 +28,7 @@ def capture_node_source(node: cst.CSTNode) -> str:
   try:
     # LibCST requires a module context to generate code for a node
     return _RENDER_CTX.code_for_node(node)
-  except Exception:
+  except (cst.CSTValidationError, ValueError, TypeError, AttributeError, RuntimeError):
     # Fallback for extreme cases (e.g. malformed or partial nodes)
     return f"<Unrepresentable Node: {type(node).__name__}>"
 

@@ -1,7 +1,5 @@
 """Test suite for the Injector Recursion module."""
 
-from tests.conftest import _test_getattr
-
 import libcst as cst
 
 from ml_switcheroo.tools.injector_fw import convert_to_cst_literal
@@ -9,6 +7,9 @@ from ml_switcheroo.tools.injector_fw import convert_to_cst_literal
 
 def render_node(node: cst.CSTNode) -> str:
   """Renders node.
+
+  Args:
+      node: LibCST node to render.
 
   Returns:
       Resulting `str` from render node.
@@ -18,7 +19,7 @@ def render_node(node: cst.CSTNode) -> str:
 
 
 def test_primitive_recursion() -> None:
-  """Verifies the behavior of primitive recursion."""
+  """Verify `render_node` handles primitive recursion as expected."""
   assert render_node(convert_to_cst_literal(1)) == "1"
   assert render_node(convert_to_cst_literal(1.5)) == "1.5"
   assert render_node(convert_to_cst_literal(True)) == "True"
@@ -42,7 +43,7 @@ def test_primitive_recursion() -> None:
 
 
 def test_get_import_root() -> None:
-  """Verify get import root behavior."""
+  """Verify `Attribute` handles get import root as expected."""
   import libcst as cst
 
   from ml_switcheroo.tools.injector_fw.utils import get_import_root
@@ -54,7 +55,7 @@ def test_get_import_root() -> None:
 
 
 def test_is_docstring() -> None:
-  """Verify is docstring behavior."""
+  """Verify `SimpleStatementLine` handles is docstring as expected."""
   import libcst as cst
 
   from ml_switcheroo.tools.injector_fw.utils import is_docstring
@@ -72,25 +73,25 @@ def test_is_docstring() -> None:
 
 
 def test_is_future_import() -> None:
-  """Verify is future import behavior."""
+  """Verify `is_future_import` produces expected results across injector recursion inputs."""
   import libcst as cst
 
   from ml_switcheroo.tools.injector_fw.utils import is_future_import
 
   # Future import
   tree: cst.Module = cst.parse_module("from __future__ import annotations")
-  assert is_future_import(_test_getattr(tree, "body")[0]) is True
+  assert is_future_import(tree.body[0]) is True
 
   # Normal import
   tree2: cst.Module = cst.parse_module("from os import path")
-  assert is_future_import(_test_getattr(tree2, "body")[0]) is False
+  assert is_future_import(tree2.body[0]) is False
 
   # Not a SimpleStatementLine
   assert is_future_import(cst.Pass()) is False
 
 
 def test_list_recursion() -> None:
-  """Verifies the behavior of list recursion."""
+  """Verify `convert_to_cst_literal` handles list recursion as expected."""
   val = [1, 2, "a"]
   node: cst.CSTNode = convert_to_cst_literal(val)
   code: str = render_node(node)
@@ -98,7 +99,7 @@ def test_list_recursion() -> None:
 
 
 def test_tuple_recursion() -> None:
-  """Verifies the behavior of tuple recursion."""
+  """Verify `convert_to_cst_literal` handles tuple recursion as expected."""
   val = (1, (2, 3))
   node: cst.CSTNode = convert_to_cst_literal(val)
   code: str = render_node(node)
@@ -107,7 +108,7 @@ def test_tuple_recursion() -> None:
 
 
 def test_dict_recursion() -> None:
-  """Verifies the behavior of dictionary recursion."""
+  """Verify `convert_to_cst_literal` handles dict recursion as expected."""
   val = {"alpha": 0.5, "dims": (1, 2), "flag": True}
   node: cst.CSTNode = convert_to_cst_literal(val)
   code: str = render_node(node)
@@ -118,9 +119,9 @@ def test_dict_recursion() -> None:
 
 
 def test_deep_nesting() -> None:
-  """Verifies the behavior of deep nesting."""
+  """Verify `convert_to_cst_literal` handles deep nesting as expected."""
   val = [{"a": [1, 2]}, (None,)]
   node: cst.CSTNode = convert_to_cst_literal(val)
   code: str = render_node(node)
   clean: str = code.replace(" ", "")
-  assert '[{"a":[1,2]},(None,)]' == clean
+  assert clean == '[{"a":[1,2]},(None,)]'

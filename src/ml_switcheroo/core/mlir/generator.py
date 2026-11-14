@@ -1,142 +1,174 @@
 """MLIR to Python (LibCST) Generator.
 
-This module provides the `MlirToPythonGenerator` class, which consumes the
-MLIR CST object model and reconstructs valid Python code via LibCST.
+Provides ``MlirToPythonGenerator``, which consumes the MLIR CST object model and
+reconstructs valid Python code via LibCST by composing ``MlirGenHelpers``,
+``MlirExpressionGenerator``, and ``MlirStatementGenerator``.
 """
 
 import typing
 from collections import defaultdict
 
 import libcst as cst
-import pydantic
 
 from ml_switcheroo.core.cst.base import Trivia
 from ml_switcheroo.core.mlir.cst import BlockNode, ModuleNode, OperationNode
-from ml_switcheroo.core.mlir.gen_base import BaseGeneratorMixin
-from ml_switcheroo.core.mlir.gen_expressions import ExpressionGeneratorMixin
-from ml_switcheroo.core.mlir.gen_statements import StatementGeneratorMixin
-
-# Import modular components
+from ml_switcheroo.core.mlir.gen_base import MlirGenHelpers
+from ml_switcheroo.core.mlir.gen_expressions import MlirExpressionGenerator
+from ml_switcheroo.core.mlir.gen_statements import MlirStatementGenerator
 from ml_switcheroo.core.mlir.naming import NamingContext
 
 
-class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, BaseGeneratorMixin):
-  """Transpiler back-end: MLIR CST -> Python LibCST.
+@typing.runtime_checkable
+class _TriviaContentProtocol(typing.Protocol):
+  """Protocol for trivia nodes exposing a ``content`` string attribute."""
 
-  Integrates expression and statement generation logic.
+  @property
+  def content(self) -> str | None:
+    """Return raw trivia content text.
+
+    Returns:
+        Trivia content string or ``None``.
+    """
+
+
+@typing.runtime_checkable
+class _TriviaTextProtocol(typing.Protocol):
+  """Protocol for trivia nodes exposing a ``text`` string attribute."""
+
+  @property
+  def text(self) -> str | None:
+    """Return raw trivia text.
+
+    Returns:
+        Trivia text string or ``None``.
+    """
+
+
+StatementLineOrCompound: typing.TypeAlias = cst.SimpleStatementLine | cst.BaseCompoundStatement
+
+
+class MlirToPythonGenerator:
+  """Transpiler back-end reconstructing Python LibCST from MLIR CST via composition.
+
+  Attributes:
+      ctx: ``NamingContext`` mapping SSA values to Python identifiers.
+      usage_counts: Mapping from SSA value names to operand reference counts.
+      usage_consumers: Mapping from SSA value names to consumer ``OperationNode`` instances.
+      deferred_exprs: Mapping from SSA value names to folded inline expressions.
+      deferred_trivia: Mapping from SSA value names to deferred leading comment lines.
+      helpers: ``MlirGenHelpers`` utility component.
+      expr_generator: ``MlirExpressionGenerator`` delegate for expression ops.
+      stmt_generator: ``MlirStatementGenerator`` delegate for structural statement ops.
   """
 
   def __init__(self) -> None:
-    """Initialize the generator.
-
-    Sets up naming context and usage tracking containers.
-    """
-    self.ctx = NamingContext()
-
-    # Store usage counts for inlining logic: {ssa_name: count}
+    """Initialize the generator, SSA usage state, and composed delegates."""
+    self.ctx: NamingContext = NamingContext()
     self.usage_counts: defaultdict[str, int] = defaultdict(int)
-    # Map of ssa_name -> consumer_op (single consumer context)
     self.usage_consumers: dict[str, OperationNode] = {}
-
-    # Map of ssa_name -> CST Node (Expression) for deferred inlining
     self.deferred_exprs: dict[str, cst.BaseExpression] = {}
     self.deferred_trivia: dict[str, list[cst.EmptyLine]] = {}
     self._in_func_def: bool = False
+    self.helpers: MlirGenHelpers = MlirGenHelpers()
+    self.expr_generator: MlirExpressionGenerator = MlirExpressionGenerator(self, self.helpers)
+    self.stmt_generator: MlirStatementGenerator = MlirStatementGenerator(self, self.helpers)
 
-  def generate(self, node: ModuleNode) -> cst.Module:
-    """Execute entry point. Converts MLIR Module to Python Module.
+  def _get_attr(self, op: OperationNode, key: str) -> str | None:
+    """Delegate MLIR attribute string lookup to ``self.helpers``.
 
     Args:
-        node: The root MLIR ModuleNode.
+        op: ``OperationNode`` to inspect.
+        key: Attribute name key.
 
     Returns:
-        A LibCST Module object representing the Python code.
-
+        Attribute value string or ``None``.
     """
-    # Analyze usage for inlining optimization across the whole module
+    return self.helpers.get_attr(op, key)
+
+  def _create_dotted_name(self, path: str) -> cst.Name | cst.Attribute:
+    """Delegate dotted CST ``Name``/``Attribute`` construction to ``self.helpers``.
+
+    Args:
+        path: Dot-separated identifier string.
+
+    Returns:
+        Constructed ``cst.Name`` or ``cst.Attribute``.
+    """
+    return self.helpers.create_dotted_name(path)
+
+  def generate(self, node: ModuleNode) -> cst.Module:
+    """Convert an MLIR ``ModuleNode`` into a Python ``cst.Module``.
+
+    Args:
+        node: Root MLIR ``ModuleNode``.
+
+    Returns:
+        Reconstructed LibCST ``Module``.
+    """
     self._analyze_module_usage(node)
-
-    # Implicit top-level block
     stmt_body = self._convert_block(node.body)
-
-    # Ensure we return a module with valid body sequence
     return cst.Module(body=stmt_body)
 
   def _analyze_module_usage(self, mod: ModuleNode) -> None:
-    """Traverse the MLIR tree to count SSA usage.
-
-    Populates self.usage_counts.
+    """Populate ``self.usage_counts`` and ``self.usage_consumers`` across ``mod``.
 
     Args:
-        mod: The root MLIR ModuleNode to analyze.
+        mod: Root MLIR ``ModuleNode``.
     """
     self._scan_block_usage(mod.body)
 
   def _scan_block_usage(self, block: BlockNode) -> None:
-    """Recursively scans op operands to update usage counts.
+    """Recursively scan ``block`` operations and nested regions to count SSA usage.
 
     Args:
-        block: The BlockNode whose operations and regions are to be scanned.
+        block: ``BlockNode`` to scan.
     """
     for op in block.operations:
-      # Count operand usage
       for operand in op.operands:
         self.usage_counts[operand.name] += 1
-        # Track last (or only) consumer for fusion analysis
         self.usage_consumers[operand.name] = op
 
-      # Recurse regions
       for region in op.regions:
         for b in region.blocks:
           self._scan_block_usage(b)
 
   def _convert_trivia(
     self,
-    trivia: typing.Sequence[Trivia | cst.CSTNode | pydantic.BaseModel | typing.Hashable],
+    trivia: typing.Sequence["Trivia | _TriviaContentProtocol | _TriviaTextProtocol"],
   ) -> list[cst.EmptyLine]:
-    """Convert MLIR comments (//) to Python comments (#).
-
-    Ignores layout whitespace as LibCST handles indentation.
+    """Convert MLIR ``//`` / ``%`` trivia entries into Python ``#`` ``cst.EmptyLine`` comments.
 
     Args:
-        trivia: A list of Trivia or TriviaNode elements from MLIR.
+        trivia: Sequence of MLIR trivia items.
 
     Returns:
-        A list of LibCST EmptyLine objects containing the Python comments.
+        List of ``cst.EmptyLine`` comment lines.
     """
-    lines = []
-    import inspect
+    lines: list[cst.EmptyLine] = []
 
     for t in trivia:
       if isinstance(t, Trivia):
         content = t.content.strip()
+      elif isinstance(t, _TriviaContentProtocol):
+        content = str(t.content or "").strip()
       else:
-        try:
-          raw_content = inspect.getattr_static(t, "content")
-        except AttributeError:
-          raw_content = inspect.getattr_static(t, "text")
-        content = str(raw_content or "").strip()
-      # Only process comments, not just newlines
+        content = str(t.text or "").strip()
       if content.startswith("//"):
-        content = "#" + content[2:]
-        lines.append(cst.EmptyLine(comment=cst.Comment(content), newline=cst.Newline()))
+        lines.append(cst.EmptyLine(comment=cst.Comment("#" + content[2:]), newline=cst.Newline()))
       elif content.startswith("%"):
-        content = "#" + content
-        lines.append(cst.EmptyLine(comment=cst.Comment(content), newline=cst.Newline()))
+        lines.append(cst.EmptyLine(comment=cst.Comment("#" + content), newline=cst.Newline()))
     return lines
 
-  def _convert_block(self, block: BlockNode) -> list[cst.SimpleStatementLine | cst.BaseCompoundStatement]:
-    """Convert operations in a block to a list of Python statements.
-
-    Applies expression folding where possible.
+  def _convert_block(self, block: BlockNode) -> list[StatementLineOrCompound]:
+    """Convert operations in ``block`` into a list of Python statements.
 
     Args:
-        block: The MLIR BlockNode containing operations to convert.
+        block: MLIR ``BlockNode`` containing operations to convert.
 
     Returns:
-        A list of LibCST BaseStatement objects representing Python statements.
+        List of LibCST statements.
     """
-    stmts: list[cst.SimpleStatementLine | cst.BaseCompoundStatement] = []
+    stmts: list[StatementLineOrCompound] = []
 
     for op in block.operations:
       leading = self._convert_trivia(op.leading_trivia)
@@ -167,142 +199,106 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
           collected_triv.extend(self.deferred_trivia.pop(operand.name))
       collected_triv.extend(leading)
 
-      # Try to create expression first
       expr_node = self._create_expression_from_op(op)
 
       if expr_node:
-        # Evaluate if we should inline or emit statement
         if self._should_inline_expression(op, expr_node):
-          # Defer emission
           res_ssa = op.results[0].name
           self.deferred_exprs[res_ssa] = expr_node
           if collected_triv:
             self.deferred_trivia[res_ssa] = collected_triv
         else:
-          # Wrap as statement (Assignment or Expression Stmt)
           stmt_node = self._wrap_as_statement(op, expr_node)
           if collected_triv:
             stmt_node = stmt_node.with_changes(leading_lines=collected_triv)
-          assert isinstance(stmt_node, (cst.SimpleStatementLine, cst.BaseCompoundStatement))
           stmts.append(stmt_node)
       else:
-        # Handle statements that are never expressions (Control Flow, Class Defs, Defs, Imports)
-        # These are handled by StatementGeneratorMixin
         stmt_op = self._convert_statement_op(op)
-        if stmt_op:
+        if stmt_op is not None:
           if collected_triv:
             stmt_op = stmt_op.with_changes(leading_lines=collected_triv)
-          assert isinstance(stmt_op, (cst.SimpleStatementLine, cst.BaseCompoundStatement))
           stmts.append(stmt_op)
 
     return stmts
 
   def _should_inline_expression(self, op: OperationNode, expr: cst.BaseExpression) -> bool:
-    """Determine if the result of an operation should be folded/inlined.
-
-    Revised Logic:
-    1.  **Atoms**: Always inline `sw.constant` and `sw.getattr` IF USED.
-    2.  **Statement Fusion**: Inline if the consumer is a "Terminal Statement"
-        like `sw.setattr` or `sw.return`.
-    3.  **Default**: Do not inline (sequential generation).
+    """Return whether ``op``'s result expression should be folded inline at its consumer.
 
     Args:
-        op: The MLIR OperationNode to consider inlining.
-        expr: The parsed LibCST expression representing the operation.
+        op: Candidate ``OperationNode``.
+        expr: Reconstructed ``cst.BaseExpression`` for ``op``.
 
     Returns:
-        True if the expression should be inlined/folded, False otherwise.
+        ``True`` if ``expr`` should be deferred and inlined.
     """
     if not op.results:
-      return False  # No result to inline
+      return False
 
     op_name = op.name.strip('"')
     res_ssa = op.results[0].name
     usage = self.usage_counts[res_ssa]
 
-    # 1. ATOMS: Always inline simple values (Constants, Attributes) if they are used.
-    if op_name == "sw.constant":
+    if op_name in ("sw.constant", "sw.getattr"):
       return usage > 0
 
-    if op_name == "sw.getattr":
-      return usage > 0
-
-    # 2. VOID/SUPER: Always inline proxies
     type_attr = self._get_attr(op, "type")
     if op_name == "sw.op" and type_attr and "super" in type_attr:
       return True
 
-    # 3. STATEMENT FUSION:
     if usage == 1 and res_ssa in self.usage_consumers:
       consumer = self.usage_consumers[res_ssa]
-      cons_name = consumer.name.strip('"')
-
-      # Target consumers that are definitely statements
-      statement_ops = {"sw.setattr", "sw.return"}
-      if cons_name in statement_ops:
+      if consumer.name.strip('"') in {"sw.setattr", "sw.return"}:
         return True
 
     return False
 
   def _resolve_operand(self, ssa_name: str) -> cst.BaseExpression:
-    """Resolve an SSA value to a CST Expression.
-
-    If previously deferred, returns the AST node (folding).
-    Else returns a Name or Attribute reference.
+    """Resolve ``ssa_name`` to either a deferred expression or a named variable/attribute.
 
     Args:
-        ssa_name: The SSA value name to resolve.
+        ssa_name: SSA value identifier.
 
     Returns:
-        A LibCST BaseExpression representing the resolved reference.
+        Resolved ``cst.BaseExpression``.
     """
     if ssa_name in self.deferred_exprs:
-      # Retrieve deferred expression
-      expr = self.deferred_exprs[ssa_name]
-      return expr
+      return self.deferred_exprs[ssa_name]
 
-    # Fallback to variable name lookup
     py_name = self.ctx.lookup(ssa_name)
-
-    # HARDENING FIX: If name is dotted (e.g. self.layer), return Attribute chain
     if "." in py_name:
-      res_dotted: cst.BaseExpression = self._create_dotted_name(py_name)
-      return res_dotted
+      return self._create_dotted_name(py_name)
 
     return cst.Name(py_name)
 
   def _create_expression_from_op(self, op: OperationNode) -> cst.BaseExpression | None:
-    """Attempt to map an Op to a Python Expression (e.g. Call, BinaryOp, Attribute).
-
-    Delegates to ExpressionGeneratorMixin.
+    """Delegate expression-producing MLIR operations to ``self.expr_generator``.
 
     Args:
-        op: The MLIR OperationNode to convert into an expression.
+        op: ``OperationNode`` to inspect.
 
     Returns:
-        The resulting LibCST BaseExpression, or None if the operation does
-        not represent an expression.
+        Constructed ``cst.BaseExpression`` or ``None`` if ``op`` is structural.
     """
     op_name = op.name.strip('"')
 
     if op_name == "sw.op":
-      return self._expr_sw_op(op)
-    elif op_name == "sw.call":
-      return self._expr_sw_call(op)
-    elif op_name == "sw.getattr":
-      return self._expr_sw_getattr(op)
-    elif op_name == "sw.constant":
-      return self._expr_sw_constant(op)
-    elif op_name.startswith("stablehlo.") and op_name != "stablehlo.return" and self._in_func_def:
+      return self.expr_generator.expr_sw_op(op)
+    if op_name == "sw.call":
+      return self.expr_generator.expr_sw_call(op)
+    if op_name == "sw.getattr":
+      return self.expr_generator.expr_sw_getattr(op)
+    if op_name == "sw.constant":
+      return self.expr_generator.expr_sw_constant(op)
+    if op_name.startswith("stablehlo.") and op_name != "stablehlo.return" and self._in_func_def:
       return self._expr_stablehlo_op(op)
 
     return None
 
   def _expr_stablehlo_op(self, op: OperationNode) -> cst.BaseExpression:
-    """Convert a ``stablehlo.*`` operation node into a Python call expression.
+    """Convert a ``stablehlo.*`` ``OperationNode`` into a Python ``cst.Call`` expression.
 
     Args:
-        op: The StableHLO ``OperationNode`` to convert.
+        op: StableHLO ``OperationNode`` to convert.
 
     Returns:
         Constructed ``cst.Call`` expression invoking ``stablehlo.<op>(...)``.
@@ -317,99 +313,89 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     args = [cst.Arg(value=self._resolve_operand(o.name)) for o in op.operands if not o.name.startswith("@")]
     return cst.Call(func=func_node, args=args)
 
-  def _convert_statement_op(self, op: OperationNode) -> cst.BaseStatement | None:
-    """Map structural ops to Statements. Delegates to StatementGeneratorMixin.
+  def _convert_statement_op(self, op: OperationNode) -> StatementLineOrCompound | None:
+    """Delegate structural MLIR operations to ``self.stmt_generator``.
 
     Args:
-        op: The MLIR OperationNode to convert.
+        op: ``OperationNode`` to convert.
 
     Returns:
-        The resulting LibCST BaseStatement representing the structural operation,
-        or None if the operation is not recognized as a statement op.
+        Constructed LibCST statement or ``None`` if unrecognized.
     """
     op_name = op.name.strip('"')
 
     if op_name == "sw.module":
-      return self._convert_class_def(op)
-    elif op_name in ("sw.func", "func.func"):
+      return self.stmt_generator.convert_class_def(op)
+    if op_name in ("sw.func", "func.func"):
       was_in = self._in_func_def
       self._in_func_def = True
       try:
-        return self._convert_func_def(op)
+        return self.stmt_generator.convert_func_def(op)
       finally:
         self._in_func_def = was_in
-    elif op_name in ("sw.return", "func.return", "stablehlo.return", "return"):
-      return self._convert_return(op)
-    elif op_name == "sw.setattr":
-      return self._convert_setattr(op)
-    elif op_name == "sw.import":
-      return self._convert_import(op)
+    if op_name in ("sw.return", "func.return", "stablehlo.return", "return"):
+      return self.stmt_generator.convert_return(op)
+    if op_name == "sw.setattr":
+      return self.stmt_generator.convert_setattr(op)
+    if op_name == "sw.import":
+      return self.stmt_generator.convert_import(op)
 
     return None
 
-  def _wrap_as_statement(self, op: OperationNode, expr: cst.BaseExpression) -> cst.BaseStatement:
-    """Wrap an expression into a statement (Assign or Expr).
-
-    Extracts semantic hints from 'type' attribute to produce readable variable names.
+  def _wrap_as_statement(self, op: OperationNode, expr: cst.BaseExpression) -> cst.SimpleStatementLine:
+    """Wrap ``expr`` as either an ``Assign`` statement or a standalone ``Expr`` statement.
 
     Args:
-        op: The MLIR OperationNode whose result is being wrapped.
-        expr: The LibCST expression to be wrapped.
+        op: ``OperationNode`` whose result is being wrapped.
+        expr: ``cst.BaseExpression`` to wrap.
 
     Returns:
-        A LibCST BaseStatement representing the assignment or simple expression statement.
+        Constructed ``cst.SimpleStatementLine``.
     """
     if op.results:
       res_ssa = op.results[0].name
 
-      # Rule 1: Usage Count 0 -> Suppress assignment
-      if self.usage_counts[res_ssa] == 0:
+      if self.usage_counts[res_ssa] == 0 or self._is_void_call(expr):
         return cst.SimpleStatementLine(body=[cst.Expr(value=expr)])
 
-      # Rule 2: Void Pattern Detection
-      if self._is_void_call(expr):
-        return cst.SimpleStatementLine(body=[cst.Expr(value=expr)])
-
-      # Semantic Hint Extraction
       hint: str | None = None
-
-      # 1. Check for 'type' attribute (e.g. torch.flatten)
       raw_t = self._get_attr(op, "type")
       if raw_t:
         val = raw_t.strip('"').strip("'")
         hint = val.split(".")[-1].lower()
-
-      # 2. Check for 'name' attribute
       elif op.name.strip('"') == "sw.getattr":
         raw_n = self._get_attr(op, "name")
         if raw_n:
           hint = raw_n.strip('"')
-
-      # 3. Fallback for constants: cst
       elif op.name.strip('"') == "sw.constant":
         hint = "cst"
 
       py_target = self.ctx.register(res_ssa, hint=hint)
       target_node = cst.AssignTarget(target=cst.Name(py_target))
       return cst.SimpleStatementLine(body=[cst.Assign(targets=[target_node], value=expr)])
-    else:
-      return cst.SimpleStatementLine(body=[cst.Expr(value=expr)])
+
+    return cst.SimpleStatementLine(body=[cst.Expr(value=expr)])
 
   def _is_void_call(self, expr: cst.BaseExpression) -> bool:
-    """Heuristic detection of calls that return None/Void (like super().__init__).
+    """Return whether ``expr`` matches ``super().__init__(...)`` void call pattern.
 
     Args:
-        expr: The LibCST expression to evaluate.
+        expr: ``cst.BaseExpression`` to inspect.
 
     Returns:
-        True if the expression is detected as a void-returning call, False otherwise.
+        ``True`` if ``expr`` is a ``super().__init__`` call.
     """
-    if isinstance(expr, cst.Call):
-      # Detect super().__init__()
-      if isinstance(expr.func, cst.Attribute):
-        if expr.func.attr.value == "__init__":
-          receiver = expr.func.value
-          if isinstance(receiver, cst.Call) and isinstance(receiver.func, cst.Name):
-            if receiver.func.value == "super":
-              return True
+    if isinstance(expr, cst.Call) and isinstance(expr.func, cst.Attribute) and expr.func.attr.value == "__init__":
+      receiver = expr.func.value
+      if isinstance(receiver, cst.Call) and isinstance(receiver.func, cst.Name) and receiver.func.value == "super":
+        return True
     return False
+
+
+__all__ = [
+  "MlirExpressionGenerator",
+  "MlirGenHelpers",
+  "MlirStatementGenerator",
+  "MlirToPythonGenerator",
+  "StatementLineOrCompound",
+]

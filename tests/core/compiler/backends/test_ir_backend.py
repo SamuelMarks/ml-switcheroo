@@ -1,7 +1,5 @@
 """Unit tests for the IR Compiler Backend."""
 
-from tests.conftest import _test_getattr, _test_setattr
-
 import json
 
 import pytest
@@ -111,15 +109,19 @@ def test_ir_backend_compile_python() -> None:
 
 def test_ir_backend_validation_invalid_input() -> None:
   """Test validation error when passing an invalid object to compile."""
+  from unittest.mock import MagicMock
+
   backend = IrBackend()
   with pytest.raises(ValueError, match="instance of LogicalGraph"):
-    _test_getattr({"v": _test_getattr({"v": backend}, "__getitem__")("v").compile}, "__getitem__")("v")(
-      _test_getattr({"v": "not a graph"}, "__getitem__")("v")
-    )
+    backend.compile(MagicMock())
 
 
-def test_ir_backend_validation_dangling_edges() -> None:
-  """Test validation errors for dangling source or target references in edges."""
+def test_ir_backend_validation_dangling_edges(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Test validation errors for dangling source or target references in edges.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   backend = IrBackend()
 
   # Dangling source
@@ -137,25 +139,16 @@ def test_ir_backend_validation_dangling_edges() -> None:
     nodes={"src_node": LogicalNode(id="src_node", op_type="Input")},
     edges=[LogicalEdge(source="src_node", target="missing_target")],
   )
-  _test_setattr(
-    _test_getattr({"v": graph_bad_tgt}, "__getitem__")("v"),
+  monkeypatch.setattr(
+    graph_bad_tgt,
     "_pending_edges",
-    _test_getattr(
-      {
-        "v": [
-          _test_getattr(
-            {
-              "v": _test_getattr({"v": LogicalEdge}, "__getitem__")("v")(
-                source=_test_getattr({"v": "src_node"}, "__getitem__")("v"),
-                target=_test_getattr({"v": "missing_target"}, "__getitem__")("v"),
-              )
-            },
-            "__getitem__",
-          )("v")
-        ]
-      },
-      "__getitem__",
-    )("v"),
+    [
+      LogicalEdge(
+        source="src_node",
+        target="missing_target",
+      )
+    ],
+    raising=False,
   )
   with pytest.raises(ValueError, match="Dangling edge target"):
     backend.compile(graph_bad_tgt)
@@ -169,7 +162,7 @@ def test_ir_backend_validate_op() -> None:
   report = backend.validate_op("Add", inputs_count=2)
   assert report is not None
 
-  with patch("ml_ecosystem_snapshots.grounding.compiler.validate_onnx_op", side_effect=Exception("Failed")):
+  with patch("ml_ecosystem_snapshots.grounding.compiler.validate_onnx_op", side_effect=RuntimeError("Failed")):
     assert backend.validate_op("Add") is None
 
 

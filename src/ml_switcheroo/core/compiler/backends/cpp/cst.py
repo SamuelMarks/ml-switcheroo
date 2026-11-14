@@ -8,21 +8,26 @@ import typing
 
 import pydantic
 
-from ml_switcheroo.core.cst.base import CstFieldValue
+from ml_switcheroo.core.cst.base import CstFieldValue, CSTNode, TriviaInput
 
 
-class CppNode(pydantic.BaseModel):
+class CppNode(CSTNode):
   """Base class for all C++ CST nodes."""
 
-  model_config = pydantic.ConfigDict(extra="forbid", arbitrary_types_allowed=True)
-
-  def __init__(self, **kwargs: CstFieldValue) -> None:
+  def __init__(
+    self,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
+    **kwargs: CstFieldValue,
+  ) -> None:
     """Initialize CppNode.
 
     Args:
-        **kwargs: Subclass field values forwarded to BaseModel.
+        leading_trivia: Optional leading trivia preceding this node.
+        trailing_trivia: Optional trailing trivia following this node.
+        **kwargs: Subclass field values forwarded to CSTNode.
     """
-    super().__init__(**kwargs)
+    super().__init__(leading_trivia=leading_trivia, trailing_trivia=trailing_trivia, **kwargs)
 
   @classmethod
   def parse(cls, code: str) -> "CppNode":
@@ -52,7 +57,11 @@ class CppNode(pydantic.BaseModel):
 
 
 class TypeIdentifier(CppNode):
-  """Represent a C++ type identifier (e.g., 'int', 'torch::Tensor')."""
+  """Represent a C++ type identifier (e.g., 'int', 'torch::Tensor').
+
+  Attributes:
+      name: The name (`str`).
+  """
 
   name: str
 
@@ -76,17 +85,28 @@ class TypeIdentifier(CppNode):
 class Expression(CppNode):
   """Base class for all C++ expressions."""
 
-  def __init__(self, **kwargs: CstFieldValue) -> None:
+  def __init__(
+    self,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
+    **kwargs: CstFieldValue,
+  ) -> None:
     """Initialize Expression.
 
     Args:
+        leading_trivia: Optional leading trivia preceding this expression.
+        trailing_trivia: Optional trailing trivia following this expression.
         **kwargs: Subclass field values forwarded to CppNode.
     """
-    super().__init__(**kwargs)
+    super().__init__(leading_trivia=leading_trivia, trailing_trivia=trailing_trivia, **kwargs)
 
 
 class Identifier(Expression):
-  """Represent a simple variable or identifier."""
+  """Represent a simple variable or identifier.
+
+  Attributes:
+      name: The name (`str`).
+  """
 
   name: str
 
@@ -108,7 +128,13 @@ class Identifier(Expression):
 
 
 class BinaryExpression(Expression):
-  """Represent a binary expression like a + b."""
+  """Represent a binary expression like a + b.
+
+  Attributes:
+      left: The left (`Expression`).
+      operator: The operator (`str`).
+      right: The right (`Expression`).
+  """
 
   left: Expression
   operator: str
@@ -134,7 +160,12 @@ class BinaryExpression(Expression):
 
 
 class MethodCall(Expression):
-  """Represent a method call or function invocation."""
+  """Represent a method call or function invocation.
+
+  Attributes:
+      name: The name (`str`).
+      arguments: The arguments (`list[Expression]`).
+  """
 
   name: str
   arguments: list[Expression] = pydantic.Field(default_factory=list)
@@ -159,7 +190,11 @@ class MethodCall(Expression):
 
 
 class ReturnStatement(CppNode):
-  """Represent a return statement."""
+  """Represent a return statement.
+
+  Attributes:
+      value: The value (`Expression | None`).
+  """
 
   value: Expression | None = None
 
@@ -183,7 +218,13 @@ class ReturnStatement(CppNode):
 
 
 class VariableDeclaration(CppNode):
-  """Represent a variable declaration statement."""
+  """Represent a variable declaration statement.
+
+  Attributes:
+      type_id: The type id (`TypeIdentifier`).
+      name: The name (`str`).
+      initializer: The initializer (`str | Expression | None`).
+  """
 
   type_id: TypeIdentifier
   name: str
@@ -218,7 +259,12 @@ class VariableDeclaration(CppNode):
 
 
 class FunctionArgument(CppNode):
-  """Represent an argument in a function signature."""
+  """Represent an argument in a function signature.
+
+  Attributes:
+      type_id: The type id (`TypeIdentifier`).
+      name: The name (`str`).
+  """
 
   type_id: TypeIdentifier
   name: str
@@ -242,7 +288,14 @@ class FunctionArgument(CppNode):
 
 
 class FunctionDefinition(CppNode):
-  """Represent a C++ function definition."""
+  """Represent a C++ function definition.
+
+  Attributes:
+      return_type: The return type (`TypeIdentifier`).
+      name: The name (`str`).
+      arguments: The arguments (`list[FunctionArgument]`).
+      body: The body (`list[CppNode]`).
+  """
 
   return_type: TypeIdentifier
   name: str
@@ -279,14 +332,17 @@ class FunctionDefinition(CppNode):
     """
     args_str = ", ".join(arg.to_text() for arg in self.arguments)
     lines = [f"{self.return_type.to_text()} {self.name}({args_str}) {{"]
-    for stmt in self.body:
-      lines.append(f"    {stmt.to_text()}")
+    lines.extend(f"    {stmt.to_text()}" for stmt in self.body)
     lines.append("}")
     return "\n".join(lines)
 
 
 class RawStatement(CppNode):
-  """Raw C++ statement to ease transition before full CST modeling."""
+  """Raw C++ statement to ease transition before full CST modeling.
+
+  Attributes:
+      code: The code (`str`).
+  """
 
   code: str
 
@@ -308,7 +364,12 @@ class RawStatement(CppNode):
 
 
 class MacroDefinition(CppNode):
-  """Represent a preprocessor macro definition."""
+  """Represent a preprocessor macro definition.
+
+  Attributes:
+      name: The name (`str`).
+      value: The value (`str`).
+  """
 
   name: str
   value: str
@@ -332,7 +393,11 @@ class MacroDefinition(CppNode):
 
 
 class BlockStatement(CppNode):
-  """Represent a block of C++ code wrapped in braces."""
+  """Represent a block of C++ code wrapped in braces.
+
+  Attributes:
+      statements: The statements (`list[CppNode]`).
+  """
 
   statements: list[CppNode]
 
@@ -351,14 +416,19 @@ class BlockStatement(CppNode):
         str: The block.
     """
     lines = ["{"]
-    for s in self.statements:
-      lines.append(f"    {s.to_text()}")
+    lines.extend(f"    {s.to_text()}" for s in self.statements)
     lines.append("}")
     return "\n".join(lines)
 
 
 class PyBindDef(CppNode):
-  """Represent a pybind11 module method definition."""
+  """Represent a pybind11 module method definition.
+
+  Attributes:
+      name: The name (`str`).
+      function_ref: The function ref (`str`).
+      docstring: The docstring (`str`).
+  """
 
   name: str
   function_ref: str
@@ -384,7 +454,13 @@ class PyBindDef(CppNode):
 
 
 class PyBindModule(CppNode):
-  """Represent a PYBIND11_MODULE block."""
+  """Represent a PYBIND11_MODULE block.
+
+  Attributes:
+      name: The name (`str`).
+      module_var: The module var (`str`).
+      defs: The defs (`list[PyBindDef]`).
+  """
 
   name: str
   module_var: str
@@ -407,14 +483,18 @@ class PyBindModule(CppNode):
         str: The module block.
     """
     lines = [f"PYBIND11_MODULE({self.name}, {self.module_var}) {{"]
-    for d in self.defs:
-      lines.append(f"    {d.to_text()}")
+    lines.extend(f"    {d.to_text()}" for d in self.defs)
     lines.append("}")
     return "\n".join(lines)
 
 
 class IncludeDirective(CppNode):
-  """Represent an #include directive."""
+  """Represent an #include directive.
+
+  Attributes:
+      path: The path (`str`).
+      system: The system (`bool`).
+  """
 
   path: str
   system: bool = False
@@ -447,7 +527,12 @@ class IncludeDirective(CppNode):
 
 
 class CppModule(CppNode):
-  """Represent a complete C++ source file."""
+  """Represent a complete C++ source file.
+
+  Attributes:
+      includes: The includes (`list[IncludeDirective]`).
+      body: The body (`list[CppNode]`).
+  """
 
   includes: list[IncludeDirective] = pydantic.Field(default_factory=list)
   body: list[CppNode] = pydantic.Field(default_factory=list)

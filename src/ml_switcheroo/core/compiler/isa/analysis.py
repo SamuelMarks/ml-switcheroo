@@ -11,7 +11,13 @@ from ml_switcheroo.core.compiler.isa.cst import IsaImmediate, IsaInstruction
 
 
 class IsaAnalyzer:
-  """Base analyzer for reverse-engineering high-level op metadata from ISA instructions."""
+  """Base analyzer for reverse-engineering high-level op metadata from ISA instructions.
+
+  Attributes:
+      CMP_OPCODE: The cmp opcode (`str`).
+      IMMEDIATE_TYPE: The immediate type (`type[IsaImmediate]`).
+      LOOP_PARAMETER_RULES: The loop parameter rules (`typing.Mapping[str, tuple[str, str]]`).
+  """
 
   CMP_OPCODE: str = ""
   IMMEDIATE_TYPE: type[IsaImmediate] = IsaImmediate
@@ -37,9 +43,7 @@ class IsaAnalyzer:
 
     for inst in instructions:
       if inst.opcode == cls.CMP_OPCODE:
-        for op in inst.operands:
-          if isinstance(op, cls.IMMEDIATE_TYPE):
-            loop_limits.append(op.value)
+        loop_limits.extend(op.value for op in inst.operands if isinstance(op, cls.IMMEDIATE_TYPE))
 
     if not loop_limits:
       return metadata

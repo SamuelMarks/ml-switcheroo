@@ -14,8 +14,8 @@ It defines the structure for:
 - **Patterns**: Graph fusion rules.
 """
 
-from enum import Enum
 import typing
+from enum import Enum
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
 
@@ -141,6 +141,43 @@ class FrameworkVariant(BaseModel):
   Defines the API endpoint, argument mappings, required imports, and versioning constraints.
   """
 
+  model_config = ConfigDict(populate_by_name=True, extra="allow")
+
+  @model_validator(mode="before")
+  @classmethod
+  def _normalize_legacy_aliases(
+    cls,
+    data: dict[str, JsonValue] | typing.Mapping[str, JsonValue] | "FrameworkVariant",
+  ) -> dict[str, JsonValue] | typing.Mapping[str, JsonValue] | "FrameworkVariant":
+    """Normalize legacy snapshot/overlay keys onto canonical ``FrameworkVariant`` fields.
+
+    Args:
+        data: Raw input mapping or ``FrameworkVariant`` instance.
+
+    Returns:
+        Normalized mapping or ``FrameworkVariant`` instance.
+    """
+    if not isinstance(data, dict):
+      return data
+    normalized = dict(data)
+    if "imports" in normalized and "required_imports" not in normalized and normalized["imports"] is not None:
+      normalized["required_imports"] = normalized.pop("imports")
+    if (
+      "output_select" in normalized
+      and "output_select_index" not in normalized
+      and normalized["output_select"] is not None
+    ):
+      normalized["output_select_index"] = normalized.pop("output_select")
+    if "rule" in normalized and "dispatch_rules" not in normalized and normalized["rule"] is not None:
+      normalized["dispatch_rules"] = normalized.pop("rule")
+    if (
+      "replace_With_graph" in normalized
+      and "replace_with_graph" not in normalized
+      and normalized["replace_With_graph"] is not None
+    ):
+      normalized["replace_with_graph"] = normalized.pop("replace_With_graph")
+    return normalized
+
   api: str | None = Field(
     None,
     description="The fully qualified API path (e.g. 'torch.nn.functional.log_softmax'). If None, implies explicit lack of support unless a plugin handles it.",
@@ -153,15 +190,15 @@ class FrameworkVariant(BaseModel):
     description="Mapping from Standard Argument Name to Framework Argument Name. If value is null, argument is dropped.",
   )
   arg_values: dict[str, dict[str, JsonValue] | JsonValue] = Field(
-    default_factory=lambda: {},
+    default_factory=dict,
     description="Map of {StandardArg: {SourceValue: TargetCode}} for enums, OR {StandardArg: TargetCode} for constant injection.",
   )
   kwargs_map: dict[str, str | None] = Field(
-    default_factory=lambda: {},
+    default_factory=dict,
     description="Mapping for specific keys within a **kwargs expansion. Values can be null to drop the key.",
   )
   inject_args: dict[str, JsonValue] = Field(
-    default_factory=lambda: {},
+    default_factory=dict,
     description="Dictionary of new arguments to inject with fixed default values (supports primitives and complex types).",
   )
   inject_defaults: bool = Field(
@@ -258,7 +295,7 @@ class PluginScaffoldDef(BaseModel):
 
   # --- Feature: Auto-Wire ---
   auto_wire: dict[str, JsonValue] = Field(
-    default_factory=lambda: {},
+    default_factory=dict,
     description="Dictionary defining Semantic Operations to be automatically injected via the plugin itself. Matches the structure of an ODL OperationDef JSON.",
   )
 
@@ -279,8 +316,19 @@ class OperationDef(BaseModel):
   and metadata for verification, fuzzing, and documentation generation.
   """
 
+  model_config = ConfigDict(populate_by_name=True, extra="allow")
+
   operation: str = Field(..., description="The PascalCase abstract name (e.g. 'LogSoftmax').")
   description: str = Field(default="", description="Docstring summary of what the operation does.")
+  metadata: dict[str, JsonValue] = Field(
+    default_factory=dict,
+    description="Structured operation metadata (e.g. {'target_type': 'Float32'}).",
+  )
+  is_internal: bool = Field(
+    default=False,
+    alias="_is_internal",
+    description="Whether this operation originates from internal bootstrap defaults.",
+  )
 
   state_semantics: str | None = Field(
     None, description="State semantics (e.g. 'pure' or 'stateful') as per the ODL specification."

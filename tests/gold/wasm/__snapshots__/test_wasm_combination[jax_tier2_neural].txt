@@ -1,0 +1,6 @@
+--- Forward ---
+# JAX (Core) does not include a neural network layer library.
+# Use Flax or Haiku for layer abstractions.
+--- Backward ---
+# JAX (Core) does not include a neural network layer library.
+# Use Flax or Haiku for layer abstractions.

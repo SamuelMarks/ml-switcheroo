@@ -1,0 +1,8 @@
+--- Forward ---
+module {sym_name = "UnknownClass"} {func.func {sym_name = "main", function_type = () -> ()} {^entry:%0 = stablehlo.abs (@_x) : tensor<*xf32>}}
+--- Backward ---
+// Graph -> MLIR compilation output
+module {
+  func.func @main() {
+  }
+}

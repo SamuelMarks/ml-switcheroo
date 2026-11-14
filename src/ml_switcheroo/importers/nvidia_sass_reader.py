@@ -8,6 +8,7 @@ It normalizes assembly mnemonics into the ML-Switcheroo Abstract Standard option
 where possible (e.g., "FP32 Add" -> "Add").
 """
 
+import typing
 from html.parser import HTMLParser
 from pathlib import Path
 
@@ -80,10 +81,9 @@ class NvidiaSassHtmlParser(HTMLParser):
         opcode = self.current_row_cells[0]
         desc = self.current_row_cells[1]
         # Filter out headers that might be in tbody or empty rows
-        if opcode and desc and not opcode.lower().startswith("opcode"):
-          # Check if Opcode looks like a mnemonic (UPPERCASE, no spaces usually)
-          if " " not in opcode and opcode.isupper():
-            self.extracted_ops.append((opcode, desc))
+        # Check if Opcode looks like a mnemonic (UPPERCASE, no spaces usually)
+        if opcode and desc and not opcode.lower().startswith("opcode") and " " not in opcode and opcode.isupper():
+          self.extracted_ops.append((opcode, desc))
     elif tag == "tbody":
       self.in_tbody = False
     elif tag == "table":
@@ -105,7 +105,7 @@ class NvidiaSassSpecImporter:
   """Facade for importing, parsing, and normalizing NVIDIA_SASS specifications from HTML files."""
 
   # Mapping logic: Substring pattern in Description -> Abstract Op Name
-  _DESCRIPTION_MAP = [
+  _DESCRIPTION_MAP: typing.ClassVar[list[tuple[str, str]]] = [
     ("FP32 Add", "Add"),
     ("FP32 Subtract", "Sub"),  # Rare, usually FADD with neg
     ("FP32 Multiply", "Mul"),
@@ -225,7 +225,6 @@ class NvidiaSassSpecImporter:
     if "convert" in desc_lower and "integer" in desc_lower and "fp32" in desc_lower:
       if desc_lower.find("integer") < desc_lower.find("fp32"):
         return "CastFloat"
-      else:
-        return "CastInt"
+      return "CastInt"
 
     return None

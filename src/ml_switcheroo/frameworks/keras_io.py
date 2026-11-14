@@ -41,7 +41,7 @@ class KerasIOMixin:
     """
     if op == "save" and object_arg:
       return f"{object_arg}.save({file_arg})"
-    elif op == "load":
+    if op == "load":
       return f"keras.saving.load_model({file_arg})"
     return ""
 

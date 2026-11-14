@@ -1,18 +1,17 @@
 """Test suite for the Keras Io module."""
 
-from tests.conftest import _test_hasattr
-
 from ml_switcheroo.frameworks.keras_io import KerasIOMixin
 
 
 def test_keras_io_dummy() -> None:
-  """Verifies the behavior of Keras I/O dummy."""
+  """Verify `KerasIOMixin` handles keras I/O dummy as expected."""
   mixin = KerasIOMixin()
-  assert _test_hasattr(mixin, "get_serialization_imports")
+  assert isinstance(mixin, KerasIOMixin)
+  assert mixin.get_serialization_imports() == ["import keras"]
 
 
 def test_keras_io_mixin_serialization() -> None:
-  """Verify keras io mixin serialization behavior."""
+  """Verify `KerasIOMixin` emits `import h5py` for keras I/O mixin serialization."""
   mixin = KerasIOMixin()
 
   assert mixin.get_serialization_imports() == ["import keras"]

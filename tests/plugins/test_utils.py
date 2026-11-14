@@ -1,14 +1,10 @@
 """Test suite for the Utils module."""
 
-from tests.conftest import _test_getattr
-
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
-
 from unittest.mock import MagicMock
 
 import libcst as cst
 import pytest
+from pydantic import JsonValue
 
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.hooks import HookContext
@@ -92,7 +88,7 @@ def test_detect_registered_alias(mock_ctx: HookContext) -> None:
 
 
 def test_reject_variable(mock_ctx: HookContext) -> None:
-  """Verifies the behavior of reject variable.
+  """Verify `Name` handles reject variable as expected.
 
   Args:
       mock_ctx (HookContext): Hook context mock.
@@ -112,16 +108,16 @@ def test_detect_complex_expression(mock_ctx: HookContext) -> None:
 
 
 def test_utils_missing() -> None:
-  """Verifies the behavior of utilities missing."""
+  """Verify `Attribute` handles utils missing as expected."""
   import libcst as cst
 
   from ml_switcheroo.core.hooks import HookContext
   from ml_switcheroo.plugins.utils import _extract_root_name, is_framework_module_node
 
   class DummyAlias:
-    """Test helper class DummyAlias."""
+    """Test double `DummyAlias` implementing `model_dump` for utils tests."""
 
-    def model_dump(self) -> dict[str, str]:
+    def model_dump(self) -> dict[str, JsonValue]:
       """Mock implementation of model dump.
 
       Returns:
@@ -130,7 +126,7 @@ def test_utils_missing() -> None:
       return {"name": "pd"}
 
   class DummyConf:
-    """Test helper class DummyConf."""
+    """Sentinel `DummyConf` fixture class used in utils tests."""
 
     alias = DummyAlias()
 
@@ -142,37 +138,23 @@ def test_utils_missing() -> None:
 
     alias = _NoDumpAlias()
 
-  class DummySM:
-    """Test helper class DummySM."""
+  dummy_sm = MagicMock(spec=SemanticsManager)
+  dummy_sm._source_registry = {"torch.nn": ("torch", "neural")}
+  dummy_sm.framework_configs = {
+    "pandas": DummyConf(),
+    "other": DummyConfNoDump(),
+    "direct_dict": {"alias": {"name": "dd"}},
+    "direct_dict_no_name": {"alias": {}},
+    "no_alias": {},
+    "target_framework": {},
+    "tf": {},
+  }
+  cfg = RuntimeConfig.model_construct(source_framework="s", target_framework="target_framework")
 
-    _source_registry: dict[str, RuntimeTensorOrValue] = {"torch.nn": {}}
-    framework_configs = {
-      "pandas": DummyConf(),
-      "other": DummyConfNoDump(),
-      "direct_dict": {"alias": {"name": "dd"}},
-      "direct_dict_no_name": {"alias": {}},
-      "no_alias": {},
-      "target_framework": {},
-      "tf": {},
-    }
-
-  class DummyConfigObj:
-    """Test helper class DummyConfigObj."""
-
-    source_framework = "s"
-    target_framework = "target_framework"
-    effective_source = "s"
-    effective_target = "target_framework"
-
-  ctx = _test_getattr(
-    {
-      "v": _test_getattr({"v": HookContext}, "__getitem__")("v")(
-        _test_getattr({"v": _test_getattr({"v": DummySM}, "__getitem__")("v")()}, "__getitem__")("v"),
-        _test_getattr({"v": _test_getattr({"v": DummyConfigObj}, "__getitem__")("v")()}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
+  ctx = HookContext(
+    dummy_sm,
+    cfg,
+  )
   assert is_framework_module_node(cst.Integer("1"), ctx) is False
   assert is_framework_module_node(cst.Name("pd"), ctx) is True
   assert is_framework_module_node(cst.Name("torch"), ctx) is True
@@ -188,3 +170,13 @@ def test_utils_missing() -> None:
 
   # And unknown root
   assert is_framework_module_node(cst.Name("unknown"), ctx) is False
+
+
+def test_resolve_variant_helpers_attribute_error_safety() -> None:
+  """Verify resolve_variant_api and resolve_variant_arg_name handle minimal contexts."""
+  from ml_switcheroo.plugins.utils import resolve_variant_api, resolve_variant_arg_name
+
+  minimal = MagicMock(spec=["lookup_api"])
+  minimal.lookup_api.return_value = None
+  assert resolve_variant_api(minimal, "Add") is None
+  assert resolve_variant_arg_name(minimal, "lr", "learning_rate") == "learning_rate"

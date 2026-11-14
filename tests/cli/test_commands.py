@@ -9,7 +9,7 @@ from ml_switcheroo.cli.commands import handle_gen_weight_script
 
 @patch("ml_switcheroo.cli.commands.WeightScriptGenerator")
 def test_handle_gen_weight_script_success(mock_gen_class: MagicMock) -> None:
-  """Verify handle gen weight script success behavior.
+  """Verify `handle_gen_weight_script` returns `0` for success.
 
   Args:
       mock_gen_class: Mock object for gen class.
@@ -24,7 +24,7 @@ def test_handle_gen_weight_script_success(mock_gen_class: MagicMock) -> None:
 
 @patch("ml_switcheroo.cli.commands.WeightScriptGenerator")
 def test_handle_gen_weight_script_failure(mock_gen_class: MagicMock) -> None:
-  """Verify handle gen weight script failure behavior.
+  """Verify `handle_gen_weight_script` returns `1` for failure.
 
   Args:
       mock_gen_class: Mock object for gen class.
@@ -45,7 +45,7 @@ def test_handle_gen_weight_script(
   mock_sem_mgr: mock.MagicMock,
   mock_rc: mock.MagicMock,
 ) -> None:
-  """Verify handle gen weight script behavior.
+  """Verify `handle_gen_weight_script` returns `0` across commands inputs.
 
   Args:
       mock_generator_cls: Mock object for generator cls.

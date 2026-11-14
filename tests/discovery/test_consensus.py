@@ -7,14 +7,14 @@ from ml_switcheroo.discovery.consensus import ConsensusEngine
 
 
 def test_consensus_engine_init() -> None:
-  """Verifies the behavior of consensus engine initialization."""
+  """Verify `ConsensusEngine` handles consensus engine init as expected."""
   engine = ConsensusEngine(["torch", "jax.numpy"])
   assert engine.frameworks == ["torch", "jax.numpy"]
   assert engine.vocabulary == {}
 
 
 def test_consensus_engine_normalize() -> None:
-  """Verifies the behavior of consensus engine normalize."""
+  """Verify `ConsensusEngine` handles consensus engine normalize as expected."""
   engine = ConsensusEngine([])
   assert engine.normalize("torch_add") == "add"
   assert engine.normalize("cross_entropy_loss") == "crossentropy"
@@ -24,7 +24,7 @@ def test_consensus_engine_normalize() -> None:
 
 
 def test_consensus_engine_ingest_success() -> None:
-  """Verifies the behavior of consensus engine ingest successfully."""
+  """Verify `ConsensusEngine` handles consensus engine ingest success as expected."""
   engine = ConsensusEngine(["json"])
   engine.ingest()
   assert len(engine.vocabulary) > 0
@@ -32,18 +32,18 @@ def test_consensus_engine_ingest_success() -> None:
 
 
 def test_consensus_engine_ingest_import_error() -> None:
-  """Verifies the behavior of consensus engine ingest import correctly handling an error."""
+  """Verify `ConsensusEngine` handles consensus engine ingest import error as expected."""
   engine = ConsensusEngine(["nonexistent_fw"])
   engine.ingest()
   assert len(engine.vocabulary) == 0
 
 
 def test_consensus_engine_scan_module_recursion() -> None:
-  """Verifies the behavior of consensus engine scan module recursion."""
+  """Verify `ConsensusEngine` handles consensus engine scan module recursion as expected."""
   engine = ConsensusEngine([])
 
   class DummyModule:
-    """Test helper class DummyModule."""
+    """Sentinel `DummyModule` fixture class used in consensus tests."""
 
     __name__ = "dummy"
 
@@ -52,7 +52,7 @@ def test_consensus_engine_scan_module_recursion() -> None:
 
 
 def test_consensus_engine_scan_module_error() -> None:
-  """Verifies the behavior of consensus engine scan module correctly handling an error."""
+  """Verify `ConsensusEngine` handles consensus engine scan module error as expected."""
   engine = ConsensusEngine([])
   with patch("inspect.getmembers", side_effect=RuntimeError("boom")):
     engine._scan_module(MagicMock(), "dummy")
@@ -60,7 +60,7 @@ def test_consensus_engine_scan_module_error() -> None:
 
 
 def test_consensus_engine_scan_submodule() -> None:
-  """Verifies the behavior of consensus engine scan submodule."""
+  """Verify `ConsensusEngine` emits `myfunc` for consensus engine scan submodule."""
   engine = ConsensusEngine([])
 
   class Sub:
@@ -69,7 +69,7 @@ def test_consensus_engine_scan_submodule() -> None:
     __name__ = "dummy.sub"
 
   class Dummy:
-    """Test helper class Dummy."""
+    """Sentinel `Dummy` fixture class used in consensus tests."""
 
     __name__ = "dummy"
     sub = Sub()
@@ -99,7 +99,7 @@ def test_consensus_engine_scan_submodule() -> None:
 
 
 def test_consensus_engine_cluster() -> None:
-  """Verifies the behavior of consensus engine cluster."""
+  """Verify `ConsensusEngine` emits `Relu` for consensus engine cluster."""
   engine = ConsensusEngine([])
   engine.vocabulary = {
     "relu": ["torch.relu", "jax.nn.relu"],
@@ -115,7 +115,7 @@ def test_consensus_engine_cluster() -> None:
 
 
 def test_consensus_engine_cluster_no_matches() -> None:
-  """Verifies the behavior of consensus engine cluster no matches."""
+  """Verify `ConsensusEngine` handles consensus engine cluster no matches as expected."""
   engine = ConsensusEngine([])
   engine.vocabulary = {"a": ["a"]}
   clusters = engine.cluster()
@@ -123,7 +123,7 @@ def test_consensus_engine_cluster_no_matches() -> None:
 
 
 def test_consensus_engine_cluster_difflib_no_matches() -> None:
-  """Verifies the behavior of consensus engine cluster when no Levenshtein matches are returned."""
+  """Verify `ConsensusEngine` handles consensus engine cluster difflib no matches as expected."""
   engine = ConsensusEngine([])
   engine.vocabulary = {"a": ["a"]}
   with patch.object(engine, "find_levenshtein_matches", return_value=[]):

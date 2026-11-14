@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 import pytest
 
+from ml_switcheroo.config import RuntimeConfigOverrides
 from ml_switcheroo.core.conversion_result import ConversionResult
 from ml_switcheroo.core.engine import ASTEngine
 
@@ -44,7 +45,7 @@ SAMPLE_IR_JSON = """{
 
 def test_engine_torch_to_ir() -> None:
   """Test converting PyTorch model code to IR JSON."""
-  engine = ASTEngine(source="torch", target="ir")
+  engine = ASTEngine.from_options(source="torch", target="ir")
   res = engine.run(SAMPLE_TORCH_CODE)
   assert res.success
   data = json.loads(res.code)
@@ -55,7 +56,7 @@ def test_engine_torch_to_ir() -> None:
 
 def test_engine_jax_to_ir() -> None:
   """Test converting JAX model code to IR JSON."""
-  engine = ASTEngine(source="jax", target="ir")
+  engine = ASTEngine.from_options(source="jax", target="ir")
   res = engine.run(SAMPLE_JAX_CODE)
   assert res.success
   data = json.loads(res.code)
@@ -65,7 +66,7 @@ def test_engine_jax_to_ir() -> None:
 
 def test_engine_ir_to_torch() -> None:
   """Test converting IR JSON to PyTorch code."""
-  engine = ASTEngine(source="ir", target="torch")
+  engine = ASTEngine.from_options(source="ir", target="torch")
   res = engine.run(SAMPLE_IR_JSON)
   assert res.success
   assert "class LinearNet(nn.Module):" in res.code
@@ -76,7 +77,7 @@ def test_engine_ir_to_torch() -> None:
 
 def test_engine_ir_to_jax() -> None:
   """Test converting IR JSON to JAX code."""
-  engine = ASTEngine(source="ir", target="jax")
+  engine = ASTEngine.from_options(source="ir", target="jax")
   res = engine.run(SAMPLE_IR_JSON)
   assert res.success
   assert len(res.code) > 0
@@ -84,7 +85,7 @@ def test_engine_ir_to_jax() -> None:
 
 def test_engine_ir_to_keras() -> None:
   """Test converting IR JSON to Keras code."""
-  engine = ASTEngine(source="ir", target="keras")
+  engine = ASTEngine.from_options(source="ir", target="keras")
   res = engine.run(SAMPLE_IR_JSON)
   assert res.success
   assert len(res.code) > 0
@@ -92,7 +93,7 @@ def test_engine_ir_to_keras() -> None:
 
 def test_engine_ir_to_mlx() -> None:
   """Test converting IR JSON to MLX code."""
-  engine = ASTEngine(source="ir", target="mlx")
+  engine = ASTEngine.from_options(source="ir", target="mlx")
   res = engine.run(SAMPLE_IR_JSON)
   assert res.success
   assert len(res.code) > 0
@@ -100,7 +101,7 @@ def test_engine_ir_to_mlx() -> None:
 
 def test_engine_ir_to_stablehlo() -> None:
   """Test compiling IR JSON directly to StableHLO MLIR text."""
-  engine = ASTEngine(source="ir", target="stablehlo")
+  engine = ASTEngine.from_options(source="ir", target="stablehlo")
   res = engine.run(SAMPLE_IR_JSON)
   assert res.success
   assert len(res.code) > 0
@@ -108,7 +109,7 @@ def test_engine_ir_to_stablehlo() -> None:
 
 def test_engine_ir_to_nvidia_sass() -> None:
   """Test compiling IR JSON directly to NVIDIA SASS assembly."""
-  engine = ASTEngine(source="ir", target="nvidia_sass")
+  engine = ASTEngine.from_options(source="ir", target="nvidia_sass")
   res = engine.run(SAMPLE_IR_JSON)
   assert res.success
   assert len(res.code) > 0
@@ -116,23 +117,26 @@ def test_engine_ir_to_nvidia_sass() -> None:
 
 def test_engine_ir_to_rdna() -> None:
   """Test compiling IR JSON directly to AMD RDNA assembly."""
-  engine = ASTEngine(source="ir", target="rdna")
+  engine = ASTEngine.from_options(source="ir", target="rdna")
   res = engine.run(SAMPLE_IR_JSON)
   assert res.success
   assert len(res.code) > 0
 
 
 def test_engine_intermediate_ir_mode() -> None:
-  """Test two-hop conversion using --intermediate ir."""
-  engine = ASTEngine(source="torch", target="jax", intermediate="ir")
+  """Test two-hop conversion using --intermediate ir preserves parent and child sub-traces."""
+  engine = ASTEngine.from_options(RuntimeConfigOverrides(source="torch", target="jax", intermediate="ir"))
   res = engine.run(SAMPLE_TORCH_CODE)
   assert res.success
   assert len(res.code) > 0
+  descriptions = [str(evt["description"]) for evt in res.trace_events]
+  assert "Intermediate Pipeline" in descriptions
+  assert "Compiler Pipeline" in descriptions
 
 
 def test_engine_intermediate_ir_failure_propagation() -> None:
   """Test error propagation when intermediate conversion hop fails."""
-  engine = ASTEngine(source="torch", target="jax", intermediate="ir")
+  engine = ASTEngine.from_options(RuntimeConfigOverrides(source="torch", target="jax", intermediate="ir"))
   with patch.object(
     ASTEngine,
     "_run_compiler_pipeline",
@@ -147,6 +151,7 @@ def test_ingest_code_ir_source() -> None:
   """Test ingest_code with IR source constructing LibCST tree."""
   from ml_switcheroo.core.ingestion import ingest_code
   from ml_switcheroo.core.tracer import get_tracer
+  from ml_switcheroo.exceptions import IngestionParseError
   from ml_switcheroo.frameworks.ir import IrAdapter
 
   adapter = IrAdapter()
@@ -155,7 +160,7 @@ def test_ingest_code_ir_source() -> None:
   assert tree is not None
 
   # Test failure branch
-  with pytest.raises(Exception):
+  with pytest.raises(IngestionParseError, match=r".+"):
     ingest_code("{bad_json:", "ir", "torch", adapter, tracer)
 
 
@@ -167,7 +172,7 @@ func.func @main(%arg0: tensor<4xf32>) -> tensor<4xf32> {
   return %0 : tensor<4xf32>
 }
 """
-  engine = ASTEngine(source="stablehlo", target="rdna")
+  engine = ASTEngine.from_options(source="stablehlo", target="rdna")
   res = engine.run(stablehlo_code)
   assert res.success
   assert len(res.code) > 0

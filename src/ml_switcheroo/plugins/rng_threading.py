@@ -98,6 +98,6 @@ def inject_prng_threading(node: cst.Call, ctx: HookContext) -> cst.Call:
     ),
   )
 
-  new_args = cleaned_args + [key_arg]
+  new_args = [*cleaned_args, key_arg]
 
   return node.with_changes(args=new_args)

@@ -4,19 +4,19 @@ import tensorflow as tf
 
 
 class LSTMModel:
-  """Test helper class LSTMModel."""
+  """Test double `LSTMModel` implementing `call` for tensorflow tests."""
 
   def __init__(self, hidden_size: int):
     """Initializes the LSTMModel instance.
 
     Args:
-        hidden_size: The hidden size (int) for   init  .
+        hidden_size: Input `hidden_size` parameter value (`int`).
     """
     super().__init__()
     self.lstm = tf.keras.layers.LSTM(hidden_size, return_sequences=True)
 
   def call(self, x: tf.Tensor) -> tf.Tensor:
-    """Helper to call.
+    """Execute `lstm` to support call in tensorflow tests.
 
     Args:
         x: Primary input tensor or array operand.

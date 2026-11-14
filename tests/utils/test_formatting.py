@@ -4,7 +4,7 @@ from ml_switcheroo.utils.formatting import MarkupVisitor, StructuredFormatter, e
 
 
 def test_structured_formatter_basic() -> None:
-  """Verify structured formatter basic behavior."""
+  """Verify `StructuredFormatter` handles structured formatter basic as expected."""
   fmt: StructuredFormatter = StructuredFormatter(indent_size=4)
   fmt.add_line("def foo():", 0)
   fmt.add_line("return True", 1)
@@ -15,7 +15,7 @@ def test_structured_formatter_basic() -> None:
 
 
 def test_structured_formatter_add_block() -> None:
-  """Verify structured formatter add block behavior."""
+  """Verify `StructuredFormatter` handles structured formatter add block as expected."""
   fmt: StructuredFormatter = StructuredFormatter(indent_size=2)
   block: str = "line1\nline2\nline3"
   fmt.add_block(block, indent_level=2)
@@ -25,7 +25,7 @@ def test_structured_formatter_add_block() -> None:
 
 
 def test_escape_html() -> None:
-  """Verify escape html behavior."""
+  """Verify `escape_html` produces expected results across formatting inputs."""
   raw: str = "<div>&'\"</div>"
   escaped: str = escape_html(raw)
   assert escaped == "&lt;div&gt;&amp;&#x27;&quot;&lt;/div&gt;"
@@ -35,7 +35,7 @@ def test_escape_html() -> None:
 
 
 def test_escape_latex() -> None:
-  """Verify escape latex behavior."""
+  """Verify `escape_latex` produces expected results across formatting inputs."""
   raw: str = "50% accuracy"
   assert escape_latex(raw) == "50\\% accuracy"
 
@@ -60,6 +60,11 @@ def test_markup_visitor() -> None:
 
   class CustomVisitor(MarkupVisitor):
     """Visitor recording visited Leaf nodes."""
+
+    def __init__(self) -> None:
+      """Initialize visitor and register `Leaf` handler."""
+      super().__init__()
+      self.register_visitor(Leaf, self.visit_Leaf)
 
     def visit_Leaf(self, node: Leaf) -> None:
       """Record visited Leaf node.

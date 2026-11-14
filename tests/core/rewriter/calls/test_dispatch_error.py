@@ -1,7 +1,5 @@
 """Test suite for dispatch error."""
 
-from tests.conftest import _test_getattr
-
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -11,7 +9,7 @@ from ml_switcheroo.enums import LogicOp
 
 
 def test_node_to_literal_value_error() -> None:
-  """Verify node to literal value error behavior."""
+  """Verify `_node_to_literal` handles value error as expected."""
   node = MagicMock(spec=cst.Integer)
   node.value = "not_an_int"
 
@@ -38,10 +36,10 @@ class DummyRule:
     """Initialize test helper instance.
 
     Args:
-        if_arg: The if arg (str) for   init  .
-        op: The op (str) for   init  .
-        is_val: The is val (int | float | str | bool | None) for   init  .
-        use_api: The use api (str) for   init  .
+        if_arg: Input `if_arg` parameter value (`str`).
+        op: Input `op` parameter value (`str`).
+        is_val: Input `is_val` parameter value (`int | float | str | bool | None`).
+        use_api: Input `use_api` parameter value (`str`).
     """
     self.if_arg = if_arg
     self.op = op
@@ -61,7 +59,7 @@ class DummyRewriter:
     self.source_framework = source_framework
 
   def _is_module_alias(self, name: cst.CSTNode) -> bool:
-    """Execute is module alias helper logic.
+    """Execute `_is_module_alias` on `DummyRewriter` for dispatch error tests.
 
     Args:
         name: Identifier or operation name string.
@@ -75,22 +73,26 @@ class DummyRewriter:
 def parse_call(code: str) -> cst.Call:
   """Parses a single call from code.
 
+  Args:
+      code: Python or DSL source snippet.
+
   Returns:
       Resulting `cst.Call` from parse call.
   """
   module = cst.parse_module(code)
-  expr = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
-  return cst.ensure_type(expr, cst.Call)
+  stmt = cst.ensure_type(module.body[0], cst.SimpleStatementLine)
+  expr_stmt = cst.ensure_type(stmt.body[0], cst.Expr)
+  return cst.ensure_type(expr_stmt.value, cst.Call)
 
 
 def test_check_rule_condition_unknown_op() -> None:
-  """Verify check rule condition unknown op behavior."""
+  """Verify `_check_rule_condition` handles unknown operation as expected."""
   rule = DummyRule("x", "UNKNOWN_OP", 5, "foo")
   assert not _check_rule_condition(cst.Integer("5"), rule)
 
 
 def test_evaluate_dispatch_rules_arg_not_found() -> None:
-  """Verify evaluate dispatch rules arg not found behavior."""
+  """Verify `parse_call` handles evaluate dispatch rules arg not found as expected."""
   rewriter = DummyRewriter("torch")
   call = parse_call("func(a=1)")
 

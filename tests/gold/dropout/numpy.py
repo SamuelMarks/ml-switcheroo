@@ -5,13 +5,13 @@ import numpy.typing
 
 
 class DropoutModel:
-  """Test helper class DropoutModel."""
+  """Sentinel `DropoutModel` fixture class used in numpy tests."""
 
   def __init__(self, p: float = 0.5):
     """Initializes the DropoutModel instance.
 
     Args:
-        p: The p (float) for   init  .
+        p: Input `p` parameter value (`float`).
     """
     self.p = p
 
@@ -20,7 +20,7 @@ class DropoutModel:
 
     Args:
         x: Primary input tensor or array operand.
-        training: The training (bool) for   call  .
+        training: Input `training` parameter value (`bool`).
 
     Returns:
         Output tensor or value computed by the forward pass.

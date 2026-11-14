@@ -11,10 +11,12 @@ import pydantic
 from ml_switcheroo.core.compiler.isa.cst import (
   CstFieldValue,
   IsaComment,
+  IsaDirective,
   IsaImmediate,
   IsaInstruction,
   IsaLabel,
   IsaMemory,
+  IsaModule,
   IsaNode,
   IsaOperand,
   IsaRegister,
@@ -304,9 +306,13 @@ class NvidiaSassInstruction(IsaInstruction, NvidiaSassNode):
     )
     self.predicate = predicate
 
-  def __post_init__(self) -> None:
-    """Validate instruction post-initialization."""
-    super().__post_init__()
+  def _post_init(self) -> None:
+    """Validate instruction post-initialization.
+
+    Raises:
+        ValueError: If `opcode` contains whitespace characters.
+    """
+    super()._post_init()
     if " " in self.opcode:
       raise ValueError("Invalid NVIDIA_SASS opcode")
 
@@ -370,16 +376,13 @@ class NvidiaSassLabel(IsaLabel, NvidiaSassOperand):
     )
 
 
-class NvidiaSassDirective(NvidiaSassNode):
+class NvidiaSassDirective(IsaDirective, NvidiaSassNode):
   """Represent an assembler directive.
 
   Attributes:
       name (str): The directive name (e.g., "headerflags").
       params (List[str]): List of string parameters.
   """
-
-  name: str = ""
-  params: list[str] = pydantic.Field(default_factory=list)
 
   def __init__(
     self,
@@ -398,23 +401,10 @@ class NvidiaSassDirective(NvidiaSassNode):
     """
     super().__init__(
       name=name,
-      params=params if params is not None else [],
-      leading_trivia=leading_trivia if leading_trivia is not None else [],
-      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+      params=params,
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
     )
-
-  def to_text(self) -> str:
-    """Render the directive to its literal text.
-
-    Returns:
-        str: The rendered directive text.
-    """
-    res = "".join(t.text for t in self.leading_trivia)
-    res += f".{self.name}"
-    if self.params:
-      res += " " + ", ".join(self.params)
-    res += "".join(t.text for t in self.trailing_trivia)
-    return res
 
 
 class NvidiaSassComment(IsaComment, NvidiaSassNode):
@@ -422,6 +412,7 @@ class NvidiaSassComment(IsaComment, NvidiaSassNode):
 
   Attributes:
       text (str): The comment content.
+      prefix (str): Comment token prefix (`"//"`).
   """
 
   text: str = ""
@@ -450,18 +441,16 @@ class NvidiaSassComment(IsaComment, NvidiaSassNode):
     )
 
 
-class NvidiaSassModule(NvidiaSassNode):
+class NvidiaSassModule(IsaModule[NvidiaSassNode], NvidiaSassNode):
   """Represent a complete NVIDIA_SASS code module.
 
   Attributes:
       statements (List[NvidiaSassNode]): List of statements in the module.
   """
 
-  statements: list[NvidiaSassNode] = pydantic.Field(default_factory=list)
-
   def __init__(
     self,
-    statements: typing.Sequence[NvidiaSassNode | IsaNode] | None = None,
+    statements: typing.Sequence[NvidiaSassNode] | None = None,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
   ) -> None:
@@ -473,19 +462,7 @@ class NvidiaSassModule(NvidiaSassNode):
         trailing_trivia: Optional trailing trivia.
     """
     super().__init__(
-      statements=list(statements) if statements is not None else [],
-      leading_trivia=leading_trivia if leading_trivia is not None else [],
-      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+      statements=statements,
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
     )
-
-  def to_text(self) -> str:
-    """Render the module to its literal text.
-
-    Returns:
-        str: The rendered module text.
-    """
-    res = "".join(t.text for t in self.leading_trivia)
-    for stmt in self.statements:
-      res += stmt.to_text()
-    res += "".join(t.text for t in self.trailing_trivia)
-    return res

@@ -8,14 +8,15 @@ a composition-based architecture.
 
 import typing
 
-
 from pydantic import BaseModel, JsonValue
 
 from ml_switcheroo.analysis.symbol_table import SymbolTable
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.core.hooks import HookContext, HookRegistry, get_default_hook_registry
 from ml_switcheroo.core.rewriter.types import SignatureContext
 from ml_switcheroo.core.runtime_models import RuntimeTraceReport
+from ml_switcheroo.exceptions import ConfigurationError
+from ml_switcheroo.semantics.resolution import query_framework_traits
 from ml_switcheroo.semantics.schema import PluginTraits
 
 if typing.TYPE_CHECKING:
@@ -32,7 +33,6 @@ class _ModelDumpProtocol(typing.Protocol):
     Returns:
         Dictionary of field values.
     """
-    ...
 
 
 def _has_model_dump(
@@ -48,9 +48,7 @@ def _has_model_dump(
   """
   if obj is None or isinstance(obj, (dict, list, str, int, float, bool)):
     return False
-  from ml_switcheroo.core.rewriter.calls.pre import _resolve_attr
-
-  return callable(_resolve_attr(obj, "model_dump"))
+  return isinstance(obj, _ModelDumpProtocol)
 
 
 class SemanticsProtocol(typing.Protocol):
@@ -58,7 +56,7 @@ class SemanticsProtocol(typing.Protocol):
 
 
 def _is_semantics_mgr(
-  obj: "SemanticsManager | SemanticsProtocol",
+  obj: "SemanticsManager | SemanticsProtocol | None",
 ) -> typing.TypeGuard["SemanticsManager"]:
   """Narrow `obj` to `SemanticsManager`.
 
@@ -80,12 +78,13 @@ class RewriterContext:
 
   def __init__(
     self,
-    semantics: "SemanticsManager | SemanticsProtocol",
+    semantics: "SemanticsManager | SemanticsProtocol | None",
     config: RuntimeConfig | None = None,
     symbol_table: SymbolTable | None = None,
     arg_injector: typing.Callable[[str, str | None], None] | None = None,
     preamble_injector: typing.Callable[[str], None] | None = None,
     runtime_trace: RuntimeTraceReport | None = None,
+    hook_registry: HookRegistry | None = None,
   ):
     """Initialize the context.
 
@@ -96,14 +95,20 @@ class RewriterContext:
         arg_injector: Callback to inject arguments into the current function scope.
         preamble_injector: Callback to inject code blocks into the current scope.
         runtime_trace: Optional on-device forward and backward execution telemetry report.
+        hook_registry: Optional isolated ``HookRegistry`` instance for plugin lookup.
+
+    Raises:
+        ConfigurationError: If ``semantics`` is ``None``.
     """
     if config is None:
       config = RuntimeConfig()
-    assert _is_semantics_mgr(semantics)
+    if not _is_semantics_mgr(semantics):
+      raise ConfigurationError("RewriterContext requires a non-None SemanticsManager instance.")
     self.semantics: "SemanticsManager" = semantics
     self.config = config
     self.symbol_table = symbol_table
     self.runtime_trace = runtime_trace
+    self.hook_registry: HookRegistry = hook_registry if hook_registry is not None else get_default_hook_registry()
 
     # -- Core State --
     # Tracks variable scopes (e.g. stateful variables in classes)
@@ -138,6 +143,7 @@ class RewriterContext:
       arg_injector=final_arg_injector,
       preamble_injector=final_pre_injector,
       symbol_table=symbol_table,
+      hook_registry=self.hook_registry,
     )
 
     # Pre-populate alias map with source defaults
@@ -217,6 +223,11 @@ class RewriterContext:
         None
     """
     try:
+      fw_traits = query_framework_traits(self.semantics, self.source_framework)
+      if fw_traits.alias is not None and fw_traits.alias.name:
+        self.alias_map[fw_traits.alias.name] = fw_traits.alias.name
+        return
+
       fw_conf = self.semantics.get_framework_config(self.source_framework)
       if not fw_conf:
         return

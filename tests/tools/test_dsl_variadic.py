@@ -1,27 +1,25 @@
 """Test suite for the Dsl Variadic module."""
 
-from tests.conftest import _test_getattr
-
 from ml_switcheroo.core.dsl import FrameworkVariant, OperationDef, ParameterDef
 
 
 def test_parameter_variadic_defaults() -> None:
-  """Verifies the behavior of parameter variadic defaults."""
+  """Verify `ParameterDef` handles parameter variadic defaults as expected."""
   p: ParameterDef = ParameterDef(name="x")
-  assert _test_getattr(p, "name") == "x"
-  assert _test_getattr(p, "is_variadic") is False
-  assert _test_getattr(p, "kind") == "positional_or_keyword"
+  assert p.name == "x"
+  assert p.is_variadic is False
+  assert p.kind == "positional_or_keyword"
 
 
 def test_parameter_variadic_explicit() -> None:
-  """Verifies the behavior of parameter variadic explicit."""
+  """Verify `ParameterDef` handles parameter variadic explicit as expected."""
   p: ParameterDef = ParameterDef(name="tensors", is_variadic=True)
-  assert _test_getattr(p, "is_variadic") is True
-  assert _test_getattr(p, "name") == "tensors"
+  assert p.is_variadic is True
+  assert p.name == "tensors"
 
 
 def test_variadic_integration_in_op_def() -> None:
-  """Verifies the behavior of variadic integration in op def."""
+  """Verify `OperationDef` handles variadic integration in operation def as expected."""
   op: OperationDef = OperationDef(
     operation="MaxVariadic",
     description="Elementwise max of variable number of tensors",
@@ -31,16 +29,18 @@ def test_variadic_integration_in_op_def() -> None:
     ],
     variants={"torch": FrameworkVariant(api="torch.maximum")},
   )
-  assert len(_test_getattr(op, "std_args")) == 2
-  v_param = _test_getattr(op, "std_args")[0]
-  assert _test_getattr(v_param, "name") == "args"
-  assert _test_getattr(v_param, "is_variadic") is True
-  n_param = _test_getattr(op, "std_args")[1]
-  assert _test_getattr(n_param, "name") == "out"
-  assert _test_getattr(n_param, "is_variadic") is False
+  assert len(op.std_args) == 2
+  v_param = op.std_args[0]
+  assert isinstance(v_param, ParameterDef)
+  assert v_param.name == "args"
+  assert v_param.is_variadic is True
+  n_param = op.std_args[1]
+  assert isinstance(n_param, ParameterDef)
+  assert n_param.name == "out"
+  assert n_param.is_variadic is False
 
 
 def test_parameter_kind_field() -> None:
-  """Verifies the behavior of parameter kind field."""
+  """Verify `ParameterDef` handles parameter kind field as expected."""
   p: ParameterDef = ParameterDef(name="x", kind="positional_only")
-  assert _test_getattr(p, "kind") == "positional_only"
+  assert p.kind == "positional_only"

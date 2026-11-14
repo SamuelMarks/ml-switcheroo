@@ -7,7 +7,7 @@ from ml_switcheroo.importers.nvidia_sass_reader import NvidiaSassSpecImporter
 
 
 def test_nvidia_sass_reader_missing_file(tmp_path: Path) -> None:
-  """Verify nvidia sass reader missing file behavior.
+  """Verify `NvidiaSassSpecImporter` handles nvidia SASS reader missing file as expected.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
@@ -18,7 +18,7 @@ def test_nvidia_sass_reader_missing_file(tmp_path: Path) -> None:
 
 
 def test_nvidia_sass_reader_parse_html(tmp_path: Path) -> None:
-  """Verify nvidia sass reader parse html behavior.
+  """Verify `NvidiaSassSpecImporter` emits `Add` for nvidia SASS reader parse HTML.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
@@ -108,7 +108,7 @@ def test_nvidia_sass_reader_parse_html(tmp_path: Path) -> None:
 
 
 def test_fallback_opcodes(tmp_path: Path) -> None:
-  """Verify fallback opcodes behavior.
+  """Verify `NvidiaSassSpecImporter` emits `Unk` for fallback opcodes.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
@@ -134,7 +134,7 @@ def test_fallback_opcodes(tmp_path: Path) -> None:
 
 
 def test_invalid_ops(tmp_path: Path) -> None:
-  """Verify invalid ops behavior.
+  """Verify `NvidiaSassSpecImporter` handles invalid operations as expected.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
@@ -167,7 +167,7 @@ def test_invalid_ops(tmp_path: Path) -> None:
 
 
 def test_nvidia_sass_reader_unicode_decode_error(tmp_path: Path) -> None:
-  """Verify nvidia sass reader unicode decode error behavior.
+  """Verify `html_path.write_bytes` handles nvidia SASS reader unicode decode error as expected.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
@@ -190,7 +190,7 @@ def test_nvidia_sass_reader_unicode_decode_error(tmp_path: Path) -> None:
 
 
 def test_nvidia_sass_reader_fp32_update() -> None:
-  """Verify nvidia sass reader fp32 update behavior."""
+  """Verify `NvidiaSassSpecImporter` emits `Mov` for nvidia SASS reader fp32 update."""
   # Test line 173
   reader = NvidiaSassSpecImporter()
   html_path = MagicMock()
@@ -205,7 +205,7 @@ def test_nvidia_sass_reader_fp32_update() -> None:
 
 
 def test_nvidia_sass_reader_regex_substrings() -> None:
-  """Verify nvidia sass reader regex substrings behavior."""
+  """Verify `NvidiaSassSpecImporter` handles nvidia SASS reader regex substrings as expected."""
   reader = NvidiaSassSpecImporter()
   # "integer" before "fp32"
   assert reader._infer_abstract_op("dummy", "convert an integer into a fp32") == "CastFloat"
@@ -214,7 +214,7 @@ def test_nvidia_sass_reader_regex_substrings() -> None:
 
 
 def test_nvidia_sass_reader_extra_branches(tmp_path: Path) -> None:
-  """Verify nvidia sass reader extra branches behavior.
+  """Verify `NvidiaSassSpecImporter` handles nvidia SASS reader extra branches as expected.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.

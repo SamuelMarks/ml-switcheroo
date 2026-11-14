@@ -1,7 +1,5 @@
 """Test suite for the Standards Content module."""
 
-from tests.conftest import _test_getattr
-
 import pytest
 
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -9,7 +7,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture(scope="module")
 def mgr() -> SemanticsManager:
-  """Helper to mgr.
+  """Create a configured `SemanticsManager` fixture for standards content tests.
 
   Returns:
       SemanticsManager: A semantics manager instance.
@@ -18,7 +16,7 @@ def mgr() -> SemanticsManager:
 
 
 def test_functional_math_ops(mgr: SemanticsManager) -> None:
-  """Verifies the behavior of functional math ops.
+  """Verify `mgr.get_known_apis` emits `abs` for functional math operations.
 
   Args:
       mgr (SemanticsManager): Manager fixture.
@@ -30,15 +28,10 @@ def test_functional_math_ops(mgr: SemanticsManager) -> None:
   assert "add" in data
   assert "mean" in data or "Mean" in data
   abs_op = data["abs"]
+  std_args = abs_op.get("std_args", [])
+  assert isinstance(std_args, list)
   args = []
-  for arg in _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": abs_op}, "__getitem__")("v").get}, "__getitem__")("v")(
-        _test_getattr({"v": "std_args"}, "__getitem__")("v"), _test_getattr({"v": []}, "__getitem__")("v")
-      )
-    },
-    "__getitem__",
-  )("v"):
+  for arg in std_args:
     if isinstance(arg, dict):
       args.append(arg.get("name"))
     elif isinstance(arg, str):
@@ -49,7 +42,7 @@ def test_functional_math_ops(mgr: SemanticsManager) -> None:
 
 
 def test_neural_ops(mgr: SemanticsManager) -> None:
-  """Verifies the behavior of neural ops.
+  """Verify `mgr.get_known_apis` emits `Conv2d` for neural operations.
 
   Args:
       mgr (SemanticsManager): Manager fixture.
@@ -59,15 +52,10 @@ def test_neural_ops(mgr: SemanticsManager) -> None:
   assert "Linear" in data
   assert "MultiHeadAttention" in data or "MultiheadAttention" in data
   conv = data["Conv2d"]
+  conv_std_args = conv.get("std_args", [])
+  assert isinstance(conv_std_args, list)
   args = []
-  for arg in _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": conv}, "__getitem__")("v").get}, "__getitem__")("v")(
-        _test_getattr({"v": "std_args"}, "__getitem__")("v"), _test_getattr({"v": []}, "__getitem__")("v")
-      )
-    },
-    "__getitem__",
-  )("v"):
+  for arg in conv_std_args:
     if isinstance(arg, dict):
       args.append(arg.get("name"))
     elif isinstance(arg, str):
@@ -77,7 +65,7 @@ def test_neural_ops(mgr: SemanticsManager) -> None:
 
 
 def test_optimizer_standards(mgr: SemanticsManager) -> None:
-  """Verifies the behavior of optimizer standards.
+  """Verify `mgr.get_known_apis` emits `Adam` for optimizer standards.
 
   Args:
       mgr (SemanticsManager): Manager fixture.
@@ -86,15 +74,10 @@ def test_optimizer_standards(mgr: SemanticsManager) -> None:
   assert "Adam" in data
   assert "SGD" in data
   adam = data["Adam"]
+  adam_std_args = adam.get("std_args", [])
+  assert isinstance(adam_std_args, list)
   args = []
-  for arg in _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": adam}, "__getitem__")("v").get}, "__getitem__")("v")(
-        _test_getattr({"v": "std_args"}, "__getitem__")("v"), _test_getattr({"v": []}, "__getitem__")("v")
-      )
-    },
-    "__getitem__",
-  )("v"):
+  for arg in adam_std_args:
     if isinstance(arg, dict):
       args.append(arg.get("name"))
     elif isinstance(arg, str):
@@ -103,7 +86,7 @@ def test_optimizer_standards(mgr: SemanticsManager) -> None:
 
 
 def test_io_constants(mgr: SemanticsManager) -> None:
-  """Verifies the behavior of I/O constants.
+  """Verify `mgr.get_known_apis` handles I/O constants as expected.
 
   Args:
       mgr (SemanticsManager): Manager fixture.

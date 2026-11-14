@@ -1,24 +1,22 @@
 """Test suite for the Readme Editor Write Error module."""
 
-from tests.conftest import _test_getattr, _test_setattr
-
 from pathlib import Path
+
+import pytest
 from markdown_it import MarkdownIt
 from markdown_it.token import Token
 
 
 def test_readme_editor_duck() -> None:
-  """Verifies the behavior of readme editor duck."""
+  """Verify `ReadmeEditor` handles readme editor duck as expected."""
   from ml_switcheroo.semantics.manager import SemanticsManager
   from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
   class DuckPath(Path):
-    """Test helper class DuckPath."""
-
-    _flavour = _test_getattr(type(Path()), "_flavour", None)
+    """Stub `Path` subclass implementing `exists`, `read_text` for readme editor write error tests."""
 
     def exists(self, *, follow_symlinks: bool = True) -> bool:
-      """Helper to exists.
+      """Execute `exists` on `DuckPath` for readme editor write error tests.
 
       Args:
           follow_symlinks: Follow symlinks flag.
@@ -34,7 +32,7 @@ def test_readme_editor_duck() -> None:
       errors: str | None = None,
       newline: str | None = None,
     ) -> str:
-      """Helper to read text.
+      """Execute `read_text` on `DuckPath` for readme editor write error tests.
 
       Args:
           encoding: Encoding string.
@@ -53,7 +51,7 @@ def test_readme_editor_duck() -> None:
       errors: str | None = None,
       newline: str | None = None,
     ) -> int:
-      """Helper to write text.
+      """Execute `OSError` to support write text in readme editor write error tests.
 
       Args:
           data: Text data.
@@ -67,10 +65,11 @@ def test_readme_editor_duck() -> None:
       raise OSError("fail")
 
   class DummySM(SemanticsManager):
-    """Test helper class DummySM."""
+    """Minimal `SemanticsManager` test double used in readme editor write error tests."""
 
     def __init__(self) -> None:
       """Initialize DummySM."""
+      super().__init__(load_defaults=False)
       self.data = {"op": {}}
 
   ed = ReadmeEditor(DummySM(), DuckPath("dummy.md"))
@@ -78,14 +77,12 @@ def test_readme_editor_duck() -> None:
 
 
 def test_readme_editor_read_error() -> None:
-  """Verifies the behavior of readme editor duck."""
+  """Verify `ReadmeEditor` handles readme editor read error as expected."""
   from ml_switcheroo.semantics.manager import SemanticsManager
   from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
   class DuckPath(Path):
-    """Test helper class DuckPath."""
-
-    _flavour = _test_getattr(type(Path()), "_flavour", None)
+    """Stub `Path` subclass implementing `exists`, `read_text` for readme editor write error tests."""
 
     def exists(self, *, follow_symlinks: bool = True) -> bool:
       """Check if exists.
@@ -117,27 +114,30 @@ def test_readme_editor_read_error() -> None:
       raise OSError("fail")
 
   class DummySM(SemanticsManager):
-    """Test helper class DummySM."""
+    """Minimal `SemanticsManager` test double used in readme editor write error tests."""
 
     def __init__(self) -> None:
       """Initialize DummySM."""
+      super().__init__(load_defaults=False)
       self.data = {"op": {}}
 
   ed = ReadmeEditor(DummySM(), DuckPath("dummy.md"))
   assert ed.update_matrix({}) is False
 
 
-def test_readme_editor_no_map() -> None:
-  """Verifies the behavior of readme editor duck."""
+def test_readme_editor_no_map(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `ReadmeEditor` handles readme editor no map as expected.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   import markdown_it
 
   from ml_switcheroo.semantics.manager import SemanticsManager
   from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
   class DuckPath(Path):
-    """Test helper class DuckPath."""
-
-    _flavour = _test_getattr(type(Path()), "_flavour", None)
+    """Stub `Path` subclass implementing `exists`, `read_text` for readme editor write error tests."""
 
     def exists(self, *, follow_symlinks: bool = True) -> bool:
       """Check if exists.
@@ -196,7 +196,7 @@ def test_readme_editor_no_map() -> None:
 
     Args:
         self: MarkdownIt instance.
-        content: The content (str) for mock parse.
+        content: Input `content` parameter value (`str`).
 
     Returns:
         Resulting `list[Token]` from mock parse.
@@ -207,16 +207,17 @@ def test_readme_editor_no_map() -> None:
     return tokens
 
   class DummySM(SemanticsManager):
-    """Test helper class DummySM."""
+    """Minimal `SemanticsManager` test double used in readme editor write error tests."""
 
     def __init__(self) -> None:
       """Initialize DummySM."""
+      super().__init__(load_defaults=False)
       self.data = {"op": {}}
 
-  _test_setattr(markdown_it.MarkdownIt, "parse", mock_parse)
+  monkeypatch.setattr(markdown_it.MarkdownIt, "parse", mock_parse, raising=False)
   ed = ReadmeEditor(DummySM(), DuckPath("dummy.md"))
   assert ed.update_matrix({}) is False
-  _test_setattr(markdown_it.MarkdownIt, "parse", original_parse)
+  monkeypatch.setattr(markdown_it.MarkdownIt, "parse", original_parse, raising=False)
 
 
 def test_guess_category_missing_plugin() -> None:

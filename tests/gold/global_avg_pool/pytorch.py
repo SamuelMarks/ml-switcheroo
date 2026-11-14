@@ -5,10 +5,10 @@ import torch.nn as nn
 
 
 class GAPModel(nn.Module):
-  """Test helper class GAPModel."""
+  """Stub `nn.Module` subclass implementing `forward` for pytorch tests."""
 
   def forward(self, x: torch.Tensor) -> torch.Tensor:
-    """Helper to forward.
+    """Compute the forward pass of `GAPModel` on input tensors.
 
     Args:
         x: Primary input tensor or array operand.

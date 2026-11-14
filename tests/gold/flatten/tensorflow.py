@@ -4,19 +4,19 @@ import tensorflow as tf
 
 
 class FlattenModel:
-  """Test helper class FlattenModel."""
+  """Test double `FlattenModel` implementing `call` for tensorflow tests."""
 
   def __init__(self, start_dim: int = 1):
     """Initializes the FlattenModel instance.
 
     Args:
-        start_dim: The start dim (int) for   init  .
+        start_dim: Input `start_dim` parameter value (`int`).
     """
     super().__init__()
     self.flatten = tf.keras.layers.Flatten()
 
   def call(self, x: tf.Tensor) -> tf.Tensor:
-    """Helper to call.
+    """Execute `flatten` to support call in tensorflow tests.
 
     Args:
         x: Primary input tensor or array operand.

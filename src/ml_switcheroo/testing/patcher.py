@@ -45,6 +45,6 @@ def patch_json_spec(file_path: Path, op_name: str, fw_name: str, new_tol: float)
     logger.info(f"Self-Healed: Semantic drift event logged for {op_name}. Updated {file_path} with tol={new_tol}.")
     return True
 
-  except Exception as e:
+  except (OSError, json.JSONDecodeError, ValueError, TypeError, KeyError, RuntimeError) as e:
     logger.error(f"Failed to patch {file_path}: {e}")
     return False

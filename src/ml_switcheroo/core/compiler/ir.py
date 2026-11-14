@@ -1,4 +1,4 @@
-"""Canonical re-exports from ml_switcheroo_ir."""
+"""Canonical re-exports from ``ml_switcheroo_ir`` with domain-exception-aware ``topological_sort``."""
 
 from ml_switcheroo_ir import BaseFrontend as BaseFrontend
 from ml_switcheroo_ir import CompilerBackend as IrCompilerBackend
@@ -11,7 +11,28 @@ from ml_switcheroo_ir import LogicalMesh as LogicalMesh
 from ml_switcheroo_ir import LogicalNode as LogicalNode
 from ml_switcheroo_ir import NodeDict as NodeDict
 from ml_switcheroo_ir import PartitionSpec as PartitionSpec
-from ml_switcheroo_ir import topological_sort as topological_sort
+from ml_switcheroo_ir import topological_sort as _ir_topological_sort
+
+from ml_switcheroo.exceptions import TopologicalSortError
+
+
+def topological_sort(graph: LogicalGraph) -> list[LogicalNode]:
+  """Topologically sort nodes in ``graph``, raising ``TopologicalSortError`` on cycles.
+
+  Args:
+      graph: ``LogicalGraph`` instance to sort.
+
+  Returns:
+      Topologically ordered list of ``LogicalNode`` instances.
+
+  Raises:
+      TopologicalSortError: If ``graph`` contains a dependency cycle or invalid topology.
+  """
+  try:
+    return _ir_topological_sort(graph)
+  except ValueError as exc:
+    raise TopologicalSortError(str(exc)) from exc
+
 
 __all__ = [
   "BaseFrontend",

@@ -9,20 +9,22 @@ Migration Note:
     have been removed. Routing now occurs via `compiler.registry`.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
 import typing
 
 from ml_switcheroo_ir import LogicalGraph, LogicalNode
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.frameworks.base import (
   FrameworkAdapter,
+  FrameworkSnapshot,
   ImportConfig,
   InitMode,
   OperationDef,
+  SnapshotBackedAdapter,
   StandardMap,
+  load_snapshot_for_adapter,
   register_framework,
 )
 from ml_switcheroo.frameworks.loader import load_definitions
@@ -39,6 +41,11 @@ class RdnaAdapter(FrameworkAdapter):
   This adapter handles metadata registry definitions, static attributes,
   device syntax generation, code template specifications, and semantic
   decoding of raw AMD GPU assembly blocks back into logical graphs.
+
+  Attributes:
+      display_name: The display name (`str`).
+      inherits_from: The inherits from (`str | None`).
+      ui_priority: The ui priority (`int`).
   """
 
   display_name: str = "AMD RDNA"
@@ -55,6 +62,13 @@ class RdnaAdapter(FrameworkAdapter):
 
     """
     self.target_arch = target_arch
+    self._snapshot = SnapshotBackedAdapter(
+      "rdna",
+      is_live_available=False,
+      loader=load_snapshot_for_adapter,
+    )
+    self._mode: InitMode = self._snapshot.mode
+    self._snapshot_data: FrameworkSnapshot | None = self._snapshot.snapshot
 
   @property
   def import_alias(self) -> tuple[str, str]:
@@ -273,7 +287,6 @@ class RdnaAdapter(FrameworkAdapter):
     Args:
         snapshot: A dictionary containing framework metadata or context configuration.
     """
-    pass
 
   def get_doc_url(self, api_name: str) -> str | None:
     """Get the documentation URL for a specific AMD RDNA API or concept.
@@ -319,11 +332,11 @@ class RdnaAdapter(FrameworkAdapter):
     lines = rdna_code.splitlines()
     for line in lines:
       line = line.strip()
-      if not line or line.startswith(";") or line.startswith("//"):
+      if not line or line.startswith((";", "//")):
         continue
 
       # RDNA labels typically end with a colon or are just BB_X_Y
-      if line.startswith("L_") or line.startswith("BB") or line.endswith(":"):
+      if line.startswith(("L_", "BB")) or line.endswith(":"):
         label_name = line.strip(":")
         new_block = cfg.get_or_create_block(label_name)
         if current_block:

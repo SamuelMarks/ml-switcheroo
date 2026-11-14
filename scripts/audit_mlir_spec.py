@@ -1,10 +1,12 @@
 """Script to audit MLIR spec against implemented Lark grammar rules."""
 
 import json
+import logging
 import os
 import re
 import sys
 import tempfile
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -44,7 +46,7 @@ def get_pip_cache_dir() -> Path:
     return Path(env_cache)
   try:
     home = Path.home()
-  except Exception:
+  except (RuntimeError, OSError, KeyError):
     return Path(tempfile.gettempdir()) / "pip"
 
   plat: str = sys.platform
@@ -127,29 +129,29 @@ def download_spec(
       cached_content = target_cache.read_text(encoding="utf-8")
       if cached_content.strip():
         return cached_content
-    except Exception:
-      pass
+    except (OSError, UnicodeError, ValueError, RuntimeError) as exc:
+      logging.getLogger(__name__).debug("Cached MLIR spec read failed (%s): %s", target_cache, exc)
 
   last_error: Exception | None = None
   downloaded_content: str | None = None
 
   try:
     downloaded_content = fetch_raw_https(url)
-  except Exception as primary_err:
+  except (OSError, urllib.error.URLError, ValueError, RuntimeError) as primary_err:
     last_error = primary_err
     fallback_url = get_fallback_raw_url(url)
     if fallback_url:
       try:
         downloaded_content = fetch_raw_https(fallback_url)
-      except Exception as fallback_err:
+      except (OSError, urllib.error.URLError, ValueError, RuntimeError) as fallback_err:
         last_error = fallback_err
 
   if downloaded_content is not None:
     try:
       target_cache.parent.mkdir(parents=True, exist_ok=True)
       target_cache.write_text(downloaded_content, encoding="utf-8")
-    except Exception:
-      pass
+    except (OSError, ValueError, RuntimeError) as exc:
+      logging.getLogger(__name__).debug("MLIR spec cache write skipped (%s): %s", target_cache, exc)
     return downloaded_content
 
   if target_cache.exists():
@@ -157,8 +159,8 @@ def download_spec(
       fallback_content = target_cache.read_text(encoding="utf-8")
       if fallback_content.strip():
         return fallback_content
-    except Exception:
-      pass
+    except (OSError, UnicodeError, ValueError, RuntimeError) as exc:
+      logging.getLogger(__name__).debug("Fallback MLIR spec cache read failed (%s): %s", target_cache, exc)
 
   raise RuntimeError(f"Failed to download spec: {last_error}") from last_error
 
@@ -247,7 +249,7 @@ def audit_mlir(
   missing_rules: list[str] = []
   implemented_matches: list[str] = []
 
-  for rule in grammar_rules.keys():
+  for rule in grammar_rules:
     rule_lower = rule.lower()
     normalized = rule_lower.replace("-", "_")
     if rule_lower in implemented_rules or normalized in implemented_rules:

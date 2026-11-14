@@ -10,12 +10,12 @@ It handles:
 - resolving documentation URLs via Framework Adapters.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 
 from pydantic import JsonValue
 
 from ml_switcheroo.config import get_framework_priority_order
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.frameworks import get_adapter
 
 if typing.TYPE_CHECKING:
@@ -196,7 +196,8 @@ class DocContextBuilder:
     if variant.get("transformation_type") == "inline_lambda":
       return "Inline Lambda"
 
-    if variant.get("api"):
+    api_val = variant.get("api")
+    if isinstance(api_val, str) and api_val:
       return "Direct Mapping"
 
     return "Custom / Partial"

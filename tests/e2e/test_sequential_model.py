@@ -1,0 +1,126 @@
+"""Test suite for the Sequential Model module."""
+
+import pytest
+from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
+
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+from ml_switcheroo.semantics.manager import SemanticsManager
+
+
+class MockSequentialSemantics(SemanticsManager):
+  """Test double `MockSequentialSemantics` used in sequential model tests."""
+
+  def __init__(self) -> None:
+    """Initializes the MockSequentialSemantics instance."""
+    super().__init__()
+    self.framework_configs["flax_nnx"] = {
+      "alias": {"module": "flax.nnx", "name": "nnx"},
+      "traits": {
+        "module_base": "flax.nnx.Module",
+        "forward_method": "__call__",
+        "inject_magic_args": [
+          [
+            "rngs",
+            "flax.nnx.Rngs",
+          ]
+        ],
+      },
+    }
+    self._providers = {}
+    self._providers["flax_nnx"] = {SemanticTier.NEURAL: {"root": "flax", "sub": "nnx", "alias": "nnx"}}
+    self._source_registry = {}
+    self._inject_op("Sequential", ["layers"], "torch.nn.Sequential", "flax.nnx.Sequential", SemanticTier.NEURAL)
+    self._inject_op("Linear", ["in", "out"], "torch.nn.Linear", "flax.nnx.Linear", SemanticTier.NEURAL)
+    self._inject_op("Flatten", ["start", "end"], "torch.nn.Flatten", "flax.nnx.Flatten", SemanticTier.NEURAL)
+    self._inject_op("ReLU", [], "torch.nn.ReLU", "flax.nnx.relu", SemanticTier.NEURAL)
+
+  def _inject_op(self, name: str, std_args: list[str], s_api: str, t_api: str, tier: SemanticTier) -> None:
+    """Execute `_inject_op` on `MockSequentialSemantics` for sequential model tests.
+
+    Args:
+        name: Identifier or operation name string.
+        std_args: Standardized ODL parameter list.
+        s_api: Source framework API qualified name.
+        t_api: Target framework API qualified name.
+        tier: Input `tier` parameter value (`SemanticTier`).
+    """
+    op_entry = self.data.get(name)
+    if op_entry is None:
+      std_args_json: list[JsonValue] = [*std_args]
+      variants: dict[str, JsonValue] = {}
+      op_entry = {
+        "std_args": std_args_json,
+        "variants": variants,
+      }
+      self.data[name] = op_entry
+    existing_variants = op_entry.get("variants")
+    if isinstance(existing_variants, dict):
+      existing_variants["torch"] = {"api": s_api}
+      existing_variants["flax_nnx"] = {"api": t_api}
+    self._reverse_index[s_api] = (name, op_entry)
+    self._key_origins[name] = tier.value
+    self._source_registry[s_api] = ("torch", tier)
+
+  def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
+    """Mock implementation of get framework configuration.
+
+    Args:
+        framework: Framework identifier string.
+
+    Returns:
+        Configuration dictionary for the specified framework.
+    """
+    return self.framework_configs.get(framework, {})
+
+  def get_import_map(self, target_framework: str) -> dict[str, tuple[str, str | None, str | None]]:
+    """Mock implementation of get import map.
+
+    Args:
+        target_framework: Target framework identifier string.
+
+    Returns:
+        Resulting `dict[str, tuple[str, str | None, str | None]]` from get import map.
+    """
+    result: dict[str, tuple[str, str | None, str | None]] = {}
+    target_providers = self._providers.get(target_framework, {})
+    for src_path, (_src_fw, tier) in self._source_registry.items():
+      if tier in target_providers:
+        conf = target_providers[tier]
+        root = conf.get("root")
+        if root is not None:
+          result[src_path] = (
+            root,
+            conf.get("sub"),
+            conf.get("alias"),
+          )
+    return result
+
+
+@pytest.fixture
+def semantics_manager() -> MockSequentialSemantics:
+  """Create a configured `MockSequentialSemantics` fixture for sequential model tests.
+
+  Returns:
+      Configured `semantics_manager` fixture value (MockSequentialSemantics).
+  """
+  return MockSequentialSemantics()
+
+
+def test_sequential_container_transpilation(semantics_manager: MockSequentialSemantics) -> None:
+  """Verify `RuntimeConfig` handles sequential container transpilation as expected.
+
+  Args:
+      semantics_manager: Input `semantics_manager` parameter value (`MockSequentialSemantics`).
+  """
+  source_code: str = "\nimport torch\nimport torch.nn as nn\n\nclass MLP(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.net = nn.Sequential(\n            nn.Flatten(),\n            nn.Linear(28 * 28, 512),\n            nn.ReLU(),\n            nn.Linear(512, 10)\n        )\n\n    def forward(self, x):\n        return self.net(x)\n"
+  config = RuntimeConfig(source_framework="torch", target_framework="flax_nnx", strict_mode=False)
+  engine = ASTEngine(semantics=semantics_manager, config=config)
+  result: ConversionResult = engine.run(source_code)
+  code: str = result.code
+  assert result.success
+  assert "from flax import nnx" in code or "import flax.nnx as nnx" in code
+  assert "class MLP(nnx.Module):" in code
+  assert "nnx.Linear(512, 10, rngs=rngs)" in code
+  assert "nnx.Flatten" in code

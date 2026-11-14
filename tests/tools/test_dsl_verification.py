@@ -1,7 +1,5 @@
 """Test suite for the Dsl Verification module."""
 
-from tests.conftest import _test_getattr
-
 import pytest
 from pydantic import ValidationError
 
@@ -9,19 +7,19 @@ from ml_switcheroo.core.dsl import OperationDef
 
 
 def test_verification_mode_default() -> None:
-  """Verifies the behavior of verification mode default."""
+  """Verify `OperationDef` handles verification mode default as expected."""
   op = OperationDef(operation="Add", description="Addition", std_args=[], variants={})
-  assert _test_getattr(op, "verification_mode") == "approx"
+  assert op.verification_mode == "approx"
 
 
 def test_verification_mode_exact() -> None:
-  """Verifies the behavior of verification mode exact."""
+  """Verify `OperationDef` handles verification mode exact as expected."""
   op = OperationDef(operation="IsNan", description="Check nan", std_args=[], variants={}, verification_mode="exact")
-  assert _test_getattr(op, "verification_mode") == "exact"
+  assert op.verification_mode == "exact"
 
 
 def test_verification_mode_invalid() -> None:
-  """Verifies the behavior of verification mode invalid."""
+  """Verify `OperationDef.model_validate` raises `ValidationError` during verification mode invalid."""
   with pytest.raises(ValidationError):
     OperationDef.model_validate(
       {"operation": "Bad", "description": "Bad", "std_args": [], "variants": {}, "verification_mode": "loose"}

@@ -1,12 +1,11 @@
 """Test suite for the Mlx module."""
 
 import mlx.core as mx
-
 import mlx.nn as nn
 
 
 class SameConvModel:
-  """Test helper class SameConvModel."""
+  """Sentinel `SameConvModel` fixture class used in MLX tests."""
 
   def __init__(self, in_channels: int, out_channels: int, kernel_size: int = 3):
     """Initializes the SameConvModel instance.

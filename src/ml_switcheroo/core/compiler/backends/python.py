@@ -58,8 +58,7 @@ class ClassBodyReplacer(cst.CSTTransformer):
         # Convert inline body to block statements
         # Inline bodies contain SmallStatements (e.g. Pass, Expr).
         # We wrap them in SimpleStatementLine logic.
-        for small_stmt in current_body.body:
-          stmts_list.append(cst.SimpleStatementLine(body=[small_stmt]))
+        stmts_list.extend(cst.SimpleStatementLine(body=[small_stmt]) for small_stmt in current_body.body)
       else:
         stmts_list = [s for s in current_body.body if isinstance(s, (cst.SimpleStatementLine, cst.BaseCompoundStatement))]
 
@@ -105,16 +104,19 @@ class ClassBodyReplacer(cst.CSTTransformer):
 class PythonBackend(CompilerBackend):
   """Synthesize a Python CST Module from a LogicalGraph."""
 
-  def __init__(self, framework: str = "torch", semantics: "SemanticsManager | None" = None) -> None:
+  def __init__(self, framework: str = "", semantics: "SemanticsManager | None" = None) -> None:
     """Initialize PythonBackend with target framework and semantics manager.
 
     Args:
-        framework: Target framework identifier (default: 'torch').
+        framework: Target framework identifier (defaults to primary registered framework).
         semantics: Optional SemanticsManager instance for resolving API variants.
     """
-    self.framework = framework
+    from ml_switcheroo.config import default_source_framework
+
+    resolved_fw = framework or default_source_framework()
+    self.framework = resolved_fw
     self.semantics = semantics
-    adapter = get_adapter(framework)
+    adapter = get_adapter(resolved_fw)
     self.traits: StructuralTraits = adapter.structural_traits if adapter else StructuralTraits()
 
   def _is_stateful_layer(self, node: LogicalNode) -> bool:
@@ -201,12 +203,12 @@ class PythonBackend(CompilerBackend):
     class_def = cst.ClassDef(
       name=cst.Name(class_name),
       bases=[cst.Arg(value=cst.parse_expression(base_class))],
-      leading_lines=[cst.EmptyLine(newline=cst.Newline())],
+      leading_lines=[cst.EmptyLine(indent=False, newline=cst.Newline())],
       body=cst.IndentedBlock(
         body=[
           init_func,
           # Attach empty line to forward_func for separation inside class
-          forward_func.with_changes(leading_lines=[cst.EmptyLine(newline=cst.Newline())]),
+          forward_func.with_changes(leading_lines=[cst.EmptyLine(indent=False, newline=cst.Newline())]),
         ]
       ),
     )

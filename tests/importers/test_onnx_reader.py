@@ -1,14 +1,13 @@
 """Test suite for onnx reader."""
 
-from tests.conftest import _test_getattr
-
 from pathlib import Path
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.importers.onnx_reader import OnnxSpecImporter, clean_html_tags
 
 
 def test_onnx_reader_missing_file(tmp_path: Path) -> None:
-  """Verify onnx reader missing file behavior.
+  """Verify `OnnxSpecImporter` handles ONNX reader missing file as expected.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
@@ -19,7 +18,7 @@ def test_onnx_reader_missing_file(tmp_path: Path) -> None:
 
 
 def test_onnx_reader_parse_markdown(tmp_path: Path) -> None:
-  """Verify onnx reader parse markdown behavior.
+  """Verify `OnnxSpecImporter` emits `Abs` for ONNX reader parse markdown.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
@@ -75,7 +74,7 @@ Adds two tensors.
 
 
 def test_map_onnx_type() -> None:
-  """Verify map onnx type behavior."""
+  """Verify `OnnxSpecImporter` handles map ONNX type as expected."""
   importer = OnnxSpecImporter()
 
   # Lists
@@ -101,7 +100,7 @@ def test_map_onnx_type() -> None:
 
 
 def test_long_summary(tmp_path: Path) -> None:
-  """Verify long summary behavior.
+  """Verify `OnnxSpecImporter` emits `Long` for long summary.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
@@ -119,25 +118,11 @@ def test_long_summary(tmp_path: Path) -> None:
 
   res = importer.parse_file(md_file)
   assert "Long" in res
-  assert _test_getattr(
-    {
-      "v": len(
-        _test_getattr(
-          {
-            "v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v")["Long"]}, "__getitem__")("v")[
-              "description"
-            ]
-          },
-          "__getitem__",
-        )("v")
-      )
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": 303}, "__getitem__")("v")
+  assert len(res["Long"]["description"]) == 303
 
 
 def test_onnx_reader_extra_branches(tmp_path: Path) -> None:
-  """Verify onnx reader extra branches behavior.
+  """Verify `OnnxSpecImporter` emits `Dup` for ONNX reader extra branches.
 
   Args:
       tmp_path: Pytest temporary directory path fixture.
@@ -249,10 +234,11 @@ def test_convert_to_odl_and_export(tmp_path: Path) -> None:
   """
   importer = OnnxSpecImporter()
 
-  parsed_ops = {
+  add_args: list[RuntimeTensorOrValue] = [("A", "Tensor"), "B", {"name": "C", "type": "int"}, 12345]
+  parsed_ops: dict[str, dict[str, RuntimeTensorOrValue]] = {
     "Add": {
       "description": "<b>Adds two tensors</b>",
-      "std_args": [("A", "Tensor"), "B", {"name": "C", "type": "int"}, 12345],
+      "std_args": add_args,
     },
     "Sub": {
       "description": "",
@@ -260,16 +246,11 @@ def test_convert_to_odl_and_export(tmp_path: Path) -> None:
     },
   }
 
-  odl = _test_getattr(
-    {
-      "v": _test_getattr({"v": _test_getattr({"v": importer}, "__getitem__")("v").convert_to_odl}, "__getitem__")("v")(
-        _test_getattr({"v": parsed_ops}, "__getitem__")("v"),
-        domain=_test_getattr({"v": "ai.onnx.custom"}, "__getitem__")("v"),
-        opset_version=_test_getattr({"v": 18}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
+  odl = importer.convert_to_odl(
+    parsed_ops,
+    domain="ai.onnx.custom",
+    opset_version=18,
+  )
   assert "Add" in odl
   assert odl["Add"]["operation"] == "Add"
   assert odl["Add"]["description"] == "Adds two tensors"
@@ -278,42 +259,12 @@ def test_convert_to_odl_and_export(tmp_path: Path) -> None:
     {"name": "B", "type": "Any"},
     {"name": "C", "type": "int"},
   ]
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr(
-            {
-              "v": _test_getattr({"v": _test_getattr({"v": odl}, "__getitem__")("v")["Add"]}, "__getitem__")("v")[
-                "variants"
-              ]
-            },
-            "__getitem__",
-          )("v")["onnx"]
-        },
-        "__getitem__",
-      )("v")["api"]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": "ai.onnx.custom.Add"}, "__getitem__")("v")
-  assert _test_getattr(
-    {
-      "v": _test_getattr(
-        {
-          "v": _test_getattr(
-            {
-              "v": _test_getattr({"v": _test_getattr({"v": odl}, "__getitem__")("v")["Add"]}, "__getitem__")("v")[
-                "variants"
-              ]
-            },
-            "__getitem__",
-          )("v")["onnx"]
-        },
-        "__getitem__",
-      )("v")["opset_version"]
-    },
-    "__getitem__",
-  )("v") == _test_getattr({"v": 18}, "__getitem__")("v")
+  add_variants = odl["Add"]["variants"]
+  assert isinstance(add_variants, dict)
+  onnx_variant = add_variants["onnx"]
+  assert isinstance(onnx_variant, dict)
+  assert onnx_variant["api"] == "ai.onnx.custom.Add"
+  assert onnx_variant["opset_version"] == 18
 
   assert "Sub" in odl
   assert odl["Sub"]["description"] == "Standardized definition for Sub."

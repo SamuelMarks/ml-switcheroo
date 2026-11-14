@@ -35,7 +35,7 @@ class TorchIOMixin:
     """
     if op == "save" and object_arg:
       return f"torch.save({object_arg}, {file_arg})"
-    elif op == "load":
+    if op == "load":
       return f"torch.load({file_arg})"
     return ""
 

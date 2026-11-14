@@ -8,14 +8,14 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 
 def test_lifter_empty() -> None:
-  """Verifies the behavior of lifter empty."""
+  """Verify `RdnaLifter` returns `0` for lifter empty."""
   lifter = RdnaLifter()
   graph: LogicalGraph = lifter.lift([])
   assert len(graph.nodes) == 0
 
 
 def test_lifter_input() -> None:
-  """Verifies the behavior of lifter input."""
+  """Verify `RdnaLifter` returns `1` for lifter input."""
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [RdnaComment(text="; Input x ->")]
   graph: LogicalGraph = lifter.lift(nodes)
@@ -25,7 +25,7 @@ def test_lifter_input() -> None:
 
 
 def test_lifter_block() -> None:
-  """Verifies the behavior of lifter block."""
+  """Verify `RdnaLifter` returns `1` for lifter block."""
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [
     RdnaComment(text="; BEGIN Linear (l1)"),
@@ -42,7 +42,7 @@ def test_lifter_block() -> None:
 
 
 def test_lifter_block_mismatch() -> None:
-  """Verifies the behavior of lifter block mismatch."""
+  """Verify `RdnaLifter` returns `0` for lifter block mismatch."""
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [RdnaComment(text="; BEGIN Linear (l1)"), RdnaComment(text="; END Linear (wrong)")]
   graph: LogicalGraph = lifter.lift(nodes)
@@ -50,7 +50,7 @@ def test_lifter_block_mismatch() -> None:
 
 
 def test_lifter_unmapped() -> None:
-  """Verifies the behavior of lifter unmapped."""
+  """Verify `RdnaLifter` returns `1` for lifter unmapped."""
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [RdnaComment(text="; Unmapped Op: torch.flatten (f1)")]
   graph: LogicalGraph = lifter.lift(nodes)
@@ -60,7 +60,7 @@ def test_lifter_unmapped() -> None:
 
 
 def test_lifter_unmapped_no_flatten() -> None:
-  """Verifies the behavior of lifter unmapped no flatten."""
+  """Verify `RdnaLifter` returns `1` for lifter unmapped no flatten."""
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [RdnaComment(text="; Unmapped Op: other.op (f2)")]
   graph: LogicalGraph = lifter.lift(nodes)
@@ -70,7 +70,7 @@ def test_lifter_unmapped_no_flatten() -> None:
 
 
 def test_lifter_return() -> None:
-  """Verifies the behavior of lifter return."""
+  """Verify `RdnaLifter` returns `2` for lifter return."""
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [RdnaComment(text="; Input x ->"), RdnaComment(text="; Return:")]
   graph: LogicalGraph = lifter.lift(nodes)
@@ -82,7 +82,7 @@ def test_lifter_return() -> None:
 
 
 def test_lifter_raw_instruction() -> None:
-  """Verifies the behavior of lifter raw instruction."""
+  """Verify `RdnaLifter` returns `1` for lifter raw instruction."""
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [RdnaInstruction(opcode="v_add", operands=[RdnaLabelRef(name="v1"), RdnaLabelRef(name="v2")])]
   graph: LogicalGraph = lifter.lift(nodes)
@@ -91,7 +91,7 @@ def test_lifter_raw_instruction() -> None:
 
 
 def test_lifter_duplicate_node() -> None:
-  """Verifies the behavior of lifter duplicate node."""
+  """Verify `RdnaLifter` returns `1` for lifter duplicate node."""
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [RdnaComment(text="; Input x ->"), RdnaComment(text="; Input x ->")]
   graph: LogicalGraph = lifter.lift(nodes)
@@ -99,7 +99,7 @@ def test_lifter_duplicate_node() -> None:
 
 
 def test_lifter_return_no_previous() -> None:
-  """Verifies the behavior of lifter return no previous."""
+  """Verify `RdnaLifter` returns `1` for lifter return no previous."""
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [RdnaComment(text="; Return:")]
   graph: LogicalGraph = lifter.lift(nodes)
@@ -109,7 +109,7 @@ def test_lifter_return_no_previous() -> None:
 
 
 def test_lifter_invalid_comment() -> None:
-  """Verifies the behavior of lifter invalid comment."""
+  """Verify `RdnaLifter` returns `0` for lifter invalid comment."""
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [RdnaComment(text="; Just a normal comment")]
   graph: LogicalGraph = lifter.lift(nodes)

@@ -6,15 +6,21 @@ representation of the HTML Grid DSL, providing standard metadata, traits,
 and parsing capabilities without executing or compiling code.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
-
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
 
 from ml_switcheroo.core.dsl import OperationDef
 from ml_switcheroo.core.html.parser import HtmlParser
-from ml_switcheroo.frameworks.base import FrameworkAdapter, ImportConfig, InitMode, StandardMap, register_framework
+from ml_switcheroo.enums import RuntimeTensorOrValue
+from ml_switcheroo.frameworks.base import (
+  FrameworkAdapter,
+  FrameworkSnapshot,
+  ImportConfig,
+  InitMode,
+  SnapshotBackedAdapter,
+  StandardMap,
+  register_framework,
+)
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.semantics.schema import PluginTraits, StructuralTraits
 
@@ -27,6 +33,11 @@ class HtmlDSLAdapter(FrameworkAdapter):
   visual block descriptions to be mapped and structured. It defines specific
   structural traits (e.g., using `html_dsl.Module` as the base class) and
   implements metadata retrieval for standard operators like Module and Conv2d.
+
+  Attributes:
+      display_name: The display name (`str`).
+      ui_priority: The ui priority (`int`).
+      inherits_from: The inherits from (`str | None`).
   """
 
   display_name: str = "HTML Grid DSL"
@@ -39,8 +50,9 @@ class HtmlDSLAdapter(FrameworkAdapter):
     Sets the initialization mode to InitMode.GHOST and prepares an empty
     snapshot data dictionary.
     """
-    self._mode = InitMode.GHOST
-    self._snapshot_data = {}
+    self._snapshot = SnapshotBackedAdapter("html", is_live_available=False, loader=lambda _: FrameworkSnapshot())
+    self._mode: InitMode = self._snapshot.mode
+    self._snapshot_data: FrameworkSnapshot | None = self._snapshot.snapshot
 
   def create_parser(self, code: str) -> HtmlParser:
     """Create an HTML Parser instance used by Ingestion.
@@ -294,7 +306,6 @@ class HtmlDSLAdapter(FrameworkAdapter):
     Args:
         snapshot: A dictionary containing snapshot state configuration.
     """
-    pass
 
   def get_doc_url(self, api_name: str) -> str | None:
     """Retrieve documentation URLs for standard operations/APIs.

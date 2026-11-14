@@ -1,0 +1,19 @@
+--- Forward ---
+import tensorflow as tf
+import keras
+
+def math_ops(x, y):
+  # Tier 1: Keras Core Operations
+  a = tf.abs(x)
+  b = tf.add(a, y)
+  return keras.ops.mean(b)
+
+--- Backward ---
+import numpy as np
+import keras
+
+def math_ops(x, y):
+  # Tier 1: Keras Core Operations
+  a = keras.ops.abs(x)
+  b = keras.ops.add(a, y)
+  return keras.ops.mean(b)

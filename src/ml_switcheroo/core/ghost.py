@@ -22,6 +22,9 @@ from pydantic import ConfigDict, Field, JsonValue, model_validator
 
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
+_InspectP = typing.ParamSpec("_InspectP")
+_InspectR = typing.TypeVar("_InspectR")
+
 InspectableTarget: typing.TypeAlias = (
   type | types.FunctionType | types.MethodType | types.BuiltinFunctionType | types.ModuleType
 )
@@ -87,7 +90,10 @@ class GhostInspector:
   """
 
   @staticmethod
-  def inspect(obj: InspectableTarget | JsonValue, api_path: str) -> "GhostRef":
+  def inspect(
+    obj: InspectableTarget | typing.Callable[_InspectP, _InspectR] | JsonValue,
+    api_path: str,
+  ) -> "GhostRef":
     """Create a GhostRef from a live Python object.
 
     Gracefully handles C-Extensions and builtins that resist introspection.
@@ -106,16 +112,11 @@ class GhostInspector:
     params: list[GhostParam] = []
     has_varargs = False
 
-    # Determine target for signature extraction
-    # If class, we want __init__. If function, we want obj itself.
-    target = obj
-    if isinstance(obj, type):
-      target = inspect.getattr_static(obj, "__init__")
-
     try:
-      # 1. Standard Introspection
-      assert callable(target)
-      sig = inspect.signature(target)
+      # 1. Standard Introspection (inspect.signature handles both classes and callables natively)
+      if not callable(obj):
+        raise TypeError("Target object is not callable")
+      sig = inspect.signature(obj)
 
       for param in sig.parameters.values():
         # Skip 'self' for methods

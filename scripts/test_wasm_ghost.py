@@ -12,11 +12,11 @@ import typing
 import unittest
 from pathlib import Path
 
-src_path = Path(__file__).resolve().parent.parent / "src"
-if str(src_path) not in sys.path:
-  sys.path.insert(0, str(src_path))
+from pydantic import JsonValue, TypeAdapter
 
-from ml_switcheroo.semantics.manager import SemanticsManager  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 FORBIDDEN_LIBS: list[str] = ["torch", "jax", "tensorflow", "mlx"]
 
@@ -49,21 +49,18 @@ class TestWasmGhostMode(unittest.TestCase):
   def test_ghost_mode_loads_snapshots(self) -> None:
     """Test that the manager can load the YAML/JSON knowledge base without ML libraries."""
     manager = SemanticsManager()
+    dict_adapter: TypeAdapter[dict[str, JsonValue]] = TypeAdapter(dict[str, JsonValue])
 
     # Test loading abstract operations (YAML)
     conv = manager.get_definition("Conv2d")
-    self.assertIsNotNone(conv, "Failed to load Conv2d abstract definition.")
+    TypeAdapter(tuple[str, dict[str, JsonValue]]).validate_python(conv)
 
     # Test loading framework variants (JSON/YAML Snapshots)
-    torch_variant = manager.resolve_variant("Conv2d", "torch")
-    self.assertIsNotNone(torch_variant, "Failed to load Torch Conv2d variant.")
-    assert torch_variant is not None
-    self.assertEqual(torch_variant.get("api"), "torch.nn.Conv2d")
+    torch_variant = dict_adapter.validate_python(manager.resolve_variant("Conv2d", "torch"))
+    TypeAdapter(typing.Literal["torch.nn.Conv2d"]).validate_python(torch_variant.get("api"))
 
-    flax_variant = manager.resolve_variant("Conv2d", "flax_nnx")
-    self.assertIsNotNone(flax_variant, "Failed to load Flax NNX Conv2d variant.")
-    assert flax_variant is not None
-    self.assertEqual(flax_variant.get("api"), "flax.nnx.Conv")
+    flax_variant = dict_adapter.validate_python(manager.resolve_variant("Conv2d", "flax_nnx"))
+    TypeAdapter(typing.Literal["flax.nnx.Conv"]).validate_python(flax_variant.get("api"))
 
 
 def main(argv: typing.Sequence[str] | None = None) -> int:

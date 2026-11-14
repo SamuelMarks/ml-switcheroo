@@ -4,23 +4,23 @@ import tensorflow as tf
 
 
 class BNModel:
-  """Test helper class BNModel."""
+  """Test double `BNModel` implementing `call` for tensorflow tests."""
 
   def __init__(self, num_features: int) -> None:
     """Initializes the BNModel instance.
 
     Args:
-        num_features: The num features (int) for   init  .
+        num_features: Input `num_features` parameter value (`int`).
     """
     super().__init__()
     self.bn = tf.keras.layers.BatchNormalization()
 
   def call(self, x: tf.Tensor, training: bool | None = None) -> tf.Tensor:
-    """Helper to call.
+    """Execute `bn` to support call in tensorflow tests.
 
     Args:
         x: Primary input tensor or array operand.
-        training: The training (bool | None) for call.
+        training: Input `training` parameter value (`bool | None`).
 
     Returns:
         Resulting `tf.Tensor` from call.

@@ -5,14 +5,14 @@ import torch.nn as nn
 
 
 class MLP(nn.Module):
-  """Test helper class MLP."""
+  """Stub `nn.Module` subclass implementing `forward` for pytorch tests."""
 
   def __init__(self, in_features: int, hidden_features: int, out_features: int):
     """Initializes the MLP instance.
 
     Args:
         in_features: Number of input linear features.
-        hidden_features: The hidden features (int) for   init  .
+        hidden_features: Input `hidden_features` parameter value (`int`).
         out_features: Number of output linear features.
     """
     super().__init__()
@@ -21,7 +21,7 @@ class MLP(nn.Module):
     self.fc2 = nn.Linear(hidden_features, out_features)
 
   def forward(self, x: torch.Tensor) -> torch.Tensor:
-    """Helper to forward.
+    """Compute the forward pass of `MLP` on input tensors.
 
     Args:
         x: Primary input tensor or array operand.
@@ -31,5 +31,4 @@ class MLP(nn.Module):
     """
     x = self.fc1(x)
     x = self.relu(x)
-    x = self.fc2(x)
-    return x
+    return self.fc2(x)

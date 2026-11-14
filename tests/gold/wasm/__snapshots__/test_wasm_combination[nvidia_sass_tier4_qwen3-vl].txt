@@ -1,0 +1,43 @@
+--- Forward ---
+; RDNA Code Generation Initialized (Arch: gfx1030)
+; BEGIN Reshape (reshape)
+; END Reshape (reshape)
+; BEGIN Conv3d (proj)
+BB_proj_1:
+    v_fmac_f32      v0, v1, v1;
+    s_cbranch_vccnz BB_proj_1;
+; END Conv3d (proj)
+
+--- Backward ---
+// BEGIN Reshape (reshape)
+    mov             R0, R2;
+// END Reshape (reshape)
+// BEGIN Conv3d (proj)
+    mov             R1, RZ;
+    mov             R2, RZ;
+L_KZ_proj:
+    mov             R3, RZ;
+L_KY_proj:
+    mov             R4, RZ;
+L_KX_proj:
+// Calc Address & Load Image Pixel
+    imad            R7, R2, 64, R3;
+    imad            R7, R3, 32, R7;
+    iadd3           R7, R7, R4, RZ;
+    ldg.e.f32       R5, [R7];
+// Calc Address & Load Weight
+    imad            R7, R2, 32, R4;
+    imad            R7, R3, 16, R7;
+    iadd3           R7, R7, R4, RZ;
+    ldg.e.f32       R6, [R7];
+    ffma            R1, R5, R6, R1;
+    iadd3           R4, R4, 1, RZ;
+    isetp.lt.and    P0, PT, R4, 3, PT;
+    @P0 bra         L_KX_proj:;
+    iadd3           R3, R3, 1, RZ;
+    isetp.lt.and    P0, PT, R3, 3, PT;
+    @P0 bra         L_KY_proj:;
+    iadd3           R2, R2, 1, RZ;
+    isetp.lt.and    P0, PT, R2, 3, PT;
+    @P0 bra         L_KZ_proj:;
+// END Conv3d (proj)

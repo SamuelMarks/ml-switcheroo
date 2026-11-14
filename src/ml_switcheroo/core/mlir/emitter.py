@@ -1,7 +1,8 @@
 """MLIR Emitter Logic.
 
-This module provides the `PythonToMlirEmitter`, a compiler front-end that
-transforms Python LibCST trees into the MLIR CST object model.
+Provides ``PythonToMlirEmitter``, a compiler front-end translating Python LibCST
+trees into the MLIR CST object model via explicit composition of ``MlirDeclEmitter``
+and ``MlirExprEmitter`` over ``SSAContext``.
 """
 
 import typing
@@ -10,94 +11,102 @@ import libcst as cst
 
 from ml_switcheroo.core.cst.base import Trivia
 from ml_switcheroo.core.mlir.cst import AttributeNode, BlockNode, ModuleNode, OperationNode, TypeNode, ValueNode
+from ml_switcheroo.core.mlir.emitter_decl import MlirDeclEmitter, SSAContext
+from ml_switcheroo.core.mlir.emitter_expr import MlirExprEmitter
 from ml_switcheroo.core.mlir.types import format_mlir_tensor_type
 from ml_switcheroo.core.runtime_models import NodeRuntimeTelemetry, RuntimeTraceReport
 from ml_switcheroo.core.scanners import get_full_name
 
 
-class SSAContext:
-  """Manage Single Static Assignment (SSA) variable scopes and ID allocation."""
+class _LeadingLineProtocol(typing.Protocol):
+  """Protocol for leading line items exposing optional ``comment`` and ``newline``.
 
-  def __init__(self) -> None:
-    """Initialize the context with a root scope."""
-    self._scopes: list[dict[str, ValueNode]] = [{}]
-    self._counter: int = 0
+  Attributes:
+      comment: Optional LibCST comment node.
+      newline: Optional LibCST newline node.
+  """
 
-  def enter_scope(self) -> None:
-    """Push a new variable scope onto the stack."""
-    self._scopes.append({})
-
-  def exit_scope(self) -> None:
-    """Pop the current variable scope from the stack."""
-    if len(self._scopes) > 1:
-      self._scopes.pop()
-
-  def declare(self, name: str, value: ValueNode) -> None:
-    """Register a variable name in the current scope.
-
-    Args:
-        name: The Python variable identifier.
-        value: The MLIR ValueNode (SSA value) associated with it.
-
-    """
-    self._scopes[-1][name] = value
-
-  def lookup(self, name: str) -> ValueNode | None:
-    """Resolve a Python variable name to its current SSA value.
-
-    Searches scopes from innermost to outermost.
-
-    Args:
-        name: The Python identifier to look up.
-
-    Returns:
-        The associated ValueNode or None if not found.
-
-    """
-    for scope in reversed(self._scopes):
-      if name in scope:
-        return scope[name]
-    return None
-
-  def allocate_ssa(self, prefix: str = "%") -> ValueNode:
-    """Generate a new unique SSA value.
-
-    Args:
-        prefix: String prefix for the ID (default "%").
-
-    Returns:
-        A new ValueNode with a unique ID (e.g. "%0", "%1").
-
-    """
-    val = ValueNode(name=f"{prefix}{self._counter}")
-    self._counter += 1
-    return val
-
-
-from ml_switcheroo.core.mlir.emitter_decl import MlirEmitterDeclMixin  # noqa: E402
-from ml_switcheroo.core.mlir.emitter_expr import MlirEmitterExprMixin  # noqa: E402
+  comment: cst.Comment | None
+  newline: cst.Newline | None
 
 
 @typing.runtime_checkable
 class _LeadingLinesProtocol(typing.Protocol):
-  """Protocol for CST nodes exposing `leading_lines`."""
+  """Protocol for CST nodes exposing ``leading_lines``.
 
-  leading_lines: typing.Sequence[cst.EmptyLine]
+  Attributes:
+      leading_lines: Leading empty/comment lines sequence.
+  """
+
+  leading_lines: typing.Sequence[_LeadingLineProtocol]
 
 
-class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
-  """Translate Python LibCST modules into MLIR structural nodes."""
+class PythonToMlirEmitter:
+  """Translate Python LibCST modules into MLIR structural nodes via composed delegates.
+
+  Attributes:
+      ctx: ``SSAContext`` tracking lexical variable bindings and SSA allocations.
+      runtime_trace: Optional ``RuntimeTraceReport`` for shape telemetry interweaving.
+      decl_emitter: ``MlirDeclEmitter`` delegate handling class and function declarations.
+      expr_emitter: ``MlirExprEmitter`` delegate handling expression lowering.
+  """
 
   def __init__(self, runtime_trace: RuntimeTraceReport | None = None) -> None:
-    """Initialize the emitter with a fresh SSA context and optional runtime trace.
+    """Initialize the emitter with a fresh ``SSAContext`` and composed delegates.
 
     Args:
         runtime_trace: Optional ``RuntimeTraceReport`` for interweaving ranked tensor types and trivia.
     """
-    self.ctx = SSAContext()
-    self.runtime_trace = runtime_trace
+    self.ctx: SSAContext = SSAContext()
+    self.runtime_trace: RuntimeTraceReport | None = runtime_trace
     self._telemetry_cursor: int = 0
     self._in_inference_func: bool = False
+    self.decl_emitter: MlirDeclEmitter = MlirDeclEmitter(self)
+    self.expr_emitter: MlirExprEmitter = MlirExprEmitter(self)
+
+  def _emit_class_def(self, node: cst.ClassDef) -> OperationNode:
+    """Delegate ``cst.ClassDef`` emission to ``self.decl_emitter``.
+
+    Args:
+        node: ``cst.ClassDef`` node to lower.
+
+    Returns:
+        Emitted ``OperationNode``.
+    """
+    return self.decl_emitter.emit_class_def(node)
+
+  def _emit_func_def(self, node: cst.FunctionDef) -> OperationNode:
+    """Delegate ``cst.FunctionDef`` emission to ``self.decl_emitter``.
+
+    Args:
+        node: ``cst.FunctionDef`` node to lower.
+
+    Returns:
+        Emitted ``OperationNode``.
+    """
+    return self.decl_emitter.emit_func_def(node)
+
+  def _emit_expression(self, expr: cst.BaseExpression) -> tuple[ValueNode, list[OperationNode]]:
+    """Delegate expression emission to ``self.expr_emitter``.
+
+    Args:
+        expr: LibCST expression node to lower.
+
+    Returns:
+        Tuple of ``(ValueNode, list[OperationNode])``.
+    """
+    return self.expr_emitter.emit_expression(expr)
+
+  def _annotation_to_string(self, node: cst.CSTNode) -> str:
+    """Delegate type annotation flattening to ``MlirExprEmitter.annotation_to_string``.
+
+    Args:
+        node: CST type annotation node.
+
+    Returns:
+        Flattened annotation string.
+    """
+    return MlirExprEmitter.annotation_to_string(node)
 
   def _match_stmt_telemetry(self, var_name: str) -> NodeRuntimeTelemetry | None:
     """Match the next ``NodeRuntimeTelemetry`` record from ``self.runtime_trace``.
@@ -108,7 +117,8 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
     Returns:
         Matched ``NodeRuntimeTelemetry``, or ``None``.
     """
-    assert self.runtime_trace is not None
+    if self.runtime_trace is None:
+      return None
     items = list(self.runtime_trace.node_telemetry.values())
     for idx in range(self._telemetry_cursor, len(items)):
       if items[idx].var_name == var_name:
@@ -134,73 +144,65 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
     return " | ".join(parts)
 
   def convert(self, node: cst.Module) -> ModuleNode:
-    """Entry point: Converts a CST Module to an MLIR ModuleNode.
+    """Convert a Python ``cst.Module`` to an MLIR ``ModuleNode``.
 
     Args:
-        node: The Python LibCST Module.
+        node: Python LibCST ``Module``.
 
     Returns:
-        The resulting MLIR ModuleNode containing the translated operations.
-
+        Resulting MLIR ``ModuleNode`` containing translated operations.
     """
     body_block = self._emit_block(node.body)
 
-    # Capture module header comments
-    header_trivia = []
-    header = node.header
-    for line in header:
+    header_trivia: list[Trivia] = []
+    for line in node.header:
       if line.comment:
         text = line.comment.value.replace("#", "//", 1)
         header_trivia.append(Trivia(text))
-        header_trivia.append(Trivia("\n"))
+        header_trivia.append(Trivia(chr(10)))
       else:
-        header_trivia.append(Trivia("\n"))
+        header_trivia.append(Trivia(chr(10)))
 
-      # Attach to first op
       if header_trivia and body_block.operations:
         body_block.operations[0].leading_trivia = header_trivia + body_block.operations[0].leading_trivia
 
     return ModuleNode(body=body_block)
 
   def _extract_trivia(self, node: cst.CSTNode) -> list[Trivia]:
-    """Extract comments and newlines from a CST node's leading lines.
+    """Extract comments and blank lines from ``node``'s leading and trailing trivia.
 
     Args:
-        node: The CST node to inspect.
+        node: CST node to inspect.
 
     Returns:
-        A list of MLIR Trivias (comments translated to `//` syntax).
-
+        List of MLIR ``Trivia`` items (with ``#`` translated to ``//``).
     """
-    trivia = []
+    trivia: list[Trivia] = []
     leading_lines = node.leading_lines if isinstance(node, _LeadingLinesProtocol) else ()
     for line in leading_lines:
       if line.comment:
         text = line.comment.value.replace("#", "//", 1)
         trivia.append(Trivia(text))
-        trivia.append(Trivia("\n"))
-      elif line.newline is not None:
-        # Persist empty lines for formatting niceness
-        if line.newline.value:
-          trivia.append(Trivia("\n"))
+        trivia.append(Trivia(chr(10)))
+      elif line.newline is not None and line.newline.value:
+        trivia.append(Trivia(chr(10)))
 
     if isinstance(node, cst.SimpleStatementLine) and node.trailing_whitespace.comment is not None:
       text = node.trailing_whitespace.comment.value.replace("#", "//", 1)
       trivia.append(Trivia(text))
-      trivia.append(Trivia("\n"))
+      trivia.append(Trivia(chr(10)))
 
     return trivia
 
   def _emit_block(self, body_enc: cst.BaseSuite | typing.Sequence[cst.CSTNode], label: str = "") -> BlockNode:
-    """Convert a sequence of statements (or a Suite) into an MLIR Block.
+    """Convert a CST suite or statement sequence into an MLIR ``BlockNode``.
 
     Args:
-        body_enc: A CST Suite (IndentedBlock) or list of statements.
-        label: Optional block label (e.g. `^entry`).
+        body_enc: CST Suite or sequence of statements.
+        label: Optional block label (e.g. ``^entry``).
 
     Returns:
-        A populated BlockNode.
-
+        Populated ``BlockNode``.
     """
     block = BlockNode(label=label)
     stmts: typing.Sequence[cst.CSTNode] = []
@@ -216,16 +218,15 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
     return block
 
   def _emit_statement(self, stmt: cst.CSTNode) -> list[OperationNode]:
-    """Dispatch statement nodes to specific handlers.
+    """Dispatch statement CST nodes to declaration or small-statement handlers.
 
     Args:
-        stmt: The statement node (ClassDef, FunctionDef, Assign, etc.).
+        stmt: Statement CST node.
 
     Returns:
-        A list of MLIR OperationNodes generated from the statement.
-
+        List of generated MLIR ``OperationNode`` instances.
     """
-    results = []
+    results: list[OperationNode] = []
 
     if isinstance(stmt, cst.ClassDef):
       results = [self._emit_class_def(stmt)]
@@ -239,24 +240,23 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
       results = self._emit_if(stmt)
     elif isinstance(stmt, cst.While):
       results = self._emit_while(stmt)
-    elif isinstance(stmt, cst.SimpleStatementLine):
-      if len(stmt.body) > 0:
-        node = stmt.body[0]
-        results = self._dispatch_small_stmt(node)
-        if results and self._in_inference_func and self.runtime_trace is not None and self.runtime_trace.executed:
-          var_name: str | None = (
-            node.targets[0].target.value
-            if (isinstance(node, cst.Assign) and node.targets and isinstance(node.targets[0].target, cst.Name))
-            else None
-          )
-          if var_name is not None:
-            tel = self._match_stmt_telemetry(var_name)
-            if tel is not None:
-              ranked_t = format_mlir_tensor_type(tel.output_shape, tel.dtype)
-              for op_item in results:
-                op_item.result_types = [TypeNode(body=ranked_t)]
-              rt_cmt = self._format_mlir_runtime_comment(tel)
-              results[0].leading_trivia = [*results[0].leading_trivia, Trivia(rt_cmt), Trivia("\n")]
+    elif isinstance(stmt, cst.SimpleStatementLine) and len(stmt.body) > 0:
+      node = stmt.body[0]
+      results = self._dispatch_small_stmt(node)
+      if results and self._in_inference_func and self.runtime_trace is not None and self.runtime_trace.executed:
+        var_name: str | None = (
+          node.targets[0].target.value
+          if (isinstance(node, cst.Assign) and node.targets and isinstance(node.targets[0].target, cst.Name))
+          else None
+        )
+        if var_name is not None:
+          tel = self._match_stmt_telemetry(var_name)
+          if tel is not None:
+            ranked_t = format_mlir_tensor_type(tel.output_shape, tel.dtype)
+            for op_item in results:
+              op_item.result_types = [TypeNode(body=ranked_t)]
+            rt_cmt = self._format_mlir_runtime_comment(tel)
+            results[0].leading_trivia = [*results[0].leading_trivia, Trivia(rt_cmt), Trivia(chr(10))]
 
     if results:
       extracted = self._extract_trivia(stmt)
@@ -266,46 +266,41 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
     return results
 
   def _dispatch_small_stmt(self, node: cst.CSTNode) -> list[OperationNode]:
-    """Handle small statements inside simple lines (Assign, Return, Expr).
+    """Handle inner small statements inside ``SimpleStatementLine``.
 
     Args:
-        node: The inner statement node.
+        node: Inner small statement CST node.
 
     Returns:
-        List of resulting operations.
-
+        List of resulting ``OperationNode`` instances.
     """
     if isinstance(node, cst.Assign):
       return self._emit_assign(node)
-    elif isinstance(node, cst.Return):
+    if isinstance(node, cst.Return):
       return self._emit_return(node)
-    elif isinstance(node, cst.Expr):
+    if isinstance(node, cst.Expr):
       _, ops = self._emit_expression(node.value)
       return ops
-    elif isinstance(node, (cst.Import, cst.ImportFrom)):
+    if isinstance(node, (cst.Import, cst.ImportFrom)):
       return [self._emit_import(node)]
     return []
 
   def _emit_import(self, node: cst.Import | cst.ImportFrom) -> OperationNode:
-    """Convert Import/ImportFrom to `sw.import`.
+    """Convert ``Import`` / ``ImportFrom`` into an ``sw.import`` ``OperationNode``.
 
     Args:
-        node: The Import or ImportFrom CST node.
+        node: ``cst.Import`` or ``cst.ImportFrom`` node.
 
     Returns:
-        An OperationNode representing the `sw.import` operation.
-
+        Constructed ``sw.import`` ``OperationNode``.
     """
-    names = []
-    aliases = []
+    names: list[str] = []
+    aliases: list[str] = []
     module_val = ""
 
     if isinstance(node, cst.ImportFrom) and node.module:
       module_val = get_full_name(node.module)
 
-    # Extract names and aliases
-    # For ImportFrom, name.name is the object imported.
-    # For Import, name.name is the module being imported.
     if isinstance(node.names, cst.ImportStar):
       names.append("*")
       aliases.append("")
@@ -313,124 +308,98 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
       for alias in node.names:
         names.append(get_full_name(alias.name))
         if alias.asname:
-          aliases.append((alias.asname.name.value if isinstance(alias.asname.name, cst.Name) else ""))
+          aliases.append(alias.asname.name.value if isinstance(alias.asname.name, cst.Name) else "")
         else:
           aliases.append("")
 
-    attrs = []
+    attrs: list[AttributeNode] = []
     if module_val:
       attrs.append(AttributeNode(name="module", value=f'"{module_val}"'))
 
-    # Format list strings properly for MLIR array attribute
-    quoted_names = [f'"{n}"' for n in names]
-    quoted_aliases = [f'"{a}"' for a in aliases]
-
-    attrs.append(AttributeNode(name="names", value=quoted_names))
-    attrs.append(AttributeNode(name="aliases", value=quoted_aliases))
+    attrs.append(AttributeNode(name="names", value=[f'"{n}"' for n in names]))
+    attrs.append(AttributeNode(name="aliases", value=[f'"{a}"' for a in aliases]))
 
     return OperationNode(name="sw.import", attributes=attrs)
 
   def _emit_assign(self, node: cst.Assign) -> list[OperationNode]:
-    """Convert an assignment statement.
-
-    Emits expression operations and registers the result in the SSA context.
-    Handles both variable assignment (`x = y`) and attribute assignment (`x.attr = y`)
-    via `sw.setattr`.
+    """Convert a Python ``cst.Assign`` statement into expression ops and SSA/attribute bindings.
 
     Args:
-        node: The Assign node.
+        node: ``cst.Assign`` node.
 
     Returns:
-        List of operations generated by the assignment expression.
-
+        List of emitted ``OperationNode`` instances.
     """
     val, ops = self._emit_expression(node.value)
 
     for target in node.targets:
       t = target.target
-
-      # Variable Assignment: x = ...
       if isinstance(t, cst.Name):
         self.ctx.declare(t.value, val)
-
-      # Attribute Assignment: self.x = ...
       elif isinstance(t, cst.Attribute):
-        # Check if base is known (e.g. self)
         base_name = self._flatten_attr(t.value)
         if base_name:
           base_val = self.ctx.lookup(base_name)
-          # Support emitting setattr for object attributes
-          # sw.setattr %self "layer" %val
-
           if base_val:
             attr_name = t.attr.value
             set_op = OperationNode(
-              name="sw.setattr", operands=[base_val, val], attributes=[AttributeNode(name="name", value=f'"{attr_name}"')]
+              name="sw.setattr",
+              operands=[base_val, val],
+              attributes=[AttributeNode(name="name", value=f'"{attr_name}"')],
             )
             ops.append(set_op)
-
-            # Feature: Register the Attribute name in context for future lookup
-            # This allows subsequent `self.layer` access to map back to this val if needed
-            # But SSA logic handles lookup by name. self.layer is complex.
-            pass
 
     return ops
 
   def _emit_while(self, node: cst.While) -> list[OperationNode]:
-    """Convert a while statement. Overridden in subclasses for specific dialects.
+    """Convert a ``while`` statement (overridden in dialect-specific subclasses).
 
     Args:
-        node: The While CST node.
+        node: ``cst.While`` node.
 
     Returns:
-        List of generated OperationNodes.
-
+        List of generated ``OperationNode`` instances.
     """
     return []
 
   def _emit_if(self, node: cst.If) -> list[OperationNode]:
-    """Convert an if statement. Overridden in subclasses for specific dialects.
+    """Convert an ``if`` statement (overridden in dialect-specific subclasses).
 
     Args:
-        node: The If CST node.
+        node: ``cst.If`` node.
 
     Returns:
-        List of generated OperationNodes.
-
+        List of generated ``OperationNode`` instances.
     """
     return []
 
   def _emit_return(self, node: cst.Return) -> list[OperationNode]:
-    """Convert a return statement to `sw.return`.
+    """Convert a ``return`` statement into expression ops followed by ``sw.return``.
 
     Args:
-        node: The Return node.
+        node: ``cst.Return`` node.
 
     Returns:
-        List containing expression evaluation ops and the return op.
-
+        List of expression evaluation ops and the terminal ``sw.return`` op.
     """
-    ops = []
-    operands = []
+    ops: list[OperationNode] = []
+    operands: list[ValueNode] = []
     if node.value:
       val, expr_ops = self._emit_expression(node.value)
       ops.extend(expr_ops)
       operands.append(val)
 
-    # Ensure we attach operands list correctly
-    op = OperationNode(name="sw.return", operands=operands)
-    ops.append(op)
+    ops.append(OperationNode(name="sw.return", operands=operands))
     return ops
 
   def _flatten_attr(self, node: cst.CSTNode) -> str | None:
-    """Flatten a Name or Attribute chain into a string.
+    """Flatten a ``Name`` or ``Attribute`` chain into a dotted string.
 
     Args:
-        node: CST node.
+        node: CST node to flatten.
 
     Returns:
-        Dotted string (e.g. "self.layer") or None.
-
+        Dotted string (e.g. ``'self.layer'``) or ``None``.
     """
     if isinstance(node, cst.Name):
       return node.value
@@ -441,14 +410,13 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
     return None
 
   def _get_binop_str(self, operator: cst.BaseBinaryOp) -> str:
-    """Map LibCST binary operator classes to string codes.
+    """Map LibCST binary operator classes to MLIR ``binop.*`` string codes.
 
     Args:
-        operator: The CST binary operator node.
+        operator: CST binary operator node.
 
     Returns:
-        String identifier (e.g. "add", "mul", "matmul").
-
+        Operator code string (e.g. ``'add'``, ``'mul'``, ``'matmul'``).
     """
     op_map = {
       cst.Add: "add",
@@ -466,3 +434,6 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
       cst.BitXor: "xor",
     }
     return op_map.get(type(operator), "unknown")
+
+
+__all__ = ["MlirDeclEmitter", "MlirExprEmitter", "PythonToMlirEmitter", "SSAContext"]

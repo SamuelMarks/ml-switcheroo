@@ -5,13 +5,19 @@ This module provides the framework adapter for the Intermediate Representation
 translation, analysis, and discovery pipeline.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
-
 from ml_switcheroo_ir.schema.ghost import SemanticTier, StandardMap
 from pydantic import JsonValue
 
-from ml_switcheroo.frameworks.base import FrameworkAdapter, ImportConfig, InitMode, OperationDef, register_framework
+from ml_switcheroo.enums import RuntimeTensorOrValue
+from ml_switcheroo.frameworks.base import (
+  FrameworkAdapter,
+  FrameworkSnapshot,
+  ImportConfig,
+  InitMode,
+  OperationDef,
+  SnapshotBackedAdapter,
+  register_framework,
+)
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.semantics.schema import PluginTraits, StructuralTraits
 
@@ -27,19 +33,17 @@ class IrAdapter(FrameworkAdapter):
       display_name: Human-readable display label.
       inherits_from: Parent framework identifier if inheriting traits.
       ui_priority: Display priority in user interfaces and CLI tables.
-      _mode: Initialization mode (Live vs Ghost).
-      _snapshot_data: Cached snapshot metadata mapping.
   """
 
   display_name: str = "ML-Switcheroo IR (JSON)"
   inherits_from: str | None = None
   ui_priority: int = 85
-  _mode: InitMode = InitMode.LIVE
-  _snapshot_data: dict[str, JsonValue] = {}
 
   def __init__(self) -> None:
     """Initialize the Intermediate Representation framework adapter."""
-    pass
+    self._snapshot = SnapshotBackedAdapter("ir", is_live_available=True)
+    self._mode: InitMode = self._snapshot.mode
+    self._snapshot_data: FrameworkSnapshot | None = self._snapshot.snapshot
 
   @property
   def import_alias(self) -> tuple[str, str]:
@@ -296,7 +300,6 @@ class IrAdapter(FrameworkAdapter):
     Args:
         snapshot: Dict containing metadata/snapshots to wire.
     """
-    pass
 
   def get_doc_url(self, api_name: str) -> str | None:
     """Retrieve documentation URL for a specific IR API call.
@@ -387,15 +390,11 @@ class IrPythonAdapter(IrAdapter):
       display_name: Human-readable display label.
       inherits_from: Parent framework identifier if inheriting traits.
       ui_priority: Display priority in user interfaces and CLI tables.
-      _mode: Initialization mode (Live vs Ghost).
-      _snapshot_data: Cached snapshot metadata mapping.
   """
 
   display_name: str = "ML-Switcheroo IR (Python)"
   inherits_from: str | None = None
   ui_priority: int = 86
-  _mode: InitMode = InitMode.LIVE
-  _snapshot_data: dict[str, JsonValue] = {}
 
   @classmethod
   def get_example_code(cls) -> str:

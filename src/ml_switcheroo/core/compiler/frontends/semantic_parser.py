@@ -5,10 +5,12 @@ compilation, allowing lifters to reconstruct high-level graphs from assembly
 without relying on regex.
 """
 
-from lark import Lark, Token, Transformer, v_args
 import pydantic
+from lark import Lark, Token, Transformer, v_args
+from lark.exceptions import LarkError
 
-from ml_switcheroo.core.cst.base import CstFieldValue, Trivia as Trivia
+from ml_switcheroo.core.cst.base import Trivia as Trivia
+from ml_switcheroo.exceptions import SyntaxParseError
 
 
 class SemanticMarker(pydantic.BaseModel):
@@ -21,15 +23,6 @@ class SemanticMarker(pydantic.BaseModel):
   model_config = pydantic.ConfigDict(extra="forbid")
 
   leading_trivia: str = ""
-
-  def __init__(self, leading_trivia: str = "", **kwargs: CstFieldValue) -> None:
-    """Initialize SemanticMarker.
-
-    Args:
-        leading_trivia: Leading whitespace or formatting before the marker.
-        **kwargs: Subclass field values forwarded to BaseModel.
-    """
-    super().__init__(leading_trivia=leading_trivia, **kwargs)
 
   def to_text(self) -> str:
     """Reconstruct the original text representation of the marker.
@@ -57,31 +50,6 @@ class SemanticInput(SemanticMarker):
   kw_input_trivia: Trivia | None = None
   name_trivia: Trivia | None = None
   tail: Trivia | None = None
-
-  def __init__(
-    self,
-    name: str,
-    kw_input_trivia: Trivia | None = None,
-    name_trivia: Trivia | None = None,
-    tail: Trivia | None = None,
-    leading_trivia: str = "",
-  ) -> None:
-    """Initialize SemanticInput.
-
-    Args:
-        name: The name of the input.
-        kw_input_trivia: Optional trivia following 'Input'.
-        name_trivia: Optional trivia following name.
-        tail: Optional trailing trivia/content.
-        leading_trivia: Leading trivia string.
-    """
-    super().__init__(
-      name=name,
-      kw_input_trivia=kw_input_trivia,
-      name_trivia=name_trivia,
-      tail=tail,
-      leading_trivia=leading_trivia,
-    )
 
   def to_text(self) -> str:
     """Reconstruct the original text of the Input marker.
@@ -121,40 +89,6 @@ class SemanticBegin(SemanticMarker):
   lparen_trivia: Trivia | None = None
   id_trivia: Trivia | None = None
   tail: Trivia | None = None
-
-  def __init__(
-    self,
-    kind: str,
-    id: str,
-    kw_begin_trivia: Trivia | None = None,
-    kind_trivia: Trivia | None = None,
-    lparen_trivia: Trivia | None = None,
-    id_trivia: Trivia | None = None,
-    tail: Trivia | None = None,
-    leading_trivia: str = "",
-  ) -> None:
-    """Initialize SemanticBegin.
-
-    Args:
-        kind: Block kind.
-        id: Block identifier.
-        kw_begin_trivia: Optional trivia following BEGIN.
-        kind_trivia: Optional trivia following kind.
-        lparen_trivia: Optional trivia following left parenthesis.
-        id_trivia: Optional trivia following identifier.
-        tail: Optional trailing trivia/content.
-        leading_trivia: Leading trivia string.
-    """
-    super().__init__(
-      kind=kind,
-      id=id,
-      kw_begin_trivia=kw_begin_trivia,
-      kind_trivia=kind_trivia,
-      lparen_trivia=lparen_trivia,
-      id_trivia=id_trivia,
-      tail=tail,
-      leading_trivia=leading_trivia,
-    )
 
   def to_text(self) -> str:
     """Reconstruct the original text of the BEGIN block marker.
@@ -200,40 +134,6 @@ class SemanticEnd(SemanticMarker):
   lparen_trivia: Trivia | None = None
   id_trivia: Trivia | None = None
   tail: Trivia | None = None
-
-  def __init__(
-    self,
-    kind: str,
-    id: str,
-    kw_end_trivia: Trivia | None = None,
-    kind_trivia: Trivia | None = None,
-    lparen_trivia: Trivia | None = None,
-    id_trivia: Trivia | None = None,
-    tail: Trivia | None = None,
-    leading_trivia: str = "",
-  ) -> None:
-    """Initialize SemanticEnd.
-
-    Args:
-        kind: Block kind.
-        id: Block identifier.
-        kw_end_trivia: Optional trivia following END.
-        kind_trivia: Optional trivia following kind.
-        lparen_trivia: Optional trivia following left parenthesis.
-        id_trivia: Optional trivia following identifier.
-        tail: Optional trailing trivia/content.
-        leading_trivia: Leading trivia string.
-    """
-    super().__init__(
-      kind=kind,
-      id=id,
-      kw_end_trivia=kw_end_trivia,
-      kind_trivia=kind_trivia,
-      lparen_trivia=lparen_trivia,
-      id_trivia=id_trivia,
-      tail=tail,
-      leading_trivia=leading_trivia,
-    )
 
   def to_text(self) -> str:
     """Reconstruct the original text of the END block marker.
@@ -282,43 +182,6 @@ class SemanticUnmapped(SemanticMarker):
   id_trivia: Trivia | None = None
   tail: Trivia | None = None
 
-  def __init__(
-    self,
-    api: str,
-    id: str,
-    kw_unmapped_trivia: Trivia | None = None,
-    kw_op_trivia: Trivia | None = None,
-    api_trivia: Trivia | None = None,
-    lparen_trivia: Trivia | None = None,
-    id_trivia: Trivia | None = None,
-    tail: Trivia | None = None,
-    leading_trivia: str = "",
-  ) -> None:
-    """Initialize SemanticUnmapped.
-
-    Args:
-        api: API/operation name.
-        id: Operation identifier.
-        kw_unmapped_trivia: Optional trivia following Unmapped.
-        kw_op_trivia: Optional trivia following Op:.
-        api_trivia: Optional trivia following API name.
-        lparen_trivia: Optional trivia following left parenthesis.
-        id_trivia: Optional trivia following identifier.
-        tail: Optional trailing trivia/content.
-        leading_trivia: Leading trivia string.
-    """
-    super().__init__(
-      api=api,
-      id=id,
-      kw_unmapped_trivia=kw_unmapped_trivia,
-      kw_op_trivia=kw_op_trivia,
-      api_trivia=api_trivia,
-      lparen_trivia=lparen_trivia,
-      id_trivia=id_trivia,
-      tail=tail,
-      leading_trivia=leading_trivia,
-    )
-
   def to_text(self) -> str:
     """Reconstruct the original text of the Unmapped Op marker.
 
@@ -354,15 +217,6 @@ class SemanticReturn(SemanticMarker):
   """
 
   tail: Trivia | None = None
-
-  def __init__(self, tail: Trivia | None = None, leading_trivia: str = "") -> None:
-    """Initialize SemanticReturn.
-
-    Args:
-        tail: Optional trailing trivia/content.
-        leading_trivia: Leading trivia string.
-    """
-    super().__init__(tail=tail, leading_trivia=leading_trivia)
 
   def to_text(self) -> str:
     """Reconstruct the original text of the Return marker.
@@ -524,9 +378,13 @@ class _SemanticTransformer(Transformer[Token, SemanticMarker]):
 
     Returns:
         The semantic marker with its leading trivia field populated.
+
+    Raises:
+        SyntaxParseError: If the parsed child is not a ``SemanticMarker`` instance.
     """
     m = children[1]
-    assert isinstance(m, SemanticMarker)
+    if not isinstance(m, SemanticMarker):
+      raise SyntaxParseError(f"Expected SemanticMarker, got {type(m).__name__}")
     m.leading_trivia = str(children[0]) if children[0] else ""
     return m
 
@@ -560,8 +418,7 @@ class SemanticCommentParser:
     try:
       tree = self.parser.parse(text)
       transformer = _SemanticTransformer()
-      marker = transformer.transform(tree)
-      assert isinstance(marker, SemanticMarker)
+      marker: SemanticMarker = transformer.transform(tree)
       return marker
-    except Exception:
+    except (LarkError, SyntaxParseError, ValueError, TypeError, KeyError, IndexError, RuntimeError):
       return None

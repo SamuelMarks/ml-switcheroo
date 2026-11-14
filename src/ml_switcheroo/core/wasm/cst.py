@@ -8,25 +8,30 @@ import typing
 
 import pydantic
 
-from ml_switcheroo.core.cst.base import CstFieldValue
+from ml_switcheroo.core.cst.base import CstFieldValue, CSTNode, TriviaInput
 
 WasmOpcode = typing.NewType("WasmOpcode", str)
 WasmRegister = typing.NewType("WasmRegister", str)
 WasmArgument = typing.NewType("WasmArgument", str)
 
 
-class WatNode(pydantic.BaseModel):
+class WatNode(CSTNode):
   """Base node for all WAT components."""
 
-  model_config = pydantic.ConfigDict(extra="forbid", arbitrary_types_allowed=True)
-
-  def __init__(self, **kwargs: CstFieldValue) -> None:
+  def __init__(
+    self,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
+    **kwargs: CstFieldValue,
+  ) -> None:
     """Initialize WatNode.
 
     Args:
-        **kwargs: Subclass field values forwarded to BaseModel.
+        leading_trivia: Optional leading trivia preceding this node.
+        trailing_trivia: Optional trailing trivia following this node.
+        **kwargs: Subclass field values forwarded to CSTNode.
     """
-    super().__init__(**kwargs)
+    super().__init__(leading_trivia=leading_trivia, trailing_trivia=trailing_trivia, **kwargs)
 
   def to_text(self, indent: int = 0) -> str:
     """Render the component to WAT text.
@@ -36,8 +41,22 @@ class WatNode(pydantic.BaseModel):
 
     Returns:
         The textual representation of the node.
+
+    Raises:
+        NotImplementedError: Must be implemented by concrete `WatNode` subclasses.
     """
     raise NotImplementedError()
+
+  def emit(self, indent_level: int = 0) -> str:
+    """Emit the WAT node formatted at ``indent_level``.
+
+    Args:
+        indent_level: Indentation depth.
+
+    Returns:
+        The textual representation of the node.
+    """
+    return self.to_text(indent=indent_level)
 
 
 class WatParam(WatNode):
@@ -240,11 +259,8 @@ class WatFunc(WatNode):
     parts.append("\n")
 
     inner_indent = indent + 1
-    for loc in self.locals:
-      parts.append("  " * inner_indent + loc.to_text() + "\n")
-
-    for instr in self.body:
-      parts.append(instr.to_text(inner_indent) + "\n")
+    parts.extend("  " * inner_indent + loc.to_text() + "\n" for loc in self.locals)
+    parts.extend(instr.to_text(inner_indent) + "\n" for instr in self.body)
 
     parts.append(f"{sp})")
     return "".join(parts)
@@ -277,8 +293,7 @@ class WatModule(WatNode):
         The rendered module block string.
     """
     parts = ["(module\n"]
-    for func in self.functions:
-      parts.append(func.to_text(1) + "\n")
+    parts.extend(func.to_text(1) + "\n" for func in self.functions)
     parts.append(")\n")
     return "".join(parts)
 

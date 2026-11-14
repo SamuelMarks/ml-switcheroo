@@ -50,6 +50,14 @@ class NvidiaSassBackend(CompilerBackend):
     self.synthesizer = NvidiaSassSynthesizer(semantics)
     self.emitter = NvidiaSassEmitter()
 
+  def configure_emission(self, *, emit_trivia_comments: bool) -> None:
+    """Configure trivia comment emission on the underlying NVIDIA SASS synthesizer.
+
+    Args:
+        emit_trivia_comments: Whether non-runtime trivia comments should be emitted.
+    """
+    self.synthesizer.emit_trivia_comments = emit_trivia_comments
+
   def compile(self, graph: LogicalGraph) -> str:
     """Compile LogicalGraph to NVIDIA_SASS Assembly string.
 
@@ -91,5 +99,5 @@ class NvidiaSassBackend(CompilerBackend):
         modifiers=modifiers,
       )
       return report
-    except Exception:
+    except (ImportError, OSError, SyntaxError, ValueError, TypeError, KeyError, AttributeError, RuntimeError):
       return None

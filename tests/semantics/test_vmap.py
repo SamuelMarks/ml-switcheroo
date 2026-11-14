@@ -1,10 +1,7 @@
 """Test suite for the Vmap module."""
 
-from tests.conftest import _test_getattr
-
-from pydantic import JsonValue
-
 import pytest
+from pydantic import JsonValue
 
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
@@ -12,7 +9,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockVmapSemantics(SemanticsManager):
-  """Test helper class MockVmapSemantics."""
+  """Test double `MockVmapSemantics` used in vmap tests."""
 
   def __init__(self) -> None:
     """Initializes the MockVmapSemantics instance."""
@@ -25,22 +22,16 @@ class MockVmapSemantics(SemanticsManager):
     self._validation_status = {}
     self.test_templates = {}
     self._known_rng_methods: set[str] = set()
-    vmap_def = {
+    vmap_def: dict[str, JsonValue] = {
       "std_args": ["func", "in_axes", "out_axes"],
       "variants": {
         "torch": {"api": "torch.vmap", "args": {"func": "func", "in_axes": "in_dims", "out_axes": "out_dims"}},
         "jax": {"api": "jax.vmap", "args": {"func": "fun", "in_axes": "in_axes", "out_axes": "out_axes"}},
       },
     }
-    _test_getattr(self.data, "__setitem__")("vmap", vmap_def)
-    _test_getattr(self._reverse_index, "__setitem__")(
-      "torch.vmap",
-      ("vmap", vmap_def),
-    )
-    _test_getattr(self._reverse_index, "__setitem__")(
-      "jax.vmap",
-      ("vmap", vmap_def),
-    )
+    self.data["vmap"] = vmap_def
+    self._reverse_index["torch.vmap"] = ("vmap", vmap_def)
+    self._reverse_index["jax.vmap"] = ("vmap", vmap_def)
 
   def get_all_rng_methods(self) -> set[str]:
     """Mock implementation of get all rng methods.
@@ -84,7 +75,7 @@ def semantics() -> MockVmapSemantics:
 
 
 def test_vmap_torch_to_jax_basic(semantics: MockVmapSemantics) -> None:
-  """Verifies the behavior of vmap PyTorch to JAX basic.
+  """Verify `RuntimeConfig` emits `jax.vmap(my_func)` for vmap torch to JAX basic.
 
   Args:
       semantics (MockVmapSemantics): The semantics fixture.
@@ -98,7 +89,7 @@ def test_vmap_torch_to_jax_basic(semantics: MockVmapSemantics) -> None:
 
 
 def test_vmap_torch_to_jax_args(semantics: MockVmapSemantics) -> None:
-  """Verifies the behavior of vmap PyTorch to JAX arguments.
+  """Verify `RuntimeConfig` emits `in_axes=0` for vmap torch to JAX args.
 
   Args:
       semantics (MockVmapSemantics): The semantics fixture.
@@ -114,7 +105,7 @@ def test_vmap_torch_to_jax_args(semantics: MockVmapSemantics) -> None:
 
 
 def test_vmap_jax_to_torch_args(semantics: MockVmapSemantics) -> None:
-  """Verifies the behavior of vmap JAX to PyTorch arguments.
+  """Verify `RuntimeConfig` emits `torch.vmap` for vmap JAX to torch args.
 
   Args:
       semantics (MockVmapSemantics): The semantics fixture.
@@ -130,7 +121,7 @@ def test_vmap_jax_to_torch_args(semantics: MockVmapSemantics) -> None:
 
 
 def test_vmap_jax_keyword_fun(semantics: MockVmapSemantics) -> None:
-  """Verifies the behavior of vmap JAX keyword fun.
+  """Verify `RuntimeConfig` emits `torch.vmap` for vmap JAX keyword fun.
 
   Args:
       semantics (MockVmapSemantics): The semantics fixture.

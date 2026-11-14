@@ -1,0 +1,17 @@
+--- Forward ---
+import jax.numpy as jnp
+from torch.utils.data import DataLoader, TensorDataset
+
+def create_loader(data, targets):
+    # Tier 3: Data Loader
+    ds = TensorDataset(data, targets)
+    return DataLoader(ds, batch_size=32, num_workers=4)
+
+--- Backward ---
+import torch
+from torch.utils.data import DataLoader, TensorDataset
+
+def create_loader(data, targets):
+    # Tier 3: Data Loader
+    ds = torch.utils.data.TensorDataset(data, targets)
+    return torch.utils.data.DataLoader(ds, batch_size=32, num_workers=4)

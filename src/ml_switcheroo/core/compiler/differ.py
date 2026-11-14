@@ -128,9 +128,7 @@ class GraphDiffer:
         matched_anchors.add(anchor)
 
     # Mark remaining deleted nodes as pure Delete
-    for did in deleted_ids:
-      if did not in matched_anchors:
-        actions.append(DeleteAction(node_id=did))
+    actions.extend(DeleteAction(node_id=did) for did in deleted_ids if did not in matched_anchors)
 
     return actions
 

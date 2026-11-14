@@ -140,7 +140,7 @@ class JAXStackMixin:
     """
     if op == "save" and object_arg:
       return f"orbax.checkpoint.PyTreeCheckpointer().save(directory={file_arg}, item={object_arg})"
-    elif op == "load":
+    if op == "load":
       return f"orbax.checkpoint.PyTreeCheckpointer().restore({file_arg})"
     return ""
 
