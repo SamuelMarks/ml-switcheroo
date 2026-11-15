@@ -1,5 +1,6 @@
 """Test suite for the Readme Editor Write Error module."""
 
+import typing
 from pathlib import Path
 
 import pytest
@@ -7,128 +8,111 @@ from markdown_it import MarkdownIt
 from markdown_it.token import Token
 
 
-def test_readme_editor_duck() -> None:
-  """Verify `ReadmeEditor` handles readme editor duck as expected."""
-  from ml_switcheroo.semantics.manager import SemanticsManager
-  from ml_switcheroo.utils.readme_editor import ReadmeEditor
-
-  class DuckPath(Path):
-    """Stub `Path` subclass implementing `exists`, `read_text` for readme editor write error tests."""
-
-    def exists(self, *, follow_symlinks: bool = True) -> bool:
-      """Execute `exists` on `DuckPath` for readme editor write error tests.
-
-      Args:
-          follow_symlinks: Follow symlinks flag.
-
-      Returns:
-          Resulting `bool` from exists.
-      """
-      return True
-
-    def read_text(
-      self,
-      encoding: str | None = None,
-      errors: str | None = None,
-      newline: str | None = None,
-    ) -> str:
-      """Execute `read_text` on `DuckPath` for readme editor write error tests.
-
-      Args:
-          encoding: Encoding string.
-          errors: Error handling string.
-          newline: Newline string.
-
-      Returns:
-          Resulting `str` from read text.
-      """
-      return "## ✅ Compatibility Matrix\n"
-
-    def write_text(
-      self,
-      data: str,
-      encoding: str | None = None,
-      errors: str | None = None,
-      newline: str | None = None,
-    ) -> int:
-      """Execute `OSError` to support write text in readme editor write error tests.
-
-      Args:
-          data: Text data.
-          encoding: Encoding string.
-          errors: Error handling string.
-          newline: Newline string.
-
-      Returns:
-          Bytes written.
-      """
-      raise OSError("fail")
-
-  class DummySM(SemanticsManager):
-    """Minimal `SemanticsManager` test double used in readme editor write error tests."""
-
-    def __init__(self) -> None:
-      """Initialize DummySM."""
-      super().__init__(load_defaults=False)
-      self.data = {"op": {}}
-
-  ed = ReadmeEditor(DummySM(), DuckPath("dummy.md"))
-  assert ed.update_matrix({}) is False
-
-
-def test_readme_editor_read_error() -> None:
-  """Verify `ReadmeEditor` handles readme editor read error as expected."""
-  from ml_switcheroo.semantics.manager import SemanticsManager
-  from ml_switcheroo.utils.readme_editor import ReadmeEditor
-
-  class DuckPath(Path):
-    """Stub `Path` subclass implementing `exists`, `read_text` for readme editor write error tests."""
-
-    def exists(self, *, follow_symlinks: bool = True) -> bool:
-      """Check if exists.
-
-      Args:
-          follow_symlinks: Follow symlinks flag.
-
-      Returns:
-          Resulting `bool` from exists.
-      """
-      return True
-
-    def read_text(
-      self,
-      encoding: str | None = None,
-      errors: str | None = None,
-      newline: str | None = None,
-    ) -> str:
-      """Read text.
-
-      Args:
-          encoding: Encoding string.
-          errors: Error handling string.
-          newline: Newline string.
-
-      Returns:
-          Resulting `str` from read text.
-      """
-      raise OSError("fail")
-
-  class DummySM(SemanticsManager):
-    """Minimal `SemanticsManager` test double used in readme editor write error tests."""
-
-    def __init__(self) -> None:
-      """Initialize DummySM."""
-      super().__init__(load_defaults=False)
-      self.data = {"op": {}}
-
-  ed = ReadmeEditor(DummySM(), DuckPath("dummy.md"))
-  assert ed.update_matrix({}) is False
-
-
-def test_readme_editor_no_map(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Verify `ReadmeEditor` handles readme editor no map as expected.
+def test_readme_editor_duck(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `ReadmeEditor.update_matrix` returns `False` when `Path.write_text` raises `OSError`.
 
   Args:
+      tmp_path: Temporary directory path fixture.
+      monkeypatch: Pytest monkeypatch fixture.
+  """
+  from ml_switcheroo.semantics.manager import SemanticsManager
+  from ml_switcheroo.utils.readme_editor import ReadmeEditor
+
+  readme = tmp_path / "dummy.md"
+  readme.write_text("## ✅ Compatibility Matrix\n", encoding="utf-8")
+
+  def mock_write_text(
+    self: Path,
+    data: str,
+    encoding: str | None = None,
+    errors: str | None = None,
+    newline: str | None = None,
+  ) -> typing.NoReturn:
+    """Raise `OSError` when writing the updated README content.
+
+    Args:
+        self: Target `Path` instance.
+        data: Text data to write.
+        encoding: Optional text encoding.
+        errors: Optional encoding error handler.
+        newline: Optional newline mode.
+
+    Returns:
+        Never returns; raises `OSError`.
+
+    Raises:
+        OSError: Always raised to simulate write failure.
+    """
+    _ = (self, data, encoding, errors, newline)
+    raise OSError("fail")
+
+  class DummySM(SemanticsManager):
+    """Minimal `SemanticsManager` test double used in readme editor write error tests."""
+
+    def __init__(self) -> None:
+      """Initialize DummySM."""
+      super().__init__(load_defaults=False)
+      self.data = {"op": {}}
+
+  monkeypatch.setattr(Path, "write_text", mock_write_text)
+  ed = ReadmeEditor(DummySM(), readme)
+  assert ed.update_matrix({}) is False
+
+
+def test_readme_editor_read_error(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `ReadmeEditor.update_matrix` returns `False` when `Path.read_text` raises `OSError`.
+
+  Args:
+      tmp_path: Temporary directory path fixture.
+      monkeypatch: Pytest monkeypatch fixture.
+  """
+  from ml_switcheroo.semantics.manager import SemanticsManager
+  from ml_switcheroo.utils.readme_editor import ReadmeEditor
+
+  readme = tmp_path / "dummy.md"
+  readme.write_text("## ✅ Compatibility Matrix\n", encoding="utf-8")
+
+  def mock_read_text(
+    self: Path,
+    encoding: str | None = None,
+    errors: str | None = None,
+    newline: str | None = None,
+  ) -> typing.NoReturn:
+    """Raise `OSError` when reading the README content.
+
+    Args:
+        self: Target `Path` instance.
+        encoding: Optional text encoding.
+        errors: Optional encoding error handler.
+        newline: Optional newline mode.
+
+    Returns:
+        Never returns; raises `OSError`.
+
+    Raises:
+        OSError: Always raised to simulate read failure.
+    """
+    _ = (self, encoding, errors, newline)
+    raise OSError("fail")
+
+  class DummySM(SemanticsManager):
+    """Minimal `SemanticsManager` test double used in readme editor write error tests."""
+
+    def __init__(self) -> None:
+      """Initialize DummySM."""
+      super().__init__(load_defaults=False)
+      self.data = {"op": {}}
+
+  monkeypatch.setattr(Path, "read_text", mock_read_text)
+  ed = ReadmeEditor(DummySM(), readme)
+  assert ed.update_matrix({}) is False
+
+
+def test_readme_editor_no_map(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify `ReadmeEditor.update_matrix` returns `False` when parsed heading tokens have `map=None`.
+
+  Args:
+      tmp_path: Temporary directory path fixture.
       monkeypatch: Pytest monkeypatch fixture.
   """
   import markdown_it
@@ -136,57 +120,8 @@ def test_readme_editor_no_map(monkeypatch: pytest.MonkeyPatch) -> None:
   from ml_switcheroo.semantics.manager import SemanticsManager
   from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
-  class DuckPath(Path):
-    """Stub `Path` subclass implementing `exists`, `read_text` for readme editor write error tests."""
-
-    def exists(self, *, follow_symlinks: bool = True) -> bool:
-      """Check if exists.
-
-      Args:
-          follow_symlinks: Follow symlinks flag.
-
-      Returns:
-          Resulting `bool` from exists.
-      """
-      return True
-
-    def read_text(
-      self,
-      encoding: str | None = None,
-      errors: str | None = None,
-      newline: str | None = None,
-    ) -> str:
-      """Read text.
-
-      Args:
-          encoding: Encoding string.
-          errors: Error handling string.
-          newline: Newline string.
-
-      Returns:
-          Resulting `str` from read text.
-      """
-      return "## ✅ Compatibility Matrix\n"
-
-    def write_text(
-      self,
-      data: str,
-      encoding: str | None = None,
-      errors: str | None = None,
-      newline: str | None = None,
-    ) -> int:
-      """Write text.
-
-      Args:
-          data: Text data.
-          encoding: Encoding string.
-          errors: Error handling string.
-          newline: Newline string.
-
-      Returns:
-          Resulting `int` from write text.
-      """
-      return 1
+  readme = tmp_path / "dummy.md"
+  readme.write_text("## ✅ Compatibility Matrix\n", encoding="utf-8")
 
   # Patch the markdown parser to return tokens with no map
   original_parse = markdown_it.MarkdownIt.parse
@@ -215,7 +150,7 @@ def test_readme_editor_no_map(monkeypatch: pytest.MonkeyPatch) -> None:
       self.data = {"op": {}}
 
   monkeypatch.setattr(markdown_it.MarkdownIt, "parse", mock_parse, raising=False)
-  ed = ReadmeEditor(DummySM(), DuckPath("dummy.md"))
+  ed = ReadmeEditor(DummySM(), readme)
   assert ed.update_matrix({}) is False
   monkeypatch.setattr(markdown_it.MarkdownIt, "parse", original_parse, raising=False)
 

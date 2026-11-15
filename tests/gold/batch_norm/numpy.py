@@ -39,4 +39,4 @@ class BNModel:
       mean = self.running_mean
       var = self.running_var
     x_norm = (x - mean) / np.sqrt(var + 1e-05)
-    return self.gamma * x_norm + self.beta
+    return np.asarray(self.gamma * x_norm + self.beta, dtype=np.float64)

@@ -298,10 +298,9 @@ def is_super_call(node: cst.CSTNode) -> bool:
     receiver = node.func.value
     if isinstance(receiver, cst.Call) and isinstance(receiver.func, cst.Name) and receiver.func.value == "super":
       return True
-  elif isinstance(node.func, cst.Name):
+  elif isinstance(node.func, cst.Name) and node.func.value == "super":
     # Case: super()
-    if node.func.value == "super":
-      return True
+    return True
   return False
 
 

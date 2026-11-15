@@ -30,4 +30,4 @@ class LayerNormModel:
     mean = np.mean(x, axis=-1, keepdims=True)
     var = np.var(x, axis=-1, keepdims=True)
     x_norm = (x - mean) / np.sqrt(var + self.eps)
-    return self.gamma * x_norm + self.beta
+    return np.asarray(self.gamma * x_norm + self.beta, dtype=np.float64)

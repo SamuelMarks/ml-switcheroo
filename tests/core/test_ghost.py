@@ -142,8 +142,7 @@ def test_ghost_inspector_functions_classes_and_unbound_methods() -> None:
   c_param = next(p for p in fn_ref.params if p.name == "c")
   assert c_param.annotation == "int"
   opt_param = next(p for p in fn_ref.params if p.name == "opt")
-  assert opt_param.annotation is not None
-  assert "None" in opt_param.annotation
+  assert opt_param.annotation == "str | None"
 
   cls_ref = GhostInspector.inspect(_SampleLayer, "pkg._SampleLayer")
   assert cls_ref.name == "_SampleLayer"
@@ -155,17 +154,20 @@ def test_ghost_inspector_functions_classes_and_unbound_methods() -> None:
   assert empty_cls_ref.name == "_EmptyClass"
   assert empty_cls_ref.kind == "class"
 
-  def _unbound_method(self: _EmptyClass, dim: int) -> None:
-    """Unbound function carrying an explicit `self` parameter.
+  def _unbound_method(self: _EmptyClass, dim: int, shape: list[int]) -> None:
+    """Unbound function carrying an explicit `self` parameter and generic alias annotation.
 
     Args:
         self: Receiver instance.
         dim: Dimension size.
+        shape: Parameterized generic list of dimension integers.
     """
-    _ = (self, dim)
+    _ = (self, dim, shape)
 
   method_ref = GhostInspector.inspect(_unbound_method, "pkg.method")
-  assert [p.name for p in method_ref.params] == ["dim"]
+  assert [p.name for p in method_ref.params] == ["dim", "shape"]
+  assert method_ref.params[0].annotation == "int"
+  assert method_ref.params[1].annotation == "list[int]"
 
 
 def test_ghost_inspector_sanitization_and_c_extension_fallbacks(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -218,7 +220,7 @@ def test_ghost_inspector_sanitization_and_c_extension_fallbacks(monkeypatch: pyt
   assert anno_ref.params[0].annotation == "CustomAnno"
 
   # C-extension signature failure: function gets `*args, **kwargs`, class gets `[]`
-  def _raise_sig_error(_obj: InspectionObject) -> typing.Never:
+  def _raise_sig_error(_obj: InspectionObject) -> typing.NoReturn:
     """Simulate `inspect.signature` raising `ValueError` on C-builtins.
 
     Args:

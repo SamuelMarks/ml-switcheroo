@@ -147,7 +147,11 @@ class GhostInspector:
 
         # Serialize annotation
         anno_val = (
-          (param.annotation.__name__ if isinstance(param.annotation, _NamedObjectProtocol) else str(param.annotation))
+          (
+            str(param.annotation)
+            if typing.get_origin(param.annotation) is not None
+            else (param.annotation.__name__ if isinstance(param.annotation, type) else str(param.annotation))
+          )
           if param.annotation is not inspect.Parameter.empty
           else None
         )

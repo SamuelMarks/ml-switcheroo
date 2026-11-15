@@ -97,7 +97,7 @@ def test_numpy_adapter_convert_protocols_and_missing_numpy_reload(monkeypatch: p
   class _DetachFail:
     """Stub tensor raising `RuntimeError` in `.detach()`."""
 
-    def detach(self) -> typing.Never:
+    def detach(self) -> typing.NoReturn:
       """Raise `RuntimeError`.
 
       Returns:
@@ -122,7 +122,7 @@ def test_numpy_adapter_convert_protocols_and_missing_numpy_reload(monkeypatch: p
   class _NumpyFail:
     """Stub tensor raising `RuntimeError` in `.numpy()`."""
 
-    def numpy(self) -> typing.Never:
+    def numpy(self) -> typing.NoReturn:
       """Raise `RuntimeError`.
 
       Returns:
@@ -154,7 +154,7 @@ def test_numpy_adapter_convert_protocols_and_missing_numpy_reload(monkeypatch: p
   class _ArrayFail:
     """Stub object raising `RuntimeError` in `__array__`."""
 
-    def __array__(self, dtype: str | None = None, copy: bool | None = None) -> typing.Never:
+    def __array__(self, dtype: str | None = None, copy: bool | None = None) -> typing.NoReturn:
       """Raise `RuntimeError`.
 
       Args:

@@ -16,4 +16,4 @@ class GAPModel:
     Returns:
         Output tensor or value computed by the forward pass.
     """
-    return np.mean(x, axis=(1, 2))
+    return np.asarray(np.mean(x, axis=(1, 2)), dtype=np.float64)

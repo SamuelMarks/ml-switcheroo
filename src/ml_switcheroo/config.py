@@ -184,10 +184,11 @@ def _import_tomllib() -> TomlLoaderProtocol | None:
   Returns:
       Optional[TomlLoaderProtocol]: The imported tomllib/tomli module, or None if neither is available.
   """
+  loader: TomlLoaderProtocol | None
   if sys.version_info >= (3, 11):
     import tomllib
 
-    loader: TomlLoaderProtocol | None = tomllib
+    loader = tomllib
   else:
     try:
       import tomli

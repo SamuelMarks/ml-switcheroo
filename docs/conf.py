@@ -172,7 +172,7 @@ def linkcode_resolve(domain: str, info: dict[str, str]) -> str | None:
   obj: InspectableTarget | property | str | int | float | bool | None = mod
 
   for part in info["fullname"].split("."):
-    members = dict(inspect.getmembers_static(obj))
+    members = dict(inspect.getmembers(obj))
     if part not in members:
       return None
     obj = members[part]

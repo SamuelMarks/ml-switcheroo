@@ -189,9 +189,12 @@ def _apply_rng_seed_method(fw_key: str, mod: "_SeedTargetModule", method: str, s
       rnd2 = mod.random
       if isinstance(rnd2, _SeedNamespaceProtocol):
         rnd2.seed(seed)
-    elif method == "utils.set_random_seed" and isinstance(mod, _UtilsAttrProtocol):
-      if isinstance(mod.utils, _UtilsSetRandomSeedProtocol):
-        mod.utils.set_random_seed(seed)
+    elif (
+      method == "utils.set_random_seed"
+      and isinstance(mod, _UtilsAttrProtocol)
+      and isinstance(mod.utils, _UtilsSetRandomSeedProtocol)
+    ):
+      mod.utils.set_random_seed(seed)
   except (AttributeError, TypeError, ValueError, RuntimeError) as exc:
     logging.getLogger(__name__).debug("RNG seeding (%s.%s) skipped: %s", fw_key, method, exc)
 

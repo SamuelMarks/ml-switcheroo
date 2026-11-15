@@ -185,7 +185,7 @@ def test_tensorflow_adapter_modes_collection_and_convert(monkeypatch: pytest.Mon
   class _DetachErr:
     """Stub tensor raising `RuntimeError` in `.detach()`."""
 
-    def detach(self) -> typing.Never:
+    def detach(self) -> typing.NoReturn:
       """Raise `RuntimeError`.
 
       Returns:
@@ -199,7 +199,7 @@ def test_tensorflow_adapter_modes_collection_and_convert(monkeypatch: pytest.Mon
   class _ArrayErr:
     """Stub object raising `RuntimeError` in `__array__`."""
 
-    def __array__(self) -> typing.Never:
+    def __array__(self) -> typing.NoReturn:
       """Raise `RuntimeError`.
 
       Returns:

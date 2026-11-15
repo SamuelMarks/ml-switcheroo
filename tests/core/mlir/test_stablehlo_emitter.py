@@ -27,7 +27,7 @@ class _StubSemantics(SemanticsManager):
     self.inject("Add", "torch.add", {"variants": {"torch": {"api": "torch.add"}, "stablehlo": {"api": "stablehlo.add"}}})
     self.inject("BinAdd", "binop.add", {"variants": {"stablehlo": {"api": "stablehlo.add"}}})
 
-  def resolve_operation(self, api_name: str) -> typing.Never:
+  def resolve_operation(self, api_name: str) -> typing.NoReturn:
     """Raise `AttributeError` to exercise legacy `get_definition` fallback on custom providers.
 
     Args:

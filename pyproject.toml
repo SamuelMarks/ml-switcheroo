@@ -194,6 +194,7 @@ module = [
     "tensorflow.*",
     "tensorflow_addons",
     "tensorflow_addons.*",
+    "tomli",
     "torch",
     "torch.*",
 ]

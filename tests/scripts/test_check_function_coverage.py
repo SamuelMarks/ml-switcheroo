@@ -127,7 +127,7 @@ def test_load_coverage_report_from_sqlite_data_file(tmp_path: Path) -> None:
   Args:
       tmp_path: Temporary directory path fixture.
   """
-  mod_file = tmp_path / "sample_mod.py"
+  mod_file = (tmp_path / "sample_mod.py").resolve()
   mod_file.write_text(
     chr(10).join(
       [
@@ -141,20 +141,9 @@ def test_load_coverage_report_from_sqlite_data_file(tmp_path: Path) -> None:
     encoding="utf-8",
   )
   data_file = tmp_path / ".coverage_sample"
-  cov = coverage.Coverage(data_file=str(data_file), branch=True, source=[str(tmp_path)])
-  cov.start()
-  sys.path.insert(0, str(tmp_path))
-  try:
-    import importlib
-
-    sample_mod = importlib.import_module("sample_mod")
-    assert sample_mod.add_one(2) == 3
-    assert sample_mod.add_one(0) == 0
-  finally:
-    sys.path.remove(str(tmp_path))
-    sys.modules.pop("sample_mod", None)
-    cov.stop()
-    cov.save()
+  cov_data = coverage.CoverageData(basename=str(data_file))
+  cov_data.add_arcs({str(mod_file): [(-1, 1), (1, -1), (-2, 2), (2, 3), (3, -2), (2, 4), (4, -2)]})
+  cov_data.write()
 
   report = load_coverage_report(None, data_file)
   assert check_report_violations(report) == []

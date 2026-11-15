@@ -243,7 +243,7 @@ def test_runner_execute_compare_and_deep_compare_edge_cases(monkeypatch: pytest.
   class _BadNumpyMethod:
     """Object whose `.numpy()` raises `RuntimeError`."""
 
-    def numpy(self) -> typing.Never:
+    def numpy(self) -> typing.NoReturn:
       """Raise `RuntimeError`.
 
       Returns:
@@ -257,7 +257,7 @@ def test_runner_execute_compare_and_deep_compare_edge_cases(monkeypatch: pytest.
   class _BadArrayProtocol:
     """Object whose `__array__` raises `ValueError`."""
 
-    def __array__(self, *args: JsonValue, **kwargs: JsonValue) -> typing.Never:
+    def __array__(self, *args: JsonValue, **kwargs: JsonValue) -> typing.NoReturn:
       """Raise `ValueError` on NumPy array coercion.
 
       Args:
