@@ -38,16 +38,25 @@ def test_hydrate_ir_snapshot_import_fallbacks() -> None:
   from scripts.snapshots.loader import _hydrate_ir_snapshot
 
   flat: dict[str, dict[str, dict[str, JsonValue]]] = {}
-  with patch.dict(sys.modules, {"ml_switcheroo_ir": None}):
+  with (
+    patch("pathlib.Path.exists", return_value=False),
+    patch.dict(sys.modules, {"ml_switcheroo_ir": None}),
+  ):
     _hydrate_ir_snapshot(flat)
   assert "ir" not in flat
 
-  sibling_ir_src = str(Path("scripts/snapshots/loader.py").resolve().parent.parent.parent / "ml-switcheroo-ir" / "src")
+  sibling_ir_src = str(
+    Path("scripts/snapshots/loader.py").resolve().parent.parent.parent.parent / "ml-switcheroo-ir" / "src"
+  )
   cleaned_path = [p for p in sys.path if p != sibling_ir_src]
   with (
+    patch("pathlib.Path.exists", return_value=True),
     patch.object(sys, "path", cleaned_path),
     patch.dict(sys.modules, {"ml_ecosystem_snapshots.frameworks.ir": None}),
   ):
+    _hydrate_ir_snapshot(flat)
+    assert sibling_ir_src in sys.path
+    # Second call exercises the `str(sibling_ir_src) not in sys.path` False branch
     _hydrate_ir_snapshot(flat)
   assert "ir" in flat
   assert "Add" in flat["ir"]

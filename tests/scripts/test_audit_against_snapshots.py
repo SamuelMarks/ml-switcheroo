@@ -379,10 +379,12 @@ def test_audit_report_checksums_and_loader_helpers(tmp_path: Path, monkeypatch: 
   sibling_ir_up = sibling_ir.parent.parent.parent / "ml-switcheroo-ir" / "src"
   monkeypatch.setattr(sys, "path", [p for p in sys.path if p not in (str(sibling_ir), str(sibling_ir_up))])
   ir_flat: dict[str, dict[str, dict[str, JsonValue]]] = {}
-  _hydrate_ir_snapshot(ir_flat)
+  with patch("pathlib.Path.exists", return_value=True):
+    _hydrate_ir_snapshot(ir_flat)
   assert "ir" in ir_flat
 
   with pytest.MonkeyPatch.context() as mp:
+    mp.setattr(Path, "exists", lambda _self: False)
     mp.setitem(sys.modules, "ml_switcheroo_ir", None)
     empty_ir: dict[str, dict[str, dict[str, JsonValue]]] = {}
     _hydrate_ir_snapshot(empty_ir)
